@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, Menu } from 'lucide-react';
 import { useSound } from './hooks/useSound';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, loginWithGoogle, logout } from './firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import Lightbox from "yet-another-react-lightbox";
@@ -341,7 +341,7 @@ const heroSlides = [
   }
 ];
 
-const DestinationCard = ({ dest, onBook }: { dest: typeof destinationsData[0], onBook: (destinasi: string, durasi: string) => void }) => {
+const DestinationCard: React.FC<{ dest: typeof destinationsData[0], onBook: (destinasi: string, durasi: string) => void }> = ({ dest, onBook }) => {
   const [selectedDuration, setSelectedDuration] = useState(dest.durations.findIndex((d: any) => d.label === '2H 1M') >= 0 ? dest.durations.findIndex((d: any) => d.label === '2H 1M') : 0);
   const { playHover } = useSound();
   
@@ -468,6 +468,18 @@ export default function App() {
     return dest.difficulty.toLowerCase().includes(filterDifficulty.toLowerCase());
   });
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      window.scrollTo({
+        top: element.offsetTop - 80, // Adjust this offset if header is taller
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <>
       <AnimatePresence>
@@ -553,29 +565,29 @@ export default function App() {
             <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-art-text">Ngopi<br/>Ketinggian</span>
           </div>
           <div className="hidden lg:flex gap-8 items-center text-[10px] font-bold uppercase tracking-widest text-art-text">
-            <a href="#cerita" className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Cerita Kami</a>
-            <a href="#cerita" className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Secangkir Cerita</a>
-            <a href="#leader" className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Trip Leader</a>
-            <a href="#fasilitas" className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Fasilitas</a>
-            <a href="#destinasi" className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Destinasi</a>
-            <a href="#galeri" className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Galeri</a>
+            <a href="#cerita" onClick={(e) => scrollToSection(e, 'cerita')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Cerita Kami</a>
+            <a href="#leader" onClick={(e) => scrollToSection(e, 'leader')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Trip Leader</a>
+            <a href="#fasilitas" onClick={(e) => scrollToSection(e, 'fasilitas')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Fasilitas</a>
+            <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Destinasi</a>
+            <a href="#galeri" onClick={(e) => scrollToSection(e, 'galeri')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Galeri</a>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {!user ? (
-              <button onClick={() => loginWithGoogle()} className="hidden md:flex items-center gap-2 uppercase text-[10px] tracking-widest font-bold text-art-text hover:text-art-orange transition-colors" onMouseEnter={playHover}>
-                <svg viewBox="0 0 24 24" width="14" height="14" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)"><path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/><path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/><path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/><path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/></g></svg> Login Google
+              <button onClick={() => loginWithGoogle()} className="flex items-center gap-1 md:gap-2 uppercase text-[10px] tracking-widest font-bold text-art-text hover:text-art-orange transition-colors" onMouseEnter={playHover}>
+                <svg viewBox="0 0 24 24" className="w-3 h-3 md:w-4 md:h-4" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)"><path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/><path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/><path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/><path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/></g></svg> <span className="hidden md:inline">Login</span>
               </button>
             ) : (
-              <div className="hidden md:flex items-center gap-4">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-art-text/80">{user.displayName?.split(' ')[0]}</span>
+              <div className="flex items-center gap-2 md:gap-4">
+                <span className="text-[10px] uppercase tracking-widest font-bold text-art-text/80 hidden md:inline">{user.displayName?.split(' ')[0]}</span>
                 <button onClick={() => logout()} className="text-art-text/60 hover:text-red-500 transition-colors" title="Logout" onMouseEnter={playHover}><LogOut size={14}/></button>
               </div>
             )}
-            <Button onClick={() => handleOpenBooking()} className="hidden md:flex uppercase text-[10px] tracking-widest py-3 rounded-lg" variant="primary">
-              Daftar Sekarang
+            <Button onClick={() => handleOpenBooking()} className="uppercase text-[8px] md:text-[10px] tracking-widest px-2 py-2 md:px-4 md:py-3 rounded-lg" variant="primary">
+              <span className="md:hidden">Daftar</span>
+              <span className="hidden md:inline">Daftar Sekarang</span>
             </Button>
-            <button className="flex lg:hidden text-art-text" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            <button className="flex lg:hidden text-art-text ml-1" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -589,24 +601,11 @@ export default function App() {
               className="lg:hidden bg-art-bg border-b border-art-text/10 overflow-hidden"
             >
               <div className="flex flex-col gap-6 p-8 text-[12px] font-bold uppercase tracking-widest text-art-text items-center">
-                <a href="#cerita" onClick={() => setIsMobileMenuOpen(false)}>Cerita Kami</a>
-                <a href="#leader" onClick={() => setIsMobileMenuOpen(false)}>Trip Leader</a>
-                <a href="#fasilitas" onClick={() => setIsMobileMenuOpen(false)}>Fasilitas</a>
-                <a href="#destinasi" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</a>
-                <a href="#galeri" onClick={() => setIsMobileMenuOpen(false)}>Galeri</a>
-                <div className="w-full h-px bg-art-text/10 my-2"></div>
-                {!user ? (
-                  <button onClick={() => { loginWithGoogle(); setIsMobileMenuOpen(false); }} className="flex items-center gap-2">
-                    <LogIn size={16} /> Login Google
-                  </button>
-                ) : (
-                  <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 text-red-500">
-                    <LogOut size={16} /> Logout ({user.displayName?.split(' ')[0]})
-                  </button>
-                )}
-                <Button onClick={() => { setIsMobileMenuOpen(false); handleOpenBooking(); }} className="w-full uppercase text-[12px] tracking-widest mt-2" variant="primary">
-                  Daftar Sekarang
-                </Button>
+                <a href="#cerita" onClick={(e) => scrollToSection(e, 'cerita')}>Cerita Kami</a>
+                <a href="#leader" onClick={(e) => scrollToSection(e, 'leader')}>Trip Leader</a>
+                <a href="#fasilitas" onClick={(e) => scrollToSection(e, 'fasilitas')}>Fasilitas</a>
+                <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')}>Destinasi</a>
+                <a href="#galeri" onClick={(e) => scrollToSection(e, 'galeri')}>Galeri</a>
               </div>
             </motion.div>
           )}
@@ -616,7 +615,10 @@ export default function App() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-art-bg pt-32 pb-24 md:py-0 text-center md:text-left">
         {/* Parallax Background using Grid layout pattern */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
+          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.15] grayscale" alt="Cover bg" />
+        </div>
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]">
           <div className="grid grid-cols-12 h-full w-full opacity-[0.03]">
             <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div>
             <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div>
@@ -639,7 +641,7 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-[42px] sm:text-[60px] md:text-[90px] lg:text-[110px] leading-[0.85] font-black uppercase tracking-tight text-art-text mb-8"
+              className="text-[36px] sm:text-[60px] md:text-[90px] lg:text-[110px] leading-[0.85] font-black uppercase tracking-tight text-art-text mb-8 md:whitespace-nowrap"
             >
               Trip Ngopi Di<br/>
               <span className="text-art-orange drop-shadow-sm">Ketinggian</span>
@@ -720,19 +722,19 @@ export default function App() {
       </section>
 
       {/* The Concept Section */}
-      <section id="cerita" className="py-32 bg-art-section relative border-y border-art-text overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop" className="w-full h-full object-cover opacity-5 grayscale" alt="Mountain bg" />
+      <section id="cerita" className="py-20 md:py-32 bg-art-section relative border-y border-art-text overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
+          <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.15] grayscale" alt="Mountain bg" />
         </div>
-        <div className="max-w-7xl mx-auto px-12 relative z-10">
-          <div className="grid md:grid-cols-2 gap-20 items-center">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
             <motion.div 
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-4xl md:text-6xl">di Atas Awan</span></h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-2xl md:text-6xl">di Atas Awan</span></h2>
               <div className="w-12 h-1 bg-art-orange mb-8"></div>
               <p className="font-medium text-art-text/80 mb-6 leading-relaxed">
                 Kami bukan sekadar penyelenggara pendakian. Trip Ngopi di Ketinggian adalah perjalanan mencecap pengalaman. Berfokus pada ritme santai, apresiasi alam, dan seduhan kopi nusantara berkualitas.
@@ -789,13 +791,13 @@ export default function App() {
       </section>
 
       {/* Trip Leader Section */}
-      <section id="leader" className="py-24 bg-white border-y border-art-text relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-5 grayscale" alt="Mountain bg" />
+      <section id="leader" className="py-20 md:py-24 bg-white border-y border-art-text relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply">
+          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.15] grayscale" alt="Mountain bg" />
         </div>
-        <div className="max-w-7xl mx-auto px-12 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-art-text mb-4">Kenalan dengan <br/><span className="text-art-green font-serif italic normal-case font-normal text-4xl md:text-5xl">Trip Leader Kami</span></h2>
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-art-text mb-4 leading-tight">Kenalan dengan <br/><span className="text-art-green font-serif italic normal-case font-normal text-2xl md:text-5xl">Trip Leader Kami</span></h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
             <p className="font-medium text-art-text/80 mb-6 leading-relaxed">
               Tim profesional kami yang siap memandu perjalanan Anda agar lebih aman, menyenangkan, dan tentunya memastikan seduhan kopi Anda sempurna.
@@ -861,12 +863,12 @@ export default function App() {
       </section>
 
       {/* Fasilitas / Include Paket Section */}
-      <section id="fasilitas" className="py-24 bg-art-green text-white relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-10" alt="Mountain bg" />
+      <section id="fasilitas" className="py-20 md:py-24 bg-art-green text-white relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
+          <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-20" alt="Mountain bg" />
         </div>
-        <div className="max-w-7xl mx-auto px-12 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4">Fasilitas Open Trip</h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
             <p className="font-medium text-white/80 leading-relaxed">
@@ -938,11 +940,11 @@ export default function App() {
       </section>
 
       {/* Destination Section */}
-      <section id="destinasi" className="py-32 bg-art-bg relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.03] grayscale" alt="Mountain bg" />
+      <section id="destinasi" className="py-20 md:py-32 bg-art-bg relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply">
+          <img src="https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.12] grayscale" alt="Mountain bg" />
         </div>
-        <div className="max-w-7xl mx-auto px-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6">Destinasi Utama</h2>
             <div className="w-12 h-1 bg-art-text mx-auto mb-6"></div>
@@ -976,12 +978,12 @@ export default function App() {
       </section>
 
       {/* Gallery Section */}
-      <section id="galeri" className="py-24 bg-art-text text-white relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-5" alt="Mountain bg" />
+      <section id="galeri" className="py-20 md:py-24 bg-art-text text-white relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
+          <img src="https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.15]" alt="Mountain bg" />
         </div>
-        <div className="max-w-7xl mx-auto px-12 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-6">Galeri Pendakian</h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-6"></div>
             <p className="font-medium text-white/60">Beberapa momen seru dari para peserta open trip kami bersama tim.</p>
