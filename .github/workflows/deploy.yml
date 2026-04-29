@@ -31,8 +31,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          rm -f package-lock.json
-          npm install --legacy-peer-deps
+          rm -rf node_modules package-lock.json
+          npm install
 
       - name: Build
         run: npm run build
