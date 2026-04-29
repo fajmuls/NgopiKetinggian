@@ -355,17 +355,17 @@ const DestinationCard: React.FC<{ dest: typeof destinationsData[0], onBook: (des
       transition={{ duration: 0.8 }}
       className="group relative bg-white overflow-hidden border-2 border-art-text flex flex-col lg:flex-row hover:shadow-[16px_16px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 mt-12"
     >
-      <div className="lg:w-1/2 relative overflow-hidden hidden md:block border-r-2 border-art-text">
+      <div className="order-2 lg:order-1 lg:w-1/2 relative overflow-hidden h-64 lg:h-auto border-t-2 lg:border-t-0 lg:border-r-2 border-art-text">
         <img 
           src={dest.image} 
           alt={dest.name} 
           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 grayscale-[10%]"
         />
-        <div className="absolute top-6 right-6 bg-white border-2 border-art-text px-4 py-2 uppercase font-bold text-[10px] tracking-widest text-art-text flex gap-2 items-center">
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-white border-2 border-art-text px-3 py-1.5 md:px-4 md:py-2 uppercase font-bold text-[10px] tracking-widest text-art-text flex gap-2 items-center">
           <Tent size={14}/> {dest.locationTag}
         </div>
       </div>
-      <div className="lg:w-1/2 p-12 flex flex-col justify-between bg-art-section">
+      <div className="order-1 lg:order-2 lg:w-1/2 p-6 lg:p-12 flex flex-col justify-between bg-art-section">
         <div>
           <div className="flex gap-3 mb-8">
             <span className="bg-white text-art-text border border-art-text text-[10px] tracking-widest uppercase font-bold px-4 py-1.5 rounded-full">{dest.difficulty}</span>
@@ -496,9 +496,9 @@ export default function App() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="w-48 h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative"
+              className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative bg-white"
             >
-              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-cover" />
+              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain p-2" />
             </motion.div>
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}
@@ -559,10 +559,10 @@ export default function App() {
       
       {/* Navigation */}
       <nav className="absolute w-full z-50">
-        <div className="max-w-7xl mx-auto px-12 h-24 flex items-end justify-between border-b border-art-text/10 pb-4">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 md:h-24 flex items-end justify-between border-b border-art-text/10 pb-4">
           <div className="flex items-center gap-3 cursor-pointer" onMouseEnter={playHover}>
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white overflow-hidden border border-art-text/20">
-              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-cover" />
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white overflow-hidden border border-art-text/20">
+              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
             </div>
             <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-art-text">Ngopi<br/>Ketinggian</span>
           </div>
@@ -618,7 +618,7 @@ export default function App() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-art-bg pt-32 pb-24 md:py-0 text-center md:text-left">
         {/* Parallax Background using Grid layout pattern */}
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
-          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.15] grayscale" alt="Cover bg" />
+          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Cover bg" />
         </div>
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]">
           <div className="grid grid-cols-12 h-full w-full opacity-[0.03]">
@@ -643,7 +643,7 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-[36px] sm:text-[60px] md:text-[90px] lg:text-[110px] leading-[0.85] font-black uppercase tracking-tight text-art-text mb-8 md:whitespace-nowrap"
+              className="text-[32px] sm:text-[50px] md:text-[80px] lg:text-[110px] leading-[0.95] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-8 md:whitespace-nowrap"
             >
               Trip Ngopi Di<br/>
               <span className="text-art-orange drop-shadow-sm">Ketinggian</span>
@@ -662,7 +662,7 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4"
+              className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4 px-4 sm:px-0"
             >
               <Button onClick={() => handleOpenBooking()} variant="primary" className="text-[10px] uppercase font-bold tracking-widest py-4 rounded-lg">
                 Booking Trip
@@ -674,9 +674,9 @@ export default function App() {
           </div>
 
           <div 
-            className="flex col-span-12 md:col-span-6 h-full items-center justify-center relative mt-12 md:mt-0"
+            className="flex col-span-12 md:col-span-6 h-full items-center justify-center relative mt-12 md:mt-0 px-2"
           >
-             <div className="relative w-[300px] md:w-[380px] h-[400px] md:h-[520px] isolate">
+             <div className="relative w-full max-w-[300px] md:max-w-none md:w-[380px] h-[360px] md:h-[520px] isolate mx-auto">
                <div className="absolute inset-0 bg-gray-300 rounded-[40px] overflow-hidden border-[8px] md:border-[12px] border-white shadow-2xl rotate-3">
                  <motion.img 
                    key={currentSlideIndex}
@@ -703,13 +703,13 @@ export default function App() {
                  </div>
                </div>
                
-               {/* Fixed DEM Ketinggian Widget - positioned at top right */}
+               {/* Fixed DEM Ketinggian Widget - positioned at top left */}
                <motion.div 
                  key={`badge-${currentSlideIndex}`}
                  initial={{ scale: 0, rotate: -45 }}
-                 animate={{ scale: 1, rotate: 12 }}
+                 animate={{ scale: 1, rotate: -12 }}
                  transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-                 className="absolute -top-4 -right-4 md:-top-6 md:-right-6 w-24 h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white rotate-[12deg] border-4 border-white shadow-2xl z-30"
+                 className="absolute -top-6 -left-6 md:-top-8 md:-left-8 w-24 h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white -rotate-[12deg] border-4 border-white shadow-2xl z-[100]"
                >
                  <span className="text-[8px] uppercase font-bold tracking-tighter">Ketinggian</span>
                  <span className="text-xl font-black leading-none my-0.5">{heroSlides[currentSlideIndex].height}</span>
@@ -725,10 +725,19 @@ export default function App() {
         </div>
       </section>
 
+      {/* Promo Banner - Moved to right under Hero */}
+      <section className="bg-art-bg flex flex-col items-center justify-center border-b border-art-text">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-12 py-8 flex items-center justify-center">
+          <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="w-full block hover:opacity-90 transition-opacity">
+            <img src="https://files.catbox.moe/lbf6xr.png" alt="Promo Banner" className="w-full h-auto object-contain rounded-2xl shadow-xl border-4 border-white" />
+          </a>
+        </div>
+      </section>
+
       {/* The Concept Section */}
       <section id="cerita" className="py-20 md:py-32 bg-art-section relative border-y border-art-text overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
-          <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.15] grayscale" alt="Mountain bg" />
+          <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Mountain bg" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
@@ -738,7 +747,7 @@ export default function App() {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-2xl md:text-6xl">di Atas Awan</span></h2>
+              <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-xl md:text-6xl">di Atas Awan</span></h2>
               <div className="w-12 h-1 bg-art-orange mb-8"></div>
               <p className="font-medium text-art-text/80 mb-6 leading-relaxed">
                 Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman.
@@ -797,7 +806,7 @@ export default function App() {
       {/* Trip Leader Section */}
       <section id="leader" className="py-20 md:py-24 bg-white border-y border-art-text relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply">
-          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.15] grayscale" alt="Mountain bg" />
+          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Mountain bg" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
@@ -869,7 +878,7 @@ export default function App() {
       {/* Fasilitas / Include Paket Section */}
       <section id="fasilitas" className="py-20 md:py-24 bg-art-green text-white relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
-          <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-20" alt="Mountain bg" />
+          <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-40" alt="Mountain bg" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
@@ -947,7 +956,7 @@ export default function App() {
       {/* Destination Section */}
       <section id="destinasi" className="py-20 md:py-32 bg-art-bg relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply">
-          <img src="https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.12] grayscale" alt="Mountain bg" />
+          <img src="https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.35] grayscale" alt="Mountain bg" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
@@ -979,15 +988,6 @@ export default function App() {
               <p className="text-art-text/60 font-medium">Belum ada destinasi untuk tingkat kesulitan ini.</p>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Promo Banner */}
-      <section className="bg-art-bg flex flex-col items-center justify-center border-y border-art-text">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-12 py-8 flex items-center justify-center">
-          <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="w-full block hover:opacity-90 transition-opacity">
-            <img src="https://files.catbox.moe/lbf6xr.png" alt="Promo Banner" className="w-full h-auto object-contain rounded-2xl shadow-xl border-4 border-white" />
-          </a>
         </div>
       </section>
 
@@ -1025,11 +1025,11 @@ export default function App() {
 
       {/* Footer */}
       <footer className="bg-art-text py-16 text-white border-t border-art-text">
-        <div className="max-w-7xl mx-auto px-12 border-b border-white/10 pb-16 mb-8 grid md:grid-cols-4 gap-12">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 border-b border-white/10 pb-16 mb-8 grid md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-full overflow-hidden border border-white/20">
-                <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-cover" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border border-white/20">
+                <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
               </div>
               <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-white opacity-80">Ngopi<br/>Ketinggian</span>
             </div>
@@ -1057,7 +1057,7 @@ export default function App() {
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-12 flex flex-col md:flex-row justify-between items-center text-white/40 text-[10px] font-bold uppercase tracking-widest">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center text-white/40 text-[10px] font-bold uppercase tracking-widest gap-4 md:gap-0">
           <p>&copy; {new Date().getFullYear()} Trip Ngopi di Ketinggian.</p>
           <p>EST. 2026 • ADVENTURE & BREW</p>
         </div>
