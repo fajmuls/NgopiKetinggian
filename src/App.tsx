@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, Menu } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import { useState, useEffect } from 'react';
 import { auth, loginWithGoogle, logout } from './firebase';
@@ -220,19 +220,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
 
             </div>
           </div>
-          {user ? (
-            <Button variant="primary" className="w-full mt-6 py-4 uppercase text-[10px] tracking-widest" type="submit">
-              Kirim Permintaan Ke Email & WA
-            </Button>
-          ) : (
-            <div className="mt-6 text-center">
-              <p className="text-[10px] text-art-text/60 italic mb-2 uppercase tracking-widest font-bold">*Wajib login akun Google untuk booking</p>
-              <Button variant="glass" type="button" className="w-full border border-art-text bg-white text-[10px] tracking-widest uppercase font-bold flex items-center justify-center gap-2" onClick={() => loginWithGoogle()}>
-                <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)"><path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/><path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/><path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/><path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/></g></svg>
-                Login untuk Booking
-              </Button>
-            </div>
-          )}
+          <Button variant="primary" className="w-full mt-6 py-4 uppercase text-[10px] tracking-widest" type="submit">
+            Kirim Permintaan Ke Email & WA
+          </Button>
         </form>
           </>
         )}
@@ -395,34 +385,34 @@ const DestinationCard = ({ dest, onBook }: { dest: typeof destinationsData[0], o
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-y-6 gap-x-8 mb-6">
-            <div className="flex items-center gap-4" onMouseEnter={playHover}>
-              <div className="w-10 h-10 border border-art-text rounded-full flex items-center justify-center"><Calendar className="text-art-text" size={16} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jadwal</p><p className="font-bold text-art-text text-sm mt-1">Sesuai Permintaan</p></div>
+          <div className="grid grid-cols-2 gap-y-6 gap-x-4 md:gap-x-8 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
+              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Calendar className="text-art-text" size={14} /></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jadwal</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">Sesuai Permintaan</p></div>
             </div>
-            <div className="flex items-center gap-4" onMouseEnter={playHover}>
-              <div className="w-10 h-10 border border-art-text rounded-full flex items-center justify-center"><Map className="text-art-text" size={16} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Mepo</p><p className="font-bold text-art-text text-sm mt-1">{dest.mepo}</p></div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
+              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Map className="text-art-text" size={14} /></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Mepo</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.mepo}</p></div>
             </div>
-            <div className="flex items-center gap-4" onMouseEnter={playHover}>
-              <div className="w-10 h-10 border border-art-text rounded-full flex items-center justify-center"><Users className="text-art-text" size={16} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Kuota</p><p className="font-bold text-art-text text-sm mt-1">{dest.kuota}</p></div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
+              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Users className="text-art-text" size={14} /></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Kuota</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.kuota}</p></div>
             </div>
-            <div className="flex items-center gap-4" onMouseEnter={playHover}>
-              <div className="w-10 h-10 border border-art-text rounded-full flex items-center justify-center"><Coffee className="text-art-text" size={16} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Beans</p><p className="font-bold text-art-text text-sm mt-1">{dest.beans}</p></div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
+              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Coffee className="text-art-text" size={14} /></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Beans</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.beans}</p></div>
             </div>
           </div>
           <div className="mb-10 text-[10px] text-art-text/60 font-medium italic border-l-2 border-art-orange pl-3">
             *Jika pesanan melebihi kuota maksimal atau ingin custom jalur pendakian, silakan chat via Admin. Harga akan disesuaikan.
           </div>
         </div>
-        <div className="border-t-2 border-art-text pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="border-t-2 border-art-text pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
             <p className="text-[10px] uppercase font-bold tracking-widest text-art-orange mb-1">Harga Mulai Dari ({dest.durations[selectedDuration].label})</p>
-            <p className="text-3xl font-black text-art-text">Rp {dest.durations[selectedDuration].price}k<span className="text-xs font-bold uppercase opacity-50 ml-1">/pax</span></p>
+            <p className="text-2xl md:text-3xl font-black text-art-text">Rp {dest.durations[selectedDuration].price}k<span className="text-[10px] md:text-xs font-bold uppercase opacity-50 ml-1">/pax</span></p>
           </div>
-          <Button onClick={() => onBook(dest.name, dest.durations[selectedDuration].label)} variant="primary" className="text-[10px] uppercase tracking-widest px-8 rounded-lg">Booking Cepat</Button>
+          <Button onClick={() => onBook(dest.name, dest.durations[selectedDuration].label)} variant="primary" className="w-full sm:w-auto text-[10px] uppercase tracking-widest px-8 py-3 md:py-2 rounded-lg">Booking Cepat</Button>
         </div>
       </div>
     </motion.div>
@@ -455,6 +445,7 @@ export default function App() {
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const galleryPhotos = [
     { src: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=2070&auto=format&fit=crop", desc: "Momen ngopi pagi" },
@@ -525,7 +516,7 @@ export default function App() {
                 Mulai Melihat Tour <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="secondary" className="w-full text-[10px] tracking-widest uppercase font-bold" onClick={() => window.open('https://instagram.com/ngopidiketinggian', '_blank')}>
+                <Button variant="secondary" className="w-full text-[10px] tracking-widest uppercase font-bold" onClick={() => window.open('https://www.instagram.com/ngopi.dketinggian?igsh=Y3JtN3Y2eXIya29y', '_blank')}>
                   Kunjungi IG
                 </Button>
                 <Button variant="secondary" className="w-full text-[10px] tracking-widest uppercase font-bold" onClick={() => window.open('https://tiktok.com/@ngopidiketinggian', '_blank')}>
@@ -534,7 +525,7 @@ export default function App() {
               </div>
               {!user ? (
                 <div className="mt-2 text-center">
-                   <p className="text-[10px] text-art-text/60 italic mb-2 uppercase tracking-widest font-bold">*Wajib login akun Google untuk booking</p>
+                   <p className="text-[10px] text-art-text/60 italic mb-2 uppercase tracking-widest font-bold">*Opsional: Login untuk kemudahan akses</p>
                    <Button variant="glass" className="w-full border-art-text border bg-white flex items-center justify-center gap-2 text-[10px] tracking-widest uppercase font-bold" onClick={() => loginWithGoogle()}>
                      <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)"><path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/><path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/><path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/><path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/></g></svg> Login via Google
                    </Button>
@@ -583,12 +574,47 @@ export default function App() {
             <Button onClick={() => handleOpenBooking()} className="hidden md:flex uppercase text-[10px] tracking-widest py-3 rounded-lg" variant="primary">
               Daftar Sekarang
             </Button>
+            <button className="flex lg:hidden text-art-text" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
           </div>
         </div>
+        
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="lg:hidden bg-art-bg border-b border-art-text/10 overflow-hidden"
+            >
+              <div className="flex flex-col gap-6 p-8 text-[12px] font-bold uppercase tracking-widest text-art-text items-center">
+                <a href="#cerita" onClick={() => setIsMobileMenuOpen(false)}>Cerita Kami</a>
+                <a href="#leader" onClick={() => setIsMobileMenuOpen(false)}>Trip Leader</a>
+                <a href="#fasilitas" onClick={() => setIsMobileMenuOpen(false)}>Fasilitas</a>
+                <a href="#destinasi" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</a>
+                <a href="#galeri" onClick={() => setIsMobileMenuOpen(false)}>Galeri</a>
+                <div className="w-full h-px bg-art-text/10 my-2"></div>
+                {!user ? (
+                  <button onClick={() => { loginWithGoogle(); setIsMobileMenuOpen(false); }} className="flex items-center gap-2">
+                    <LogIn size={16} /> Login Google
+                  </button>
+                ) : (
+                  <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 text-red-500">
+                    <LogOut size={16} /> Logout ({user.displayName?.split(' ')[0]})
+                  </button>
+                )}
+                <Button onClick={() => { setIsMobileMenuOpen(false); handleOpenBooking(); }} className="w-full uppercase text-[12px] tracking-widest mt-2" variant="primary">
+                  Daftar Sekarang
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-art-bg">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-art-bg pt-32 pb-24 md:py-0 text-center md:text-left">
         {/* Parallax Background using Grid layout pattern */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
           <div className="grid grid-cols-12 h-full w-full opacity-[0.03]">
@@ -598,8 +624,8 @@ export default function App() {
           </div>
         </div>
 
-        <div className="relative w-full max-w-7xl mx-auto h-full grid grid-cols-12 pt-40 px-12 z-10">
-          <div className="col-span-12 md:col-span-6 z-20 flex flex-col justify-center pb-20">
+        <div className="relative w-full max-w-7xl mx-auto h-full grid grid-cols-1 md:grid-cols-12 px-6 md:px-12 z-10 gap-12 md:gap-0">
+          <div className="col-span-1 md:col-span-6 z-20 flex flex-col justify-center items-center md:items-start pt-12 md:pb-20">
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -613,7 +639,7 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-[60px] md:text-[90px] lg:text-[110px] leading-[0.85] font-black uppercase tracking-tight text-art-text mb-8"
+              className="text-[42px] sm:text-[60px] md:text-[90px] lg:text-[110px] leading-[0.85] font-black uppercase tracking-tight text-art-text mb-8"
             >
               Trip Ngopi Di<br/>
               <span className="text-art-orange drop-shadow-sm">Ketinggian</span>
@@ -644,9 +670,9 @@ export default function App() {
           </div>
 
           <div 
-            className="hidden md:flex col-span-6 h-full items-center justify-center relative"
+            className="flex col-span-12 md:col-span-6 h-full items-center justify-center relative mt-12 md:mt-0"
           >
-             <div className="relative w-[380px] h-[520px] bg-gray-300 rounded-[40px] overflow-hidden border-[12px] border-white shadow-2xl rotate-3">
+             <div className="relative w-[300px] md:w-[380px] h-[400px] md:h-[520px] bg-gray-300 rounded-[40px] overflow-hidden border-[8px] md:border-[12px] border-white shadow-2xl rotate-3">
                <motion.img 
                  key={currentSlideIndex}
                  initial={{ opacity: 0, scale: 1.05 }}
@@ -694,8 +720,11 @@ export default function App() {
       </section>
 
       {/* The Concept Section */}
-      <section id="cerita" className="py-32 bg-art-section relative border-y border-art-text">
-        <div className="max-w-7xl mx-auto px-12">
+      <section id="cerita" className="py-32 bg-art-section relative border-y border-art-text overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop" className="w-full h-full object-cover opacity-5 grayscale" alt="Mountain bg" />
+        </div>
+        <div className="max-w-7xl mx-auto px-12 relative z-10">
           <div className="grid md:grid-cols-2 gap-20 items-center">
             <motion.div 
               initial={{ opacity: 0, x: -50 }}
@@ -760,8 +789,11 @@ export default function App() {
       </section>
 
       {/* Trip Leader Section */}
-      <section id="leader" className="py-24 bg-white border-y border-art-text">
-        <div className="max-w-7xl mx-auto px-12">
+      <section id="leader" className="py-24 bg-white border-y border-art-text relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-5 grayscale" alt="Mountain bg" />
+        </div>
+        <div className="max-w-7xl mx-auto px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-art-text mb-4">Kenalan dengan <br/><span className="text-art-green font-serif italic normal-case font-normal text-4xl md:text-5xl">Trip Leader Kami</span></h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
@@ -829,8 +861,11 @@ export default function App() {
       </section>
 
       {/* Fasilitas / Include Paket Section */}
-      <section id="fasilitas" className="py-24 bg-art-green text-white">
-        <div className="max-w-7xl mx-auto px-12">
+      <section id="fasilitas" className="py-24 bg-art-green text-white relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-10" alt="Mountain bg" />
+        </div>
+        <div className="max-w-7xl mx-auto px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4">Fasilitas Open Trip</h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
@@ -903,8 +938,11 @@ export default function App() {
       </section>
 
       {/* Destination Section */}
-      <section id="destinasi" className="py-32 bg-art-bg">
-        <div className="max-w-7xl mx-auto px-12">
+      <section id="destinasi" className="py-32 bg-art-bg relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.03] grayscale" alt="Mountain bg" />
+        </div>
+        <div className="max-w-7xl mx-auto px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6">Destinasi Utama</h2>
             <div className="w-12 h-1 bg-art-text mx-auto mb-6"></div>
@@ -938,8 +976,11 @@ export default function App() {
       </section>
 
       {/* Gallery Section */}
-      <section id="galeri" className="py-24 bg-art-text text-white">
-        <div className="max-w-7xl mx-auto px-12">
+      <section id="galeri" className="py-24 bg-art-text text-white relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-5" alt="Mountain bg" />
+        </div>
+        <div className="max-w-7xl mx-auto px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-6">Galeri Pendakian</h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-6"></div>
@@ -987,13 +1028,14 @@ export default function App() {
               <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Salak</a></li>
               <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Semeru</a></li>
               <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Rinjani</a></li>
+              <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Sumbing</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-bold mb-6 text-[10px] uppercase tracking-widest text-art-orange">Hubungi Kami</h4>
             <ul className="space-y-4 text-white/60 font-medium text-sm">
               <li><a href="https://wa.me/6282127533268" className="hover:text-white transition-colors" onMouseEnter={playHover}>WA: 0821 2753 3268</a></li>
-              <li><a href="https://instagram.com/ngopidiketinggian" className="hover:text-white transition-colors" onMouseEnter={playHover}>IG: @ngopidiketinggian</a></li>
+              <li><a href="https://www.instagram.com/ngopi.dketinggian?igsh=Y3JtN3Y2eXIya29y" target="_blank" rel="noreferrer" className="hover:text-white transition-colors" onMouseEnter={playHover}>IG: @ngopi.dketinggian</a></li>
               <li><a href="https://tiktok.com/@ngopidiketinggian" className="hover:text-white transition-colors" onMouseEnter={playHover}>TikTok: @ngopidiketinggian</a></li>
               <li>Email: siliwangiputra1510@gmail.com</li>
             </ul>
