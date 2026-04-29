@@ -46,6 +46,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const nama = formData.get('nama');
+    const emailStr = formData.get('email') || 'Tidak diisi';
     const wa = formData.get('wa');
     const destinasi = formData.get('destinasi');
     const durasi = formData.get('durasi');
@@ -79,21 +80,18 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
     
     const opsionalText = opsionalSelected.length > 0 ? opsionalSelected.join(' | ') : 'Tidak ada tambahan';
     
-    const text = `Halo Admin Trip Ngopi di Ketinggian,\n\nSaya ingin booking trip dengan detail berikut:\n- Nama: ${nama}\n- No WA: ${wa}\n- Destinasi: ${destinasi}\n- Durasi: ${durasi}\n- Rencana Jadwal: ${jadwal}\n- Jumlah: ${peserta} Pax\n- Tambahan Opsional: ${opsionalText}\n- Catatan/Kendala: ${deskripsi}\n\nMohon info ketersediaan dan total biayanya. Terima kasih!`;
-    const mailToText = encodeURIComponent(text);
+    const text = `Halo Admin Trip Ngopi di Ketinggian,\n\nSaya ingin booking trip dengan detail berikut:\n- Nama: ${nama}\n- Email: ${emailStr}\n- No WA: ${wa}\n- Destinasi: ${destinasi}\n- Durasi: ${durasi}\n- Rencana Jadwal: ${jadwal}\n- Jumlah: ${peserta} Pax\n- Tambahan Opsional: ${opsionalText}\n- Catatan/Kendala: ${deskripsi}\n\nMohon info ketersediaan dan total biayanya. Terima kasih!`;
     const waText = encodeURIComponent(text);
 
     setShowSuccess(true);
     
-    // Open email client
-    window.open(`mailto:siliwangiputra1510@gmail.com?subject=Booking Trip - ${destinasi}&body=${mailToText}`, '_blank');
+    // Open WA next
+    window.open(`https://wa.me/6282127533268?text=${waText}`, '_blank');
     
     setTimeout(() => {
-      // Open WA next
-      window.open(`https://wa.me/6282127533268?text=${waText}`, '_blank');
       setShowSuccess(false);
       onClose();
-    }, 2500);
+    }, 1500);
   };
 
   return (
@@ -117,6 +115,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Nama Lengkap</label>
             <input name="nama" required type="text" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Alamat Email</label>
+            <input name="email" required type="email" defaultValue={user?.email || ''} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
           </div>
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Nomor WhatsApp</label>
@@ -221,7 +223,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
             </div>
           </div>
           <Button variant="primary" className="w-full mt-6 py-4 uppercase text-[10px] tracking-widest" type="submit">
-            Kirim Permintaan Ke Email & WA
+            Kirim Permintaan Ke WhatsApp
           </Button>
         </form>
           </>
@@ -674,41 +676,43 @@ export default function App() {
           <div 
             className="flex col-span-12 md:col-span-6 h-full items-center justify-center relative mt-12 md:mt-0"
           >
-             <div className="relative w-[300px] md:w-[380px] h-[400px] md:h-[520px] bg-gray-300 rounded-[40px] overflow-hidden border-[8px] md:border-[12px] border-white shadow-2xl rotate-3">
-               <motion.img 
-                 key={currentSlideIndex}
-                 initial={{ opacity: 0, scale: 1.05 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 transition={{ duration: 1 }}
-                 src={heroSlides[currentSlideIndex].image} 
-                 alt={heroSlides[currentSlideIndex].name} 
-                 className="w-full h-full object-cover grayscale-[15%] absolute inset-0 z-0"
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
-               
-               <div className="absolute bottom-8 left-8 text-white z-20">
-                 <p className="text-[10px] uppercase tracking-widest opacity-80 mb-1">Lokasi Utama</p>
-                 <motion.h3 
-                   key={`title-${currentSlideIndex}`}
-                   initial={{ y: 20, opacity: 0 }}
-                   animate={{ y: 0, opacity: 1 }}
-                   transition={{ duration: 0.5, delay: 0.3 }}
-                   className="text-3xl font-serif italic drop-shadow-md"
-                 >
-                   {heroSlides[currentSlideIndex].name}
-                 </motion.h3>
+             <div className="relative w-[300px] md:w-[380px] h-[400px] md:h-[520px] isolate">
+               <div className="absolute inset-0 bg-gray-300 rounded-[40px] overflow-hidden border-[8px] md:border-[12px] border-white shadow-2xl rotate-3">
+                 <motion.img 
+                   key={currentSlideIndex}
+                   initial={{ opacity: 0, scale: 1.05 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   transition={{ duration: 1 }}
+                   src={heroSlides[currentSlideIndex].image} 
+                   alt={heroSlides[currentSlideIndex].name} 
+                   className="w-full h-full object-cover grayscale-[15%] absolute inset-0 z-0"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
+                 
+                 <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 text-white z-20">
+                   <p className="text-[10px] uppercase tracking-widest opacity-80 mb-1">Lokasi Utama</p>
+                   <motion.h3 
+                     key={`title-${currentSlideIndex}`}
+                     initial={{ y: 20, opacity: 0 }}
+                     animate={{ y: 0, opacity: 1 }}
+                     transition={{ duration: 0.5, delay: 0.3 }}
+                     className="text-3xl font-serif italic drop-shadow-md"
+                   >
+                     {heroSlides[currentSlideIndex].name}
+                   </motion.h3>
+                 </div>
                </div>
                
-               {/* Fixed DEM Ketinggian Widget - positioned above the title text */}
+               {/* Fixed DEM Ketinggian Widget - positioned at top right */}
                <motion.div 
                  key={`badge-${currentSlideIndex}`}
                  initial={{ scale: 0, rotate: -45 }}
-                 animate={{ scale: 1, rotate: -12 }}
+                 animate={{ scale: 1, rotate: 12 }}
                  transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-                 className="absolute bottom-32 right-6 w-24 h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white rotate-[-12deg] border-4 border-white shadow-xl z-20"
+                 className="absolute -top-4 -right-4 md:-top-6 md:-right-6 w-24 h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white rotate-[12deg] border-4 border-white shadow-2xl z-30"
                >
                  <span className="text-[8px] uppercase font-bold tracking-tighter">Ketinggian</span>
-                 <span className="text-xl font-black">{heroSlides[currentSlideIndex].height}</span>
+                 <span className="text-xl font-black leading-none my-0.5">{heroSlides[currentSlideIndex].height}</span>
                  <span className="text-[8px] opacity-80 uppercase">MDPL</span>
                </motion.div>
              </div>
@@ -737,10 +741,10 @@ export default function App() {
               <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-2xl md:text-6xl">di Atas Awan</span></h2>
               <div className="w-12 h-1 bg-art-orange mb-8"></div>
               <p className="font-medium text-art-text/80 mb-6 leading-relaxed">
-                Kami bukan sekadar penyelenggara pendakian. Trip Ngopi di Ketinggian adalah perjalanan mencecap pengalaman. Berfokus pada ritme santai, apresiasi alam, dan seduhan kopi nusantara berkualitas.
+                Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman.
               </p>
               <p className="font-medium text-art-text/80 mb-10 leading-relaxed">
-                Tinggalkan penatnya ibukota sejenak. Nikmati aroma arabika yang diseduh di tengah udara pegunungan yang menusuk tulang, disuguhi panorama matahari terbit yang tak ternilai harganya.
+                Berbekal pengalaman panjang ini, meracik kopi di alam terbuka tak lagi sekadar ritual bagi kami, ia menjelma jadi perayaan kebersamaan. Lupakan sejenak semrawutnya ibukota. Kami siapkan ritme perjalanan yang santai, aman, penuh cerita, dan tentu saja... kopi rindu tebal yang diseduh di waktu yang paling tepat. Sesuatu yang tak akan pernah Anda temukan walau di coffee shop semewah apa pun di tengah kota.
               </p>
               
               <div className="space-y-6 border-l-2 border-art-text/10 pl-6">
@@ -902,6 +906,7 @@ export default function App() {
             <div className="bg-white/5 border-2 border-white/20 text-white p-8 rounded-2xl relative overflow-hidden">
                <div className="absolute inset-0 bg-art-orange/10"></div>
                <div className="relative z-10">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-art-orange rounded-full mix-blend-overlay filter blur-3xl opacity-50 translate-x-10 -translate-y-10"></div>
                  <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><PlusCircle /> Optional (Tambahan)</h3>
                  <p className="text-sm font-medium text-white/70 mb-4">Pilih fasilitas tambahan jika Anda membutuhkannya. <br/><span className="text-art-orange">Catatan: Tambahan opsional ini akan dikenakan biaya tambahan dan tidak termasuk ke dalam harga paket yang tertera. Boleh dicat admin untuk detail harga tambahan.</span></p>
                  <ul className="space-y-4 text-sm font-medium">
@@ -974,6 +979,15 @@ export default function App() {
               <p className="text-art-text/60 font-medium">Belum ada destinasi untuk tingkat kesulitan ini.</p>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Promo Banner */}
+      <section className="bg-art-bg flex flex-col items-center justify-center border-y border-art-text">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-12 py-8 flex items-center justify-center">
+          <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="w-full block hover:opacity-90 transition-opacity">
+            <img src="https://files.catbox.moe/lbf6xr.png" alt="Promo Banner" className="w-full h-auto object-contain rounded-2xl shadow-xl border-4 border-white" />
+          </a>
         </div>
       </section>
 
