@@ -44,7 +44,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
   
   const [selectedDestinasi, setSelectedDestinasi] = useState(prefill?.destinasi || '');
   const [selectedDurasi, setSelectedDurasi] = useState(prefill?.durasi || '');
-  const [pesertaCount, setPesertaCount] = useState(2);
+  const [pesertaCount, setPesertaCount] = useState<number | string>(2);
   const [promoCode, setPromoCode] = useState('');
   
   useEffect(() => {
@@ -63,9 +63,18 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
      }
   }
 
-  const isPromoValid = promoCode.toLowerCase() === 'emikari';
-  const grossPrice = basePricePerPax * pesertaCount;
-  const discountAmount = isPromoValid ? grossPrice * 0.1 : 0;
+  const promoLower = promoCode.toLowerCase();
+  const isPromoEmi = promoLower === 'emikari';
+  const isPromoAri = promoLower === 'ari ganteng';
+  const isPromoValid = isPromoEmi || isPromoAri;
+  
+  const currentPesertaCount = typeof pesertaCount === 'number' ? pesertaCount : 0;
+  const grossPrice = basePricePerPax * currentPesertaCount;
+  
+  let discountRate = 0;
+  if (isPromoAri) discountRate = 0.5;
+  else if (isPromoEmi) discountRate = 0.1;
+  const discountAmount = grossPrice * discountRate;
   const netPrice = grossPrice - discountAmount;
   
   if (!isOpen) return null;
@@ -78,9 +87,24 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
     const wa = formData.get('wa');
     const destinasi = formData.get('destinasi');
     const durasi = formData.get('durasi');
-    const jadwal = formData.get('jadwal') || 'Belum ditentukan';
+    const jadwal = formData.get('jadwal');
     const peserta = formData.get('peserta');
     const deskripsi = formData.get('deskripsi') || 'Tidak ada catatan khusus';
+    
+    if (!nama || !wa || !destinasi || !durasi || !jadwal || !peserta) {
+      alert("Mohon lengkapi semua data wajib: Nama, WhatsApp, Destinasi, Durasi, Tanggal, dan Jumlah Peserta.");
+      return;
+    }
+
+    const today = new Date();
+    const selectedDate = new Date(jadwal.toString());
+    const diffTime = selectedDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays < 7) {
+      alert("Jadwal harus minimal H-7 dari hari ini.");
+      return;
+    }
+
     
     let opsionalSelected = [];
     const mainOpsional = formData.getAll('opsional_main');
@@ -145,7 +169,7 @@ Saya tertarik untuk booking trip, berikut detail pesanan saya:
 • Jumlah Peserta: ${peserta} Pax
 
 🎟️ *Promo & Biaya*
-• Kode Promo: ${promoCode ? promoCode + (isPromoValid ? ' (Valid - Diskon 10%)' : ' (Tidak Valid)') : '-'}
+• Kode Promo: ${promoCode ? promoCode + (isPromoValid ? ` (Valid - Diskon ${discountRate * 100}%)` : ' (Tidak Valid)') : '-'}
 • Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${(isPromoValid && grossPrice > 0) ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}
 
 🎒 *Opsi Tambahan (Opsional)*
@@ -193,8 +217,8 @@ Terima kasih! 🙌`;
             <input name="nama" required type="text" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Alamat Email</label>
-            <input name="email" required type="email" defaultValue={user?.email || ''} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Alamat Email (Opsional)</label>
+            <input name="email" type="email" defaultValue={user?.email || ''} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
           </div>
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Nomor WhatsApp</label>
@@ -203,7 +227,7 @@ Terima kasih! 🙌`;
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Destinasi</label>
-              <select name="destinasi" value={selectedDestinasi} onChange={e => setSelectedDestinasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
+              <select name="destinasi" required value={selectedDestinasi} onChange={e => setSelectedDestinasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
                 <option value="">-- Pilih Destinasi --</option>
                 {destinationOptions ? destinationOptions.map((dest, i) => (
                   <option key={i} value={dest.name}>{dest.name}</option>
@@ -220,7 +244,7 @@ Terima kasih! 🙌`;
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Durasi</label>
-              <select name="durasi" value={selectedDurasi} onChange={e => setSelectedDurasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
+              <select name="durasi" required value={selectedDurasi} onChange={e => setSelectedDurasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
                 <option value="">-- Pilih Durasi --</option>
                 <option>1H (Tektok)</option>
                 <option>2H 1M</option>
@@ -231,29 +255,29 @@ Terima kasih! 🙌`;
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jadwal (Bisa disesuaikan nanti)</label>
-            <input name="jadwal" type="date" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jadwal (Min. H-7)</label>
+            <input name="jadwal" required type="date" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
             <p className="text-[10px] mt-1 text-art-text/60 italic">*Jadwal pasti dapat didiskusikan setelah booking.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jumlah Peserta</label>
-              <input name="peserta" type="number" min="1" value={pesertaCount} onChange={e => setPesertaCount(parseInt(e.target.value) || 1)} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
+              <input name="peserta" required type="number" min="1" value={pesertaCount} onChange={e => setPesertaCount(e.target.value === '' ? '' : (parseInt(e.target.value) || ''))} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
               <p className="text-[10px] mt-1 text-art-text/60 italic">*Kuota min/max bervariasi.</p>
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Kode Promo</label>
-              <input type="text" value={promoCode} onChange={e => setPromoCode(e.target.value)} placeholder="Contoh: EmiKari" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm uppercase" />
+              <input type="text" value={promoCode} onChange={e => setPromoCode(e.target.value)} placeholder="Contoh: KODEPROMO" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm uppercase" />
               {promoCode.length > 0 && (
                  isPromoValid ? (
-                   <p className="text-[10px] mt-1 text-green-600 font-bold">Promo Valid! Diskon 10%</p>
+                   <p className="text-[10px] mt-1 text-green-600 font-bold">Promo Valid! Diskon {discountRate * 100}%</p>
                  ) : (
                    <p className="text-[10px] mt-1 text-red-500 font-bold">Promo Tidak Valid</p>
                  )
               )}
             </div>
           </div>
-          {basePricePerPax > 0 && (
+          {basePricePerPax > 0 && typeof pesertaCount === 'number' && (
             <div className="bg-art-section border-2 border-art-text p-4 rounded-xl mt-4">
               <h4 className="text-[10px] font-bold uppercase tracking-widest text-art-text/80 mb-2">Estimasi Biaya Paket:</h4>
               <div className="flex justify-between items-center mb-1 text-sm">
@@ -262,7 +286,7 @@ Terima kasih! 🙌`;
               </div>
               {isPromoValid && (
                 <div className="flex justify-between items-center mb-1 text-sm text-green-600">
-                   <span>Diskon Promo (10%)</span>
+                   <span>Diskon Promo ({discountRate * 100}%)</span>
                    <span className="font-bold">- Rp {discountAmount.toLocaleString('id-ID')}</span>
                 </div>
               )}
@@ -271,6 +295,7 @@ Terima kasih! 🙌`;
                  <span className="text-art-orange">Rp {netPrice.toLocaleString('id-ID')}</span>
               </div>
               <p className="text-[9px] text-art-text/60 mt-1">*Harga di atas belum termasuk penambahan opsional.</p>
+              <p className="text-[9px] text-art-text/60 mt-0.5 font-bold">*Nanti admin akan mengkonfirmasi harga kembali kepada Anda.</p>
             </div>
           )}
           <div>
@@ -348,7 +373,7 @@ const destinationsData = [
     name: "Gunung Gede Pangrango",
     height: "2.958 mdpl",
     desc: "Eksplorasi megahnya Alun-Alun Suryakencana, padang savana penuh edelweiss. Kita akan camp dan menyeduh kopi sore menanti senja, serta morning coffee dengan view kawah yang menakjubkan.",
-    image: "https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop",
     locationTag: "Alun-Alun Suryakencana",
     difficulty: "Pemula - Menengah",
     mepo: "Cibodas / Gunung Putri",
@@ -499,7 +524,7 @@ const DestinationCard: React.FC<{ dest: typeof destinationsData[0], onBook: (des
           <div className="grid grid-cols-2 gap-y-6 gap-x-4 md:gap-x-8 mb-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
               <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Calendar className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jadwal</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">Sesuai Permintaan</p></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jadwal</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">Sesuai Permintaan (Min. H-7)</p></div>
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
               <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Map className="text-art-text" size={14} /></div>
@@ -526,7 +551,7 @@ const DestinationCard: React.FC<{ dest: typeof destinationsData[0], onBook: (des
             </div>
             <div className="flex items-center gap-3">
               <p className="text-sm font-bold text-art-text/40 line-through">Rp {dest.durations[selectedDuration].originalPrice}k</p>
-              <p className="text-2xl md:text-3xl font-black text-art-text">Rp {dest.durations[selectedDuration].price}k<span className="text-[10px] md:text-xs font-bold uppercase opacity-50 ml-1">/pax</span></p>
+              <p className="text-2xl md:text-3xl font-black text-art-orange drop-shadow-sm">Rp {dest.durations[selectedDuration].price}k<span className="text-[10px] md:text-xs font-bold uppercase text-art-text/60 ml-1">/pax</span></p>
             </div>
             <p className="text-[10px] mt-2 text-art-text/60 max-w-sm hidden md:block">Harga sudah termasuk fasilitas lengkap dan pemandu perjalanan yang ahli. Pesan sekarang untuk mengamankan slot perjalananmu!</p>
           </div>
@@ -703,16 +728,15 @@ export default function App() {
   const scrollToSection = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement> | { preventDefault: () => void }, id: string) => {
     if (e && e.preventDefault) e.preventDefault();
     setIsMobileMenuOpen(false);
+    
+    // Allow a small delay for menu to close and state to settle
     setTimeout(() => {
-	    const element = document.getElementById(id);
-	    if (element) {
-	      const offsetTop = element.getBoundingClientRect().top + window.scrollY;
-	      window.scrollTo({
-	        top: offsetTop - 80,
-	        behavior: 'smooth'
-	      });
-	    }
-    }, 100);
+      const element = document.getElementById(id);
+      if (element) {
+        // Use scrollIntoView as primary
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   return (
@@ -911,7 +935,7 @@ export default function App() {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-8 md:mb-12 w-full mx-auto md:mx-0 text-center md:text-left"
             >
-              Menikmati kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.
+              Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.
             </motion.p>
             
             <motion.div 
@@ -1025,9 +1049,10 @@ export default function App() {
               className="relative"
             >
               <div className="absolute inset-0 bg-art-orange rounded-[40px] transform rotate-3 scale-105 z-0" />
-              <img 
-                src="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop" 
-                alt="Pourover coffee outdoor" 
+              <video 
+                autoPlay loop muted playsInline controls
+                src="https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" 
+                poster="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop"
                 className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/5] grayscale-[10%] border-8 border-white"
               />
               <motion.div 
@@ -1070,7 +1095,8 @@ export default function App() {
               </div>
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-text">Sukmayadi</h3>
               <p className="text-[10px] uppercase tracking-widest font-bold text-art-orange mt-2 mb-4">Pengalaman 10+ Tahun</p>
-              <p className="text-xs text-art-text/70">Expert navigasi dan coffee brewer. Menaklukkan puluhan puncak gunung.</p>
+              <p className="text-xs text-art-text/70 mb-4 h-12 flex items-center justify-center">Expert navigasi dan coffee brewer. Menaklukkan puluhan puncak gunung.</p>
+              <audio controls className="w-full h-8 mt-auto rounded-full" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
             </div>
 
             {/* Leader 2 */}
@@ -1080,7 +1106,8 @@ export default function App() {
               </div>
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-text">Ardi</h3>
               <p className="text-[10px] uppercase tracking-widest font-bold text-art-orange mt-2 mb-4">Pengalaman 7 Tahun</p>
-              <p className="text-xs text-art-text/70">Spesialis survival dan logistik perjalanan panjang.</p>
+              <p className="text-xs text-art-text/70 mb-4 h-12 flex items-center justify-center">Spesialis survival dan logistik perjalanan panjang.</p>
+              <audio controls className="w-full h-8 mt-auto rounded-full" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"></audio>
             </div>
 
             {/* Leader 3 */}
@@ -1090,7 +1117,8 @@ export default function App() {
               </div>
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-text">Rizky</h3>
               <p className="text-[10px] uppercase tracking-widest font-bold text-art-orange mt-2 mb-4">Pengalaman 5 Tahun</p>
-              <p className="text-xs text-art-text/70">Fotografer alam bebas dan pemandu jalur ramah pemula.</p>
+              <p className="text-xs text-art-text/70 mb-4 h-12 flex items-center justify-center">Fotografer alam bebas dan pemandu jalur ramah pemula.</p>
+              <audio controls className="w-full h-8 mt-auto rounded-full" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"></audio>
             </div>
 
             {/* Leader 4 */}
@@ -1100,7 +1128,8 @@ export default function App() {
               </div>
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-text">Deni</h3>
               <p className="text-[10px] uppercase tracking-widest font-bold text-art-orange mt-2 mb-4">Pengalaman 6 Tahun</p>
-              <p className="text-xs text-art-text/70">Pakar P3K dan master penyeduh kopi pagi.</p>
+              <p className="text-xs text-art-text/70 mb-4 h-12 flex items-center justify-center">Pakar P3K dan master penyeduh kopi pagi.</p>
+              <audio controls className="w-full h-8 mt-auto rounded-full" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"></audio>
             </div>
           </div>
 
@@ -1208,7 +1237,7 @@ export default function App() {
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6">Destinasi Utama</h2>
             <div className="w-12 h-1 bg-art-text mx-auto mb-6"></div>
-            <p className="font-medium text-art-text/80 mb-10">Bergabunglah dalam perjalanan epik ke salah satu gunung paling ikonik di Jawa Barat dengan formasi ngopi terindah kami.</p>
+            <p className="font-medium text-art-text/80 mb-10">Bergabunglah dalam perjalanan epik ke berbagai gunung terbaik di Indonesia dengan formasi ngopi terindah kami. Setiap pilihan destinasi hadir dengan harga spesial dan promo diskon menarik untuk pengalaman trip yang tak terlupakan!</p>
             
             {/* Filter */}
             <div className="flex flex-wrap justify-center gap-3">
@@ -1271,8 +1300,17 @@ export default function App() {
         </div>
       </section>
 
-      {/* Promo Banner Removed as per request */}
-      
+      {/* Promo Banner */}
+      <section className="bg-art-bg flex flex-col items-center justify-center border-t border-art-text">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-12 py-12 flex items-center justify-center relative">
+          <div className="absolute top-0 right-12 w-24 h-24 bg-art-orange rounded-full mix-blend-multiply blur-xl opacity-50 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-12 w-32 h-32 bg-art-green rounded-full mix-blend-multiply blur-xl opacity-50 pointer-events-none"></div>
+          <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="w-full block hover:scale-[1.02] transition-transform duration-500 z-10 flex justify-center">
+            <img src="https://files.catbox.moe/lbf6xr.png" alt="Promo Promo Trip Ngopi" className="w-full max-w-4xl h-auto object-contain rounded-3xl shadow-2xl border-[6px] md:border-[10px] border-white" />
+          </a>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-art-text py-16 text-white border-t border-art-text">
         <div className="max-w-7xl mx-auto px-6 md:px-12 border-b border-white/10 pb-16 mb-8 grid md:grid-cols-4 gap-12">
