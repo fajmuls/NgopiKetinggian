@@ -1,0 +1,30 @@
+{
+  "entities": {
+    "Booking": {
+      "title": "Booking",
+      "description": "User booking data for trips",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "nama": { "type": "string" },
+        "email": { "type": "string" },
+        "wa": { "type": "string" },
+        "destinasi": { "type": "string" },
+        "durasi": { "type": "string" },
+        "jadwal": { "type": "string" },
+        "peserta": { "type": "string" },
+        "opsionalText": { "type": "string" },
+        "deskripsi": { "type": "string" },
+        "createdAt": { "type": "timestamp" },
+        "status": { "type": "string" }
+      },
+      "required": ["userId", "nama", "email", "wa", "destinasi", "durasi", "jadwal", "peserta", "createdAt", "status"]
+    }
+  },
+  "firestore": {
+    "/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Stores user trip bookings"
+    }
+  }
+}

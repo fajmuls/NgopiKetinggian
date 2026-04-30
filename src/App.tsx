@@ -1,9 +1,11 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, Menu } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect } from 'react';
-import { auth, loginWithGoogle, logout } from './firebase';
+import { auth, db, loginWithGoogle, logout } from './firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
@@ -33,16 +35,42 @@ function Button({ children, className = '', variant = 'primary', onClick, ...pro
 }
 
 const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, durasi: string } }) => {
-  const { playClick, playHover } = useSound();
+  const { playClick, playHover, playSuccess } = useSound();
   const [showSuccess, setShowSuccess] = useState(false);
   const [user] = useAuthState(auth);
 
   const [rentEquipment, setRentEquipment] = useState(false);
   const [rentClothing, setRentClothing] = useState(false);
   
+  const [selectedDestinasi, setSelectedDestinasi] = useState(prefill?.destinasi || '');
+  const [selectedDurasi, setSelectedDurasi] = useState(prefill?.durasi || '');
+  const [pesertaCount, setPesertaCount] = useState(2);
+  const [promoCode, setPromoCode] = useState('');
+  
+  useEffect(() => {
+    if (prefill) {
+      setSelectedDestinasi(prefill.destinasi || '');
+      setSelectedDurasi(prefill.durasi || '');
+    }
+  }, [prefill]);
+
+  let basePricePerPax = 0;
+  if (selectedDestinasi && selectedDurasi && destinationOptions) {
+     const dest = destinationOptions.find(d => d.name === selectedDestinasi);
+     if (dest) {
+       const duration = dest.durations.find((d: any) => d.label === selectedDurasi);
+       if (duration) basePricePerPax = duration.price * 1000;
+     }
+  }
+
+  const isPromoValid = promoCode.toLowerCase() === 'emikari';
+  const grossPrice = basePricePerPax * pesertaCount;
+  const discountAmount = isPromoValid ? grossPrice * 0.1 : 0;
+  const netPrice = grossPrice - discountAmount;
+  
   if (!isOpen) return null;
 
-  const handleBooking = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleBooking = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const nama = formData.get('nama');
@@ -80,9 +108,57 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
     
     const opsionalText = opsionalSelected.length > 0 ? opsionalSelected.join(' | ') : 'Tidak ada tambahan';
     
-    const text = `Halo Admin Trip Ngopi di Ketinggian,\n\nSaya ingin booking trip dengan detail berikut:\n- Nama: ${nama}\n- Email: ${emailStr}\n- No WA: ${wa}\n- Destinasi: ${destinasi}\n- Durasi: ${durasi}\n- Rencana Jadwal: ${jadwal}\n- Jumlah: ${peserta} Pax\n- Tambahan Opsional: ${opsionalText}\n- Catatan/Kendala: ${deskripsi}\n\nMohon info ketersediaan dan total biayanya. Terima kasih!`;
+    if (user) {
+      try {
+        await addDoc(collection(db, 'bookings'), {
+          userId: user.uid,
+          nama,
+          email: emailStr,
+          wa,
+          destinasi,
+          durasi,
+          jadwal,
+          peserta,
+          opsionalText,
+          deskripsi,
+          createdAt: serverTimestamp(),
+          status: 'pending'
+        });
+      } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, 'bookings');
+      }
+    }
+
+    const text = `Halo Admin Trip Ngopi di Ketinggian! 🏕️☕
+
+Saya tertarik untuk booking trip, berikut detail pesanan saya:
+
+👤 *Data Pemesan*
+• Nama: ${nama}
+• No WhatsApp: ${wa}
+• Email: ${emailStr}
+
+🏔️ *Detail Trip*
+• Destinasi: *${destinasi}*
+• Durasi: ${durasi}
+• Rencana Tanggal: ${jadwal}
+• Jumlah Peserta: ${peserta} Pax
+
+🎟️ *Promo & Biaya*
+• Kode Promo: ${promoCode ? promoCode + (isPromoValid ? ' (Valid - Diskon 10%)' : ' (Tidak Valid)') : '-'}
+• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${(isPromoValid && grossPrice > 0) ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}
+
+🎒 *Opsi Tambahan (Opsional)*
+${opsionalSelected.length > 0 ? opsionalSelected.map(opt => `• ${opt}`).join('\n') : '• Tidak ada tambahan (Bawa perlengkapan sendiri)'}
+
+📝 *Catatan Khusus / Kesehatan*
+_${deskripsi}_
+
+Mohon info untuk ketersediaan jadwal serta total biayanya ya min.
+Terima kasih! 🙌`;
     const waText = encodeURIComponent(text);
 
+    playSuccess();
     setShowSuccess(true);
     
     // Open WA next
@@ -127,7 +203,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Destinasi</label>
-              <select name="destinasi" defaultValue={prefill?.destinasi || ""} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
+              <select name="destinasi" value={selectedDestinasi} onChange={e => setSelectedDestinasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
                 <option value="">-- Pilih Destinasi --</option>
                 {destinationOptions ? destinationOptions.map((dest, i) => (
                   <option key={i} value={dest.name}>{dest.name}</option>
@@ -144,7 +220,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Durasi</label>
-              <select name="durasi" defaultValue={prefill?.durasi || ""} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
+              <select name="durasi" value={selectedDurasi} onChange={e => setSelectedDurasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
                 <option value="">-- Pilih Durasi --</option>
                 <option>1H (Tektok)</option>
                 <option>2H 1M</option>
@@ -159,11 +235,44 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
             <input name="jadwal" type="date" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
             <p className="text-[10px] mt-1 text-art-text/60 italic">*Jadwal pasti dapat didiskusikan setelah booking.</p>
           </div>
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jumlah Peserta</label>
-            <input name="peserta" type="number" min="1" defaultValue="2" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
-            <p className="text-[10px] mt-1 text-art-text/60 italic">*Minimal peserta tergantung destinasi. Kuota maksimal 12 Pax.</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jumlah Peserta</label>
+              <input name="peserta" type="number" min="1" value={pesertaCount} onChange={e => setPesertaCount(parseInt(e.target.value) || 1)} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
+              <p className="text-[10px] mt-1 text-art-text/60 italic">*Kuota min/max bervariasi.</p>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Kode Promo</label>
+              <input type="text" value={promoCode} onChange={e => setPromoCode(e.target.value)} placeholder="Contoh: EmiKari" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm uppercase" />
+              {promoCode.length > 0 && (
+                 isPromoValid ? (
+                   <p className="text-[10px] mt-1 text-green-600 font-bold">Promo Valid! Diskon 10%</p>
+                 ) : (
+                   <p className="text-[10px] mt-1 text-red-500 font-bold">Promo Tidak Valid</p>
+                 )
+              )}
+            </div>
           </div>
+          {basePricePerPax > 0 && (
+            <div className="bg-art-section border-2 border-art-text p-4 rounded-xl mt-4">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-art-text/80 mb-2">Estimasi Biaya Paket:</h4>
+              <div className="flex justify-between items-center mb-1 text-sm">
+                 <span>Rp {(basePricePerPax).toLocaleString('id-ID')} x {pesertaCount} Pax</span>
+                 <span className="font-bold">Rp {grossPrice.toLocaleString('id-ID')}</span>
+              </div>
+              {isPromoValid && (
+                <div className="flex justify-between items-center mb-1 text-sm text-green-600">
+                   <span>Diskon Promo (10%)</span>
+                   <span className="font-bold">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-art-text/20 text-lg font-black">
+                 <span>Subtotal Biaya</span>
+                 <span className="text-art-orange">Rp {netPrice.toLocaleString('id-ID')}</span>
+              </div>
+              <p className="text-[9px] text-art-text/60 mt-1">*Harga di atas belum termasuk penambahan opsional.</p>
+            </div>
+          )}
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Catatan Tambahan (Kondisi Khusus / Kesehatan)</label>
             <textarea name="deskripsi" rows={2} placeholder="Mohon isi deskripsi ini jika ada kebutuhan personal atau kendala/penyakit bawaan." className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm"></textarea>
@@ -246,9 +355,9 @@ const destinationsData = [
     kuota: "Min 2 - Max 12 Pax",
     beans: "Java Preanger",
     durations: [
-      { label: "1H (Tektok)", price: 400 },
-      { label: "2H 1M", price: 650 },
-      { label: "3H 2M", price: 900 }
+      { label: "1H (Tektok)", price: 400, originalPrice: 480 },
+      { label: "2H 1M", price: 650, originalPrice: 750 },
+      { label: "3H 2M", price: 900, originalPrice: 1050 }
     ]
   },
   {
@@ -263,9 +372,9 @@ const destinationsData = [
     kuota: "Min 2 - Max 12 Pax",
     beans: "Gayo / Flores",
     durations: [
-      { label: "1H (Tektok)", price: 350 },
-      { label: "2H 1M", price: 600 },
-      { label: "3H 2M", price: 850 }
+      { label: "1H (Tektok)", price: 350, originalPrice: 420 },
+      { label: "2H 1M", price: 600, originalPrice: 700 },
+      { label: "3H 2M", price: 850, originalPrice: 950 }
     ]
   },
   {
@@ -280,9 +389,9 @@ const destinationsData = [
     kuota: "Min 4 - Max 15 Pax",
     beans: "Dampit / Kintamani",
     durations: [
-      { label: "2H 1M", price: 1200 },
-      { label: "3H 2M", price: 1600 },
-      { label: "4H 3M", price: 2100 }
+      { label: "2H 1M", price: 1200, originalPrice: 1400 },
+      { label: "3H 2M", price: 1600, originalPrice: 1900 },
+      { label: "4H 3M", price: 2100, originalPrice: 2400 }
     ]
   },
   {
@@ -297,9 +406,9 @@ const destinationsData = [
     kuota: "Min 4 - Max 10 Pax",
     beans: "Kintamani / Toraja",
     durations: [
-      { label: "3H 2M", price: 2000 },
-      { label: "4H 3M", price: 2500 },
-      { label: "5H 4M", price: 3200 }
+      { label: "3H 2M", price: 2000, originalPrice: 2350 },
+      { label: "4H 3M", price: 2500, originalPrice: 2900 },
+      { label: "5H 4M", price: 3200, originalPrice: 3800 }
     ]
   },
   {
@@ -314,8 +423,8 @@ const destinationsData = [
     kuota: "Min 3 - Max 12 Pax",
     beans: "Temanggung / Sindoro",
     durations: [
-      { label: "2H 1M", price: 850 },
-      { label: "3H 2M", price: 1200 }
+      { label: "2H 1M", price: 850, originalPrice: 1000 },
+      { label: "3H 2M", price: 1200, originalPrice: 1400 }
     ]
   }
 ];
@@ -410,14 +519,89 @@ const DestinationCard: React.FC<{ dest: typeof destinationsData[0], onBook: (des
           </div>
         </div>
         <div className="border-t-2 border-art-text pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div>
-            <p className="text-[10px] uppercase font-bold tracking-widest text-art-orange mb-1">Harga Mulai Dari ({dest.durations[selectedDuration].label})</p>
-            <p className="text-2xl md:text-3xl font-black text-art-text">Rp {dest.durations[selectedDuration].price}k<span className="text-[10px] md:text-xs font-bold uppercase opacity-50 ml-1">/pax</span></p>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+               <p className="text-[10px] uppercase font-bold tracking-widest text-art-orange">Harga Promo Terjangkau ({dest.durations[selectedDuration].label})</p>
+               <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">Diskon</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-bold text-art-text/40 line-through">Rp {dest.durations[selectedDuration].originalPrice}k</p>
+              <p className="text-2xl md:text-3xl font-black text-art-text">Rp {dest.durations[selectedDuration].price}k<span className="text-[10px] md:text-xs font-bold uppercase opacity-50 ml-1">/pax</span></p>
+            </div>
+            <p className="text-[10px] mt-2 text-art-text/60 max-w-sm hidden md:block">Harga sudah termasuk fasilitas lengkap dan pemandu perjalanan yang ahli. Pesan sekarang untuk mengamankan slot perjalananmu!</p>
           </div>
-          <Button onClick={() => onBook(dest.name, dest.durations[selectedDuration].label)} variant="primary" className="w-full sm:w-auto text-[10px] uppercase tracking-widest px-8 py-3 md:py-2 rounded-lg">Booking Cepat</Button>
+          <Button onClick={() => onBook(dest.name, dest.durations[selectedDuration].label)} variant="primary" className="w-full sm:w-auto text-[10px] uppercase tracking-widest px-8 md:px-10 py-3 md:py-4 rounded-lg bg-art-orange hover:bg-art-text">Booking Trip</Button>
         </div>
       </div>
     </motion.div>
+  );
+};
+
+const SettingsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  const { playClick, playHover } = useSound();
+  const [user] = useAuthState(auth);
+  const [localVolume, setLocalVolume] = useState(() => {
+    const saved = localStorage.getItem('appVolume');
+    return saved ? parseFloat(saved) : 1.0;
+  });
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVol = parseFloat(e.target.value);
+    setLocalVolume(newVol);
+    localStorage.setItem('appVolume', newVol.toString());
+    window.dispatchEvent(new Event('volumeChange'));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left text-art-text">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-sm rounded-2xl p-6 md:p-8 border-2 border-art-text relative shadow-2xl">
+        <button onClick={(e) => { playClick(); onClose(); e.preventDefault(); }} className="absolute top-4 right-4 text-art-text hover:text-art-orange transition-colors" type="button">
+          <X size={24} />
+        </button>
+        <h3 className="text-xl font-black uppercase tracking-tight text-art-text mb-6">Pengaturan</h3>
+        
+        <div className="mb-6">
+          <label className="block text-xs font-bold uppercase tracking-widest text-art-text/80 mb-3">Volume Suara Tombol</label>
+          <div className="flex items-center gap-4 border-b border-art-text/10 pb-6 mb-6">
+            <span className="text-xs font-bold w-12">{Math.round(localVolume * 100)}%</span>
+            <input 
+              type="range" 
+              min="0" max="3" step="0.1" 
+              value={localVolume} 
+              onChange={handleVolumeChange}
+              className="flex-1 accent-art-orange"
+            />
+          </div>
+
+          <label className="block text-xs font-bold uppercase tracking-widest text-art-text/80 mb-3">Akun</label>
+          <div className="flex flex-col gap-3">
+            {!user ? (
+              <button onClick={() => { playClick(); loginWithGoogle(); }} className="flex items-center justify-center gap-2 border-2 border-art-text py-3 px-4 rounded-lg hover:bg-art-text hover:text-white transition-colors" onMouseEnter={playHover}>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)"><path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/><path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/><path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/><path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/></g></svg>
+                <span className="text-xs uppercase font-bold tracking-widest">Login via Google</span>
+              </button>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between border border-art-text/30 p-3 rounded-lg bg-white/50">
+                   <div className="flex items-center gap-3">
+                     <img src={user.photoURL || ''} alt="Avatar" className="w-8 h-8 rounded-full border border-art-text" />
+                     <span className="text-xs font-bold text-art-text">{user.displayName}</span>
+                   </div>
+                   <button onClick={() => { playClick(); logout(); }} className="text-[10px] bg-red-100 hover:bg-red-200 text-red-600 font-bold uppercase tracking-widest px-3 py-1.5 rounded-md transition-colors" title="Logout" onMouseEnter={playHover}>Logout</button>
+                </div>
+                <div className="text-[10px] text-art-text/60 italic px-1">Login berhasil, Anda dapat melanjutkan booking trip.</div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <Button onClick={() => { playClick(); onClose(); }} variant="primary" className="w-full text-[10px] uppercase font-bold tracking-widest py-3 rounded-lg mt-8">
+          Tutup
+        </Button>
+      </motion.div>
+    </div>
   );
 };
 
@@ -425,8 +609,51 @@ export default function App() {
   const [user] = useAuthState(auth);
   const [showSplash, setShowSplash] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [bookingPrefill, setBookingPrefill] = useState({ destinasi: '', durasi: '' });
   const [filterDifficulty, setFilterDifficulty] = useState('Semua');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (e.target.value.length > 0) {
+      setShowSearchDropdown(true);
+    } else {
+      setShowSearchDropdown(false);
+    }
+  };
+
+  const getSearchResults = () => {
+     if (!searchQuery) return [];
+     const q = searchQuery.toLowerCase();
+     const results = [];
+     if ('fasilitas'.includes(q) || 'premium'.includes(q)) {
+        results.push({ type: 'section', id: 'fasilitas', name: 'Fasilitas & Layanan' });
+     }
+     if ('gunung'.includes(q) || 'destinasi'.includes(q)) {
+        results.push({ type: 'section', id: 'destinasi', name: 'Semua Gunung & Destinasi' });
+     }
+     
+     destinationsData.forEach(d => {
+        if (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q)) {
+           results.push({ type: 'mountain', id: d.id, name: d.name });
+        }
+     });
+     
+     return results;
+  };
+
+  const executeSearch = (item: any) => {
+    setShowSearchDropdown(false);
+    if (item.type === 'section') {
+       setSearchQuery('');
+       scrollToSection({ preventDefault: () => {} } as any, item.id);
+    } else {
+       setSearchQuery(item.name);
+       scrollToSection({ preventDefault: () => {} } as any, 'destinasi');
+    }
+  };
 
   const handleOpenBooking = (destinasi = '', durasi = '') => {
     setBookingPrefill({ destinasi, durasi });
@@ -466,20 +693,26 @@ export default function App() {
 
   const difficultyOptions = ['Semua', 'Pemula', 'Menengah', 'Ahli', 'Sangat Ahli'];
   const filteredDestinations = destinationsData.filter(dest => {
-    if (filterDifficulty === 'Semua') return true;
-    return dest.difficulty.toLowerCase().includes(filterDifficulty.toLowerCase());
+    const matchesDifficulty = filterDifficulty === 'Semua' || dest.difficulty.toLowerCase().includes(filterDifficulty.toLowerCase());
+    const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          dest.desc.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          dest.locationTag.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesDifficulty && matchesSearch;
   });
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault();
+  const scrollToSection = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement> | { preventDefault: () => void }, id: string) => {
+    if (e && e.preventDefault) e.preventDefault();
     setIsMobileMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      window.scrollTo({
-        top: element.offsetTop - 80, // Adjust this offset if header is taller
-        behavior: 'smooth'
-      });
-    }
+    setTimeout(() => {
+	    const element = document.getElementById(id);
+	    if (element) {
+	      const offsetTop = element.getBoundingClientRect().top + window.scrollY;
+	      window.scrollTo({
+	        top: offsetTop - 80,
+	        behavior: 'smooth'
+	      });
+	    }
+    }, 100);
   };
 
   return (
@@ -496,9 +729,9 @@ export default function App() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative bg-white"
+              className="w-48 h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative bg-white"
             >
-              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain p-2" />
+              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain" />
             </motion.div>
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}
@@ -555,41 +788,61 @@ export default function App() {
       </AnimatePresence>
 
       <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} destinationOptions={destinationsData} prefill={bookingPrefill} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}
       <nav className="absolute w-full z-50">
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 md:h-24 flex items-end justify-between border-b border-art-text/10 pb-4">
-          <div className="flex items-center gap-3 cursor-pointer" onMouseEnter={playHover}>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white overflow-hidden border border-art-text/20">
+          <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} onMouseEnter={playHover}>
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white overflow-hidden border border-art-text/20 shrink-0">
               <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
             </div>
-            <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-art-text">Ngopi<br/>Ketinggian</span>
+            <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-art-text hidden sm:block">Ngopi<br/>Ketinggian</span>
           </div>
-          <div className="hidden lg:flex gap-8 items-center text-[10px] font-bold uppercase tracking-widest text-art-text">
-            <a href="#cerita" onClick={(e) => scrollToSection(e, 'cerita')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Cerita Kami</a>
-            <a href="#leader" onClick={(e) => scrollToSection(e, 'leader')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Trip Leader</a>
-            <a href="#fasilitas" onClick={(e) => scrollToSection(e, 'fasilitas')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Fasilitas</a>
-            <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Destinasi</a>
-            <a href="#galeri" onClick={(e) => scrollToSection(e, 'galeri')} className="opacity-60 hover:opacity-100 hover:border-t-2 hover:border-art-text pt-2 transition-all" onMouseEnter={playHover}>Galeri</a>
+          
+          <div className="flex-1 flex justify-center px-4 md:px-8 max-w-lg mx-auto">
+            <div className="relative w-full">
+              <input 
+                type="text" 
+                placeholder="Cari gunung..." 
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full bg-transparent border-b border-art-text/30 px-3 py-1.5 focus:outline-none focus:border-art-orange text-xs font-bold tracking-wider uppercase text-art-text placeholder:text-art-text/40 transition-colors" 
+              />
+              <Search className="absolute right-0 top-1/2 -translate-y-1/2 text-art-text/40 w-4 h-4 pointer-events-none" />
+              <AnimatePresence>
+                {showSearchDropdown && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full left-0 w-full mt-2 bg-white border-2 border-art-text rounded-xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] overflow-hidden z-50"
+                  >
+                    {getSearchResults().length > 0 ? (
+                      <div className="py-2">
+                         {getSearchResults().map(res => (
+                           <button key={res.id + res.name} onClick={() => { playClick(); executeSearch(res); }} className="w-full text-left px-4 py-3 border-b border-art-text/5 last:border-b-0 hover:bg-art-bg hover:text-art-orange transition-colors flex flex-col md:flex-row md:items-center justify-between text-[11px] font-bold text-art-text uppercase tracking-widest gap-1">
+                              <span>{res.name}</span>
+                              <span className="text-[9px] text-art-text/50">{res.type === 'section' ? 'Kategori / Menu' : 'Destinasi Gunung'}</span>
+                           </button>
+                         ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center text-xs text-art-text/50 font-medium italic">Tidak ada hasil ditemukan</div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-4">
-            {!user ? (
-              <button onClick={() => loginWithGoogle()} className="flex items-center gap-1 md:gap-2 uppercase text-[10px] tracking-widest font-bold text-art-text hover:text-art-orange transition-colors" onMouseEnter={playHover}>
-                <svg viewBox="0 0 24 24" className="w-3 h-3 md:w-4 md:h-4" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)"><path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/><path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/><path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/><path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/></g></svg> <span className="hidden md:inline">Login</span>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 md:gap-4">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-art-text/80 hidden md:inline">{user.displayName?.split(' ')[0]}</span>
-                <button onClick={() => logout()} className="text-art-text/60 hover:text-red-500 transition-colors" title="Logout" onMouseEnter={playHover}><LogOut size={14}/></button>
-              </div>
-            )}
-            <Button onClick={() => handleOpenBooking()} className="uppercase text-[8px] md:text-[10px] tracking-widest px-2 py-2 md:px-4 md:py-3 rounded-lg" variant="primary">
-              <span className="md:hidden">Daftar</span>
-              <span className="hidden md:inline">Daftar Sekarang</span>
-            </Button>
-            <button className="flex lg:hidden text-art-text ml-1" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+
+          <div className="flex items-center gap-2 md:gap-4 shrink-0 border-l border-art-text/20 pl-4 items-center">
+            <button className="p-2 text-art-text hover:text-art-orange transition-colors" onClick={(e) => { playClick(); setIsMobileMenuOpen(!isMobileMenuOpen); }} title="Menu">
+              {isMobileMenuOpen ? <X size={24} /> : <MoreVertical size={24} />}
+            </button>
+            <button onClick={() => { playClick(); setIsSettingsOpen(true); }} className="p-2 text-art-text hover:text-art-orange transition-colors" onMouseEnter={playHover} aria-label="Settings" title="Pengaturan & Akun">
+              <Settings size={20} />
             </button>
           </div>
         </div>
@@ -600,14 +853,17 @@ export default function App() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden bg-art-bg border-b border-art-text/10 overflow-hidden"
+              className="absolute top-[80px] md:top-[96px] right-6 md:right-12 w-64 bg-white border-2 border-art-text shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] overflow-hidden z-40 rounded-xl"
             >
-              <div className="flex flex-col gap-6 p-8 text-[12px] font-bold uppercase tracking-widest text-art-text items-center">
-                <a href="#cerita" onClick={(e) => scrollToSection(e, 'cerita')}>Cerita Kami</a>
-                <a href="#leader" onClick={(e) => scrollToSection(e, 'leader')}>Trip Leader</a>
-                <a href="#fasilitas" onClick={(e) => scrollToSection(e, 'fasilitas')}>Fasilitas</a>
-                <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')}>Destinasi</a>
-                <a href="#galeri" onClick={(e) => scrollToSection(e, 'galeri')}>Galeri</a>
+              <div className="absolute inset-0 z-0 opacity-5 pointer-events-none flex items-center justify-center">
+                <img src="https://files.catbox.moe/lubzno.png" className="w-3/4 object-contain" alt="Background Menu" />
+              </div>
+              <div className="flex flex-col gap-0 p-2 text-[12px] font-bold uppercase tracking-widest text-art-text items-stretch relative z-10">
+                <button onClick={(e) => { playClick(); scrollToSection(e, 'cerita'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Cerita Kami</button>
+                <button onClick={(e) => { playClick(); scrollToSection(e, 'leader'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Trip Leader</button>
+                <button onClick={(e) => { playClick(); scrollToSection(e, 'fasilitas'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Fasilitas</button>
+                <button onClick={(e) => { playClick(); scrollToSection(e, 'destinasi'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Destinasi</button>
+                <button onClick={(e) => { playClick(); scrollToSection(e, 'galeri'); }} className="text-left px-4 py-3 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Galeri</button>
               </div>
             </motion.div>
           )}
@@ -615,12 +871,12 @@ export default function App() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-art-bg pt-32 pb-24 md:py-0 text-center md:text-left">
+      <section className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden bg-art-bg pt-32 pb-20 md:py-0">
         {/* Parallax Background using Grid layout pattern */}
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
           <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Cover bg" />
         </div>
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]">
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-[1] hidden md:block">
           <div className="grid grid-cols-12 h-full w-full opacity-[0.03]">
             <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div>
             <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div>
@@ -628,13 +884,13 @@ export default function App() {
           </div>
         </div>
 
-        <div className="relative w-full max-w-7xl mx-auto h-full grid grid-cols-1 md:grid-cols-12 px-6 md:px-12 z-10 gap-12 md:gap-0">
-          <div className="col-span-1 md:col-span-6 z-20 flex flex-col justify-center items-center md:items-start pt-12 md:pb-20">
+        <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-8 md:mt-0">
+          <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-20">
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-art-green font-serif italic text-2xl mb-2"
+              className="text-art-green font-serif italic text-xl md:text-2xl mb-3 md:mb-2 w-full text-center md:text-left"
             >
               Open Trip Eksklusif
             </motion.p>
@@ -643,7 +899,7 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-[32px] sm:text-[50px] md:text-[80px] lg:text-[110px] leading-[0.95] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-8 md:whitespace-nowrap"
+              className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left"
             >
               Trip Ngopi Di<br/>
               <span className="text-art-orange drop-shadow-sm">Ketinggian</span>
@@ -653,7 +909,7 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="md:text-xl font-medium max-w-md text-art-text/80 mb-12"
+              className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-8 md:mb-12 w-full mx-auto md:mx-0 text-center md:text-left"
             >
               Menikmati kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.
             </motion.p>
@@ -662,22 +918,20 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4 px-4 sm:px-0"
+              className="flex flex-col sm:flex-row gap-4 w-full max-w-[240px] sm:max-w-none mx-auto md:mx-0 justify-center md:justify-start"
             >
-              <Button onClick={() => handleOpenBooking()} variant="primary" className="text-[10px] uppercase font-bold tracking-widest py-4 rounded-lg">
+              <Button onClick={() => handleOpenBooking()} variant="primary" className="text-[11px] md:text-xs uppercase font-bold tracking-widest py-3.5 md:py-4 px-6 rounded-lg w-full sm:w-auto">
                 Booking Trip
               </Button>
-              <Button onClick={() => window.location.href='#destinasi'} variant="secondary" className="text-[10px] uppercase font-bold tracking-widest py-4 rounded-lg">
+              <Button onClick={() => window.location.href='#destinasi'} variant="secondary" className="text-[11px] md:text-xs uppercase font-bold tracking-widest py-3.5 md:py-4 px-6 rounded-lg w-full sm:w-auto">
                 Lihat Destinasi
               </Button>
             </motion.div>
           </div>
 
-          <div 
-            className="flex col-span-12 md:col-span-6 h-full items-center justify-center relative mt-12 md:mt-0 px-2"
-          >
-             <div className="relative w-full max-w-[300px] md:max-w-none md:w-[380px] h-[360px] md:h-[520px] isolate mx-auto">
-               <div className="absolute inset-0 bg-gray-300 rounded-[40px] overflow-hidden border-[8px] md:border-[12px] border-white shadow-2xl rotate-3">
+          <div className="flex justify-center items-center relative z-20">
+             <div className="relative w-full max-w-[280px] sm:max-w-[340px] md:max-w-[380px] aspect-[4/5] md:aspect-[3/4] isolate mx-auto">
+               <div className="absolute inset-0 bg-gray-300 rounded-[32px] md:rounded-[40px] overflow-hidden border-[6px] md:border-[12px] border-white shadow-2xl rotate-2 md:rotate-3">
                  <motion.img 
                    key={currentSlideIndex}
                    initial={{ opacity: 0, scale: 1.05 }}
@@ -696,7 +950,7 @@ export default function App() {
                      initial={{ y: 20, opacity: 0 }}
                      animate={{ y: 0, opacity: 1 }}
                      transition={{ duration: 0.5, delay: 0.3 }}
-                     className="text-3xl font-serif italic drop-shadow-md"
+                     className="text-2xl md:text-3xl font-serif italic drop-shadow-md"
                    >
                      {heroSlides[currentSlideIndex].name}
                    </motion.h3>
@@ -709,11 +963,11 @@ export default function App() {
                  initial={{ scale: 0, rotate: -45 }}
                  animate={{ scale: 1, rotate: -12 }}
                  transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-                 className="absolute -top-6 -left-6 md:-top-8 md:-left-8 w-24 h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white -rotate-[12deg] border-4 border-white shadow-2xl z-[100]"
+                 className="absolute -top-4 -left-4 md:-top-8 md:-left-8 w-20 h-20 md:w-24 md:h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white -rotate-[12deg] border-4 border-white shadow-2xl z-[100]"
                >
-                 <span className="text-[8px] uppercase font-bold tracking-tighter">Ketinggian</span>
-                 <span className="text-xl font-black leading-none my-0.5">{heroSlides[currentSlideIndex].height}</span>
-                 <span className="text-[8px] opacity-80 uppercase">MDPL</span>
+                 <span className="text-[6px] md:text-[8px] uppercase font-bold tracking-tighter">Ketinggian</span>
+                 <span className="text-xl md:text-2xl font-black leading-none my-0.5">{heroSlides[currentSlideIndex].height}</span>
+                 <span className="text-[6px] md:text-[8px] opacity-80 uppercase">MDPL</span>
                </motion.div>
              </div>
           </div>
@@ -722,15 +976,6 @@ export default function App() {
         {/* Floating Vertical Text */}
         <div className="absolute top-[40%] left-4 rotate-180 hidden xl:block" style={{ writingMode: 'vertical-rl' }}>
           <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-black/20">EST. 2026 • ADVENTURE & BREW</span>
-        </div>
-      </section>
-
-      {/* Promo Banner - Moved to right under Hero */}
-      <section className="bg-art-bg flex flex-col items-center justify-center border-b border-art-text">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-12 py-8 flex items-center justify-center">
-          <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="w-full block hover:opacity-90 transition-opacity">
-            <img src="https://files.catbox.moe/lbf6xr.png" alt="Promo Banner" className="w-full h-auto object-contain rounded-2xl shadow-xl border-4 border-white" />
-          </a>
         </div>
       </section>
 
@@ -747,12 +992,12 @@ export default function App() {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-xl md:text-6xl">di Atas Awan</span></h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-3xl md:text-5xl">di Atas Awan</span></h2>
               <div className="w-12 h-1 bg-art-orange mb-8"></div>
-              <p className="font-medium text-art-text/80 mb-6 leading-relaxed">
+              <p className="text-sm md:text-base font-medium text-art-text/80 mb-6 leading-relaxed">
                 Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman.
               </p>
-              <p className="font-medium text-art-text/80 mb-10 leading-relaxed">
+              <p className="text-sm md:text-base font-medium text-art-text/80 mb-10 leading-relaxed">
                 Berbekal pengalaman panjang ini, meracik kopi di alam terbuka tak lagi sekadar ritual bagi kami, ia menjelma jadi perayaan kebersamaan. Lupakan sejenak semrawutnya ibukota. Kami siapkan ritme perjalanan yang santai, aman, penuh cerita, dan tentu saja... kopi rindu tebal yang diseduh di waktu yang paling tepat. Sesuatu yang tak akan pernah Anda temukan walau di coffee shop semewah apa pun di tengah kota.
               </p>
               
@@ -810,9 +1055,9 @@ export default function App() {
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-art-text mb-4 leading-tight">Kenalan dengan <br/><span className="text-art-green font-serif italic normal-case font-normal text-2xl md:text-5xl">Trip Leader Kami</span></h2>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-art-text mb-4 leading-tight">Kenalan dengan <br/><span className="text-art-green font-serif italic normal-case font-normal text-3xl md:text-5xl">Trip Leader Kami</span></h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
-            <p className="font-medium text-art-text/80 mb-6 leading-relaxed">
+            <p className="text-sm md:text-base font-medium text-art-text/80 mb-6 leading-relaxed">
               Tim profesional kami yang siap memandu perjalanan Anda agar lebih aman, menyenangkan, dan tentunya memastikan seduhan kopi Anda sempurna.
             </p>
           </div>
@@ -954,9 +1199,10 @@ export default function App() {
       </section>
 
       {/* Destination Section */}
-      <section id="destinasi" className="py-20 md:py-32 bg-art-bg relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply">
-          <img src="https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.35] grayscale" alt="Mountain bg" />
+      <section id="destinasi" className="py-20 md:py-32 bg-[#F3F4F6] relative overflow-hidden">
+        {/* Background image same as hero section */}
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
+          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale-[80%]" alt="Destinasi bg" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
@@ -984,8 +1230,10 @@ export default function App() {
               <DestinationCard key={dest.id} dest={dest} onBook={(destinasi, durasi) => handleOpenBooking(destinasi, durasi)} />
             ))
           ) : (
-            <div className="text-center py-20 border-2 border-art-text/20 rounded-2xl bg-white/50">
-              <p className="text-art-text/60 font-medium">Belum ada destinasi untuk tingkat kesulitan ini.</p>
+            <div className="text-center py-20 border-2 border-art-text/20 rounded-2xl bg-white flex flex-col items-center justify-center">
+              <Mountain size={48} className="text-art-text/20 mb-4" />
+              <h4 className="font-bold text-xl uppercase tracking-tighter text-art-text">Gunung Tidak Ditemukan</h4>
+              <p className="text-sm font-medium text-art-text/60 mt-2">Coba tingkat kesulitan atau keyword pencarian lain.</p>
             </div>
           )}
         </div>
@@ -1023,6 +1271,8 @@ export default function App() {
         </div>
       </section>
 
+      {/* Promo Banner Removed as per request */}
+      
       {/* Footer */}
       <footer className="bg-art-text py-16 text-white border-t border-art-text">
         <div className="max-w-7xl mx-auto px-6 md:px-12 border-b border-white/10 pb-16 mb-8 grid md:grid-cols-4 gap-12">
