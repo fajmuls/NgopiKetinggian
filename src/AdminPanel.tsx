@@ -62,11 +62,6 @@ const DestinationsAdmin = ({ config, updateConfig }: any) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg border border-art-text/20 gap-3">
         <p className="text-xs font-bold text-art-text/60 uppercase">Mengedit Destinasi Tektok / Camp</p>
         <div className="flex gap-2">
-          <button onClick={() => {
-            if (confirm("Ingin mereset destinasi ke bawaan awal? Ini tidak bisa di-undo.")) {
-              const defaultDests = [...document.querySelectorAll('script')] /* we can't easily access defaultDestinations here without props, hmm wait */
-            }
-          }} className="hidden" />
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
         </div>
       </div>

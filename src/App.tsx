@@ -666,8 +666,9 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
               <div className="flex gap-2 w-full mt-2">
                 <input 
                   type="password"
+                  id="adminTokenInput"
                   placeholder="Masukkan Token Admin"
-                  className="w-full border border-art-text/30 px-3 py-2 rounded-lg text-xs"
+                  className="w-full border border-art-text/30 px-3 py-2 rounded-lg text-xs outline-none focus:border-art-orange"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -681,6 +682,24 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
                     }
                   }}
                 />
+                <button 
+                  onClick={() => {
+                    playClick();
+                    const inputElement = document.getElementById('adminTokenInput') as HTMLInputElement;
+                    if (inputElement) {
+                      if (inputElement.value === 'Fajmuls22') {
+                        localStorage.setItem('isAdminValid', 'true');
+                        window.dispatchEvent(new Event('adminModeToggled'));
+                        onClose();
+                      } else {
+                        alert('Token salah!');
+                      }
+                    }
+                  }}
+                  className="bg-art-text text-white px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap"
+                >
+                  Go
+                </button>
               </div>
             ) : (
               <button 

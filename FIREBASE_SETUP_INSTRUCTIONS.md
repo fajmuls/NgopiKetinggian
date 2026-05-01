@@ -4,19 +4,23 @@ Aplikasi ini menggunakan layanan Firebase untuk fungsi Login (Google) dan fitur 
 
 ## 1. Setup Google Login & Authentication (Auth)
 
-Agar fitur login Google dan Mode Admin berfungsi dengan baik saat website sudah di-hosting (seperti di GitHub Pages atau domain kustom):
+Agar fitur login Google dan Mode Admin berfungsi dengan baik saat website sudah di-hosting (seperti di GitHub Pages, Vercel, Netlify, atau domain kustom):
 
 1. Buka [Firebase Console](https://console.firebase.google.com/)
-2. Pilih project Firebase aplikasi ini.
+2. Pilih project Firebase aplikasi ini (`ngopi-ketinggian` atau project Anda sendiri).
 3. Di menu sebelah kiri, masuk ke menu **Build** > **Authentication**.
 4. Klik tab **Settings** (Pengaturan).
 5. Pilih menu **Authorized domains** (Domain yang diotorisasi) di sebelah kiri layar.
 6. Klik tombol **Add domain** (Tambahkan domain).
-7. Masukkan link URL website/aplikasi Anda.
-   - Contoh untuk GitHub Pages: `username.github.io`
-   - Contoh untuk Domain Kustom: `ngopidiketinggian.com`
+7. Masukkan link/URL website/aplikasi Anda:
+   - Jika Anda sedang testing di AI Studio, masukkan URL `ais-dev-....run.app` dan `ais-pre-....run.app` (tanpa `https://` atau `/`).
+   - Contoh untuk Vercel: `ngopi-ketinggian.vercel.app`
+   - Contoh untuk Netlify: `ngopi-ketinggian.netlify.app`
    - *(Penting: Jangan cantumkan `https://` atau garis miring `/` di ujung)*
 8. Klik **Add** (Tambahkan).
+
+Catatan mengenai `npm install firebase`: 
+Anda tidak perlu repot-repot install `firebase` dari NPM secara manual karena project ini sudah dikonfigurasi menggunakan modul `firebase` versi `12.12.1`. Cukup pastikan URL domain Anda sudah terdaftar di daftar "Authorized domains" Firebase di atas.
 
 Sekarang fitur login Google telah ditambahkan dan pengguna seharusnya bisa masuk tanpa hambatan.
 

@@ -32,12 +32,21 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
           galleryPhotos: defaultPhotos,
           ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4"
         };
-        setDoc(docRef, defaultConfig).catch(console.error);
+        setDoc(docRef, defaultConfig).catch((err) => {
+           console.warn("Could not save default config to Firestore (possibly due to security rules). Using local state.", err);
+        });
         setConfig(defaultConfig);
       }
       setLoading(false);
     }, (err) => {
-      console.error(err);
+      console.warn("Firestore access restricted via rules or not setup yet. Using default configuration.", err);
+      // Fallback
+      setConfig({
+        destinationsData: defaultDestinations,
+        tripLeaders: defaultLeaders,
+        galleryPhotos: defaultPhotos,
+        ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4"
+      });
       setLoading(false);
     });
 
@@ -46,7 +55,13 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
 
   const updateConfig = async (newConfig: Partial<AppConfig>) => {
     const docRef = doc(db, 'appConfig', 'main');
-    await setDoc(docRef, { ...config, ...newConfig }, { merge: true });
+    try {
+      await setDoc(docRef, { ...config, ...newConfig }, { merge: true });
+    } catch (err) {
+      console.warn("Could not save to Firestore, trying local state update only", err);
+      setConfig((prev) => ({ ...prev, ...newConfig }));
+      alert("Perubahan hanya tersimpan lokal (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat. Cek instruksi di FILE setup.");
+    }
   };
 
   return { config, loading, updateConfig };
