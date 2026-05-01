@@ -1,21 +1,63 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
 
-@theme {
+:root {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
   
-  --color-art-bg: #F5EFEB;
-  --color-art-text: #421404; /* RUST */
-  --color-art-green: #562C1E; /* MAHOGANY */
-  --color-art-orange: #C16804; /* FIRE */
-  --color-art-section: #D3B49F; /* CLAY */
+  --theme-bg: #F5EFEB;
+  --theme-text: #421404;
+  --theme-green: #562C1E;
+  --theme-orange: #C16804;
+  --theme-section: #D3B49F;
+}
+
+[data-theme="algae"] {
+  --theme-bg: #fbfaf0;
+  --theme-text: #5e561a;
+  --theme-green: #afa231;
+  --theme-orange: #8a7e23;
+  --theme-section: #e8e3a8;
+}
+
+[data-theme="wine"] {
+  --theme-bg: #f8eced;
+  --theme-text: #4c0004;
+  --theme-green: #360003;
+  --theme-orange: #800007;
+  --theme-section: #d19ba0;
+}
+
+[data-theme="wasabi"] {
+  --theme-bg: #fdfdf9;
+  --theme-text: #5a542b;
+  --theme-green: #877f44;
+  --theme-orange: #dcd189;
+  --theme-section: #ece5af;
+}
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  
+  --color-art-bg: var(--theme-bg);
+  --color-art-text: var(--theme-text);
+  --color-art-green: var(--theme-green);
+  --color-art-orange: var(--theme-orange);
+  --color-art-section: var(--theme-section);
   --color-art-cider: #8C522D;
   --color-art-burnt: #903500;
 }
 
 html {
+  font-size: 14px; /* Mobile root font-size scaled down by ~12.5% */
   scroll-behavior: smooth;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 14.4px; /* Desktop root font-size scaled down by exactly 10% */
+  }
 }
 
 body {

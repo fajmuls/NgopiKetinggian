@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -18,11 +18,16 @@ export const loginWithGoogle = async () => {
     if (error.code === 'auth/popup-closed-by-user') {
       // Ignore
     } else if (error.code === 'auth/unauthorized-domain') {
-      alert("Error: Website ini belum diizinkan oleh Firebase. Silakan hubungi admin.");
+      alert("Error: Domain ini belum diizinkan oleh Firebase. Pastikan domain web/GitHub Pages Anda sudah ditambahkan di Firebase Console > Authentication > Settings > Authorized domains.");
     } else {
-      alert("Gagal melakukan login. Jika Anda membuka web ini di dalam frame/preview AI Studio, silakan 'Buka di Tab Baru' (Open in New Tab) untuk melakukan login Google dengan lancar.");
+      // Fallback to redirect if popup is blocked or fails due to cross-origin policies (like on GitHub pages)
+      console.log("Popup failed or blocked, falling back to redirect...");
+      await signInWithRedirect(auth, googleProvider);
     }
-    throw error;
+    // Don't throw if we are redirecting
+    if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/unauthorized-domain') {
+      throw error;
+    }
   }
 };
 

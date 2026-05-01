@@ -153,33 +153,33 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
       }
     }
 
-    const text = `Halo Admin Trip Ngopi di Ketinggian! 🏕️☕
+    const text = `Halo Admin Trip Ngopi di Ketinggian! 🏕️
 
 Saya tertarik untuk booking trip, berikut detail pesanan saya:
 
-👤 *Data Pemesan*
+*Data Pemesan*
 • Nama: ${nama}
 • No WhatsApp: ${wa}
 • Email: ${emailStr}
 
-🏔️ *Detail Trip*
+*Detail Trip*
 • Destinasi: *${destinasi}*
 • Durasi: ${durasi}
 • Rencana Tanggal: ${jadwal}
 • Jumlah Peserta: ${peserta} Pax
 
-🎟️ *Promo & Biaya*
+*Promo & Biaya*
 • Kode Promo: ${promoCode ? promoCode + (isPromoValid ? ` (Valid - Diskon ${discountRate * 100}%)` : ' (Tidak Valid)') : '-'}
 • Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${(isPromoValid && grossPrice > 0) ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}
 
-🎒 *Opsi Tambahan (Opsional)*
+*Opsi Tambahan (Opsional)*
 ${opsionalSelected.length > 0 ? opsionalSelected.map(opt => `• ${opt}`).join('\n') : '• Tidak ada tambahan (Bawa perlengkapan sendiri)'}
 
-📝 *Catatan Khusus / Kesehatan*
+*Catatan Khusus / Kesehatan*
 _${deskripsi}_
 
 Mohon info untuk ketersediaan jadwal serta total biayanya ya min.
-Terima kasih! 🙌`;
+Terima kasih! 🙏`;
     const waText = encodeURIComponent(text);
 
     playSuccess();
@@ -562,7 +562,7 @@ const DestinationCard: React.FC<{ dest: typeof destinationsData[0], onBook: (des
   );
 };
 
-const SettingsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, onClose: () => void, theme: string, setTheme: (t: string) => void }) => {
   const { playClick, playHover } = useSound();
   const [user] = useAuthState(auth);
   const [localVolume, setLocalVolume] = useState(() => {
@@ -576,6 +576,13 @@ const SettingsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
     localStorage.setItem('appVolume', newVol.toString());
     window.dispatchEvent(new Event('volumeChange'));
   };
+
+  const themes = [
+    { id: 'default', name: 'Rust (Default)', color: '#421404' },
+    { id: 'algae', name: 'Algae (Hijau)', color: '#afa231' },
+    { id: 'wine', name: 'Wine (Merah)', color: '#4c0004' },
+    { id: 'wasabi', name: 'Wasabi (Kuning)', color: '#dcd189' },
+  ];
 
   if (!isOpen) return null;
 
@@ -598,6 +605,21 @@ const SettingsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
               onChange={handleVolumeChange}
               className="flex-1 accent-art-orange"
             />
+          </div>
+
+          <label className="block text-xs font-bold uppercase tracking-widest text-art-text/80 mb-3">Tema Tampilan</label>
+          <div className="grid grid-cols-2 gap-2 border-b border-art-text/10 pb-6 mb-6">
+            {themes.map(t => (
+              <button 
+                key={t.id} 
+                onClick={() => { playClick(); setTheme(t.id); }} 
+                onMouseEnter={playHover}
+                className={`flex flex-col gap-1 items-start p-2 rounded border-2 transition-all ${theme === t.id ? 'border-art-orange bg-white/50 shadow-sm' : 'border-art-text/10 hover:border-art-text/30'}`}
+              >
+                <div className="w-full h-6 rounded flex" style={{ backgroundColor: t.color }}></div>
+                <span className="text-[10px] font-bold uppercase w-full text-center leading-tight mt-1">{t.name}</span>
+              </button>
+            ))}
           </div>
 
           <label className="block text-xs font-bold uppercase tracking-widest text-art-text/80 mb-3">Akun</label>
@@ -639,6 +661,15 @@ export default function App() {
   const [filterDifficulty, setFilterDifficulty] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('appTheme') || 'default';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('appTheme', theme);
+  }, [theme]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -812,7 +843,7 @@ export default function App() {
       </AnimatePresence>
 
       <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} destinationOptions={destinationsData} prefill={bookingPrefill} />
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}
@@ -841,7 +872,7 @@ export default function App() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 w-full mt-2 bg-white border-2 border-art-text rounded-xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] overflow-hidden z-50"
+                    className="absolute top-full left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 w-[85vw] max-w-sm md:max-w-none md:w-full mt-2 bg-white border-2 border-art-text rounded-xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] overflow-hidden z-50 origin-top"
                   >
                     {getSearchResults().length > 0 ? (
                       <div className="py-2">
@@ -909,15 +940,16 @@ export default function App() {
         </div>
 
         <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-8 md:mt-0">
-          <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-20">
-            <motion.p
+          <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-30 relative">
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-art-green font-serif italic text-xl md:text-2xl mb-3 md:mb-2 w-full text-center md:text-left"
+              className="text-art-green mb-3 md:mb-4 w-full text-center md:text-left"
             >
-              Open Trip Eksklusif
-            </motion.p>
+              <p className="font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">Open Trip Eksklusif</p>
+              <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">Fasilitas Premium • Pemandu Ahli • Dokumentasi Epik</p>
+            </motion.div>
             
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
@@ -925,7 +957,7 @@ export default function App() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left"
             >
-              Trip Ngopi Di<br/>
+              <span className="text-art-green">Trip</span> Ngopi Di<br/>
               <span className="text-art-orange drop-shadow-sm">Ketinggian</span>
             </motion.h1>
             
@@ -933,28 +965,29 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-8 md:mb-12 w-full mx-auto md:mx-0 text-center md:text-left"
+              className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left"
             >
               Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.
+              <br/><span className="mt-2 block font-bold text-xs uppercase tracking-widest text-art-orange">Jaya / Jaya / Jaya</span>
             </motion.p>
             
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 w-full max-w-[240px] sm:max-w-none mx-auto md:mx-0 justify-center md:justify-start"
+              className="flex flex-col sm:flex-row gap-3 w-full max-w-[240px] sm:max-w-none mx-auto md:mx-0 justify-center md:justify-start"
             >
-              <Button onClick={() => handleOpenBooking()} variant="primary" className="text-[11px] md:text-xs uppercase font-bold tracking-widest py-3.5 md:py-4 px-6 rounded-lg w-full sm:w-auto">
+              <Button onClick={() => handleOpenBooking()} variant="primary" className="text-[10px] md:text-xs uppercase font-bold tracking-widest py-3 px-5 rounded-lg w-full sm:w-auto">
                 Booking Trip
               </Button>
-              <Button onClick={() => window.location.href='#destinasi'} variant="secondary" className="text-[11px] md:text-xs uppercase font-bold tracking-widest py-3.5 md:py-4 px-6 rounded-lg w-full sm:w-auto">
+              <Button onClick={() => window.location.href='#destinasi'} variant="secondary" className="text-[10px] md:text-xs uppercase font-bold tracking-widest py-3 px-5 rounded-lg w-full sm:w-auto">
                 Lihat Destinasi
               </Button>
             </motion.div>
           </div>
 
-          <div className="flex justify-center items-center relative z-20">
-             <div className="relative w-full max-w-[280px] sm:max-w-[340px] md:max-w-[380px] aspect-[4/5] md:aspect-[3/4] isolate mx-auto">
+          <div className="flex justify-center items-center relative z-20 pointer-events-none md:pointer-events-auto">
+             <div className="relative w-full max-w-[260px] sm:max-w-[300px] md:max-w-[320px] aspect-[4/5] md:aspect-[3/4] isolate mx-auto">
                <div className="absolute inset-0 bg-gray-300 rounded-[32px] md:rounded-[40px] overflow-hidden border-[6px] md:border-[12px] border-white shadow-2xl rotate-2 md:rotate-3">
                  <motion.img 
                    key={currentSlideIndex}
