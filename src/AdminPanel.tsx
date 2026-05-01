@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Trash2, Plus, GripVertical } from 'lucide-react';
 import { AppConfig } from './useAppConfig';
-import { Button } from './components/Button'; // Ensure you have this
 
 export const AdminPanelModal = ({ 
   isOpen, 
