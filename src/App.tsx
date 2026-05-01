@@ -264,7 +264,7 @@ Terima kasih! 🙏`;
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jumlah Peserta</label>
-              <input name="peserta" required type="number" min="1" value={pesertaCount} onChange={e => setPesertaCount(e.target.value === '' ? '' : (parseInt(e.target.value) || ''))} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
+              <input name="peserta" required type="number" min="1" value={pesertaCount} onChange={e => setPesertaCount(e.target.value === '' ? '' : (parseInt(e.target.value) || 1))} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
               <p className="text-[10px] mt-1 text-art-text/60 italic">*Kuota min/max bervariasi.</p>
             </div>
             <div>
@@ -279,11 +279,11 @@ Terima kasih! 🙏`;
               )}
             </div>
           </div>
-          {basePricePerPax > 0 && typeof pesertaCount === 'number' && (
+          {basePricePerPax > 0 && (
             <div className="bg-art-section border-2 border-art-text p-4 rounded-xl mt-4">
               <h4 className="text-[10px] font-bold uppercase tracking-widest text-art-text/80 mb-2">Estimasi Biaya Paket:</h4>
               <div className="flex justify-between items-center mb-1 text-sm">
-                 <span>Rp {(basePricePerPax).toLocaleString('id-ID')} x {pesertaCount} Pax</span>
+                 <span>Rp {(basePricePerPax).toLocaleString('id-ID')} x {currentPesertaCount || 0} Pax</span>
                  <span className="font-bold">Rp {grossPrice.toLocaleString('id-ID')}</span>
               </div>
               {isPromoValid && (
@@ -391,7 +391,9 @@ const destinationsData = [
     durations: [
       { label: "1H (Tektok)", price: 400, originalPrice: 480 },
       { label: "2H 1M", price: 650, originalPrice: 750 },
-      { label: "3H 2M", price: 900, originalPrice: 1050 }
+      { label: "3H 2M", price: 900, originalPrice: 1050 },
+      { label: "4H 3M", price: 1150, originalPrice: 1350 },
+      { label: "5H 4M", price: 1400, originalPrice: 1650 }
     ]
   },
   {
@@ -408,7 +410,9 @@ const destinationsData = [
     durations: [
       { label: "1H (Tektok)", price: 350, originalPrice: 420 },
       { label: "2H 1M", price: 600, originalPrice: 700 },
-      { label: "3H 2M", price: 850, originalPrice: 950 }
+      { label: "3H 2M", price: 850, originalPrice: 950 },
+      { label: "4H 3M", price: 1100, originalPrice: 1250 },
+      { label: "5H 4M", price: 1350, originalPrice: 1550 }
     ]
   },
   {
@@ -423,9 +427,11 @@ const destinationsData = [
     kuota: "Min 4 - Max 15 Pax",
     beans: "Dampit / Kintamani",
     durations: [
+      { label: "1H (Tektok)", price: 800, originalPrice: 900 },
       { label: "2H 1M", price: 1200, originalPrice: 1400 },
       { label: "3H 2M", price: 1600, originalPrice: 1900 },
-      { label: "4H 3M", price: 2100, originalPrice: 2400 }
+      { label: "4H 3M", price: 2100, originalPrice: 2400 },
+      { label: "5H 4M", price: 2600, originalPrice: 2900 }
     ]
   },
   {
@@ -440,6 +446,8 @@ const destinationsData = [
     kuota: "Min 4 - Max 10 Pax",
     beans: "Kintamani / Toraja",
     durations: [
+      { label: "1H (Tektok)", price: 1000, originalPrice: 1200 },
+      { label: "2H 1M", price: 1500, originalPrice: 1800 },
       { label: "3H 2M", price: 2000, originalPrice: 2350 },
       { label: "4H 3M", price: 2500, originalPrice: 2900 },
       { label: "5H 4M", price: 3200, originalPrice: 3800 }
@@ -457,8 +465,11 @@ const destinationsData = [
     kuota: "Min 3 - Max 12 Pax",
     beans: "Temanggung / Sindoro",
     durations: [
+      { label: "1H (Tektok)", price: 500, originalPrice: 600 },
       { label: "2H 1M", price: 850, originalPrice: 1000 },
-      { label: "3H 2M", price: 1200, originalPrice: 1400 }
+      { label: "3H 2M", price: 1200, originalPrice: 1400 },
+      { label: "4H 3M", price: 1550, originalPrice: 1750 },
+      { label: "5H 4M", price: 1900, originalPrice: 2200 }
     ]
   }
 ];
@@ -647,32 +658,29 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
                    </div>
                    <button onClick={() => { playClick(); logout(); }} className="text-[10px] bg-red-100 hover:bg-red-200 text-red-600 font-bold uppercase tracking-widest px-3 py-1.5 rounded-md transition-colors" title="Logout" onMouseEnter={playHover}>Logout</button>
                 </div>
-                <button 
-                  onClick={(e) => { 
-                    playClick(); 
-                    const btn = e.currentTarget;
-                    const count = parseInt(btn.dataset.clicks || '0') + 1;
-                    btn.dataset.clicks = count.toString();
-                    if (count >= 3) {
-                      btn.dataset.clicks = '0';
-                      const token = window.prompt('Masukkan Token Admin:');
-                      if (token === 'Fajmuls22') {
-                        localStorage.setItem('isAdminValid', 'true');
-                        window.dispatchEvent(new Event('adminModeToggled'));
-                        alert('Mode Admin Diaktifkan!');
-                        onClose();
-                      } else if (token !== null) {
-                        alert('Token salah!');
-                      }
-                    }
-                  }} 
-                  className="flex items-center justify-center gap-2 border border-art-text/30 py-2 px-4 rounded-lg hover:bg-art-text/10 transition-colors mt-2 text-art-text/50 w-full"
-                  onMouseEnter={playHover}
-                >
-                  <span className="font-bold text-[10px] uppercase tracking-widest">Mode Admin</span>
-                </button>
               </div>
             )}
+            
+            <button 
+              onClick={(e) => { 
+                playClick(); 
+                setTimeout(() => {
+                  const token = window.prompt('Masukkan Token Admin:');
+                  if (token === 'Fajmuls22') {
+                    localStorage.setItem('isAdminValid', 'true');
+                    window.dispatchEvent(new Event('adminModeToggled'));
+                    alert('Mode Admin Diaktifkan!');
+                    onClose();
+                  } else if (token !== null) {
+                    alert('Token salah!');
+                  }
+                }, 10);
+              }} 
+              className="flex items-center justify-center gap-2 border border-art-text/30 py-2 px-4 rounded-lg hover:bg-art-text/10 transition-colors mt-2 text-art-text/50 w-full"
+              onMouseEnter={playHover}
+            >
+              <span className="font-bold text-[10px] uppercase tracking-widest">Mode Admin</span>
+            </button>
           </div>
         </div>
         
@@ -831,7 +839,7 @@ export default function App() {
               transition={{ duration: 1, ease: "easeOut" }}
               className="w-48 h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative bg-white"
             >
-              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain" />
+              <img src="https://i.ibb.co/6Jp5YVg7/file-00000000c58872098a1a7b9d1c4c5561.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain" />
             </motion.div>
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}
@@ -897,7 +905,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 md:h-24 flex items-end justify-between border-b border-art-text/10 pb-4">
           <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} onMouseEnter={playHover}>
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white overflow-hidden border border-art-text/20 shrink-0">
-              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
+              <img src="https://i.ibb.co/6Jp5YVg7/file-00000000c58872098a1a7b9d1c4c5561.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
             </div>
             <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-art-text hidden sm:block">Ngopi<br/>Ketinggian</span>
           </div>
@@ -957,7 +965,7 @@ export default function App() {
               className="absolute top-[80px] md:top-[96px] right-6 md:right-12 w-64 bg-white border-2 border-art-text shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] overflow-hidden z-40 rounded-xl"
             >
               <div className="absolute inset-0 z-0 opacity-5 pointer-events-none flex items-center justify-center">
-                <img src="https://files.catbox.moe/lubzno.png" className="w-3/4 object-contain" alt="Background Menu" />
+                <img src="https://i.ibb.co/6Jp5YVg7/file-00000000c58872098a1a7b9d1c4c5561.png" className="w-3/4 object-contain" alt="Background Menu" />
               </div>
               <div className="flex flex-col gap-0 p-2 text-[12px] font-bold uppercase tracking-widest text-art-text items-stretch relative z-10">
                 <button onClick={(e) => { playClick(); scrollToSection(e, 'cerita'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Cerita Kami</button>
@@ -1405,7 +1413,7 @@ export default function App() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border border-white/20">
-                <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
+                <img src="https://i.ibb.co/6Jp5YVg7/file-00000000c58872098a1a7b9d1c4c5561.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
               </div>
               <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-white opacity-80">Ngopi<br/>Ketinggian</span>
             </div>

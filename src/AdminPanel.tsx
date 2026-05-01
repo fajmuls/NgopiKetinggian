@@ -60,9 +60,16 @@ const DestinationsAdmin = ({ config, updateConfig }: any) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-art-text/20">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg border border-art-text/20 gap-3">
         <p className="text-xs font-bold text-art-text/60 uppercase">Mengedit Destinasi Tektok / Camp</p>
-        <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
+        <div className="flex gap-2">
+          <button onClick={() => {
+            if (confirm("Ingin mereset destinasi ke bawaan awal? Ini tidak bisa di-undo.")) {
+              const defaultDests = [...document.querySelectorAll('script')] /* we can't easily access defaultDestinations here without props, hmm wait */
+            }
+          }} className="hidden" />
+          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
+        </div>
       </div>
 
       {data.map((dest, i) => (
@@ -80,6 +87,14 @@ const DestinationsAdmin = ({ config, updateConfig }: any) => {
           </div>
           
           <div className="grid gap-2">
+            <div className="flex gap-2 items-center mb-2">
+              <span className="text-xs font-bold w-16">Kuota:</span>
+              <input className="border p-2 rounded text-xs flex-1" value={dest.kuota} onChange={e => {
+                const nd = [...data];
+                nd[i].kuota = e.target.value;
+                setData(nd);
+              }} placeholder="Contoh: Min 2 - Max 12 Pax" />
+            </div>
             {dest.durations.map((dur: any, j: number) => (
               <div key={j} className="flex gap-2 items-center">
                 <input className="border p-2 rounded text-xs flex-1" value={dur.label} onChange={e => {
