@@ -8,6 +8,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import { useAppConfig } from './useAppConfig';
+import { AdminPanelModal } from './AdminPanel';
 
 function Button({ children, className = '', variant = 'primary', onClick, ...props }: any) {
   const { playClick, playHover } = useSound();
@@ -367,6 +369,13 @@ Terima kasih! 🙏`;
   );
 };
 
+const defaultTripLeaders = [
+  { name: "Sukmayadi", age: "31 Th", description: "Punya segudang pengalaman dengan tim penolong.", avatar: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&fit=crop", voiceLine: "" },
+  { name: "Agung", age: "29 Th", description: "Jago masak dan meracik kopi, selalu siap membantu.", avatar: "https://images.unsplash.com/photo-1534308143481-c55f00be8bd7?w=400&fit=crop", voiceLine: "" },
+  { name: "Ilham", age: "28 Th", description: "Si paling humoris, mencairkan suasana di tiap pendakian.", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&fit=crop", voiceLine: "" },
+  { name: "Alman", age: "28 Th", description: "Santai tapi pasti, porter andalan yang tak pernah mengeluh.", avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&fit=crop", voiceLine: "" }
+];
+
 const destinationsData = [
   {
     id: "gede",
@@ -551,7 +560,7 @@ const DestinationCard: React.FC<{ dest: typeof destinationsData[0], onBook: (des
             </div>
             <div className="flex items-center gap-3">
               <p className="text-sm font-bold text-art-text/40 line-through">Rp {dest.durations[selectedDuration].originalPrice}k</p>
-              <p className="text-2xl md:text-3xl font-black text-art-orange drop-shadow-sm">Rp {dest.durations[selectedDuration].price}k<span className="text-[10px] md:text-xs font-bold uppercase text-art-text/60 ml-1">/pax</span></p>
+              <p className="text-2xl md:text-3xl font-black text-art-text drop-shadow-sm">Rp {dest.durations[selectedDuration].price}k<span className="text-[10px] md:text-xs font-bold uppercase text-art-text/60 ml-1">/pax</span></p>
             </div>
             <p className="text-[10px] mt-2 text-art-text/60 max-w-sm hidden md:block">Harga sudah termasuk fasilitas lengkap dan pemandu perjalanan yang ahli. Pesan sekarang untuk mengamankan slot perjalananmu!</p>
           </div>
@@ -638,7 +647,30 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
                    </div>
                    <button onClick={() => { playClick(); logout(); }} className="text-[10px] bg-red-100 hover:bg-red-200 text-red-600 font-bold uppercase tracking-widest px-3 py-1.5 rounded-md transition-colors" title="Logout" onMouseEnter={playHover}>Logout</button>
                 </div>
-                <div className="text-[10px] text-art-text/60 italic px-1">Login berhasil, Anda dapat melanjutkan booking trip.</div>
+                <button 
+                  onClick={(e) => { 
+                    playClick(); 
+                    const btn = e.currentTarget;
+                    const count = parseInt(btn.dataset.clicks || '0') + 1;
+                    btn.dataset.clicks = count.toString();
+                    if (count >= 3) {
+                      btn.dataset.clicks = '0';
+                      const token = window.prompt('Masukkan Token Admin:');
+                      if (token === 'Fajmuls22') {
+                        localStorage.setItem('isAdminValid', 'true');
+                        window.dispatchEvent(new Event('adminModeToggled'));
+                        alert('Mode Admin Diaktifkan!');
+                        onClose();
+                      } else if (token !== null) {
+                        alert('Token salah!');
+                      }
+                    }
+                  }} 
+                  className="flex items-center justify-center gap-2 border border-art-text/30 py-2 px-4 rounded-lg hover:bg-art-text/10 transition-colors mt-2 text-art-text/50 w-full"
+                  onMouseEnter={playHover}
+                >
+                  <span className="font-bold text-[10px] uppercase tracking-widest">Mode Admin</span>
+                </button>
               </div>
             )}
           </div>
@@ -731,13 +763,26 @@ export default function App() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
 
-  const galleryPhotos = [
+  const defaultGalleryPhotos = [
     { src: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=2070&auto=format&fit=crop", desc: "Momen ngopi pagi" },
     { src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop", desc: "Suasana sunrise" },
     { src: "https://images.unsplash.com/photo-1519181245277-cffeb31da2e3?q=80&w=2070&auto=format&fit=crop", desc: "Trekking bersama" },
     { src: "https://images.unsplash.com/photo-1498855926480-d98e83099315?q=80&w=2070&auto=format&fit=crop", desc: "Istirahat di camp" }
   ];
+
+  const { config, updateConfig, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
+  
+  const currentDestinations = config.destinationsData;
+  const currentTripLeaders = config.tripLeaders;
+  const galleryPhotos = config.galleryPhotos;
+
+  useEffect(() => {
+    const onAdminToggle = () => setIsAdminPanelOpen(true);
+    window.addEventListener('adminModeToggled', onAdminToggle);
+    return () => window.removeEventListener('adminModeToggled', onAdminToggle);
+  }, []);
 
   // Hero slideshow auto-play
   useEffect(() => {
@@ -748,7 +793,7 @@ export default function App() {
   }, []);
 
   const difficultyOptions = ['Semua', 'Pemula', 'Menengah', 'Ahli', 'Sangat Ahli'];
-  const filteredDestinations = destinationsData.filter(dest => {
+  const filteredDestinations = currentDestinations.filter(dest => {
     const matchesDifficulty = filterDifficulty === 'Semua' || dest.difficulty.toLowerCase().includes(filterDifficulty.toLowerCase());
     const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           dest.desc.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -842,8 +887,9 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} destinationOptions={destinationsData} prefill={bookingPrefill} />
+      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} destinationOptions={currentDestinations} prefill={bookingPrefill} />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} />
+      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}
@@ -872,7 +918,7 @@ export default function App() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 w-[85vw] max-w-sm md:max-w-none md:w-full mt-2 bg-white border-2 border-art-text rounded-xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] overflow-hidden z-50 origin-top"
+                    className="absolute top-full left-0 right-0 w-full mt-2 bg-white border-2 border-art-text rounded-xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] overflow-y-auto max-h-[50vh] z-50 origin-top"
                   >
                     {getSearchResults().length > 0 ? (
                       <div className="py-2">
@@ -940,7 +986,7 @@ export default function App() {
         </div>
 
         <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-8 md:mt-0">
-          <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-30 relative">
+          <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-40 relative">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -948,14 +994,14 @@ export default function App() {
               className="text-art-green mb-3 md:mb-4 w-full text-center md:text-left"
             >
               <p className="font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">Open Trip Eksklusif</p>
-              <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">Fasilitas Premium • Pemandu Ahli • Dokumentasi Epik</p>
+              <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin</p>
             </motion.div>
             
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left"
+              className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none"
             >
               <span className="text-art-green">Trip</span> Ngopi Di<br/>
               <span className="text-art-orange drop-shadow-sm">Ketinggian</span>
@@ -965,10 +1011,10 @@ export default function App() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left"
+              className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto"
             >
               Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.
-              <br/><span className="mt-2 block font-bold text-xs uppercase tracking-widest text-art-orange">Jaya / Jaya / Jaya</span>
+              <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-green">Jaya / Jaya / Jaya</span>
             </motion.p>
             
             <motion.div 
@@ -1082,12 +1128,21 @@ export default function App() {
               className="relative"
             >
               <div className="absolute inset-0 bg-art-orange rounded-[40px] transform rotate-3 scale-105 z-0" />
-              <video 
-                autoPlay loop muted playsInline controls
-                src="https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" 
-                poster="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop"
-                className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/5] grayscale-[10%] border-8 border-white"
-              />
+              {config.ceritaVideoUrl.includes('youtube.com') || config.ceritaVideoUrl.includes('youtu.be') ? (
+                <iframe 
+                  src={config.ceritaVideoUrl}
+                  className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/5] grayscale-[10%] border-8 border-white"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video 
+                  autoPlay loop muted playsInline controls
+                  src={config.ceritaVideoUrl} 
+                  poster="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop"
+                  className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/5] grayscale-[10%] border-8 border-white"
+                />
+              )}
               <motion.div 
                 animate={{ y: [0, -10, 0] }}
                 transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}

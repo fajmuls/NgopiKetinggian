@@ -18,7 +18,7 @@ export const loginWithGoogle = async () => {
     if (error.code === 'auth/popup-closed-by-user') {
       // Ignore
     } else if (error.code === 'auth/unauthorized-domain') {
-      alert("Error: Domain ini belum diizinkan oleh Firebase. Pastikan domain web/GitHub Pages Anda sudah ditambahkan di Firebase Console > Authentication > Settings > Authorized domains.");
+      alert("Error: Website ini belum mendapatkan izin dari Firebase. Silakan buka website Firebase Console Anda, pergi ke menu Authentication > Settings > Authorized Domains, dan tambahkan link website ini ke daftar tersebut.");
     } else {
       // Fallback to redirect if popup is blocked or fails due to cross-origin policies (like on GitHub pages)
       console.log("Popup failed or blocked, falling back to redirect...");

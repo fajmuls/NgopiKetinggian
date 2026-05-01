@@ -30,6 +30,28 @@ service cloud.firestore {
         && (!('deskripsi' in data) || (data.deskripsi is string && data.deskripsi.size() <= 2000));
     }
 
+    function isAdmin() { return isSignedIn() && request.auth.token.email == 'mrachmanfm@gmail.com'; }
+
+    match /appConfig/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /destinations/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /tripLeaders/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /galleryPhotos/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /bookings/{bookingId} {
       allow get: if isSignedIn() && existing().userId == request.auth.uid && isValidId(bookingId);
       allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
