@@ -70,7 +70,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
   const isPromoAri = promoLower === 'ari ganteng';
   const isPromoValid = isPromoEmi || isPromoAri;
   
-  const currentPesertaCount = typeof pesertaCount === 'number' ? pesertaCount : 0;
+  const currentPesertaCount = typeof pesertaCount === 'number' && pesertaCount > 0 ? pesertaCount : 1;
   const grossPrice = basePricePerPax * currentPesertaCount;
   
   let discountRate = 0;
@@ -229,30 +229,22 @@ Terima kasih! 🙏`;
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Destinasi</label>
-              <select name="destinasi" required value={selectedDestinasi} onChange={e => setSelectedDestinasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
+              <select name="destinasi" required value={selectedDestinasi} onChange={e => { setSelectedDestinasi(e.target.value); setSelectedDurasi(''); }} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
                 <option value="">-- Pilih Destinasi --</option>
                 {destinationOptions ? destinationOptions.map((dest, i) => (
                   <option key={i} value={dest.name}>{dest.name}</option>
-                )) : (
-                  <>
-                    <option>Gunung Gede Pangrango</option>
-                    <option>Gunung Salak</option>
-                    <option>Gunung Semeru</option>
-                    <option>Gunung Rinjani</option>
-                    <option>Gunung Sumbing</option>
-                  </>
-                )}
+                )) : null}
               </select>
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Durasi</label>
               <select name="durasi" required value={selectedDurasi} onChange={e => setSelectedDurasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
                 <option value="">-- Pilih Durasi --</option>
-                <option>1H (Tektok)</option>
-                <option>2H 1M</option>
-                <option>3H 2M</option>
-                <option>4H 3M</option>
-                <option>5H 4M</option>
+                {selectedDestinasi && destinationOptions && (
+                  destinationOptions.find(d => d.name === selectedDestinasi)?.durations.map((dur: any, i: number) => (
+                    <option key={i} value={dur.label}>{dur.label}</option>
+                  ))
+                )}
               </select>
             </div>
           </div>
@@ -378,98 +370,905 @@ const defaultTripLeaders = [
 
 const destinationsData = [
   {
-    id: "gede",
-    name: "Gunung Gede Pangrango",
-    height: "2.958 mdpl",
-    desc: "Eksplorasi megahnya Alun-Alun Suryakencana, padang savana penuh edelweiss. Kita akan camp dan menyeduh kopi sore menanti senja, serta morning coffee dengan view kawah yang menakjubkan.",
-    image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop",
-    locationTag: "Alun-Alun Suryakencana",
-    difficulty: "Pemula - Menengah",
-    mepo: "Cibodas / Gunung Putri",
-    kuota: "Min 2 - Max 12 Pax",
-    beans: "Java Preanger",
-    durations: [
-      { label: "1H (Tektok)", price: 400, originalPrice: 480 },
-      { label: "2H 1M", price: 650, originalPrice: 750 },
-      { label: "3H 2M", price: 900, originalPrice: 1050 },
-      { label: "4H 3M", price: 1150, originalPrice: 1350 },
-      { label: "5H 4M", price: 1400, originalPrice: 1650 }
+    "id": "gn-prau-wates",
+    "name": "Gunung Prau Wates",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Prau Wates. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
     ]
   },
   {
-    id: "salak",
-    name: "Gunung Salak",
-    height: "2.211 mdpl",
-    desc: "Menjelajahi keeksotisan jalur Gunung Salak dan pesona Kawah Ratu. Sangat cocok untuk pendaki, ditemani hangatnya kopi andalan di tengah rimbunnya hutan tropis.",
-    image: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    locationTag: "Kawah Ratu",
-    difficulty: "Pemula",
-    mepo: "TNGHS / Cidahu",
-    kuota: "Min 2 - Max 12 Pax",
-    beans: "Gayo / Flores",
-    durations: [
-      { label: "1H (Tektok)", price: 350, originalPrice: 420 },
-      { label: "2H 1M", price: 600, originalPrice: 700 },
-      { label: "3H 2M", price: 850, originalPrice: 950 },
-      { label: "4H 3M", price: 1100, originalPrice: 1250 },
-      { label: "5H 4M", price: 1350, originalPrice: 1550 }
+    "id": "gn-prau-patakbanteng",
+    "name": "Gunung Prau Patakbanteng",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Prau Patakbanteng. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
     ]
   },
   {
-    id: "semeru",
-    name: "Gunung Semeru",
-    height: "3.676 mdpl",
-    desc: "Menaklukkan atap Pulau Jawa. Perjalanan panjang dari Ranu Kumbolo hingga puncak Mahameru, menyeduh kopi di tepian danau nan eksotis dan mengagumi kawah Jonggring Saloko.",
-    image: "https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop",
-    locationTag: "Ranu Kumbolo",
-    difficulty: "Menengah - Ahli",
-    mepo: "Tumpang / Malang",
-    kuota: "Min 4 - Max 15 Pax",
-    beans: "Dampit / Kintamani",
-    durations: [
-      { label: "1H (Tektok)", price: 800, originalPrice: 900 },
-      { label: "2H 1M", price: 1200, originalPrice: 1400 },
-      { label: "3H 2M", price: 1600, originalPrice: 1900 },
-      { label: "4H 3M", price: 2100, originalPrice: 2400 },
-      { label: "5H 4M", price: 2600, originalPrice: 2900 }
+    "id": "gn-kembang-lengkong",
+    "name": "Gunung Kembang Lengkong",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Kembang Lengkong. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
     ]
   },
   {
-    id: "rinjani",
-    name: "Gunung Rinjani",
-    height: "3.726 mdpl",
-    desc: "Menaklukkan salah satu gunung terindah di Indonesia. Menyusuri sabana Sembalun, berkemah di tepi Danau Segara Anak, dan menikmati momen ngopi dengan pemandangan magis yang tak terlupakan.",
-    image: "https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2659&auto=format&fit=crop",
-    locationTag: "Segara Anak",
-    difficulty: "Sangat Ahli",
-    mepo: "Bandara Lombok / Sembalun",
-    kuota: "Min 4 - Max 10 Pax",
-    beans: "Kintamani / Toraja",
-    durations: [
-      { label: "1H (Tektok)", price: 1000, originalPrice: 1200 },
-      { label: "2H 1M", price: 1500, originalPrice: 1800 },
-      { label: "3H 2M", price: 2000, originalPrice: 2350 },
-      { label: "4H 3M", price: 2500, originalPrice: 2900 },
-      { label: "5H 4M", price: 3200, originalPrice: 3800 }
+    "id": "gn-bismo-sikunang",
+    "name": "Gunung Bismo Sikunang",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Bismo Sikunang. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
     ]
   },
   {
-    id: "sumbing",
-    name: "Gunung Sumbing",
-    height: "3.371 mdpl",
-    desc: "Mengeksplorasi Gunung Sumbing via jalur Garung dengan hamparan sabana luas dan samudra awan menakjubkan. Seduh kopi premium sambil memandang indahnya alam Wonosobo.",
-    image: "https://images.unsplash.com/photo-1589308078059-814cb2091fb1?q=80&w=2072&auto=format&fit=crop",
-    locationTag: "Sabana Sumbing",
-    difficulty: "Menengah",
-    mepo: "Basecamp Garung / Wonosobo",
-    kuota: "Min 3 - Max 12 Pax",
-    beans: "Temanggung / Sindoro",
-    durations: [
-      { label: "1H (Tektok)", price: 500, originalPrice: 600 },
-      { label: "2H 1M", price: 850, originalPrice: 1000 },
-      { label: "3H 2M", price: 1200, originalPrice: 1400 },
-      { label: "4H 3M", price: 1550, originalPrice: 1750 },
-      { label: "5H 4M", price: 1900, originalPrice: 2200 }
+    "id": "gn-kembang-+-bismo",
+    "name": "Gunung Kembang + Bismo",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Kembang + Bismo. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-merbabu-selo",
+    "name": "Gunung Merbabu Selo",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Merbabu Selo. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-merbabu-thekelan",
+    "name": "Gunung Merbabu Thekelan",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Merbabu Thekelan. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-merbabu-swanting",
+    "name": "Gunung Merbabu Swanting",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Merbabu Swanting. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-slamet-bambangan",
+    "name": "Gunung Slamet Bambangan",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Slamet Bambangan. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-slamet-guci",
+    "name": "Gunung Slamet Guci",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Slamet Guci. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-sindoro-kledung",
+    "name": "Gunung Sindoro Kledung",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Sindoro Kledung. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-sumbing-garung",
+    "name": "Gunung Sumbing Garung",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Sumbing Garung. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-sumbing-gajahmungkur",
+    "name": "Gunung Sumbing Gajahmungkur",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Sumbing Gajahmungkur. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-lawu-candi-cetho",
+    "name": "Gunung Lawu Candi Cetho",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Lawu Candi Cetho. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-ciremai-apuy",
+    "name": "Gunung Ciremai Apuy",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Ciremai Apuy. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-ciremai-sadarehe",
+    "name": "Gunung Ciremai Sadarehe",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Ciremai Sadarehe. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-papandayan-camp",
+    "name": "Gunung Papandayan Camp",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Papandayan Camp. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-gede-putri",
+    "name": "Gunung Gede Putri",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Gede Putri. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-pangrango-cibodas",
+    "name": "Gunung Pangrango Cibodas",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Pangrango Cibodas. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-salak",
+    "name": "Gunung Salak",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Salak. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-semeru",
+    "name": "Gunung Semeru",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Semeru. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
+    ]
+  },
+  {
+    "id": "gn-rinjani",
+    "name": "Gunung Rinjani",
+    "isActive": true,
+    "region": "Jawa",
+    "height": "2.000 mdpl",
+    "desc": "Deskripsi perjalanan untuk Gn Rinjani. Anda dapat mengedit ini di panel admin.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica",
+    "durations": [
+      {
+        "label": "1H (Tektok)",
+        "price": 400,
+        "originalPrice": 500
+      },
+      {
+        "label": "2H 1M",
+        "price": 800,
+        "originalPrice": 900
+      },
+      {
+        "label": "3H 2M",
+        "price": 1200,
+        "originalPrice": 1400
+      },
+      {
+        "label": "4H 3M",
+        "price": 1600,
+        "originalPrice": 1800
+      },
+      {
+        "label": "5H 4M",
+        "price": 2000,
+        "originalPrice": 2200
+      }
     ]
   }
 ];
@@ -672,7 +1471,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      if (e.currentTarget.value === 'Fajmuls22') {
+                      if (e.currentTarget.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com') {
                         localStorage.setItem('isAdminValid', 'true');
                         window.dispatchEvent(new Event('adminModeToggled'));
                         onClose();
@@ -687,7 +1486,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
                     playClick();
                     const inputElement = document.getElementById('adminTokenInput') as HTMLInputElement;
                     if (inputElement) {
-                      if (inputElement.value === 'Fajmuls22') {
+                      if (inputElement.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com') {
                         localStorage.setItem('isAdminValid', 'true');
                         window.dispatchEvent(new Event('adminModeToggled'));
                         onClose();
@@ -705,7 +1504,13 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
               <button 
                 onClick={(e) => { 
                   playClick(); 
-                  setShowTokenInput(true);
+                  if (user?.email === 'mrachmanfm@gmail.com') {
+                    localStorage.setItem('isAdminValid', 'true');
+                    window.dispatchEvent(new Event('adminModeToggled'));
+                    onClose();
+                  } else {
+                    setShowTokenInput(true);
+                  }
                 }} 
                 className="flex items-center justify-center gap-2 border border-art-text/30 py-2 px-4 rounded-lg hover:bg-art-text/10 transition-colors mt-2 text-art-text/50 w-full"
                 onMouseEnter={playHover}
@@ -812,7 +1617,7 @@ export default function App() {
     { src: "https://images.unsplash.com/photo-1498855926480-d98e83099315?q=80&w=2070&auto=format&fit=crop", desc: "Istirahat di camp" }
   ];
 
-  const { config, updateConfig, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
+  const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   
   const currentDestinations = config.destinationsData;
   const currentTripLeaders = config.tripLeaders;
@@ -834,6 +1639,7 @@ export default function App() {
 
   const difficultyOptions = ['Semua', 'Pemula', 'Menengah', 'Ahli', 'Sangat Ahli'];
   const filteredDestinations = currentDestinations.filter(dest => {
+    if (dest.isActive === false) return false;
     const matchesDifficulty = filterDifficulty === 'Semua' || dest.difficulty.toLowerCase().includes(filterDifficulty.toLowerCase());
     const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           dest.desc.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -927,9 +1733,9 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} destinationOptions={currentDestinations} prefill={bookingPrefill} />
+      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} destinationOptions={currentDestinations.filter(d => d.isActive !== false)} prefill={bookingPrefill} />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} />
-      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} />
+      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}
@@ -1424,6 +2230,7 @@ export default function App() {
             close={() => setGalleryOpen(false)}
             index={galleryIndex}
             slides={galleryPhotos}
+            on={{ view: ({ index: current }) => setGalleryIndex(current) }}
           />
         </div>
       </section>

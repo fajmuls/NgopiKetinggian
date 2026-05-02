@@ -64,5 +64,23 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     }
   };
 
-  return { config, loading, updateConfig };
+  const revertToDefault = async () => {
+    const defaultConfig = {
+      destinationsData: defaultDestinations,
+      tripLeaders: defaultLeaders,
+      galleryPhotos: defaultPhotos,
+      ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4"
+    };
+    const docRef = doc(db, 'appConfig', 'main');
+    try {
+      await setDoc(docRef, defaultConfig);
+      setConfig(defaultConfig);
+    } catch (err) {
+      console.warn("Could not save to Firestore, trying local state update only", err);
+      setConfig(defaultConfig);
+      alert("Pembalikan ke default hanya bekerja di sesi ini (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat.");
+    }
+  };
+
+  return { config, loading, updateConfig, revertToDefault };
 }

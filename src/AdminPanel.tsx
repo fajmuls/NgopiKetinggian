@@ -7,22 +7,48 @@ export const AdminPanelModal = ({
   isOpen, 
   onClose, 
   config, 
-  updateConfig 
+  updateConfig,
+  revertToDefault
 }: { 
   isOpen: boolean, 
   onClose: () => void, 
   config: AppConfig,
-  updateConfig: (c: Partial<AppConfig>) => void 
+  updateConfig: (c: Partial<AppConfig>) => void,
+  revertToDefault: () => void 
 }) => {
   const [activeTab, setActiveTab] = useState<'destinations' | 'leaders' | 'gallery' | 'cerita'>('destinations');
+  const [toastMsg, setToastMsg] = useState("");
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(""), 3000);
+  };
   
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left text-art-text">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border-2 border-art-text relative shadow-2xl overflow-hidden">
+        {toastMsg && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-art-text text-white px-4 py-2 rounded-full text-xs font-bold z-50 shadow-xl opacity-90">
+            {toastMsg}
+          </div>
+        )}
         <div className="flex justify-between items-center p-4 sm:p-6 border-b border-art-text bg-white">
-          <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
+            <button 
+              onClick={() => {
+                if (window.confirm("Beneran mau reset semua ke default?")) {
+                  revertToDefault();
+                  showToast("Berhasil direset!");
+                }
+              }} 
+              className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors"
+            >
+              Reset ke Default
+            </button>
+          </div>
           <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
         </div>
         
@@ -37,10 +63,10 @@ export const AdminPanelModal = ({
           
           {/* Content */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-art-bg/50">
-            {activeTab === 'destinations' && <DestinationsAdmin config={config} updateConfig={updateConfig} />}
-            {activeTab === 'leaders' && <LeadersAdmin config={config} updateConfig={updateConfig} />}
-            {activeTab === 'gallery' && <GalleryAdmin config={config} updateConfig={updateConfig} />}
-            {activeTab === 'cerita' && <CeritaAdmin config={config} updateConfig={updateConfig} />}
+            {activeTab === 'destinations' && <DestinationsAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'leaders' && <LeadersAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'gallery' && <GalleryAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'cerita' && <CeritaAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
           </div>
         </div>
       </motion.div>
@@ -49,27 +75,78 @@ export const AdminPanelModal = ({
 };
 
 // Sub-components for Admin
-const DestinationsAdmin = ({ config, updateConfig }: any) => {
+const DestinationsAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState([...config.destinationsData]);
+  const [search, setSearch] = useState("");
+  const [regionFilter, setRegionFilter] = useState("Semua");
 
   const handleSave = () => {
     updateConfig({ destinationsData: data });
-    alert('Disimpan!');
+    showToast('Disimpan!');
   };
+
+  const regions = ["Semua", ...Array.from(new Set(data.map((d: any) => d.region || "Jawa")))];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg border border-art-text/20 gap-3">
-        <p className="text-xs font-bold text-art-text/60 uppercase">Mengedit Destinasi Tektok / Camp</p>
+        <p className="text-xs font-bold text-art-text/60 uppercase">Mengedit Destinasi & Durasi</p>
         <div className="flex gap-2">
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
         </div>
       </div>
 
-      {data.map((dest, i) => (
-        <div key={i} className="bg-white p-4 rounded-lg border-2 border-art-text space-y-4">
-          <div className="flex items-center gap-4">
-            <h3 className="font-bold text-lg">{dest.name}</h3>
+      <div className="flex flex-col sm:flex-row gap-3 bg-white p-4 rounded-lg border border-art-text/20">
+        <input 
+          type="text" 
+          placeholder="Cari Gunung / Jalur..." 
+          className="border border-art-text/30 px-3 py-2 rounded text-sm outline-none focus:border-art-orange flex-1"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select 
+          className="border border-art-text/30 px-3 py-2 rounded text-sm outline-none focus:border-art-orange"
+          value={regionFilter}
+          onChange={(e) => setRegionFilter(e.target.value)}
+        >
+          {regions.map((r: any) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+      </div>
+
+      {data.map((dest, i) => {
+        const matchesSearch = dest.name.toLowerCase().includes(search.toLowerCase());
+        const matchesRegion = regionFilter === "Semua" || dest.region === regionFilter;
+        
+        if (!matchesSearch || !matchesRegion) return null;
+
+        return (
+        <div key={i} className={`bg-white p-4 rounded-lg border-2 ${dest.isActive !== false ? 'border-art-text' : 'border-gray-300 opacity-70'} space-y-4 relative`}>
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60">Aktif di Homepage?</span>
+            <input 
+              type="checkbox" 
+              className="w-4 h-4 accent-art-orange"
+              checked={dest.isActive !== false}
+              onChange={(e) => {
+                const nd = [...data];
+                nd[i].isActive = e.target.checked;
+                setData(nd);
+              }}
+            />
+          </div>
+          <div className="flex items-center gap-4 pr-32">
+            <input 
+              className="font-bold text-lg border-b border-dashed border-art-text/30 outline-none focus:border-art-orange w-full bg-transparent" 
+              value={dest.name}
+              onChange={e => {
+                const nd = [...data];
+                nd[i].name = e.target.value;
+                setData(nd);
+              }}
+              placeholder="Nama Gunung"
+            />
             <button 
               onClick={() => {
                 const nd = [...data];
@@ -82,7 +159,14 @@ const DestinationsAdmin = ({ config, updateConfig }: any) => {
           
           <div className="grid gap-2">
             <div className="flex gap-2 items-center mb-2">
-              <span className="text-xs font-bold w-16">Kuota:</span>
+              <span className="text-xs font-bold w-16">Region:</span>
+              <input className="border p-2 rounded text-xs w-32" value={dest.region || 'Jawa'} onChange={e => {
+                const nd = [...data];
+                nd[i].region = e.target.value;
+                setData(nd);
+              }} placeholder="Contoh: Jawa Tengah" />
+              
+              <span className="text-xs font-bold w-12 ml-4">Kuota:</span>
               <input className="border p-2 rounded text-xs flex-1" value={dest.kuota} onChange={e => {
                 const nd = [...data];
                 nd[i].kuota = e.target.value;
@@ -90,8 +174,8 @@ const DestinationsAdmin = ({ config, updateConfig }: any) => {
               }} placeholder="Contoh: Min 2 - Max 12 Pax" />
             </div>
             {dest.durations.map((dur: any, j: number) => (
-              <div key={j} className="flex gap-2 items-center">
-                <input className="border p-2 rounded text-xs flex-1" value={dur.label} onChange={e => {
+              <div key={j} className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
+                <input className="border p-2 rounded text-xs flex-1 min-w-[100px]" value={dur.label} onChange={e => {
                   const nd = [...data];
                   nd[i].durations[j].label = e.target.value;
                   setData(nd);
@@ -110,17 +194,17 @@ const DestinationsAdmin = ({ config, updateConfig }: any) => {
             ))}
           </div>
         </div>
-      ))}
+      )})}
     </div>
   );
 };
 
-const LeadersAdmin = ({ config, updateConfig }: any) => {
+const LeadersAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState([...config.tripLeaders]);
 
   const handleSave = () => {
     updateConfig({ tripLeaders: data });
-    alert('Disimpan!');
+    showToast('Disimpan!');
   };
 
   return (
@@ -162,12 +246,12 @@ const LeadersAdmin = ({ config, updateConfig }: any) => {
   );
 };
 
-const GalleryAdmin = ({ config, updateConfig }: any) => {
+const GalleryAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState([...config.galleryPhotos]);
   
   const handleSave = () => {
     updateConfig({ galleryPhotos: data });
-    alert('Disimpan!');
+    showToast('Disimpan!');
   };
 
   return (
@@ -201,12 +285,12 @@ const GalleryAdmin = ({ config, updateConfig }: any) => {
   );
 };
 
-const CeritaAdmin = ({ config, updateConfig }: any) => {
+const CeritaAdmin = ({ config, updateConfig, showToast }: any) => {
   const [url, setUrl] = useState(config.ceritaVideoUrl);
 
   const handleSave = () => {
     updateConfig({ ceritaVideoUrl: url });
-    alert('Disimpan!');
+    showToast('Disimpan!');
   };
 
   return (
