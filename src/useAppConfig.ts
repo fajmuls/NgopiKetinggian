@@ -3,6 +3,9 @@ import { db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export interface AppConfig {
+  openTrips: any[];
+  visibilities: { map: boolean, quota: boolean, beans: boolean, routes: boolean };
+  facilities?: { include: string[], exclude: string[], opsi: string[] };
   destinationsData: any[];
   tripLeaders: any[];
   galleryPhotos: any[];
@@ -14,7 +17,30 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     destinationsData: defaultDestinations,
     tripLeaders: defaultLeaders,
     galleryPhotos: defaultPhotos,
-    ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4"
+    ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+    openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
+      include: [
+        "Tiket masuk & asuransi pendakian resmi (Simaksi)",
+        "Tenda premium kapasitas 2-3 orang",
+        "Matras & Sleeping bag hangat",
+        "Makan selama pendakian (Sesuai durasi)",
+        "Peralatan masak & makan",
+        "Guide & Porter kelompok"
+      ],
+      exclude: [
+        "Transportasi dari kota asal ke Meeting Point",
+        "Pengeluaran pribadi & jajan selama perjalanan",
+        "Perlengkapan pribadi (Jaket, Sepatu, Pakaian ganti)",
+        "Obat-obatan pribadi yang spesifik",
+        "Porter pribadi (bisa dipesan terpisah)"
+      ],
+      opsi: [
+        "Sewa Porter Pribadi: Rp 250.000 / Hari",
+        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
+        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
+        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+      ]
+    }
   });
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +56,30 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
           destinationsData: defaultDestinations,
           tripLeaders: defaultLeaders,
           galleryPhotos: defaultPhotos,
-          ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4"
+          ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+          openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
+      include: [
+        "Tiket masuk & asuransi pendakian resmi (Simaksi)",
+        "Tenda premium kapasitas 2-3 orang",
+        "Matras & Sleeping bag hangat",
+        "Makan selama pendakian (Sesuai durasi)",
+        "Peralatan masak & makan",
+        "Guide & Porter kelompok"
+      ],
+      exclude: [
+        "Transportasi dari kota asal ke Meeting Point",
+        "Pengeluaran pribadi & jajan selama perjalanan",
+        "Perlengkapan pribadi (Jaket, Sepatu, Pakaian ganti)",
+        "Obat-obatan pribadi yang spesifik",
+        "Porter pribadi (bisa dipesan terpisah)"
+      ],
+      opsi: [
+        "Sewa Porter Pribadi: Rp 250.000 / Hari",
+        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
+        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
+        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+      ]
+    }
         };
         setDoc(docRef, defaultConfig).catch((err) => {
            console.warn("Could not save default config to Firestore (possibly due to security rules). Using local state.", err);
@@ -45,7 +94,30 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         destinationsData: defaultDestinations,
         tripLeaders: defaultLeaders,
         galleryPhotos: defaultPhotos,
-        ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4"
+        ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+          openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
+      include: [
+        "Tiket masuk & asuransi pendakian resmi (Simaksi)",
+        "Tenda premium kapasitas 2-3 orang",
+        "Matras & Sleeping bag hangat",
+        "Makan selama pendakian (Sesuai durasi)",
+        "Peralatan masak & makan",
+        "Guide & Porter kelompok"
+      ],
+      exclude: [
+        "Transportasi dari kota asal ke Meeting Point",
+        "Pengeluaran pribadi & jajan selama perjalanan",
+        "Perlengkapan pribadi (Jaket, Sepatu, Pakaian ganti)",
+        "Obat-obatan pribadi yang spesifik",
+        "Porter pribadi (bisa dipesan terpisah)"
+      ],
+      opsi: [
+        "Sewa Porter Pribadi: Rp 250.000 / Hari",
+        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
+        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
+        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+      ]
+    }
       });
       setLoading(false);
     });
@@ -69,7 +141,30 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       destinationsData: defaultDestinations,
       tripLeaders: defaultLeaders,
       galleryPhotos: defaultPhotos,
-      ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4"
+      ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+          openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
+      include: [
+        "Tiket masuk & asuransi pendakian resmi (Simaksi)",
+        "Tenda premium kapasitas 2-3 orang",
+        "Matras & Sleeping bag hangat",
+        "Makan selama pendakian (Sesuai durasi)",
+        "Peralatan masak & makan",
+        "Guide & Porter kelompok"
+      ],
+      exclude: [
+        "Transportasi dari kota asal ke Meeting Point",
+        "Pengeluaran pribadi & jajan selama perjalanan",
+        "Perlengkapan pribadi (Jaket, Sepatu, Pakaian ganti)",
+        "Obat-obatan pribadi yang spesifik",
+        "Porter pribadi (bisa dipesan terpisah)"
+      ],
+      opsi: [
+        "Sewa Porter Pribadi: Rp 250.000 / Hari",
+        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
+        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
+        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+      ]
+    }
     };
     const docRef = doc(db, 'appConfig', 'main');
     try {

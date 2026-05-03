@@ -404,41 +404,21 @@ const destinationsData = [
       {
         "name": "Via Wates",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Patakbanteng",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -460,21 +440,11 @@ const destinationsData = [
       {
         "name": "Via Lengkong",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -496,21 +466,11 @@ const destinationsData = [
       {
         "name": "Via Sikunang",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -532,21 +492,11 @@ const destinationsData = [
       {
         "name": "Via Lengkong & Sikunang",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -568,61 +518,31 @@ const destinationsData = [
       {
         "name": "Via Selo",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Thekelan",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Swanting",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -644,41 +564,21 @@ const destinationsData = [
       {
         "name": "Via Bambangan",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Guci",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -700,21 +600,11 @@ const destinationsData = [
       {
         "name": "Via Kledung",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -736,41 +626,21 @@ const destinationsData = [
       {
         "name": "Via Garung",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Gajahmungkur",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -792,41 +662,21 @@ const destinationsData = [
       {
         "name": "Via Candi Cetho",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Cemoro Sewu",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -848,41 +698,21 @@ const destinationsData = [
       {
         "name": "Via Apuy",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Sadarehe",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -904,21 +734,11 @@ const destinationsData = [
       {
         "name": "Via Camp David",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -940,41 +760,21 @@ const destinationsData = [
       {
         "name": "Via Putri",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Cibodas",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -996,21 +796,11 @@ const destinationsData = [
       {
         "name": "Via Cibodas",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 700,
-            "originalPrice": 800
-          },
-          {
-            "label": "2H 1M",
-            "price": 900,
-            "originalPrice": 1050
-          },
-          {
-            "label": "3H 2M",
-            "price": 1200,
-            "originalPrice": 1350
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -1032,21 +822,11 @@ const destinationsData = [
       {
         "name": "Via Cidahu",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 500,
-            "originalPrice": 600
-          },
-          {
-            "label": "2H 1M",
-            "price": 700,
-            "originalPrice": 850
-          },
-          {
-            "label": "3H 2M",
-            "price": 1000,
-            "originalPrice": 1150
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -1068,21 +848,11 @@ const destinationsData = [
       {
         "name": "Via Ranu Pani",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 1600,
-            "originalPrice": 1700
-          },
-          {
-            "label": "2H 1M",
-            "price": 1800,
-            "originalPrice": 1950
-          },
-          {
-            "label": "3H 2M",
-            "price": 2100,
-            "originalPrice": 2250
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -1104,41 +874,21 @@ const destinationsData = [
       {
         "name": "Via Sembalun",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 1600,
-            "originalPrice": 1700
-          },
-          {
-            "label": "2H 1M",
-            "price": 1800,
-            "originalPrice": 1950
-          },
-          {
-            "label": "3H 2M",
-            "price": 2100,
-            "originalPrice": 2250
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       },
       {
         "name": "Via Senaru",
         "durations": [
-          {
-            "label": "1H (Tektok)",
-            "price": 1600,
-            "originalPrice": 1700
-          },
-          {
-            "label": "2H 1M",
-            "price": 1800,
-            "originalPrice": 1950
-          },
-          {
-            "label": "3H 2M",
-            "price": 2100,
-            "originalPrice": 2250
-          }
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
+          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
+          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
+          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
         ]
       }
     ]
@@ -1168,7 +918,7 @@ const heroSlides = [
   }
 ];
 
-const DestinationCard: React.FC<{ dest: any, onBook: (destinasi: string, jalur: string, durasi: string) => void }> = ({ dest, onBook }) => {
+const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destinasi: string, jalur: string, durasi: string) => void }> = ({ dest, visibilities, onBook }) => {
   const [selectedPath, setSelectedPath] = useState(0);
   
   const safePaths = dest.paths && dest.paths.length > 0 ? dest.paths : [{ name: "Jalur Utama", durations: dest.durations || [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] }];
@@ -1212,15 +962,15 @@ const DestinationCard: React.FC<{ dest: any, onBook: (destinasi: string, jalur: 
           <h3 className="text-3xl font-serif italic text-art-text mb-4">{dest.name} <span className="font-sans font-black normal-case block mt-2 text-4xl">{dest.height}</span></h3>
           <p className="font-medium text-art-text/80 mb-6 leading-relaxed">{dest.desc}</p>
           
-          <div className="mb-6 border border-art-text/20 p-3 rounded-xl bg-white/50">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-2">Pilihan Jalur:</p>
+          <div className="mb-6">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-3">Pilihan Jalur:</p>
             <div className="flex flex-wrap gap-2">
               {safePaths.map((p: any, idx: number) => (
                 <button 
                   key={idx}
                   onClick={() => setSelectedPath(idx)}
                   onMouseEnter={playHover}
-                  className={`text-[10px] tracking-widest uppercase font-bold px-3 py-1.5 rounded-lg border-2 transition-all ${selectedPath === idx ? 'bg-art-orange text-white border-art-orange' : 'bg-transparent text-art-text border-art-text/20 hover:border-art-orange/50'}`}
+                  className={`text-[10px] tracking-widest uppercase font-bold px-4 py-2 rounded-lg border-2 transition-all ${selectedPath === idx ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/20 hover:border-art-text'}`}
                 >
                   {p.name}
                 </button>
@@ -1248,22 +998,30 @@ const DestinationCard: React.FC<{ dest: any, onBook: (destinasi: string, jalur: 
               <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Calendar className="text-art-text" size={14} /></div>
               <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jadwal</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">Sesuai Permintaan</p></div>
             </div>
+            {visibilities?.map !== false && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
               <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Map className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Mepo</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.mepo}</p></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Mepo</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.mepo || '-'}</p></div>
             </div>
+            )}
+            {visibilities?.quota !== false && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
               <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Users className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Kuota</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.kuota}</p></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Kuota</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.kuota || '-'}</p></div>
             </div>
+            )}
+            {visibilities?.beans !== false && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
               <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Coffee className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Beans</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.beans}</p></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Beans</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.beans || '-'}</p></div>
             </div>
+            )}
+            {visibilities?.routes !== false && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 col-span-2 lg:col-span-1" onMouseEnter={playHover}>
               <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Map className="text-art-text" size={14} /></div>
               <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jalur</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{currentPath.name}</p></div>
             </div>
+            )}
           </div>
           <div className="mb-10 text-[10px] text-art-text/60 font-medium italic border-l-2 border-art-orange pl-3">
             *Jika pesanan melebihi kuota maksimal atau ingin custom jalur pendakian, silakan chat via Admin. Harga akan disesuaikan.
@@ -1982,22 +1740,18 @@ export default function App() {
             <div className="bg-white/10 p-8 rounded-2xl border-2 border-white/20">
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><CheckCircle2 /> Include</h3>
               <ul className="space-y-4 text-sm font-medium">
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>Tiket masuk & asuransi pendakian resmi (Simaksi)</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>Tenda premium kapasitas 2-3 orang</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>Matras & Sleeping bag hangat</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>Makan selama pendakian (Sesuai durasi)</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>Signature Coffee Drip di camp & morning coffee</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>P3K dan Alat masak kelompok</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>Tour leader berpengalaman & Porter tim</span></li>
+                {config.facilities?.include?.map((item: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>{item}</span></li>
+                ))}
               </ul>
             </div>
             
             <div className="bg-art-bg text-art-text p-8 rounded-2xl border-2 border-art-text">
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><X /> Exclude</h3>
               <ul className="space-y-4 text-sm font-medium">
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-text flex-shrink-0"></div><span>Transportasi dari kota asal ke Meeting Point</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-text flex-shrink-0"></div><span>Pengeluaran pribadi di luar fasilitas</span></li>
-                <li className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-text flex-shrink-0"></div><span>Obat-obatan pribadi yang khusus</span></li>
+                {config.facilities?.exclude?.map((item: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-text flex-shrink-0"></div><span>{item}</span></li>
+                ))}
               </ul>
             </div>
 
@@ -2006,35 +1760,14 @@ export default function App() {
                <div className="relative z-10">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-art-orange rounded-full mix-blend-overlay filter blur-3xl opacity-50 translate-x-10 -translate-y-10"></div>
                  <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><PlusCircle /> Optional (Tambahan)</h3>
-                 <p className="text-sm font-medium text-white/70 mb-4">Pilih fasilitas tambahan jika Anda membutuhkannya. <br/><span className="text-art-orange">Catatan: Tambahan opsional ini akan dikenakan biaya tambahan dan tidak termasuk ke dalam harga paket yang tertera. Boleh dicat admin untuk detail harga tambahan.</span></p>
+                 <p className="text-sm font-medium text-white/70 mb-4">Pilih fasilitas tambahan jika Anda membutuhkannya. <br/><span className="text-art-orange">Catatan: Tambahan opsional ini dikenakan biaya dan tidak termasuk harga tertera.</span></p>
                  <ul className="space-y-4 text-sm font-medium">
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
-                    <div>
-                      <span>Sewa Peralatan Gunung</span>
-                      <p className="text-xs text-white/50 mt-1">- Jaket Gunung</p>
-                      <p className="text-xs text-white/50 mt-1">- Sepatu Trekking</p>
-                      <p className="text-xs text-white/50 mt-1">- Ransel</p>
-                      <p className="text-xs text-white/50 mt-1">- Headlamp</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
-                    <div>
-                      <span>Sewa Pakaian Khusus</span>
-                      <p className="text-xs text-white/50 mt-1">- Pakaian tebal</p>
-                      <p className="text-xs text-white/50 mt-1">- Sarung tangan extra</p>
-                      <p className="text-xs text-white/50 mt-1">- Kupluk / Topi Gunung</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
-                    <span>Penjemputan dan Pengantaran di Meeting Point</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
-                    <span>Lainnya (Bisa didiskusikan)</span>
-                  </li>
+                  {config.facilities?.opsi?.map((item: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
+                      <span>{item}</span>
+                    </li>
+                  ))}
                  </ul>
                </div>
             </div>
