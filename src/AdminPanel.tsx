@@ -45,11 +45,31 @@ export const AdminPanelModal = ({
                 onClick={() => {
                   customConfirm("Are you sure you want to set the current configuration as the global default? This action cannot be undone.", async () => {
                     try {
-                      await updateDoc(doc(db, 'appConfig', 'default'), config as any);
+                      const { writeBatch, doc } = await import('firebase/firestore');
+                      const batch = writeBatch(db);
+                      batch.set(doc(db, 'destinations', 'data'), { items: config.destinationsData });
+                      batch.set(doc(db, 'leaders', 'data'), { items: config.tripLeaders });
+                      batch.set(doc(db, 'gallery', 'data'), { items: config.galleryPhotos });
+                      batch.set(doc(db, 'openTrips', 'data'), { items: config.openTrips });
+                      
+                      const websiteData = { ...config };
+                      delete (websiteData as any).destinationsData;
+                      delete (websiteData as any).tripLeaders;
+                      delete (websiteData as any).galleryPhotos;
+                      delete (websiteData as any).openTrips;
+
+                      batch.set(doc(db, 'website', 'data'), websiteData);
+
+                      await batch.commit();
+
+                      // Also store backup
+                      batch.set(doc(db, 'website', 'default_backup'), websiteData);
+
+                      showToast("Berhasil di-set sebagai default!", "success");
                     } catch (e) {
-                      await setDoc(doc(db, 'appConfig', 'default'), config as any);
+                      console.error(e);
+                      showToast("Gagal menyimpan ke default", "error");
                     }
-                    showToast("Berhasil di-set sebagai default!", "success");
                   });
                 }} 
                 className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors hidden sm:block"
@@ -870,8 +890,8 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
       const url = await uploadFile(file, 'homepage');
       setData({ ...data, heroPhotoUrl: url });
       showToast('Foto Terunggah!');
-    } catch (e) {
-      showToast('Gagal upload', 'error');
+    } catch (e: any) {
+      customAlert(e.message || 'Gagal upload foto.');
     } finally {
       setUploading(false);
     }
@@ -965,9 +985,9 @@ const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value:
     try {
       const url = await uploadFile(file, 'images');
       onChange(url);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      customAlert('Gagal upload foto.');
+      customAlert(e.message || 'Gagal upload foto.');
     } finally {
       setUploading(false);
     }

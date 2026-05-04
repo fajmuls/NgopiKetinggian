@@ -714,7 +714,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Prau.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Pemula Menengah",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -800,7 +800,7 @@ const destinationsData = [
       {
         "name": "Via Lengkong & Sikunang",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -818,7 +818,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Merbabu.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Menengah Ahli",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -826,7 +826,7 @@ const destinationsData = [
       {
         "name": "Via Selo",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -836,7 +836,7 @@ const destinationsData = [
       {
         "name": "Via Thekelan",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -846,7 +846,7 @@ const destinationsData = [
       {
         "name": "Via Swanting",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -864,7 +864,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Slamet.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Ahli",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -872,7 +872,7 @@ const destinationsData = [
       {
         "name": "Via Bambangan",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -882,7 +882,7 @@ const destinationsData = [
       {
         "name": "Via Guci",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -900,7 +900,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Sindoro.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Sangat Ahli",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -908,7 +908,7 @@ const destinationsData = [
       {
         "name": "Via Kledung",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -926,7 +926,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Sumbing.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Pemula",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -934,7 +934,7 @@ const destinationsData = [
       {
         "name": "Via Garung",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -944,7 +944,7 @@ const destinationsData = [
       {
         "name": "Via Gajahmungkur",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -962,7 +962,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Lawu.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Pemula Menengah",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -970,7 +970,7 @@ const destinationsData = [
       {
         "name": "Via Candi Cetho",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -980,7 +980,7 @@ const destinationsData = [
       {
         "name": "Via Cemoro Sewu",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1006,7 +1006,7 @@ const destinationsData = [
       {
         "name": "Via Apuy",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1016,7 +1016,7 @@ const destinationsData = [
       {
         "name": "Via Sadarehe",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1034,7 +1034,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Papandayan.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Menengah Ahli",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -1042,7 +1042,7 @@ const destinationsData = [
       {
         "name": "Via Camp David",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1060,7 +1060,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Gede.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Ahli",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -1068,7 +1068,7 @@ const destinationsData = [
       {
         "name": "Via Putri",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1078,7 +1078,7 @@ const destinationsData = [
       {
         "name": "Via Cibodas",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1096,7 +1096,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Pangrango.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Sangat Ahli",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -1104,7 +1104,7 @@ const destinationsData = [
       {
         "name": "Via Cibodas",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1122,7 +1122,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Salak.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Pemula",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -1130,7 +1130,7 @@ const destinationsData = [
       {
         "name": "Via Cidahu",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1148,7 +1148,7 @@ const destinationsData = [
     "desc": "Petualangan premium di Gunung Semeru.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Pemula Menengah",
     "mepo": "Basecamp",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Blend",
@@ -1156,7 +1156,7 @@ const destinationsData = [
       {
         "name": "Via Ranu Pani",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1182,7 +1182,7 @@ const destinationsData = [
       {
         "name": "Via Sembalun",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1192,7 +1192,7 @@ const destinationsData = [
       {
         "name": "Via Senaru",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
           { "label": "2H 1M", "price": 650, "originalPrice": 800 },
           { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
           { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
@@ -1801,8 +1801,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 variant="primary" 
                 className="w-full py-4 text-sm tracking-widest uppercase font-bold group" 
                 onClick={() => { playClick(); setShowSplash(false); }}
+                disabled={loading}
               >
-                Mulai Melihat Tour <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                {loading ? "Memuat Data..." : "Mulai Melihat Tour"} {!loading && <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />}
               </Button>
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="secondary" className="w-full text-[10px] tracking-widest uppercase font-bold" onClick={() => window.open('https://www.instagram.com/ngopi.dketinggian?igsh=Y3JtN3Y2eXIya29y', '_blank')}>

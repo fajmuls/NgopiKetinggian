@@ -21,6 +21,17 @@ export const uploadFile = async (file: File, folder: string): Promise<string> =>
     const extension = fileToUpload.name.split('.').pop();
     const fileName = `${Date.now()}_img.${extension}`;
     const storageRef = ref(storage, `${folder}/${fileName}`);
-    await uploadBytes(storageRef, fileToUpload);
-    return await getDownloadURL(storageRef);
+    try {
+        await uploadBytes(storageRef, fileToUpload);
+        return await getDownloadURL(storageRef);
+    } catch (e: any) {
+        console.error("Firebase Storage Upload Error: ", e);
+        if (e.code === 'storage/unauthorized') {
+            throw new Error('Anda tidak memiliki izin mengunggah foto. Pastikan Anda sudah login, dan aturan Firebase Storage diset ke true untuk user.');
+        } else if (e.code === 'storage/unknown' || e.message?.toLowerCase().includes('bucket')) {
+            throw new Error('Firebase Storage belum diaktifkan di Firebase Console Anda. Silakan ke Firebase Console -> Storage -> Get Started.');
+        } else {
+            throw new Error(`Gagal mengunggah foto. Error: ${e.message}`);
+        }
+    }
 };
