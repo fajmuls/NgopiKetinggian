@@ -9,6 +9,8 @@ import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, OpenTrip, WEBSITE_VERSION } from './useAppConfig';
 import { jsPDF } from 'jspdf';
 
+import { customConfirm, customAlert } from './GlobalDialog';
+
 export const AdminPanelModal = ({ 
   isOpen, 
   onClose, 
@@ -41,14 +43,29 @@ export const AdminPanelModal = ({
               <p className="text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
               <button 
                 onClick={() => {
-                  if (window.confirm("Are you sure you want to set to default? This action cannot be undone and will overwrite all current configurations.")) {
-                    revertToDefault();
-                    showToast("Berhasil diset ke default!");
-                  }
+                  customConfirm("Are you sure you want to set the current configuration as the global default? This action cannot be undone.", async () => {
+                    try {
+                      await updateDoc(doc(db, 'appConfig', 'default'), config as any);
+                    } catch (e) {
+                      await setDoc(doc(db, 'appConfig', 'default'), config as any);
+                    }
+                    showToast("Berhasil di-set sebagai default!", "success");
+                  });
                 }} 
-                className="text-[10px] bg-red-600 text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-700 transition-colors"
+                className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors hidden sm:block"
               >
                 Set to default.
+              </button>
+              <button 
+                onClick={() => {
+                  customConfirm("Reset to default?", () => {
+                    revertToDefault();
+                    showToast("Direset ke default!");
+                  });
+                }} 
+                className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors hidden sm:block"
+              >
+                Reset to default
               </button>
             </div>
             <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
@@ -169,7 +186,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Beneran mau hapus data booking ini?")) {
+    customConfirm("Beneran mau hapus data booking ini?", async () => {
       try {
         await deleteDoc(doc(db, 'bookings', id));
         await syncOpenTripQuota(bookings, undefined, undefined, id);
@@ -177,7 +194,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
       } catch (error) {
         showToast("Gagal menghapus booking", 'error');
       }
-    }
+    });
   };
 
   const generateInvoice = (booking: any) => {
@@ -405,12 +422,12 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
         <p className="text-xs font-bold text-art-text/60 uppercase">Mengedit Destinasi & Jalur</p>
         <div className="flex gap-2">
           <button onClick={() => {
-            if (window.confirm("Beneran mau reset destinasi ke default?")) {
+            customConfirm("Beneran mau reset destinasi ke default?", () => {
               const defaultData = JSON.parse(JSON.stringify(defaultList));
               setData(defaultData);
               updateConfig({ destinationsData: defaultData });
               showToast('Direset ke Default!');
-            }
+            });
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={() => {
              setData(JSON.parse(JSON.stringify(config.destinationsData)));
@@ -700,12 +717,12 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
         <p className="text-xs font-bold text-art-text/60 uppercase">Daftar Trip Leader</p>
         <div className="flex gap-2">
           <button onClick={() => {
-            if (window.confirm("Beneran mau reset leaders ke default?")) {
+            customConfirm("Beneran mau reset leaders ke default?", () => {
               const defaultData = JSON.parse(JSON.stringify(defaultList));
               setData(defaultData);
               updateConfig({ tripLeaders: defaultData });
               showToast('Direset ke Default!');
-            }
+            });
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Reset Default</button>
           <button onClick={() => {
              setData(JSON.parse(JSON.stringify(config.tripLeaders)));
@@ -770,12 +787,12 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
         <p className="text-xs font-bold text-art-text/60 uppercase">Gallery Foto</p>
         <div className="flex gap-2">
           <button onClick={() => {
-            if (window.confirm("Beneran mau reset gallery ke default?")) {
+            customConfirm("Beneran mau reset gallery ke default?", () => {
               const defaultData = JSON.parse(JSON.stringify(defaultList));
               setData(defaultData);
               updateConfig({ galleryPhotos: defaultData });
               showToast('Direset ke Default!');
-            }
+            });
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={() => {
              setData(JSON.parse(JSON.stringify(config.galleryPhotos)));
@@ -823,11 +840,11 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
         <p className="text-xs text-art-text/60">Gunakan link embed YouTube atau file MP4 yang didukung.</p>
         <div className="flex gap-2 w-fit">
           <button onClick={() => {
-            if (window.confirm("Beneran mau reset cerita ke default?")) {
+            customConfirm("Beneran mau reset cerita ke default?", () => {
               setUrl(defaultVideo);
               updateConfig({ ceritaVideoUrl: defaultVideo });
               showToast('Direset ke Default!');
-            }
+            });
           }} className="bg-red-100 text-red-600 px-4 py-3 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
         </div>
@@ -915,17 +932,17 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
 
 const CleanupPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
   const handleCleanup = () => {
-    if (!window.confirm("Beneran mau hapus semua URL foto? Tindakan ini tidak bisa dibatalkan!")) return;
-    
-    const newConfig = {
-      ...config,
-      destinationsData: config.destinationsData.map((d: any) => ({ ...d, image: "" })),
-      tripLeaders: config.tripLeaders.map((l: any) => ({ ...l, avatar: "" })),
-      homepage: { ...config.homepage, heroPhotoUrl: "" },
-      galleryPhotos: []
-    };
-    updateConfig(newConfig);
-    showToast('Foto dibersihkan!');
+    customConfirm("Beneran mau hapus semua URL foto? Tindakan ini tidak bisa dibatalkan!", () => {
+      const newConfig = {
+        ...config,
+        destinationsData: config.destinationsData.map((d: any) => ({ ...d, image: "" })),
+        tripLeaders: config.tripLeaders.map((l: any) => ({ ...l, avatar: "" })),
+        homepage: { ...config.homepage, heroPhotoUrl: "" },
+        galleryPhotos: []
+      };
+      updateConfig(newConfig);
+      showToast('Foto dibersihkan!');
+    });
   };
 
   return (
@@ -950,7 +967,7 @@ const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value:
       onChange(url);
     } catch (e) {
       console.error(e);
-      alert('Gagal upload foto.');
+      customAlert('Gagal upload foto.');
     } finally {
       setUploading(false);
     }
@@ -1303,12 +1320,12 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
         <p className="text-xs font-bold uppercase text-art-text/60">Fasilitas Trip</p>
         <div className="flex gap-2">
           <button onClick={() => {
-            if (window.confirm("Beneran mau reset fasilitas ke default?")) {
+            customConfirm("Beneran mau reset fasilitas ke default?", () => {
               const defaultData = JSON.parse(JSON.stringify(defaultList || { include: [], exclude: [], opsi: [] }));
               setData(defaultData);
               updateConfig({ facilities: defaultData });
               showToast('Direset ke Default!');
-            }
+            });
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
         </div>

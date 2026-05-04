@@ -11,6 +11,8 @@ export const db = (firebaseConfig as any).firestoreDatabaseId ? getFirestore(app
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
+import { customAlert } from './GlobalDialog';
+
 export const loginWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -20,18 +22,18 @@ export const loginWithGoogle = async () => {
     if (error.code === 'auth/popup-closed-by-user') {
       // Ignore
     } else if (error.code === 'auth/unauthorized-domain') {
-      alert("Error Firebase: Domain ini belum diizinkan. Silakan tambahkan URL saat ini ke Firebase Console > Authentication > Settings > Authorized Domains.");
+      customAlert("Error Firebase: Domain ini belum diizinkan. Silakan tambahkan URL saat ini ke Firebase Console > Authentication > Settings > Authorized Domains.", "Informasi Login");
     } else {
       if (window.self !== window.top) {
-        alert(`Login gagal dalam preview window. Silakan klik tombol "Buka di Tab Baru" (Open in New Tab) di pojok kanan atas layar dan coba login kembali.\nDetail Error: ${error.message}`);
+        customAlert(`Login gagal dalam preview window. Silakan klik tombol "Buka di Tab Baru" (Open in New Tab) di pojok kanan atas layar dan coba login kembali.\nDetail Error: ${error.message}`, "Informasi Login");
       } else {
-        alert(`Gagal login via Google popup: ${error.message}. Akan mencoba redirect...`);
+        customAlert(`Gagal login via Google popup: ${error.message}. Akan mencoba redirect...`, "Informasi Login");
       }
       console.log("Popup failed or blocked, falling back to redirect...");
       try {
         await signInWithRedirect(auth, googleProvider);
       } catch (redirectError: any) {
-        alert(`Redirect login juga gagal: ${redirectError.message}`);
+        customAlert(`Redirect login juga gagal: ${redirectError.message}`, "Error Login");
       }
     }
     // Don't throw if we are redirecting

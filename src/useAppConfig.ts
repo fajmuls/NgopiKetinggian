@@ -13,6 +13,8 @@ export interface FacilityOption {
 export const DIFFICULTY_LEVELS = ["Pemula", "Pemula Menengah", "Menengah", "Menengah Ahli", "Ahli", "Sangat Ahli"];
 export const DURATION_LEVELS = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
 
+import { customAlert } from './GlobalDialog';
+
 export interface OpenTrip {
   id: string;
   name: string;
@@ -301,7 +303,7 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     } catch (err) {
       console.warn("Could not save to Firestore, trying local state update only", err);
       setConfig((prev) => ({ ...prev, ...newConfig }));
-      alert("Perubahan hanya tersimpan lokal (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat. Cek instruksi di FILE setup.");
+      customAlert("Perubahan hanya tersimpan lokal (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat. Cek instruksi di FILE setup.");
     }
   };
 
@@ -380,7 +382,7 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     } catch (err) {
       console.warn("Could not save to Firestore, trying local state update only", err);
       setConfig(defaultConfig);
-      alert("Pembalikan ke default hanya bekerja di sesi ini (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat.");
+      customAlert("Pembalikan ke default hanya bekerja di sesi ini (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat.");
     }
   };
 

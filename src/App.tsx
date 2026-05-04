@@ -8,6 +8,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import { customAlert, customConfirm, GlobalDialogProvider } from './GlobalDialog';
 import { DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, useAppConfig } from './useAppConfig';
 import { AdminPanelModal } from './AdminPanel';
 
@@ -198,7 +199,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   const handleSubmitPreview = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formState.nama || !formState.wa || !selectedDestinasi || !selectedJalur || !selectedDurasi || !selectedJadwal || !pesertaCount) {
-      alert("Mohon lengkapi semua data wajib.");
+      customAlert("Mohon lengkapi semua data wajib.");
       return;
     }
 
@@ -209,7 +210,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         const diffTime = selectedDate.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         if (diffDays < 7) {
-          alert("Pemesanan private trip minimal H-7 keberangkatan.");
+          customAlert("Pemesanan private trip minimal H-7 keberangkatan.", "Informasi");
           return;
         }
       }
@@ -1540,7 +1541,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
                         window.dispatchEvent(new Event('adminModeToggled'));
                         onClose();
                       } else {
-                        alert('Token salah!');
+                        customAlert('Token salah!');
                       }
                     }
                   }}
@@ -1555,7 +1556,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
                         window.dispatchEvent(new Event('adminModeToggled'));
                         onClose();
                       } else {
-                        alert('Token salah!');
+                        customAlert('Token salah!');
                       }
                     }
                   }}
@@ -1757,6 +1758,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
 
   return (
     <>
+      <GlobalDialogProvider />
       <AnimatePresence>
         {showSplash && (
           <motion.div 
