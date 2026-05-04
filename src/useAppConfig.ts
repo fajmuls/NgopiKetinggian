@@ -43,6 +43,11 @@ export interface AppConfig {
   galleryPhotos: any[];
   ceritaVideoUrl: string;
   promoCodes: { code: string, discount: number }[];
+  homepage: {
+    heroTitle: string;
+    heroDescription: string;
+    heroPhotoUrl: string;
+  };
 }
 
 export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], defaultPhotos: any[]) {
@@ -100,6 +105,11 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         },
         { name: "Upgrade Tenda Privat", priceInfo: "Rp 100rb / Tenda", subItems: [] }
       ]
+    },
+    homepage: {
+      heroTitle: "Trip Ngopi di Ketinggian",
+      heroDescription: "Rasakan sensasi ngopi di atas awan.",
+      heroPhotoUrl: ""
     }
   });
   const [loading, setLoading] = useState(true);

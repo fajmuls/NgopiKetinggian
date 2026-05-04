@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { uploadFile } from './lib/storage-utils';
 import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
@@ -109,6 +110,7 @@ export const AdminPanelModal = ({
             {activeTab === 'facilities' && <FacilitiesAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.facilities} />}
             {activeTab === 'promoCodes' && <PromoCodesAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cerita' && <CeritaAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultVideo={defaultLists.cerita} />}
+            {activeTab === 'homepage' && <HomepageAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
           </div>
         </div>
       </motion.div>
@@ -822,6 +824,46 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
        </div>
     </div>
   )
+};
+
+const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
+  const [data, setData] = useState({ ...config.homepage });
+  const [uploading, setUploading] = useState(false);
+
+  const handleSave = () => {
+    updateConfig({ homepage: data });
+    showToast('Homepage Tersimpan!');
+  };
+
+  const handleFileChange = async (e: any) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadFile(file, 'homepage');
+      setData({ ...data, heroPhotoUrl: url });
+      showToast('Foto Terunggah!');
+    } catch (e) {
+      showToast('Gagal upload', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-4">
+      <h3 className="font-bold text-sm uppercase">Edit Homepage</h3>
+      <input className="w-full border p-2 rounded" value={data.heroTitle} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Hero Title" />
+      <input className="w-full border p-2 rounded" value={data.heroDescription} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description" />
+      <div className="space-y-2">
+        <label className="text-xs font-bold">Hero Photo</label>
+        {data.heroPhotoUrl && <img src={data.heroPhotoUrl} className="w-full h-32 object-cover rounded" />}
+        <input type="file" onChange={handleFileChange} disabled={uploading} />
+        {uploading && <p className="text-xs">Mengunggah...</p>}
+      </div>
+      <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase">Simpan Homepage</button>
+    </div>
+  );
 };
 
 
