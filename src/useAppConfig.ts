@@ -253,12 +253,30 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
 
   const revertToDefault = async () => {
     try {
+      // Try to get from defaults collection first
+      const defaultDoc = await getDoc(doc(db, 'defaults', 'data'));
+      
+      let destinations = defaultDestinations;
+      let leaders = defaultTripLeaders;
+      let gallery = defaultGalleryPhotos;
+      let website = getDefaultWebsiteData();
+      let openTripsData: any[] = [];
+
+      if (defaultDoc.exists()) {
+        const d = defaultDoc.data();
+        if (d.destinations) destinations = d.destinations;
+        if (d.leaders) leaders = d.leaders;
+        if (d.gallery) gallery = d.gallery;
+        if (d.website) website = d.website;
+        if (d.openTrips) openTripsData = d.openTrips;
+      }
+
       const batch = writeBatch(db);
-      batch.set(doc(db, 'destinations', 'data'), { items: defaultDestinations });
-      batch.set(doc(db, 'leaders', 'data'), { items: defaultLeaders });
-      batch.set(doc(db, 'gallery', 'data'), { items: defaultPhotos });
-      batch.set(doc(db, 'openTrips', 'data'), { items: [] });
-      batch.set(doc(db, 'website', 'data'), getDefaultWebsiteData());
+      batch.set(doc(db, 'destinations', 'data'), { items: destinations });
+      batch.set(doc(db, 'leaders', 'data'), { items: leaders });
+      batch.set(doc(db, 'gallery', 'data'), { items: gallery });
+      batch.set(doc(db, 'openTrips', 'data'), { items: openTripsData });
+      batch.set(doc(db, 'website', 'data'), website);
       
       await batch.commit();
     } catch (err) {
