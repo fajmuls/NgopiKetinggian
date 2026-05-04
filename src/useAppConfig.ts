@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from './firebase';
+import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
 export const WEBSITE_VERSION = "1.0.1";
@@ -182,9 +182,14 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
           } else if (name === 'openTrips') {
             currentConfig.openTrips = data.items || [];
           }
-        } else {
-          // Initialize default if not exists
-          setDoc(docRef, defaultData).catch(e => console.warn("Failed to set default doc for " + name, e));
+        } else if (auth.currentUser) {
+          // Initialize default if not exists, but only if someone is logged in 
+          // (They still need admin email to succeed, but this hides it for guests)
+          setDoc(docRef, defaultData).catch(e => {
+            if (!e.message.includes('permission')) {
+              console.warn("Failed to set default doc for " + name, e);
+            }
+          });
         }
         loadedCount++;
         if (loadedCount >= collections.length) {

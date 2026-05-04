@@ -25,6 +25,26 @@
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/entities/Booking" },
       "description": "Stores user trip bookings"
+    },
+    "/website/data": {
+      "schema": "object",
+      "description": "General website configuration (hero, facilities, video)"
+    },
+    "/destinations/data": {
+      "schema": "object",
+      "description": "List of all destinations and paths"
+    },
+    "/leaders/data": {
+      "schema": "object",
+      "description": "List of trip leaders"
+    },
+    "/gallery/data": {
+      "schema": "object",
+      "description": "Photo gallery items"
+    },
+    "/openTrips/data": {
+      "schema": "object",
+      "description": "List of scheduled open trips"
     }
   }
 }

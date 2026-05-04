@@ -34,23 +34,29 @@ service cloud.firestore {
     }
 
     function isAdmin() { return isSignedIn() && request.auth.token.email == 'mrachmanfm@gmail.com'; }
-
-    match /appConfig/{document=**} {
+    
+    // Explicitly allow read for anyone on these collections
+    match /website/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
-    
-    match /destinations/{document=**} {
+    match /destinations/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
-    
-    match /tripLeaders/{document=**} {
+    match /leaders/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
-    
-    match /galleryPhotos/{document=**} {
+    match /gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /openTrips/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /appConfig/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
