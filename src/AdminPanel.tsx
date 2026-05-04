@@ -22,7 +22,7 @@ export const AdminPanelModal = ({
   defaultLists: any,
   showToast: (msg: string, type?: 'success' | 'info' | 'error') => void
 }) => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'leaders' | 'gallery' | 'cerita' | 'openTrips' | 'facilities' | 'bookings'>('openTrips');
+  const [activeTab, setActiveTab] = useState<'destinations' | 'leaders' | 'gallery' | 'cerita' | 'openTrips' | 'facilities' | 'bookings' | 'promoCodes'>('openTrips');
   
   if (!isOpen) return null;
 
@@ -57,6 +57,7 @@ export const AdminPanelModal = ({
             <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
             <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
             <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
+            <button onClick={() => setActiveTab('promoCodes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'promoCodes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Kode Promo</button>
             <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Secangkir Cerita</button>
           </div>
           
@@ -68,6 +69,7 @@ export const AdminPanelModal = ({
             {activeTab === 'leaders' && <LeadersAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.leaders} />}
             {activeTab === 'gallery' && <GalleryAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.gallery} />}
             {activeTab === 'facilities' && <FacilitiesAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.facilities} />}
+            {activeTab === 'promoCodes' && <PromoCodesAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cerita' && <CeritaAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultVideo={defaultLists.cerita} />}
           </div>
         </div>
@@ -146,11 +148,17 @@ const BookingsAdmin = ({ showToast }: any) => {
                   <select 
                     value={booking.status} 
                     onChange={(e) => handleStatusUpdate(booking.id, e.target.value)}
-                    className={`text-[10px] font-black uppercase px-4 py-2 rounded-xl outline-none cursor-pointer border-2 ${booking.status === 'confirmed' ? 'bg-art-green text-white border-art-green' : booking.status === 'cancelled' ? 'bg-red-500 text-white border-red-500' : 'bg-white border-art-text'}`}
+                    className={`text-[10px] font-black uppercase px-4 py-2 rounded-xl outline-none cursor-pointer border-2 transition-all ${
+                      booking.status === 'lunas' ? 'bg-art-green text-white border-art-green' : 
+                      booking.status === 'dp' ? 'bg-art-orange text-white border-art-orange' :
+                      booking.status === 'batal' ? 'bg-red-500 text-white border-red-500' : 
+                      'bg-white border-art-text'
+                    }`}
                   >
                     <option value="pending">⏳ Pending</option>
-                    <option value="confirmed">✅ Confirmed</option>
-                    <option value="cancelled">❌ Cancelled</option>
+                    <option value="dp">💰 DP Masuk</option>
+                    <option value="lunas">💳 Lunas</option>
+                    <option value="batal">❌ Batal</option>
                   </select>
                   <button onClick={() => handleDelete(booking.id)} className="p-2 border-2 border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
                     <Trash2 size={16} />
@@ -196,7 +204,7 @@ const BookingsAdmin = ({ showToast }: any) => {
                 <div className="bg-art-bg/50 p-4 rounded-xl border border-art-text/5 flex flex-col justify-between">
                   <div>
                     <span className="text-[10px] font-black uppercase text-art-text/30 block mb-1">Catatan Tambahan:</span>
-                    <p className="text-[11px] font-medium leading-relaxed italic text-art-text/70">"{booking.deskripsi}"</p>
+                    <p className="text-[11px] font-medium leading-relaxed italic text-art-text/70 break-words">"{booking.deskripsi}"</p>
                   </div>
                   <span className="text-[8px] font-black uppercase text-art-text/20 mt-4 text-right">ID: {booking.id}</span>
                 </div>
@@ -210,6 +218,16 @@ const BookingsAdmin = ({ showToast }: any) => {
 };
 
 // Sub-components for Admin
+const INDONESIA_PROVINCES = [
+  "Aceh", "Sumatera Utara", "Sumatera Barat", "Riau", "Kepulauan Riau", "Jambi", "Bengkulu", 
+  "Sumatera Selatan", "Kepulauan Bangka Belitung", "Lampung", "DKI Jakarta", "Jawa Barat", 
+  "Banten", "Jawa Tengah", "DI Yogyakarta", "Jawa Timur", "Bali", "Nusa Tenggara Barat", 
+  "Nusa Tenggara Timur", "Kalimantan Barat", "Kalimantan Tengah", "Kalimantan Selatan", 
+  "Kalimantan Timur", "Kalimantan Utara", "Sulawesi Utara", "Gorontalo", "Sulawesi Tengah", 
+  "Sulawesi Barat", "Sulawesi Selatan", "Sulawesi Tenggara", "Maluku", "Maluku Utara", 
+  "Papua Barat", "Papua", "Papua Tengah", "Papua Pegunungan", "Papua Selatan", "Papua Barat Daya"
+];
+
 const difficultyLevels = ["Pemula", "Pemula-Menengah", "Menengah", "Menengah-Ahli", "Ahli", "Sangat Ahli"];
 const durationLevels = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
 
@@ -661,10 +679,38 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
 
   const handleSave = () => { updateConfig({ openTrips: data }); showToast('Tersimpan!'); };
 
+  const calculateDateRange = (startDate: string, duration: string) => {
+    if (!startDate || !duration) return "";
+    
+    try {
+      const start = new Date(startDate);
+      const days = parseInt(duration.split('H')[0]) || 1;
+      const end = new Date(start);
+      end.setDate(start.getDate() + (days - 1));
+      
+      const formatDay = (date: Date) => date.getDate();
+      const formatMonth = (date: Date) => {
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+        return months[date.getMonth()];
+      };
+
+      if (start.getMonth() === end.getMonth()) {
+        if (days === 1) return `${formatDay(start)} ${formatMonth(start)}`;
+        return `${formatDay(start)}-${formatDay(end)} ${formatMonth(start)}`;
+      } else {
+        return `${formatDay(start)} ${formatMonth(start)} - ${formatDay(end)} ${formatMonth(end)}`;
+      }
+    } catch (e) {
+      return "";
+    }
+  };
+
   const handleMountainSelect = (i: number, mountainName: string) => {
     const dest = config.destinationsData?.find((d: any) => d.name === mountainName);
     const nd = [...data];
     if (dest) {
+      const defaultPath = dest.paths?.[0]?.name || "";
+      const defaultDuration = dest.paths?.[0]?.durations?.[0]?.label || "2H 1M";
       nd[i] = { 
         ...nd[i], 
         name: dest.name, 
@@ -673,9 +719,15 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
         mepo: dest.mepo, 
         beans: dest.beans, 
         image: dest.image,
-        kuotaNum: 15, // Default numeric quota
-        kuota: "15 Pax Tersisa"
+        kuotaNum: 15,
+        kuota: "15 Pax Tersisa",
+        path: defaultPath,
+        duration: defaultDuration
       };
+      
+      if (nd[i].startDate) {
+        nd[i].jadwal = calculateDateRange(nd[i].startDate, defaultDuration);
+      }
     } else {
       nd[i].name = mountainName;
     }
@@ -719,8 +771,11 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
           {expandedIndexes.includes(i) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pr-8 pt-4 border-t border-dashed border-art-text/10 mt-4">
             <div className="flex flex-col sm:col-span-2">
-               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Region / Wilayah</span>
-               <input className="border p-2 rounded text-sm font-bold" value={ot.region} onChange={e => { const nd = [...data]; nd[i].region = e.target.value; setData(nd); }} placeholder="Contoh: Jawa Barat / NTB" />
+               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Provinsi / Wilayah</span>
+               <select className="border p-2 rounded text-sm font-bold" value={ot.region} onChange={e => { const nd = [...data]; nd[i].region = e.target.value; setData(nd); }}>
+                  <option value="">-- Pilih Provinsi --</option>
+                  {INDONESIA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+               </select>
             </div>
             <div className="flex flex-col sm:col-span-2">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Gunung Tujuan</span>
@@ -732,12 +787,31 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
               </select>
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Meeting Point</span>
-              <input className="border p-2 rounded text-sm" value={ot.mepo} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Tanggal Mulai</span>
+              <input 
+                type="date"
+                className="border p-2 rounded text-sm font-bold" 
+                value={ot.startDate || ""} 
+                onChange={e => { 
+                  const date = e.target.value;
+                  const nd = [...data]; 
+                  nd[i].startDate = date; 
+                  nd[i].jadwal = calculateDateRange(date, ot.duration);
+                  setData(nd); 
+                }} 
+              />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jadwal Keberangkatan</span>
-              <input className="border p-2 rounded text-sm font-bold" value={ot.jadwal} onChange={e => { const nd = [...data]; nd[i].jadwal = e.target.value; setData(nd); }} placeholder="Jadwal (cth: 15-16 Ags)" />
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jadwal Keberangkatan (Display)</span>
+              <input className="border p-2 rounded text-sm bg-gray-50 font-bold" value={ot.jadwal} readOnly placeholder="Otomatis (cth: 15-16 Ags)" />
+            </div>
+            <div className="flex flex-col">
+               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Meeting Point</span>
+               <input className="border p-2 rounded text-sm" value={ot.mepo} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
+            </div>
+            <div className="flex flex-col">
+               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Beans (Biji Kopi)</span>
+               <input className="border p-2 rounded text-sm" value={ot.beans} onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }} placeholder="Beans" />
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Sisa Kuota (Numerik)</span>
@@ -774,7 +848,13 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Durasi</span>
-              <select className="border p-2 rounded text-sm" value={ot.duration} onChange={e => { const nd = [...data]; nd[i].duration = e.target.value; setData(nd); }}>
+              <select className="border p-2 rounded text-sm" value={ot.duration} onChange={e => { 
+                  const dur = e.target.value;
+                  const nd = [...data]; 
+                  nd[i].duration = dur; 
+                  nd[i].jadwal = calculateDateRange(ot.startDate, dur);
+                  setData(nd); 
+                }}>
                 <option value="">-- Pilih Durasi --</option>
                 {durationLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
               </select>
@@ -852,3 +932,63 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
     </div>
   )
 }
+
+const PromoCodesAdmin = ({ config, updateConfig, showToast }: any) => {
+  const [data, setData] = useState(config.promoCodes || []);
+
+  const handleSave = () => { updateConfig({ promoCodes: data }); showToast('Tersimpan!'); };
+
+  return (
+    <div className="space-y-6 text-left">
+      <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
+        <p className="text-xs font-bold uppercase text-art-text/60 font-black">Manajemen Kode Promo</p>
+        <div className="flex gap-2">
+           <button onClick={() => {
+             const nd = [{ code: "BARU", discount: 10 }, ...data];
+             setData(nd);
+           }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest font-black">+ Kode Promo</button>
+           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest font-black">Simpan</button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((promo: any, i: number) => (
+          <div key={i} className="bg-white p-4 rounded-xl border-2 border-art-text flex flex-col gap-3 relative">
+            <button onClick={() => {
+              const nd = [...data]; nd.splice(i, 1); setData(nd);
+            }} className="absolute top-2 right-2 text-red-500 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+            
+            <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Kode Promo</label>
+              <input 
+                className="w-full border-2 border-art-text p-2 rounded-lg font-black uppercase text-sm" 
+                value={promo.code} 
+                onChange={e => {
+                  const nd = [...data]; nd[i].code = e.target.value; setData(nd);
+                }} 
+                placeholder="PROMOCODE"
+              />
+            </div>
+            
+            <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Diskon (%)</label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="number"
+                  className="w-full border-2 border-art-text p-2 rounded-lg font-black text-sm" 
+                  value={promo.discount} 
+                  onChange={e => {
+                    const nd = [...data]; nd[i].discount = parseInt(e.target.value) || 0; setData(nd);
+                  }} 
+                  min="0"
+                  max="100"
+                />
+                <span className="font-black text-xl text-art-text">%</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

@@ -14,17 +14,20 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
 
     function isValidBooking(data) {
-      return data.keys().hasAll(['userId', 'nama', 'email', 'wa', 'destinasi', 'durasi', 'jadwal', 'peserta', 'createdAt', 'status'])
-        && data.size() >= 10 && data.size() <= 12
-        && data.userId == request.auth.uid
+      return data.keys().hasAll(['userId', 'nama', 'email', 'wa', 'destinasi', 'jalur', 'durasi', 'jadwal', 'peserta', 'createdAt', 'status', 'type', 'totalPrice'])
+        && data.size() >= 13 && data.size() <= 15
+        && (data.userId == request.auth.uid || isAdmin())
         && data.nama is string && data.nama.size() <= 200
         && data.email is string && data.email.size() <= 200
         && data.wa is string && data.wa.size() <= 100
         && data.destinasi is string && data.destinasi.size() <= 200
+        && data.jalur is string && data.jalur.size() <= 200
         && data.durasi is string && data.durasi.size() <= 100
         && data.jadwal is string && data.jadwal.size() <= 200
-        && data.peserta is string && data.peserta.size() <= 50
+        && (data.peserta is number || data.peserta is string)
         && data.status is string && data.status.size() <= 50
+        && data.type is string && (data.type == 'open' || data.type == 'private')
+        && data.totalPrice is number
         && data.createdAt is timestamp
         && (!('opsionalText' in data) || (data.opsionalText is string && data.opsionalText.size() <= 1000))
         && (!('deskripsi' in data) || (data.deskripsi is string && data.deskripsi.size() <= 2000));
@@ -53,24 +56,19 @@ service cloud.firestore {
     }
 
     match /bookings/{bookingId} {
-      allow get: if isSignedIn() && existing().userId == request.auth.uid && isValidId(bookingId);
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && (existing().userId == request.auth.uid || isAdmin()) && isValidId(bookingId);
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() 
-                    && isValidId(bookingId) 
                     && request.auth.token.email_verified == true
                     && isValidBooking(incoming())
                     && incoming().createdAt == request.time;
       
       allow update: if isSignedIn()
-                    && isValidId(bookingId)
-                    && existing().userId == request.auth.uid
-                    && request.auth.token.email_verified == true
-                    && isValidBooking(incoming())
-                    && incoming().diff(existing()).affectedKeys().hasOnly(['status'])
-                    && incoming().userId == existing().userId
-                    && incoming().createdAt == existing().createdAt;
+                    && (existing().userId == request.auth.uid || isAdmin())
+                    && (isAdmin() || (request.auth.token.email_verified == true && isValidBooking(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['status'])))
+                    && (isAdmin() || (incoming().userId == existing().userId && incoming().createdAt == existing().createdAt));
                     
-      allow delete: if false; // Only admin can delete bookings
+      allow delete: if isAdmin();
     }
   }
 }

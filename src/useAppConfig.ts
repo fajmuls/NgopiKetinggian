@@ -11,6 +11,7 @@ export interface AppConfig {
   teamPhotos?: string[];
   galleryPhotos: any[];
   ceritaVideoUrl: string;
+  promoCodes?: { code: string, discount: number }[];
 }
 
 export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], defaultPhotos: any[]) {
@@ -25,6 +26,10 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     ],
     galleryPhotos: defaultPhotos,
     ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+    promoCodes: [
+      { code: "Ari ganteng", discount: 50 },
+      { code: "Emikari", discount: 10 }
+    ],
     openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",
@@ -70,6 +75,10 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
             "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
           ],
           ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+          promoCodes: [
+            { code: "Ari ganteng", discount: 50 },
+            { code: "Emikari", discount: 10 }
+          ],
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",
@@ -114,6 +123,10 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
           "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
         ],
         ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+        promoCodes: [
+          { code: "Ari ganteng", discount: 50 },
+          { code: "Emikari", discount: 10 }
+        ],
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",
@@ -167,6 +180,10 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
       ],
       ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
+      promoCodes: [
+        { code: "Ari ganteng", discount: 50 },
+        { code: "Emikari", discount: 10 }
+      ],
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",
