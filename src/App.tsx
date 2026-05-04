@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
@@ -36,27 +36,37 @@ function Button({ children, className = '', variant = 'primary', onClick, ...pro
   );
 }
 
-const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string } }) => {
+const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void }) => {
   const { playClick, playHover, playSuccess } = useSound();
   const [showSuccess, setShowSuccess] = useState(false);
   const [user] = useAuthState(auth);
+  const [bookingType, setBookingType] = useState<'selection' | 'form'>(prefill?.destinasi ? 'form' : 'selection');
 
-  const [rentEquipment, setRentEquipment] = useState(false);
-  const [rentClothing, setRentClothing] = useState(false);
+  const [currentType, setCurrentType] = useState<'private' | 'open'>(prefill?.type || 'private');
   
   const [selectedDestinasi, setSelectedDestinasi] = useState(prefill?.destinasi || '');
   const [selectedJalur, setSelectedJalur] = useState(prefill?.jalur || '');
   const [selectedDurasi, setSelectedDurasi] = useState(prefill?.durasi || '');
+  const [selectedJadwal, setSelectedJadwal] = useState(prefill?.jadwal || '');
   const [pesertaCount, setPesertaCount] = useState<number | string>(2);
   const [promoCode, setPromoCode] = useState('');
   
+  const [selectedOpsional, setSelectedOpsional] = useState<string[]>([]);
+
   useEffect(() => {
     if (prefill) {
       setSelectedDestinasi(prefill.destinasi || '');
       setSelectedJalur(prefill.jalur || '');
       setSelectedDurasi(prefill.durasi || '');
+      setSelectedJadwal(prefill.jadwal || '');
+      setCurrentType(prefill.type || 'private');
+      if (prefill.destinasi) setBookingType('form');
     }
   }, [prefill]);
+
+  const handleToggleOption = (opt: string) => {
+    setSelectedOpsional(prev => prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev, opt]);
+  };
 
   let basePricePerPax = 0;
   if (selectedDestinasi && selectedJalur && selectedDurasi && destinationOptions) {
@@ -99,280 +109,214 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill }: { isOpen
     const peserta = formData.get('peserta');
     const deskripsi = formData.get('deskripsi') || 'Tidak ada catatan khusus';
     
-    if (!nama || !wa || !destinasi || !jalur || !durasi || !jadwal || !peserta) {
-      alert("Mohon lengkapi semua data wajib: Nama, WhatsApp, Destinasi, Jalur, Durasi, Tanggal, dan Jumlah Peserta.");
+    if (!nama || !wa || !destinasi || !jalur || !durasi || !selectedJadwal || !peserta) {
+      alert("Mohon lengkapi semua data wajib.");
       return;
     }
 
     const today = new Date();
-    const selectedDate = new Date(jadwal.toString());
-    const diffTime = selectedDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 7) {
-      alert("Jadwal harus minimal H-7 dari hari ini.");
-      return;
+    // Only check H-7 for private trips, Open trips have fixed dates
+    if (currentType === 'private') {
+      const selectedDate = new Date(selectedJadwal.toString());
+      const diffTime = selectedDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays < 7) {
+        alert("Jadwal private trip harus minimal H-7 dari hari ini.");
+        return;
+      }
     }
-
-    
-    let opsionalSelected = [];
-    const mainOpsional = formData.getAll('opsional_main');
-    
-    if (mainOpsional.includes('Penjemputan / Transportasi')) opsionalSelected.push('Penjemputan / Transportasi');
-    if (mainOpsional.includes('Lainnya')) opsionalSelected.push('Lainnya');
-
-    if (rentEquipment) {
-      const equipItems = ['Jaket Gunung', 'Sepatu Trekking', 'Ransel', 'Headlamp'].map(item => {
-        const qty = formData.get(`qty_${item}`);
-        if (formData.get(`chk_${item}`) && qty && Number(qty) > 0) return `${item} (${qty})`;
-        return null;
-      }).filter(Boolean);
-      if (equipItems.length > 0) opsionalSelected.push(`Sewa Peralatan: ${equipItems.join(', ')}`);
-    }
-
-    if (rentClothing) {
-      const clothItems = ['Pakaian Tebal', 'Sarung Tangan Extra', 'Kupluk / Topi Gunung'].map(item => {
-        const qty = formData.get(`qty_${item}`);
-        if (formData.get(`chk_${item}`) && qty && Number(qty) > 0) return `${item} (${qty})`;
-        return null;
-      }).filter(Boolean);
-      if (clothItems.length > 0) opsionalSelected.push(`Sewa Pakaian: ${clothItems.join(', ')}`);
-    }
-    
-    const opsionalText = opsionalSelected.length > 0 ? opsionalSelected.join(' | ') : 'Tidak ada tambahan';
     
     if (user) {
       try {
         await addDoc(collection(db, 'bookings'), {
           userId: user.uid,
-          nama,
-          email: emailStr,
-          wa,
-          destinasi: `${destinasi} (${jalur})`,
-          durasi,
-          jadwal,
-          peserta,
-          opsionalText,
+          nama, email: emailStr, wa,
+          destinasi, jalur,
+          durasi, jadwal: selectedJadwal, peserta,
+          opsionalText: selectedOpsional.join(' | ') || 'Tidak ada',
           deskripsi,
+          type: currentType,
+          totalPrice: netPrice,
           createdAt: serverTimestamp(),
           status: 'pending'
         });
+
+        // Automatic Quota reduction for Open Trips
+        if (currentType === 'open' && config) {
+           const updatedOpenTrips = (config.openTrips || []).map((ot: any) => {
+              if (ot.name === destinasi && ot.jadwal === selectedJadwal) {
+                 const currentKuota = typeof ot.kuotaNum === 'number' ? ot.kuotaNum : 10;
+                 const newKuota = Math.max(0, currentKuota - Number(peserta));
+                 return { ...ot, kuotaNum: newKuota, kuota: `${newKuota} Pax Tersisa` };
+              }
+              return ot;
+           });
+           updateConfig({ openTrips: updatedOpenTrips });
+        }
       } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, 'bookings');
       }
     }
 
-    const text = `Halo Admin Trip Ngopi di Ketinggian! 🏕️
-
-Saya tertarik untuk booking trip, berikut detail pesanan saya:
-
-*Data Pemesan*
-• Nama: ${nama}
-• No WhatsApp: ${wa}
-• Email: ${emailStr}
-
-*Detail Trip*
-• Destinasi: *${destinasi} (${jalur})*
-• Durasi: ${durasi}
-• Rencana Tanggal: ${jadwal}
-• Jumlah Peserta: ${peserta} Pax
-
-*Promo & Biaya*
-• Kode Promo: ${promoCode ? promoCode + (isPromoValid ? ` (Valid - Diskon ${discountRate * 100}%)` : ' (Tidak Valid)') : '-'}
-• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${(isPromoValid && grossPrice > 0) ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}
-
-*Opsi Tambahan (Opsional)*
-${opsionalSelected.length > 0 ? opsionalSelected.map(opt => `• ${opt}`).join('\n') : '• Tidak ada tambahan (Bawa perlengkapan sendiri)'}
-
-*Catatan Khusus / Kesehatan*
-_${deskripsi}_
-
-Mohon info untuk ketersediaan jadwal serta total biayanya ya min.
-Terima kasih! 🙏`;
-    const waText = encodeURIComponent(text);
-
+    const text = `Halo Admin Trip Ngopi! 🏕️\n\nBooking: *${currentType.toUpperCase()} TRIP*\nDestinasi: *${destinasi} (${jalur})*\nNama: ${nama}\nWA: ${wa}\nJadwal: ${jadwal}\nOpsional: ${selectedOpsional.join(', ') || '-'}\nEstimasi: Rp ${netPrice.toLocaleString('id-ID')}`;
+    window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(text)}`, '_blank');
+    
     playSuccess();
     setShowSuccess(true);
-    
-    // Open WA next
-    window.open(`https://wa.me/6282127533268?text=${waText}`, '_blank');
-    
-    setTimeout(() => {
-      setShowSuccess(false);
-      onClose();
-    }, 1500);
+    setTimeout(() => { setShowSuccess(false); onClose(); }, 1500);
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-bg w-full max-w-lg rounded-2xl p-6 md:p-8 border-2 border-art-text relative max-h-[90vh] overflow-y-auto">
-        <button onClick={(e) => { playClick(); onClose(); e.preventDefault(); setShowSuccess(false); }} className="absolute top-4 right-4 text-art-text hover:text-art-orange transition-colors" type="button">
-          <X size={24} />
-        </button>
+        <button onClick={() => { playClick(); onClose(); }} className="absolute top-4 right-4 text-art-text hover:text-art-orange transition-colors"><X size={24} /></button>
+        
         {showSuccess ? (
           <div className="text-center py-12 flex flex-col items-center justify-center">
-            <div className="w-20 h-20 bg-art-green/20 text-art-green rounded-full flex items-center justify-center mb-6">
-              <CheckCircle2 size={48} />
-            </div>
-            <h3 className="text-2xl font-black uppercase tracking-tight text-art-text mb-3">Pesanan Diterima!</h3>
-            <p className="font-medium text-art-text/80 mb-6 text-sm">Permintaan Anda sedang dialihkan ke WhatsApp Admin...</p>
+            <div className="w-20 h-20 bg-art-green/20 text-art-green rounded-full flex items-center justify-center mb-6"><CheckCircle2 size={48} /></div>
+            <h3 className="text-2xl font-black uppercase text-art-text mb-3">Pesanan Terkirim!</h3>
+          </div>
+        ) : bookingType === 'selection' ? (
+          <div className="pt-4">
+             <h3 className="text-2xl font-black uppercase tracking-tight text-art-text mb-2">Pilih Jenis Trip</h3>
+             <p className="text-xs font-bold text-art-text/60 mb-8 uppercase tracking-widest leading-loose">Pilih bagaimana cara kamu ingin menjelajah bersama kami.</p>
+             <div className="grid grid-cols-1 gap-4">
+                <button 
+                  onClick={() => { playClick(); setCurrentType('private'); setBookingType('form'); }}
+                  className="group bg-white p-6 rounded-2xl border-2 border-art-text hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all text-left"
+                >
+                   <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 bg-art-orange text-white rounded-xl shadow-sm"><Users size={24}/></div>
+                      <ChevronRight className="text-art-text/20 group-hover:text-art-orange transition-colors" />
+                   </div>
+                   <h4 className="text-xl font-black uppercase text-art-text mb-1">Book Private Trip</h4>
+                   <p className="text-xs font-medium text-art-text/50">Atur sendiri jadwal, jalur, dan kawan perjalananmu.</p>
+                </button>
+                <button 
+                  onClick={() => { playClick(); setCurrentType('open'); setBookingType('form'); }}
+                  className="group bg-white p-6 rounded-2xl border-2 border-art-text hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all text-left"
+                >
+                   <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 bg-art-green text-white rounded-xl shadow-sm"><Calendar size={24}/></div>
+                      <ChevronRight className="text-art-text/20 group-hover:text-art-green transition-colors" />
+                   </div>
+                   <h4 className="text-xl font-black uppercase text-art-text mb-1">Book Open Trip</h4>
+                   <p className="text-xs font-medium text-art-text/50">Gabung dengan pendaki lain di jadwal yang tersedia.</p>
+                </button>
+             </div>
           </div>
         ) : (
-          <>
-            <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-art-text mb-6">Booking Trip</h3>
-            <form className="space-y-4" onSubmit={handleBooking}>
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Nama Lengkap</label>
-            <input name="nama" required type="text" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Alamat Email (Opsional)</label>
-            <input name="email" type="email" defaultValue={user?.email || ''} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Nomor WhatsApp</label>
-            <input name="wa" required type="tel" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Destinasi</label>
-            <select name="destinasi" required value={selectedDestinasi} onChange={e => { setSelectedDestinasi(e.target.value); setSelectedJalur(''); setSelectedDurasi(''); }} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm">
-              <option value="">-- Pilih Destinasi --</option>
-              {destinationOptions ? destinationOptions.map((dest, i) => (
-                <option key={i} value={dest.name}>{dest.name}</option>
-              )) : null}
-            </select>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Jalur</label>
-              <select name="jalur" required value={selectedJalur} onChange={e => { setSelectedJalur(e.target.value); setSelectedDurasi(''); }} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm disabled:bg-gray-100 disabled:opacity-50" disabled={!selectedDestinasi}>
-                <option value="">-- Pilih Jalur --</option>
-                {selectedDestinasi && destinationOptions && (
-                  destinationOptions.find(d => d.name === selectedDestinasi)?.paths?.map((p: any, i: number) => (
-                    <option key={i} value={p.name}>{p.name}</option>
-                  ))
-                )}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Pilih Durasi</label>
-              <select name="durasi" required value={selectedDurasi} onChange={e => setSelectedDurasi(e.target.value)} className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm disabled:bg-gray-100 disabled:opacity-50" disabled={!selectedJalur}>
-                <option value="">-- Pilih Durasi --</option>
-                {selectedJalur && selectedDestinasi && destinationOptions && (
-                  destinationOptions.find(d => d.name === selectedDestinasi)?.paths?.find(p => p.name === selectedJalur)?.durations?.map((dur: any, i: number) => (
-                    <option key={i} value={dur.label}>{dur.label}</option>
-                  ))
-                )}
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jadwal (Min. H-7)</label>
-            <input name="jadwal" required type="date" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
-            <p className="text-[10px] mt-1 text-art-text/60 italic">*Jadwal pasti dapat didiskusikan setelah booking.</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jumlah Peserta</label>
-              <input name="peserta" required type="number" min="1" value={pesertaCount} onChange={e => setPesertaCount(e.target.value === '' ? '' : (parseInt(e.target.value) || 1))} className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm" />
-              <p className="text-[10px] mt-1 text-art-text/60 italic">*Kuota min/max bervariasi.</p>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Kode Promo</label>
-              <input type="text" value={promoCode} onChange={e => setPromoCode(e.target.value)} placeholder="Contoh: KODEPROMO" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm uppercase" />
-              {promoCode.length > 0 && (
-                 isPromoValid ? (
-                   <p className="text-[10px] mt-1 text-green-600 font-bold">Promo Valid! Diskon {discountRate * 100}%</p>
-                 ) : (
-                   <p className="text-[10px] mt-1 text-red-500 font-bold">Promo Tidak Valid</p>
-                 )
-              )}
-            </div>
-          </div>
-          {basePricePerPax > 0 && (
-            <div className="bg-art-section border-2 border-art-text p-4 rounded-xl mt-4">
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-art-text/80 mb-2">Estimasi Biaya Paket:</h4>
-              <div className="flex justify-between items-center mb-1 text-sm">
-                 <span>Rp {(basePricePerPax).toLocaleString('id-ID')} x {currentPesertaCount || 0} Pax</span>
-                 <span className="font-bold">Rp {grossPrice.toLocaleString('id-ID')}</span>
-              </div>
-              {isPromoValid && (
-                <div className="flex justify-between items-center mb-1 text-sm text-green-600">
-                   <span>Diskon Promo ({discountRate * 100}%)</span>
-                   <span className="font-bold">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+          <form className="space-y-4 pt-2" onSubmit={handleBooking}>
+             <button type="button" onClick={() => setBookingType('selection')} className="text-[10px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1"><ChevronRight size={12} className="rotate-180" /> Kembali ke Pilihan</button>
+             <h3 className="text-2xl font-black uppercase text-art-text mb-1">Detail Pemesanan</h3>
+             <p className="text-[10px] font-bold text-art-text/40 uppercase mb-6 tracking-widest italic">{currentType} Trip Adventure</p>
+             
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Nama Lengkap</label>
+                  <input name="nama" required type="text" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-bold outline-none focus:border-art-orange text-sm" />
+               </div>
+               <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">WhatsApp</label>
+                  <input name="wa" required type="tel" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-bold outline-none focus:border-art-orange text-sm" />
+               </div>
+             </div>
+
+             <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Email</label>
+                <input name="email" required type="email" className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-bold outline-none focus:border-art-orange text-sm" placeholder="example@mail.com" />
+             </div>
+
+             <div className="bg-yellow-50 p-4 border-2 border-yellow-200 rounded-xl mb-4">
+                <p className="text-[10px] font-bold text-yellow-800 uppercase tracking-widest mb-1 flex items-center gap-1"><BellRing size={12}/> Penting</p>
+                <p className="text-[10px] text-yellow-700/80 leading-relaxed">* Harga di atas belum termasuk layanan tambahan (Opsional). Untuk request khusus lainnya, tim kami akan menghubungi via WhatsApp.</p>
+             </div>
+
+             <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Destinasi</label>
+                <select 
+                  name="destinasi" 
+                  required 
+                  value={selectedDestinasi} 
+                  onChange={e => { setSelectedDestinasi(e.target.value); setSelectedJalur(''); }} 
+                  className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-bold outline-none focus:border-art-orange text-sm disabled:bg-gray-100"
+                  disabled={currentType === 'open'}
+                >
+                   <option value="">-- Pilih Gunung --</option>
+                   {destinationOptions?.map((d, i) => <option key={i} value={d.name}>{d.name}</option>)}
+                </select>
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Jalur (Via)</label>
+                  <select 
+                    name="jalur" 
+                    required 
+                    value={selectedJalur} 
+                    onChange={e => { setSelectedJalur(e.target.value); setSelectedDurasi(''); }} 
+                    className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-bold outline-none focus:border-art-orange text-sm disabled:bg-gray-100" 
+                    disabled={!selectedDestinasi || currentType === 'open'}
+                  >
+                    <option value="">-- Pilih --</option>
+                    {selectedDestinasi && destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.map((p: any) => <option key={p.name} value={p.name}>{p.name}</option>)}
+                  </select>
                 </div>
-              )}
-              <div className="flex justify-between items-center mt-2 pt-2 border-t border-art-text/20 text-lg font-black">
-                 <span>Subtotal Biaya</span>
-                 <span className="text-art-orange">Rp {netPrice.toLocaleString('id-ID')}</span>
-              </div>
-              <p className="text-[9px] text-art-text/60 mt-1">*Harga di atas belum termasuk penambahan opsional.</p>
-              <p className="text-[9px] text-art-text/60 mt-0.5 font-bold">*Nanti admin akan mengkonfirmasi harga kembali kepada Anda.</p>
-            </div>
-          )}
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Catatan Tambahan (Kondisi Khusus / Kesehatan)</label>
-            <textarea name="deskripsi" rows={2} placeholder="Mohon isi deskripsi ini jika ada kebutuhan personal atau kendala/penyakit bawaan." className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-medium outline-none focus:border-art-orange text-sm"></textarea>
-          </div>
-          <div className="border-t border-art-text/20 pt-4 mt-2">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-2">Tambahan Opsional (Di luar paket, dikenakan biaya tambahan)</label>
-            <div className="space-y-3">
-              
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-art-text cursor-pointer hover:text-art-orange mb-1">
-                  <input type="checkbox" checked={rentEquipment} onChange={(e) => setRentEquipment(e.target.checked)} className="w-4 h-4 text-art-orange border-art-text rounded" />
-                  Sewa Peralatan Gunung
-                </label>
-                {rentEquipment && (
-                  <div className="pl-6 mt-2 text-xs space-y-2">
-                    {['Jaket Gunung', 'Sepatu Trekking', 'Ransel', 'Headlamp'].map(item => (
-                      <div key={item} className="flex items-center gap-3">
-                         <input type="checkbox" name={`chk_${item}`} value="yes" className="w-3 h-3 text-art-orange rounded" />
-                         <span className="w-24 text-art-text/80">{item}</span>
-                         <input type="number" name={`qty_${item}`} min="1" defaultValue="1" className="w-12 border border-art-text/30 rounded px-1 py-0.5 text-center bg-white" />
-                         <span className="text-art-text/50">pcs</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                <div>
+                   <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Durasi</label>
+                   <select 
+                    name="durasi" 
+                    required 
+                    value={selectedDurasi} 
+                    onChange={e => setSelectedDurasi(e.target.value)} 
+                    className="w-full border-2 border-art-text bg-white px-2 py-2 rounded-lg text-art-text font-bold outline-none focus:border-art-orange text-sm disabled:bg-gray-100" 
+                    disabled={!selectedJalur || currentType === 'open'}
+                  >
+                    <option value="">-- Pilih --</option>
+                    {selectedJalur && destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.map((d: any) => <option key={d.label} value={d.label}>{d.label}</option>)}
+                   </select>
+                </div>
+             </div>
+             
+             <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Tanggal Rencana</label>
+                <input 
+                  name="jadwal" 
+                  required 
+                  type={currentType === 'open' ? 'text' : 'date'} 
+                  value={selectedJadwal}
+                  onChange={e => setSelectedJadwal(e.target.value)}
+                  readOnly={currentType === 'open'}
+                  className="w-full border-2 border-art-text bg-white px-3 py-2 rounded-lg text-art-text font-bold outline-none focus:border-art-orange text-sm disabled:bg-gray-100" 
+                />
+             </div>
 
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-art-text cursor-pointer hover:text-art-orange mb-1">
-                  <input type="checkbox" checked={rentClothing} onChange={(e) => setRentClothing(e.target.checked)} className="w-4 h-4 text-art-orange border-art-text rounded" />
-                  Sewa Pakaian Khusus
-                </label>
-                {rentClothing && (
-                  <div className="pl-6 mt-2 text-xs space-y-2">
-                    {['Pakaian Tebal', 'Sarung Tangan Extra', 'Kupluk / Topi Gunung'].map(item => (
-                      <div key={item} className="flex items-center gap-3">
-                         <input type="checkbox" name={`chk_${item}`} value="yes" className="w-3 h-3 text-art-orange rounded" />
-                         <span className="w-32 text-art-text/80">{item}</span>
-                         <input type="number" name={`qty_${item}`} min="1" defaultValue="1" className="w-12 border border-art-text/30 rounded px-1 py-0.5 text-center bg-white" />
-                         <span className="text-art-text/50">pcs</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+             <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-1">Layanan Opsional (Add-on)</label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                   {facilities?.opsi?.map((opt: string, i: number) => (
+                      <button 
+                        key={i} 
+                        type="button" 
+                        onClick={() => handleToggleOption(opt)}
+                        className={`text-[9px] font-black uppercase px-2 py-1.5 rounded-md border-2 transition-all ${selectedOpsional.includes(opt) ? 'bg-art-orange text-white border-art-orange' : 'bg-white text-art-text border-art-text/10 hover:border-art-text/30'}`}
+                      >
+                         {opt}
+                      </button>
+                   ))}
+                </div>
+             </div>
 
-              <label className="flex items-center gap-2 text-sm font-medium text-art-text cursor-pointer hover:text-art-orange">
-                <input type="checkbox" name="opsional_main" value="Penjemputan / Transportasi" className="w-4 h-4 text-art-orange border-art-text rounded" />
-                Penjemputan / Transportasi
-              </label>
+             <div className="bg-art-orange/5 p-4 rounded-xl border border-dashed border-art-orange/30">
+                <div className="flex justify-between items-baseline mb-1">
+                   <span className="text-[10px] font-black uppercase text-art-orange whitespace-nowrap">Estimasi Biaya p/Pax</span>
+                   <span className="text-xl font-black text-art-text">Rp {netPrice.toLocaleString('id-ID')}</span>
+                </div>
+                <p className="text-[8px] font-bold text-art-text/40 uppercase">Dihitung berdasarkan destinasi, jalur, dan durasi pilihan.</p>
+             </div>
 
-              <label className="flex items-center gap-2 text-sm font-medium text-art-text cursor-pointer hover:text-art-orange">
-                <input type="checkbox" name="opsional_main" value="Lainnya" className="w-4 h-4 text-art-orange border-art-text rounded" />
-                Lainnya (Unspecified)
-              </label>
-
-            </div>
-          </div>
-          <Button variant="primary" className="w-full mt-6 py-4 uppercase text-[10px] tracking-widest" type="submit">
-            Kirim Permintaan Ke WhatsApp
-          </Button>
-        </form>
-          </>
+             <Button type="submit" className="w-full py-4 text-xs font-black uppercase tracking-[0.2em] mt-4">Kirim Pesanan ke WhatsApp</Button>
+          </form>
         )}
       </motion.div>
     </div>
@@ -918,14 +862,113 @@ const heroSlides = [
   }
 ];
 
-const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destinasi: string, jalur: string, durasi: string) => void }> = ({ dest, visibilities, onBook }) => {
+const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void }> = ({ ot, onJoin }) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const { playClick, playHover } = useSound();
+  
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col">
+      <div className="h-56 relative overflow-hidden border-b-2 border-art-text">
+        <img src={ot.image} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
+        <div className="absolute top-4 left-4 bg-art-green text-white text-[9px] font-black px-2 py-1 rounded border border-white/20 uppercase shadow-sm">{ot.jadwal}</div>
+        <div className="absolute top-4 right-4 bg-white text-art-text text-[9px] font-black px-2 py-1 rounded border border-art-text/10 uppercase shadow-sm">{ot.difficulty}</div>
+        <div className="absolute bottom-4 left-4 bg-white/10 backdrop-blur-sm px-2 py-1 rounded text-[8px] font-bold text-white uppercase tracking-widest border border-white/20">
+           {ot.kuota || 'Limited'}
+        </div>
+      </div>
+      <div className="p-6 flex-1 flex flex-col">
+         <div className="flex justify-between items-center mb-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-art-text/40">{ot.region}</span>
+            <span className="text-[9px] font-black text-art-green flex items-center gap-1 uppercase"><Map size={10}/> {ot.path}</span>
+         </div>
+         <h3 className="text-2xl font-black uppercase text-art-text mb-4 leading-tight">{ot.name}</h3>
+         
+         <div className="grid grid-cols-2 gap-3 mb-6 bg-art-bg/50 p-3 rounded-xl border border-art-text/5">
+            <div className="flex items-center gap-2">
+               <MapPin size={12} className="text-art-orange" />
+               <span className="text-[9px] font-bold uppercase truncate">{ot.mepo || "Basecamp"}</span>
+            </div>
+            <div className="flex items-center gap-2">
+               <Calendar size={12} className="text-art-green" />
+               <span className="text-[9px] font-bold uppercase">{ot.duration || "N/A"}</span>
+            </div>
+         </div>
+
+         <div className="flex items-center gap-2 mb-6 text-art-text/60">
+           <div className="bg-art-bg p-1.5 rounded-full">
+             <Coffee size={12} className="text-art-green" />
+           </div>
+           <span className="text-[9px] font-bold uppercase tracking-wider">{ot.beans || "Premium Blend"}</span>
+         </div>
+
+         <AnimatePresence>
+            {showDetails && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden mb-6 border-t border-dashed border-art-text/10 pt-4"
+              >
+                 <p className="text-[10px] font-medium text-art-text/70 mb-4 italic leading-relaxed">{ot.desc || "Nikmati petualangan bersama pendaki lain di gunung yang memukau ini."}</p>
+                 <div className="space-y-2">
+                    <div className="flex justify-between text-[9px] font-bold uppercase">
+                       <span className="text-art-text/40">Kesulitan</span>
+                       <span className="text-art-text">{ot.difficulty}</span>
+                    </div>
+                    <div className="flex justify-between text-[9px] font-bold uppercase">
+                       <span className="text-art-text/40">Sajian Kopi</span>
+                       <span className="text-art-text">{ot.beans || 'V60 / Tubruk'}</span>
+                    </div>
+                    <div className="flex justify-between text-[9px] font-bold uppercase">
+                       <span className="text-art-text/40">Meeting Point</span>
+                       <span className="text-art-text">{ot.mepo || 'Basecamp'}</span>
+                    </div>
+                 </div>
+              </motion.div>
+            )}
+         </AnimatePresence>
+
+         <div className="mt-auto pt-4 border-t border-dashed border-art-text/10 flex flex-col gap-4">
+           <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                 {ot.originalPrice > 0 && <span className="text-[9px] text-art-text/30 line-through">Rp {(ot.originalPrice * 1000).toLocaleString('id-ID')}</span>}
+                 <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-black text-art-orange leading-none">Rp {(ot.price * 1000).toLocaleString('id-ID')}</span>
+                    <span className="text-[8px] font-bold text-art-text/40 uppercase">/Pax</span>
+                 </div>
+              </div>
+              <Button 
+                variant="secondary" 
+                onClick={() => { playClick(); setShowDetails(!showDetails); }}
+                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest border-2"
+              >
+                {showDetails ? 'Tutup' : 'Detail'}
+              </Button>
+           </div>
+           <Button 
+             onClick={() => {
+               onJoin(ot.name, ot.path, ot.duration, 'open', ot.jadwal);
+               setShowDetails(false);
+             }} 
+             variant="primary" 
+             className="w-full py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none transition-all"
+           >
+             Join Trip
+           </Button>
+         </div>
+      </div>
+    </motion.div>
+  );
+};
+const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destinasi: string, jalur: string, durasi: string, type: 'private' | 'open') => void }> = ({ dest, visibilities, onBook }) => {
+  const [showDetails, setShowDetails] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
   
   const safePaths = dest.paths && dest.paths.length > 0 ? dest.paths : [{ name: "Jalur Utama", durations: dest.durations || [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] }];
   const currentPath = safePaths[selectedPath] || safePaths[0];
   
   const [selectedDuration, setSelectedDuration] = useState(currentPath.durations?.findIndex((d: any) => d.label === '2H 1M') >= 0 ? currentPath.durations.findIndex((d: any) => d.label === '2H 1M') : 0);
-  const { playHover } = useSound();
+  const { playHover, playClick } = useSound();
   
   useEffect(() => {
     if (currentPath.durations && selectedDuration >= currentPath.durations.length) {
@@ -938,108 +981,115 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
   
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8 }}
-      className="group relative bg-white overflow-hidden border-2 border-art-text flex flex-col lg:flex-row hover:shadow-[16px_16px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 mt-12"
+      viewport={{ once: true }}
+      className="group bg-white border-2 border-art-text rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300"
     >
-      <div className="order-2 lg:order-1 lg:w-1/2 relative overflow-hidden h-64 lg:h-auto border-t-2 lg:border-t-0 lg:border-r-2 border-art-text">
-        <img 
-          src={dest.image} 
-          alt={dest.name} 
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 grayscale-[10%]"
-        />
-        <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-white border-2 border-art-text px-3 py-1.5 md:px-4 md:py-2 uppercase font-bold text-[10px] tracking-widest text-art-text flex gap-2 items-center">
-          <Tent size={14}/> {dest.locationTag}
-        </div>
+      <div className="relative h-64 overflow-hidden border-b-2 border-art-text">
+        <img src={dest.image} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+        <div className="absolute top-4 right-4 bg-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
+        <div className="absolute top-4 left-4 bg-art-orange text-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.difficulty}</div>
       </div>
-      <div className="order-1 lg:order-2 lg:w-1/2 p-6 lg:p-12 flex flex-col justify-between bg-art-section">
-        <div>
-          <div className="flex gap-3 mb-8">
-            <span className="bg-white text-art-text border border-art-text text-[10px] tracking-widest uppercase font-bold px-4 py-1.5 rounded-full">{dest.difficulty}</span>
-          </div>
-          <h3 className="text-3xl font-serif italic text-art-text mb-4">{dest.name} <span className="font-sans font-black normal-case block mt-2 text-4xl">{dest.height}</span></h3>
-          <p className="font-medium text-art-text/80 mb-6 leading-relaxed">{dest.desc}</p>
-          
-          <div className="mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-3">Pilihan Jalur:</p>
-            <div className="flex flex-wrap gap-2">
-              {safePaths.map((p: any, idx: number) => (
-                <button 
-                  key={idx}
-                  onClick={() => setSelectedPath(idx)}
-                  onMouseEnter={playHover}
-                  className={`text-[10px] tracking-widest uppercase font-bold px-4 py-2 rounded-lg border-2 transition-all ${selectedPath === idx ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/20 hover:border-art-text'}`}
-                >
-                  {p.name}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <div className="mb-8">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50 mb-3">Pilihan Durasi Trip:</p>
-            <div className="flex flex-wrap gap-2">
-              {safeDurations.map((dur: any, idx: number) => (
-                <button 
-                  key={idx}
-                  onClick={() => setSelectedDuration(idx)}
-                  onMouseEnter={playHover}
-                  className={`text-[10px] tracking-widest uppercase font-bold px-4 py-2 rounded-lg border-2 transition-all ${selectedDuration === idx ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/20 hover:border-art-text'}`}
-                >
-                  {dur.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-4 md:gap-x-8 mb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
-              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Calendar className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jadwal</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">Sesuai Permintaan</p></div>
-            </div>
-            {visibilities?.map !== false && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
-              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Map className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Mepo</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.mepo || '-'}</p></div>
-            </div>
-            )}
-            {visibilities?.quota !== false && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
-              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Users className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Kuota</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.kuota || '-'}</p></div>
-            </div>
-            )}
-            {visibilities?.beans !== false && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4" onMouseEnter={playHover}>
-              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Coffee className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Beans</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{dest.beans || '-'}</p></div>
-            </div>
-            )}
-            {visibilities?.routes !== false && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 col-span-2 lg:col-span-1" onMouseEnter={playHover}>
-              <div className="w-8 h-8 md:w-10 md:h-10 border border-art-text rounded-full flex items-center justify-center"><Map className="text-art-text" size={14} /></div>
-              <div><p className="text-[10px] font-bold uppercase tracking-widest text-art-text/50">Jalur</p><p className="font-bold text-art-text text-xs md:text-sm mt-1">{currentPath.name}</p></div>
-            </div>
-            )}
-          </div>
-          <div className="mb-10 text-[10px] text-art-text/60 font-medium italic border-l-2 border-art-orange pl-3">
-            *Jika pesanan melebihi kuota maksimal atau ingin custom jalur pendakian, silakan chat via Admin. Harga akan disesuaikan.
-          </div>
+      <div className="p-6 md:p-8">
+        <div className="flex justify-between items-end mb-4">
+           <div>
+              <h3 className="text-2xl font-black uppercase text-art-text tracking-tight mb-1">{dest.name}</h3>
+              <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">{dest.height} MDPL</p>
+           </div>
+           <div className="text-right">
+              <p className="text-[10px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>
+              <p className="text-2xl font-black text-art-text">Rp {dest.paths?.[0]?.durations?.[0]?.price || '0'}k</p>
+           </div>
         </div>
-        <div className="border-t-2 border-art-text pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-               <p className="text-[10px] uppercase font-bold tracking-widest text-art-orange">Harga ({currentDur?.label})</p>
-               <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">Diskon</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <p className="text-sm font-bold text-art-text/40 line-through">Rp {currentDur?.originalPrice}k</p>
-              <p className="text-2xl md:text-3xl font-black text-art-text drop-shadow-sm">Rp {currentDur?.price}k<span className="text-[10px] md:text-xs font-bold uppercase text-art-text/60 ml-1">/pax</span></p>
-            </div>
-            <p className="text-[10px] mt-2 text-art-text/60 max-w-sm hidden md:block">Harga sudah termasuk fasilitas lengkap dan pemandu perjalanan yang ahli. Pesan sekarang untuk amankan slot.</p>
-          </div>
-          <Button onClick={() => onBook(dest.name, currentPath.name, currentDur?.label || "")} variant="primary" className="w-full sm:w-auto text-[10px] uppercase tracking-widest px-8 md:px-10 py-3 md:py-4 rounded-lg bg-art-orange hover:bg-art-text">Booking Trip</Button>
+
+        <p className="text-xs font-medium text-art-text/70 mb-6 leading-relaxed line-clamp-2">{dest.desc}</p>
+
+        <div className="flex flex-col gap-3">
+           <Button 
+            variant="secondary" 
+            className="w-full py-4 text-[10px] font-black uppercase tracking-widest border-2"
+            onClick={() => { playClick(); setShowDetails(!showDetails); }}
+           >
+             {showDetails ? 'Tutup Detail' : 'Lihat Detail Trip'}
+           </Button>
+
+           <AnimatePresence>
+             {showDetails && (
+               <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden space-y-6 pt-4 border-t-2 border-dashed border-art-text/10"
+               >
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-art-text/40 mb-2">Pilihan Jalur:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {safePaths.map((p: any, idx: number) => (
+                          <button 
+                            key={idx}
+                            onClick={() => { playClick(); setSelectedPath(idx); }}
+                            className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border-2 transition-all ${selectedPath === idx ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/10 hover:border-art-text/30'}`}
+                          >
+                            {p.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-art-text/40 mb-2">Pilihan Durasi:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {safeDurations.map((dur: any, idx: number) => (
+                          <button 
+                            key={idx}
+                            onClick={() => { playClick(); setSelectedDuration(idx); }}
+                            className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border-2 transition-all ${selectedDuration === idx ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/10 hover:border-art-text/30'}`}
+                          >
+                            {dur.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-art-text/5">
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-art-green/10 flex items-center justify-center text-art-green"><Users size={14}/></div>
+                          <div><p className="text-[8px] font-black uppercase text-art-text/40">Min Kuota</p><p className="text-xs font-black">2 Orang</p></div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-art-orange/10 flex items-center justify-center text-art-orange"><MapPin size={14}/></div>
+                          <div><p className="text-[8px] font-black uppercase text-art-text/40">MePo</p><p className="text-xs font-black truncate max-w-[80px]">{dest.mepo || 'Basecamp'}</p></div>
+                       </div>
+                    </div>
+
+                    <div className="bg-art-orange/5 p-4 rounded-xl border border-dashed border-art-orange/20">
+                       <div className="flex justify-between items-center mb-1">
+                          <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
+                          <div className="flex items-center gap-2">
+                             {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
+                             <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
+                          </div>
+                       </div>
+                       <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Per Orang (Min. 2 Pax)</p>
+                    </div>
+
+                    <Button 
+                      variant="primary" 
+                      className="w-full py-4 text-xs font-black uppercase tracking-[0.2em] bg-art-orange shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none transition-all"
+                      onClick={() => {
+                        onBook(dest.name, currentPath.name, currentDur?.label || "", "private");
+                        setShowDetails(false);
+                      }}
+                    >
+                      Booking Private Trip
+                    </Button>
+                  </div>
+               </motion.div>
+             )}
+           </AnimatePresence>
         </div>
       </div>
     </motion.div>
@@ -1199,10 +1249,20 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [bookingPrefill, setBookingPrefill] = useState({ destinasi: '', jalur: '', durasi: '' });
+  const [bookingPrefill, setBookingPrefill] = useState({ destinasi: '', jalur: '', durasi: '', type: 'private' as 'private' | 'open', jadwal: '' });
   const [filterDifficulty, setFilterDifficulty] = useState('Semua');
+  const [filterRegion, setFilterRegion] = useState('Semua');
+  const [openFilterRegion, setOpenFilterRegion] = useState('Semua');
+  const [openFilterDifficulty, setOpenFilterDifficulty] = useState('Semua');
+  const difficultyOptions = ["Semua", "Pemula", "Pemula-Menengah", "Menengah", "Menengah-Ahli", "Ahli", "Sangat Ahli"];
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [toast, setToast] = useState<{ msg: string, type: 'success' | 'info' | 'error' } | null>(null);
+
+  const showToastMsg = (msg: string, type: 'success' | 'info' | 'error' = 'info') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('appTheme') || 'default';
@@ -1253,9 +1313,11 @@ export default function App() {
     }
   };
 
-  const handleOpenBooking = (destinasi = '', jalur = '', durasi = '') => {
-    setBookingPrefill({ destinasi, jalur, durasi });
+  const handleOpenBooking = (destinasi = '', jalur = '', durasi = '', type: 'private' | 'open' = 'open', jadwal = '') => {
+    playClick();
+    setBookingPrefill({ destinasi, jalur, durasi, type, jadwal });
     setIsBookingOpen(true);
+    showToastMsg(`Membuka Booking: ${destinasi}`);
   };
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const { playHover, playClick } = useSound();
@@ -1288,6 +1350,13 @@ export default function App() {
   const currentTripLeaders = config.tripLeaders;
   const galleryPhotos = config.galleryPhotos;
 
+  const filteredOpenTrips = (config.openTrips || []).filter((ot: any) => {
+    const matchesRegion = openFilterRegion === 'Semua' || ot.region === openFilterRegion;
+    const matchesDifficulty = openFilterDifficulty === 'Semua' || ot.difficulty === openFilterDifficulty;
+    const matchesSearch = ot.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesRegion && matchesDifficulty && matchesSearch;
+  });
+
   useEffect(() => {
     const onAdminToggle = () => setIsAdminPanelOpen(true);
     window.addEventListener('adminModeToggled', onAdminToggle);
@@ -1302,14 +1371,13 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const difficultyOptions = ['Semua', 'Pemula', 'Menengah', 'Ahli', 'Sangat Ahli'];
   const filteredDestinations = currentDestinations.filter(dest => {
     if (dest.isActive === false) return false;
-    const matchesDifficulty = filterDifficulty === 'Semua' || dest.difficulty.toLowerCase().includes(filterDifficulty.toLowerCase());
+    const matchesDifficulty = filterDifficulty === 'Semua' || dest.difficulty === filterDifficulty;
+    const matchesRegion = filterRegion === 'Semua' || dest.region === filterRegion;
     const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          dest.desc.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          dest.locationTag.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesDifficulty && matchesSearch;
+                          dest.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesDifficulty && matchesRegion && matchesSearch;
   });
 
   const scrollToSection = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement> | { preventDefault: () => void }, id: string) => {
@@ -1398,9 +1466,17 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} destinationOptions={currentDestinations.filter(d => d.isActive !== false)} prefill={bookingPrefill} />
+      <BookingModal 
+        isOpen={isBookingOpen} 
+        onClose={() => setIsBookingOpen(false)} 
+        destinationOptions={currentDestinations.filter(d => d.isActive !== false)} 
+        prefill={bookingPrefill} 
+        facilities={config.facilities}
+        config={config}
+        updateConfig={updateConfig}
+      />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} />
-      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
+      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}
@@ -1712,11 +1788,18 @@ export default function App() {
               <h3 className="text-2xl font-black uppercase tracking-tight text-art-text">Tim Lapangan Kami</h3>
               <p className="text-art-text/60 font-medium mt-2">Momen kebersamaan dan dedikasi tim di alam bebas</p>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-8 snap-x scrollbar-hide">
-              <img src="https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop" alt="Tim Lapangan" className="w-80 h-64 object-cover rounded-2xl snap-center flex-shrink-0 grayscale-[20%] border-2 border-art-text hover:grayscale-0 hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all" />
-              <img src="https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop" alt="Tim Lapangan 2" className="w-80 h-64 object-cover rounded-2xl snap-center flex-shrink-0 grayscale-[20%] border-2 border-art-text hover:grayscale-0 hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all" />
-              <img src="https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop" alt="Tim Lapangan 3" className="w-80 h-64 object-cover rounded-2xl snap-center flex-shrink-0 grayscale-[20%] border-2 border-art-text hover:grayscale-0 hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all" />
-              <img src="https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop" alt="Tim Lapangan 4" className="w-80 h-64 object-cover rounded-2xl snap-center flex-shrink-0 grayscale-[20%] border-2 border-art-text hover:grayscale-0 hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all" />
+            <div className="flex gap-4 overflow-x-auto pb-8 snap-x scrollbar-hide px-4">
+              {(config.teamPhotos || []).map((url: string, idx: number) => (
+                <img 
+                  key={idx}
+                  src={url} 
+                  alt={`Tim Lapangan ${idx + 1}`} 
+                  className="w-80 h-64 object-cover rounded-2xl snap-center flex-shrink-0 grayscale-[20%] border-2 border-art-text hover:grayscale-0 hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all" 
+                />
+              ))}
+              {(!config.teamPhotos || config.teamPhotos.length === 0) && (
+                <p className="text-xs font-bold text-art-text/40 italic mx-auto">Upload foto tim di dashboard admin.</p>
+              )}
             </div>
           </div>
         </div>
@@ -1775,44 +1858,132 @@ export default function App() {
         </div>
       </section>
 
-      {/* Destination Section */}
+      {/* Destination Section - Separated Open & Private */}
       <section id="destinasi" className="py-20 md:py-32 bg-[#F3F4F6] relative overflow-hidden">
         {/* Background image same as hero section */}
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
           <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale-[80%]" alt="Destinasi bg" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6">Destinasi Utama</h2>
-            <div className="w-12 h-1 bg-art-text mx-auto mb-6"></div>
-            <p className="font-medium text-art-text/80 mb-10">Bergabunglah dalam perjalanan epik ke berbagai gunung terbaik di Indonesia dengan formasi ngopi terindah kami. Setiap pilihan destinasi hadir dengan harga spesial dan promo diskon menarik untuk pengalaman trip yang tak terlupakan!</p>
+          
+          {/* OPEN TRIP SECTION */}
+          {config.openTrips && config.openTrips.length > 0 && (
+            <div className="mb-32">
+              <div className="text-center max-w-5xl mx-auto mb-16 px-4">
+                <span className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-art-orange mb-4 block">Fixed Schedule Adventure</span>
+                <h2 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Open Trip <span className="text-art-green">Ngopi</span></h2>
+                <div className="w-24 h-2 bg-art-green mx-auto mb-10"></div>
+                <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Gabung dengan pendaki lain di jadwal yang sudah ditentukan. Harga lebih hemat namun fasilitas tetap premium.</p>
+                
+                {/* OPEN TRIP FILTERS - INTEGRATED CHIPS */}
+                <div className="mt-16 flex flex-col gap-8 items-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Pilih Wilayah</span>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {['Semua', ...Array.from(new Set(config.openTrips.map((ot: any) => ot.region))).filter(Boolean)].sort().map((reg: any) => (
+                        <button 
+                          key={reg}
+                          onClick={() => { playClick(); setOpenFilterRegion(reg); }}
+                          className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${openFilterRegion === reg ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
+                        >
+                          {reg}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-4">
+                    <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Tingkat Kesulitan</span>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {['Semua', 'Mudah', 'Sedang', 'Sulit', 'Sangat Sulit'].map((lvl: any) => (
+                        <button 
+                          key={lvl}
+                          onClick={() => { playClick(); setOpenFilterDifficulty(lvl); }}
+                          className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${openFilterDifficulty === lvl ? 'bg-art-green text-white border-art-green shadow-[4px_4px_0px_0px_rgba(26,26,26,.3)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
+                        >
+                          {lvl}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredOpenTrips.length > 0 ? (
+                  filteredOpenTrips.map((ot: any, i: number) => (
+                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} />
+                  ))
+                ) : (
+                  <div className="col-span-full py-24 border-4 border-dashed border-art-text/5 rounded-[3rem] flex flex-col items-center justify-center text-center bg-white/40">
+                    <Search size={64} className="mb-6 text-art-text/5" />
+                    <p className="font-black uppercase tracking-[0.2em] text-sm text-art-text/30">Belum ada jadwal untuk kriteria ini</p>
+                    <button onClick={() => { setOpenFilterRegion('Semua'); setOpenFilterDifficulty('Semua'); }} className="mt-6 px-6 py-2 bg-art-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">Reset Filter</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* PRIVATE TRIP SECTION */}
+          <div className="text-center max-w-5xl mx-auto mb-16 px-4">
+            <span className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-art-orange mb-4 block">Exclusive Journey</span>
+            <h2 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Private <span className="text-art-orange">Trip</span></h2>
+            <div className="w-24 h-2 bg-art-text mx-auto mb-10"></div>
+            <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Tentukan sendiri gunung tujuan, jalur pendakian, dan durasi sesuai keinginanmu. Cocok untuk solo traveler maupun rombongan tertutup.</p>
             
-            {/* Filter */}
-            <div className="flex flex-wrap justify-center gap-3">
-              {difficultyOptions.map(level => (
-                <button
-                  key={level}
-                  onClick={() => { playClick(); setFilterDifficulty(level); }}
-                  onMouseEnter={playHover}
-                  className={`text-[10px] tracking-widest uppercase font-bold px-6 py-2 rounded-full border-2 transition-all ${filterDifficulty === level ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/20 hover:border-art-text'}`}
-                >
-                  {level}
-                </button>
-              ))}
+            {/* PRIVATE TRIP FILTERS - INTEGRATED CHIPS */}
+            <div className="mt-16 flex flex-col gap-8 items-center">
+              <div className="flex flex-col items-center gap-4">
+                <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Cari Wilayah</span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {['Semua', ...Array.from(new Set(currentDestinations.map(d => d.region))).filter(Boolean)].sort().map((reg: any) => (
+                    <button 
+                      key={reg}
+                      onClick={() => { playClick(); setFilterRegion(reg); }}
+                      className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${filterRegion === reg ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
+                    >
+                      {reg}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center gap-4">
+                <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Tingkat Kesulitan</span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {['Semua', 'Pemula', 'Pemula-Menengah', 'Menengah', 'Ahli'].map((lvl: any) => (
+                    <button 
+                      key={lvl}
+                      onClick={() => { playClick(); setFilterDifficulty(lvl); }}
+                      className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${filterDifficulty === lvl ? 'bg-art-orange text-white border-art-orange shadow-[4px_4px_0px_0px_rgba(255,107,0,.2)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {filteredDestinations.length > 0 ? (
-            filteredDestinations.map((dest) => (
-              <DestinationCard key={dest.id} dest={dest} onBook={(destinasi, durasi) => handleOpenBooking(destinasi, durasi)} />
-            ))
-          ) : (
-            <div className="text-center py-20 border-2 border-art-text/20 rounded-2xl bg-white flex flex-col items-center justify-center">
-              <Mountain size={48} className="text-art-text/20 mb-4" />
-              <h4 className="font-bold text-xl uppercase tracking-tighter text-art-text">Gunung Tidak Ditemukan</h4>
-              <p className="text-sm font-medium text-art-text/60 mt-2">Coba tingkat kesulitan atau keyword pencarian lain.</p>
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            {filteredDestinations.length > 0 ? (
+              filteredDestinations.map((dest: any, idx: number) => (
+                <DestinationCard 
+                  key={dest.id} 
+                  dest={dest} 
+                  visibilities={{}} 
+                  onBook={(d, j, dur, t) => handleOpenBooking(d, j, dur, t)} 
+                />
+              ))
+            ) : (
+              <div className="col-span-full py-20 border-2 border-dashed border-art-text/20 rounded-2xl bg-white/50 flex flex-col items-center justify-center text-center px-4">
+                <Mountain size={48} className="text-art-text/20 mb-4" />
+                <h4 className="font-bold text-xl uppercase tracking-tighter text-art-text">Destinasi Belum Tersedia</h4>
+                <p className="text-sm font-medium text-art-text/60 mt-2 max-w-xs">Gunakan filter wilayah atau kesulitan yang berbeda untuk menemukan trip impianmu.</p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -1898,6 +2069,20 @@ export default function App() {
           <p>EST. 2026 • ADVENTURE & BREW</p>
         </div>
       </footer>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 100, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-art-text text-white px-8 py-4 rounded-2xl border-4 border-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-4 min-w-[300px]"
+          >
+             <div className="w-8 h-8 rounded-full bg-art-orange flex items-center justify-center text-white shrink-0"><BellRing size={16} /></div>
+             <p className="text-sm font-black uppercase tracking-widest leading-none">{toast.msg}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
     </>
   );

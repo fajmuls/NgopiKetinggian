@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Trash2, Plus, GripVertical } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle } from 'lucide-react';
+import { db } from './firebase';
+import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { AppConfig } from './useAppConfig';
 
 export const AdminPanelModal = ({ 
@@ -9,25 +11,24 @@ export const AdminPanelModal = ({
   config, 
   updateConfig,
   revertToDefault,
-  defaultLists
+  defaultLists,
+  showToast
 }: { 
   isOpen: boolean, 
   onClose: () => void, 
   config: AppConfig,
   updateConfig: (c: Partial<AppConfig>) => void,
   revertToDefault: () => void,
-  defaultLists: any
+  defaultLists: any,
+  showToast: (msg: string, type?: 'success' | 'info' | 'error') => void
 }) => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'leaders' | 'gallery' | 'cerita' | 'openTrips' | 'facilities'>('destinations');
-  const showToast = (msg: string) => {
-    alert(msg);
-  };
+  const [activeTab, setActiveTab] = useState<'destinations' | 'leaders' | 'gallery' | 'cerita' | 'openTrips' | 'facilities' | 'bookings'>('openTrips');
   
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left text-art-text">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border-2 border-art-text relative shadow-2xl overflow-hidden">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-5xl max-h-[95vh] flex flex-col rounded-2xl border-2 border-art-text relative shadow-2xl overflow-hidden">
         <div className="flex justify-between items-center p-4 sm:p-6 border-b border-art-text bg-white">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
@@ -49,6 +50,8 @@ export const AdminPanelModal = ({
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
           {/* Sidebar Tabs */}
           <div className="flex sm:flex-col gap-2 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
+            <button onClick={() => setActiveTab('bookings')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>Daftar Booking</button>
+            <div className="w-full h-px bg-art-text/10 my-2"></div>
             <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip (Bebas)</button>
             <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
             <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
@@ -59,6 +62,7 @@ export const AdminPanelModal = ({
           
           {/* Content */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-art-bg/50">
+            {activeTab === 'bookings' && <BookingsAdmin showToast={showToast} />}
             {activeTab === 'openTrips' && <OpenTripsAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'destinations' && <DestinationsAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.destinations} />}
             {activeTab === 'leaders' && <LeadersAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.leaders} />}
@@ -72,7 +76,143 @@ export const AdminPanelModal = ({
   );
 };
 
+const BookingsAdmin = ({ showToast }: any) => {
+  const [bookings, setBookings] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    try {
+      await updateDoc(doc(db, 'bookings', id), { status: newStatus });
+      showToast(`Status booking berhasil diupdate ke ${newStatus}!`);
+    } catch (error) {
+      console.error(error);
+      showToast('Gagal update status', 'error');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Beneran mau hapus data booking ini?")) {
+      try {
+        await deleteDoc(doc(db, 'bookings', id));
+        showToast("Booking berhasil dihapus!");
+      } catch (error) {
+        showToast("Gagal menghapus booking", 'error');
+      }
+    }
+  };
+
+  if (loading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-art-orange"></div></div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-black uppercase tracking-widest text-art-text">Daftar Booking Masuk</h3>
+        <span className="text-[10px] font-black uppercase px-3 py-1 bg-art-text text-white rounded-full">{bookings.length} Pesanan</span>
+      </div>
+
+      <div className="space-y-4">
+        {bookings.length === 0 ? (
+          <div className="py-20 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
+            <Info className="mx-auto mb-2 text-art-text/20" size={32} />
+            <p className="font-bold text-art-text/40 uppercase text-xs">Belum ada booking masuk</p>
+          </div>
+        ) : (
+          bookings.map((booking: any) => (
+            <div key={booking.id} className={`bg-white rounded-2xl border-2 transition-all p-5 flex flex-col gap-4 ${booking.status === 'confirmed' ? 'border-art-green' : booking.status === 'cancelled' ? 'border-red-400' : 'border-art-text'}`}>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-art-text/5 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl border-2 ${booking.status === 'confirmed' ? 'bg-art-green/10 border-art-green text-art-green' : booking.status === 'cancelled' ? 'bg-red-50 border-red-400 text-red-400' : 'bg-art-bg border-art-text text-art-text'}`}>
+                    <Users size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-black uppercase tracking-tight text-lg leading-none mb-1">{booking.nama}</h4>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-art-text/40 uppercase">
+                      <span>{booking.type === 'open' ? '🟢 Open Trip' : '🔵 Private Trip'}</span>
+                      <span>•</span>
+                      <span>{booking.wa}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select 
+                    value={booking.status} 
+                    onChange={(e) => handleStatusUpdate(booking.id, e.target.value)}
+                    className={`text-[10px] font-black uppercase px-4 py-2 rounded-xl outline-none cursor-pointer border-2 ${booking.status === 'confirmed' ? 'bg-art-green text-white border-art-green' : booking.status === 'cancelled' ? 'bg-red-500 text-white border-red-500' : 'bg-white border-art-text'}`}
+                  >
+                    <option value="pending">⏳ Pending</option>
+                    <option value="confirmed">✅ Confirmed</option>
+                    <option value="cancelled">❌ Cancelled</option>
+                  </select>
+                  <button onClick={() => handleDelete(booking.id)} className="p-2 border-2 border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <MapPin size={16} className="text-art-orange shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-art-text/30">Destinasi & Jalur</p>
+                      <p className="text-xs font-bold uppercase">{booking.destinasi} (Via {booking.jalur})</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar size={16} className="text-art-green shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-art-text/30">Jadwal & Durasi</p>
+                      <p className="text-xs font-bold uppercase">{booking.jadwal} ({booking.durasi})</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Users size={16} className="text-art-text/60 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-art-text/30">Peserta & Harga</p>
+                      <p className="text-xs font-bold uppercase">{booking.peserta} Orang - Total: Rp {booking.totalPrice?.toLocaleString('id-ID')}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Coffee size={16} className="text-art-orange shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-art-text/30">Opsional Layanan</p>
+                      <p className="text-xs font-bold uppercase truncate max-w-[200px]">{booking.opsionalText || 'Tidak ada'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-art-bg/50 p-4 rounded-xl border border-art-text/5 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-art-text/30 block mb-1">Catatan Tambahan:</span>
+                    <p className="text-[11px] font-medium leading-relaxed italic text-art-text/70">"{booking.deskripsi}"</p>
+                  </div>
+                  <span className="text-[8px] font-black uppercase text-art-text/20 mt-4 text-right">ID: {booking.id}</span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Sub-components for Admin
+const difficultyLevels = ["Pemula", "Pemula-Menengah", "Menengah", "Menengah-Ahli", "Ahli", "Sangat Ahli"];
+const durationLevels = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
+
 const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState(JSON.parse(JSON.stringify(config.destinationsData)));
   const [search, setSearch] = useState("");
@@ -241,11 +381,14 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
 
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
               <span className="text-xs font-bold w-16">Kesulitan:</span>
-              <input className="border p-2 rounded text-xs w-full sm:flex-1" value={dest.difficulty || ''} onChange={e => {
+              <select className="border p-2 rounded text-xs w-full sm:flex-1" value={dest.difficulty || ''} onChange={e => {
                 const nd = [...data];
                 nd[i].difficulty = e.target.value;
                 setData(nd);
-              }} placeholder="Level Kesulitan (Cth: Pemula - Menengah)" />
+              }}>
+                <option value="">-- Pilih Kesulitan --</option>
+                {difficultyLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+              </select>
             </div>
             
             <button 
@@ -282,22 +425,31 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 <div className="pl-0 sm:pl-14 space-y-2">
                   {path.durations.map((dur: any, j: number) => (
                     <div key={j} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                      <input className="border p-2 rounded text-xs w-full sm:flex-1" value={dur.label} onChange={e => {
+                      <select className="border p-2 rounded text-xs w-full sm:flex-1" value={dur.label} onChange={e => {
                         const nd = [...data];
                         nd[i].paths[pIdx].durations[j].label = e.target.value;
                         setData(nd);
-                      }} placeholder="Durasi (1H (Tektok))" />
+                      }}>
+                        <option value="">-- Pilih Durasi --</option>
+                        {durationLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                      </select>
                       <div className="flex gap-2 w-full sm:w-auto">
-                        <input type="number" className="border p-2 rounded text-xs w-24 flex-1 sm:flex-none" value={dur.originalPrice} onChange={e => {
-                          const nd = [...data];
-                          nd[i].paths[pIdx].durations[j].originalPrice = parseInt(e.target.value) || 0;
-                          setData(nd);
-                        }} placeholder="Harga Asli (k)" />
-                        <input type="number" className="border p-2 rounded text-xs w-24 flex-1 sm:flex-none" value={dur.price} onChange={e => {
-                          const nd = [...data];
-                          nd[i].paths[pIdx].durations[j].price = parseInt(e.target.value) || 0;
-                          setData(nd);
-                        }} placeholder="Harga Final (k)" />
+                        <div className="relative">
+                          <input type="number" className="border p-2 rounded text-xs w-24 flex-1 sm:flex-none" value={dur.originalPrice} onChange={e => {
+                            const nd = [...data];
+                            nd[i].paths[pIdx].durations[j].originalPrice = parseInt(e.target.value) || 0;
+                            setData(nd);
+                          }} placeholder="Coret" />
+                          <span className="absolute -top-3 left-0 text-[8px] font-bold text-art-text/40 bg-white px-1">Harga Coret (K)</span>
+                        </div>
+                        <div className="relative">
+                          <input type="number" className="border p-2 rounded text-xs w-24 flex-1 sm:flex-none" value={dur.price} onChange={e => {
+                            const nd = [...data];
+                            nd[i].paths[pIdx].durations[j].price = parseInt(e.target.value) || 0;
+                            setData(nd);
+                          }} placeholder="Final" />
+                          <span className="absolute -top-3 left-0 text-[8px] font-bold text-art-orange/60 bg-white px-1">Harga Final (K)</span>
+                        </div>
                         <button onClick={() => {
                           const nd = [...data];
                           nd[i].paths[pIdx].durations.splice(j, 1);
@@ -313,6 +465,43 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
           )}
         </div>
       )})}
+    </div>
+  );
+};
+
+// Sub-components for Admin
+const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
+  const [photos, setPhotos] = useState(config.teamPhotos || []);
+
+  const handleSave = () => {
+    updateConfig({ teamPhotos: photos });
+    showToast('Foto Tim Tersimpan!');
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-4">
+      <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+        <h3 className="font-bold text-sm uppercase">Foto Tim Lapangan (Maks 4)</h3>
+        <div className="flex gap-2">
+          <button onClick={() => setPhotos([...photos, ""])} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Foto</button>
+          <button onClick={handleSave} className="text-xs bg-art-orange text-white px-2 py-1 rounded">Simpan</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {photos.map((url: string, i: number) => (
+          <div key={i} className="space-y-2 relative">
+            <button onClick={() => {
+              const np = [...photos]; np.splice(i, 1); setPhotos(np);
+            }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md z-10"><Trash2 size={12}/></button>
+            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border border-art-text/10">
+              <img src={url} className="w-full h-full object-cover" />
+            </div>
+            <input className="w-full border p-1 text-[10px] rounded" value={url} onChange={e => {
+              const np = [...photos]; np[i] = e.target.value; setPhotos(np);
+            }} placeholder="URL Image" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -376,6 +565,10 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
           </div>
         ))}
         <p className="text-[10px] text-art-text/50">Kosongkan URL Voice Line agar admin bisa mengisi audionya secara manual dari luar jika dibutuhkan, atau isikan URL Firebase/Public HTTPS yang sudah dihosting. Karena Firestore hanya menampung teks url.</p>
+      </div>
+
+      <div className="mt-8 border-t-2 border-dashed border-art-text/20 pt-8">
+        <TeamPhotosAdmin config={config} updateConfig={updateConfig} showToast={showToast} />
       </div>
     </div>
   );
@@ -464,6 +657,7 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
 
 const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState(config.openTrips || []);
+  const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
 
   const handleSave = () => { updateConfig({ openTrips: data }); showToast('Tersimpan!'); };
 
@@ -471,7 +665,17 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
     const dest = config.destinationsData?.find((d: any) => d.name === mountainName);
     const nd = [...data];
     if (dest) {
-      nd[i] = { ...nd[i], name: dest.name, region: dest.region, difficulty: dest.difficulty, mepo: dest.mepo, beans: dest.beans, image: dest.image };
+      nd[i] = { 
+        ...nd[i], 
+        name: dest.name, 
+        region: dest.region, 
+        difficulty: dest.difficulty, 
+        mepo: dest.mepo, 
+        beans: dest.beans, 
+        image: dest.image,
+        kuotaNum: 15, // Default numeric quota
+        kuota: "15 Pax Tersisa"
+      };
     } else {
       nd[i].name = mountainName;
     }
@@ -483,14 +687,41 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
       <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
         <p className="text-xs font-bold uppercase text-art-text/60">Custom Trip (Open Trip)</p>
         <div className="flex gap-2">
-           <button onClick={() => setData([...data, { id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0 }])} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Custom Trip</button>
+           <button onClick={() => {
+             const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0 }, ...data];
+             setData(nd);
+             setExpandedIndexes([0]);
+           }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Custom Trip</button>
            <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
         </div>
       </div>
       {data.map((ot: any, i: number) => (
-        <div key={i} className="bg-white p-4 rounded-lg border-2 border-art-text space-y-3 relative">
-          <button onClick={() => { const nd = [...data]; nd.splice(i, 1); setData(nd); }} className="absolute top-4 right-4 text-red-500"><Trash2 size={16}/></button>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pr-8">
+        <div key={i} className="bg-white p-4 rounded-lg border-2 border-art-text space-y-3 relative overflow-hidden transition-all">
+          <div className="absolute top-2 right-2 flex items-center gap-2">
+            <button 
+              onClick={() => { const nd = [...data]; nd.splice(i, 1); setData(nd); }} 
+              className="text-red-500 hover:bg-red-50 p-2 rounded"
+            >
+              <Trash2 size={16}/>
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => setExpandedIndexes(prev => prev.includes(i) ? prev.filter(idx => idx !== i) : [...prev, i])}>
+             <span className="font-black text-xl w-6 text-center">{expandedIndexes.includes(i) ? '-' : '+'}</span>
+             <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1">
+                <span className="text-sm font-black uppercase tracking-tight">{ot.name || 'Gunung Belum Dipilih'}</span>
+                {ot.jadwal && <span className="text-[10px] font-bold bg-art-green/10 text-art-green px-2 py-0.5 rounded uppercase">{ot.jadwal}</span>}
+                {ot.path && <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">{ot.path}</span>}
+                {ot.region && <span className="text-[8px] font-black uppercase text-art-text/40 tracking-widest bg-gray-100 px-1.5 py-0.5 rounded ml-auto">{ot.region}</span>}
+             </div>
+          </div>
+
+          {expandedIndexes.includes(i) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pr-8 pt-4 border-t border-dashed border-art-text/10 mt-4">
+            <div className="flex flex-col sm:col-span-2">
+               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Region / Wilayah</span>
+               <input className="border p-2 rounded text-sm font-bold" value={ot.region} onChange={e => { const nd = [...data]; nd[i].region = e.target.value; setData(nd); }} placeholder="Contoh: Jawa Barat / NTB" />
+            </div>
             <div className="flex flex-col sm:col-span-2">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Gunung Tujuan</span>
               <select className="border p-2 rounded text-sm font-bold bg-gray-50" value={ot.name} onChange={e => handleMountainSelect(i, e.target.value)}>
@@ -500,17 +731,69 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                 ))}
               </select>
             </div>
-            <input className="border p-2 rounded text-sm" value={ot.region} onChange={e => { const nd = [...data]; nd[i].region = e.target.value; setData(nd); }} placeholder="Region" />
-            <input className="border p-2 rounded text-sm" value={ot.mepo} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
-            <input className="border p-2 rounded text-sm" value={ot.jadwal} onChange={e => { const nd = [...data]; nd[i].jadwal = e.target.value; setData(nd); }} placeholder="Jadwal (cth: 15-16 Ags)" />
-            <input className="border p-2 rounded text-sm" value={ot.kuota} onChange={e => { const nd = [...data]; nd[i].kuota = e.target.value; setData(nd); }} placeholder="Kuota" />
-            <input className="border p-2 rounded text-sm" value={ot.difficulty} onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }} placeholder="Kesulitan (Pemula / Menengah)" />
-            <input className="border p-2 rounded text-sm" value={ot.path} onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }} placeholder="Jalur" />
-            <input className="border p-2 rounded text-sm" value={ot.duration} onChange={e => { const nd = [...data]; nd[i].duration = e.target.value; setData(nd); }} placeholder="Durasi" />
-            <input className="border p-2 rounded text-sm" type="number" value={ot.price} onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Akhir (k)" />
-            <input className="border p-2 rounded text-sm" type="number" value={ot.originalPrice} onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Coret (k)" />
-            <input className="border p-2 rounded text-sm sm:col-span-2" value={ot.image} onChange={e => { const nd = [...data]; nd[i].image = e.target.value; setData(nd); }} placeholder="URL Gambar" />
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Meeting Point</span>
+              <input className="border p-2 rounded text-sm" value={ot.mepo} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jadwal Keberangkatan</span>
+              <input className="border p-2 rounded text-sm font-bold" value={ot.jadwal} onChange={e => { const nd = [...data]; nd[i].jadwal = e.target.value; setData(nd); }} placeholder="Jadwal (cth: 15-16 Ags)" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Sisa Kuota (Numerik)</span>
+              <input 
+                className="border p-2 rounded text-sm font-bold border-art-orange/30" 
+                type="number" 
+                value={ot.kuotaNum || 0} 
+                onChange={e => { 
+                  const num = parseInt(e.target.value) || 0;
+                  const nd = [...data]; 
+                  nd[i].kuotaNum = num; 
+                  nd[i].kuota = `${num} Pax Tersisa`; // Auto sync text kuota
+                  setData(nd); 
+                }} 
+                placeholder="Kuota Tersisa" 
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Tampilan Kuota (Teks)</span>
+              <input className="border p-2 rounded text-sm bg-gray-50" value={ot.kuota} readOnly placeholder="Kuota Display" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Kesulitan</span>
+              <input className="border p-2 rounded text-sm" value={ot.difficulty} onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }} placeholder="Kesulitan (Pemula / Menengah)" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jalur (Via)</span>
+              <select className="border p-2 rounded text-sm disabled:bg-gray-100" value={ot.path} onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }} disabled={!ot.name}>
+                <option value="">-- Pilih Jalur --</option>
+                {ot.name && config.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.map((p: any) => (
+                  <option key={p.name} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Durasi</span>
+              <select className="border p-2 rounded text-sm" value={ot.duration} onChange={e => { const nd = [...data]; nd[i].duration = e.target.value; setData(nd); }}>
+                <option value="">-- Pilih Durasi --</option>
+                {durationLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+              </select>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Harga Akhir (K)</span>
+              <input className="border p-2 rounded text-sm font-black text-art-orange" type="number" value={ot.price} onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Akhir (k)" />
+              <p className="text-[8px] text-art-text/50">Contoh: 1500 = 1,5 Juta</p>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Harga Coret (K)</span>
+              <input className="border p-2 rounded text-sm" type="number" value={ot.originalPrice} onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Coret (k)" />
+            </div>
+            <div className="flex flex-col sm:col-span-2">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">URL Gambar Banner</span>
+              <input className="border p-2 rounded text-sm" value={ot.image} onChange={e => { const nd = [...data]; nd[i].image = e.target.value; setData(nd); }} placeholder="URL Gambar" />
+            </div>
           </div>
+          )}
         </div>
       ))}
     </div>

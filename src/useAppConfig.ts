@@ -8,6 +8,7 @@ export interface AppConfig {
   facilities?: { include: string[], exclude: string[], opsi: string[] };
   destinationsData: any[];
   tripLeaders: any[];
+  teamPhotos?: string[];
   galleryPhotos: any[];
   ceritaVideoUrl: string;
 }
@@ -16,6 +17,12 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
   const [config, setConfig] = useState<AppConfig>({
     destinationsData: defaultDestinations,
     tripLeaders: defaultLeaders,
+    teamPhotos: [
+      "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
+    ],
     galleryPhotos: defaultPhotos,
     ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
     openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
@@ -56,6 +63,12 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
           destinationsData: defaultDestinations,
           tripLeaders: defaultLeaders,
           galleryPhotos: defaultPhotos,
+          teamPhotos: [
+            "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
+          ],
           ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
@@ -94,6 +107,12 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         destinationsData: defaultDestinations,
         tripLeaders: defaultLeaders,
         galleryPhotos: defaultPhotos,
+        teamPhotos: [
+          "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
+        ],
         ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
@@ -141,6 +160,12 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       destinationsData: defaultDestinations,
       tripLeaders: defaultLeaders,
       galleryPhotos: defaultPhotos,
+      teamPhotos: [
+        "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
+      ],
       ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
