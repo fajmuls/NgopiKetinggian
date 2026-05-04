@@ -721,21 +721,11 @@ const destinationsData = [
       {
         "name": "Via Wates",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Patakbanteng",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
+          { "label": "1H (Tektok)", "price": 450, "originalPrice": 550 },
+          { "label": "2H 1M", "price": 700, "originalPrice": 850 },
+          { "label": "3H 2M", "price": 1000, "originalPrice": 1200 },
+          { "label": "4H 3M", "price": 1400, "originalPrice": 1600 },
+          { "label": "5H 4M", "price": 1700, "originalPrice": 1900 }
         ]
       }
     ]
@@ -746,22 +736,22 @@ const destinationsData = [
     "isActive": true,
     "region": "Jawa Tengah",
     "height": "2.340 mdpl",
-    "desc": "Petualangan premium di Gunung Kembang.",
+    "desc": "Petualangan menantang dengan jalur terjal di Gunung Kembang.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Ahli",
     "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
+    "kuota": "Min 2 - Max 10 Pax",
     "beans": "Arabica Blend",
     "paths": [
       {
         "name": "Via Lengkong",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
+          { "label": "1H (Tektok)", "price": 500, "originalPrice": 600 },
+          { "label": "2H 1M", "price": 800, "originalPrice": 950 },
+          { "label": "3H 2M", "price": 1100, "originalPrice": 1300 },
+          { "label": "4H 3M", "price": 1500, "originalPrice": 1700 },
+          { "label": "5H 4M", "price": 1800, "originalPrice": 2000 }
         ]
       }
     ]
@@ -772,22 +762,22 @@ const destinationsData = [
     "isActive": true,
     "region": "Jawa Tengah",
     "height": "2.365 mdpl",
-    "desc": "Petualangan premium di Gunung Bismo.",
+    "desc": "Pendakian santai dan pemandangan luar biasa di Gunung Bismo.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah",
+    "difficulty": "Pemula-Menengah",
     "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
+    "kuota": "Min 2 - Max 15 Pax",
     "beans": "Arabica Blend",
     "paths": [
       {
         "name": "Via Sikunang",
         "durations": [
-          { "label": "1H (Tektok)", "price": 400, "originalPrice": 500 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
+          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
+          { "label": "2H 1M", "price": 600, "originalPrice": 750 },
+          { "label": "3H 2M", "price": 900, "originalPrice": 1050 },
+          { "label": "4H 3M", "price": 1250, "originalPrice": 1450 },
+          { "label": "5H 4M", "price": 1550, "originalPrice": 1750 }
         ]
       }
     ]

@@ -596,38 +596,29 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 
                 <div className="pl-0 sm:pl-14 space-y-2">
                   {path.durations.map((dur: any, j: number) => (
-                    <div key={j} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                      <select className="border p-2 rounded text-xs w-full sm:flex-1" value={dur.label} onChange={e => {
+                    <div key={j} className="flex gap-2 items-center">
+                      <select className="border p-2 rounded text-xs flex-1" value={dur.label} onChange={e => {
                         const nd = [...data];
                         nd[i].paths[pIdx].durations[j].label = e.target.value;
                         setData(nd);
                       }}>
-                        <option value="">-- Pilih Durasi --</option>
-                        {durationLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                        {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
                       </select>
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        <div className="relative">
-                          <input type="number" className="border p-2 rounded text-xs w-24 flex-1 sm:flex-none" value={dur.originalPrice} onChange={e => {
+                      <input type="number" className="border p-2 rounded text-xs w-20" value={dur.originalPrice} onChange={e => {
                             const nd = [...data];
                             nd[i].paths[pIdx].durations[j].originalPrice = parseInt(e.target.value) || 0;
                             setData(nd);
                           }} placeholder="Coret" />
-                          <span className="absolute -top-3 left-0 text-[8px] font-bold text-art-text/40 bg-white px-1">Harga Coret (K)</span>
-                        </div>
-                        <div className="relative">
-                          <input type="number" className="border p-2 rounded text-xs w-24 flex-1 sm:flex-none" value={dur.price} onChange={e => {
+                      <input type="number" className="border p-2 rounded text-xs w-20" value={dur.price} onChange={e => {
                             const nd = [...data];
                             nd[i].paths[pIdx].durations[j].price = parseInt(e.target.value) || 0;
                             setData(nd);
                           }} placeholder="Final" />
-                          <span className="absolute -top-3 left-0 text-[8px] font-bold text-art-orange/60 bg-white px-1">Harga Final (K)</span>
-                        </div>
                         <button onClick={() => {
                           const nd = [...data];
                           nd[i].paths[pIdx].durations.splice(j, 1);
                           setData(nd);
-                        }} className="text-red-500 p-2 border rounded hover:bg-red-50 bg-white"><Trash2 size={16} /></button>
-                      </div>
+                        }} className="text-red-500 p-2"><Trash2 size={16} /></button>
                     </div>
                   ))}
                 </div>
