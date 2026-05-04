@@ -2332,23 +2332,8 @@ export default function App() {
             
                 {/* FILTERS */}
                 <div className="mt-12 flex flex-col items-center justify-center gap-6 w-full max-w-2xl mx-auto border-t border-art-text/5 pt-10">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                     {/* Wilayah Filter */}
-                     <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Pilih Wilayah</label>
-                        <select 
-                          value={filterRegion}
-                          onChange={(e) => setFilterRegion(e.target.value)}
-                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
-                        >
-                          {['Semua', ...Array.from(new Set(currentDestinations.map(d => d.region))).filter(Boolean)].sort().map((r: any) => (
-                            <option key={r} value={r}>{r}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
-                     </div>
-
-                     {/* Kesulitan Filter */}
+                   <div className="grid grid-cols-2 gap-6 w-full">
+                     {/* Kesulitan Filter (Left) */}
                      <div className="flex flex-col relative group">
                         <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Tingkat Kesulitan</label>
                         <select 
@@ -2358,6 +2343,21 @@ export default function App() {
                         >
                           {difficultyOptions.map((opt: any) => (
                             <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                     </div>
+
+                     {/* Wilayah Filter (Right) */}
+                     <div className="flex flex-col relative group">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Pilih Wilayah</label>
+                        <select 
+                          value={filterRegion}
+                          onChange={(e) => setFilterRegion(e.target.value)}
+                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
+                        >
+                          {['Semua', ...Array.from(new Set(currentDestinations.map(d => d.region))).filter(Boolean)].sort().map((r: any) => (
+                            <option key={r} value={r}>{r}</option>
                           ))}
                         </select>
                         <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>

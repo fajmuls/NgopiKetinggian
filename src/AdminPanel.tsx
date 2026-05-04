@@ -5,7 +5,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
-import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, OpenTrip } from './useAppConfig';
+import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, OpenTrip, WEBSITE_VERSION } from './useAppConfig';
 import { jsPDF } from 'jspdf';
 
 export const AdminPanelModal = ({ 
@@ -25,66 +25,78 @@ export const AdminPanelModal = ({
   defaultLists: any,
   showToast: (msg: string, type?: 'success' | 'info' | 'error') => void
 }) => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'leaders' | 'gallery' | 'cerita' | 'openTrips' | 'facilities' | 'bookings' | 'promoCodes'>('openTrips');
+  const [activeCategory, setActiveCategory] = useState<'booking' | 'trip' | 'website'>('booking');
+  const [activeTab, setActiveTab] = useState<string>('bookings');
   
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left text-art-text">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-5xl max-h-[95vh] flex flex-col rounded-2xl border-2 border-art-text relative shadow-2xl overflow-hidden">
-        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-art-text bg-white">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
-            <button 
-              onClick={() => {
-                if (window.confirm("Beneran mau reset semua ke default global?")) {
-                  revertToDefault();
-                  showToast("Berhasil direset global!");
-                }
-              }} 
-              className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors"
-            >
-              Reset ke Default
-            </button>
-            <button 
-              onClick={async () => {
-                if (window.confirm("Jadikan tampilan website saat ini sebagai default?")) {
-                  try {
-                    await updateDoc(doc(db, 'appConfig', 'default'), config);
-                  } catch (e) {
-                    await setDoc(doc(db, 'appConfig', 'default'), config);
+        <div className="flex flex-col border-b border-art-text bg-white">
+          <div className="flex justify-between items-center p-4 sm:p-6">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
+              <p className="text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
+              <button 
+                onClick={() => {
+                  if (window.confirm("Beneran mau reset semua ke default global?")) {
+                    revertToDefault();
+                    showToast("Berhasil direset global!");
                   }
-                  showToast("Berhasil di-set sebagai default!", "success");
-                }
-              }} 
-              className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors"
-            >
-              Set Default
-            </button>
+                }} 
+                className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors hidden sm:block"
+              >
+                Reset ke Default
+              </button>
+              <button 
+                onClick={async () => {
+                  if (window.confirm("Jadikan tampilan website saat ini sebagai default?")) {
+                    try {
+                      await updateDoc(doc(db, 'appConfig', 'default'), config as any);
+                    } catch (e) {
+                      await setDoc(doc(db, 'appConfig', 'default'), config as any);
+                    }
+                    showToast("Berhasil di-set sebagai default!", "success");
+                  }
+                }} 
+                className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors hidden sm:block"
+              >
+                Set Default
+              </button>
+            </div>
+            <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
           </div>
-          <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
+          <div className="flex gap-2 px-4 pb-2 border-t border-art-text/10 pt-2">
+            <button onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'booking' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Booking</button>
+            <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'trip' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Trip</button>
+            <button onClick={() => { setActiveCategory('website'); setActiveTab('cerita'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'website' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Website</button>
+          </div>
         </div>
         
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
-          {/* Sidebar Tabs */}
+          {/* Sub Sidebar Tabs */}
           <div className="flex sm:flex-col gap-1.5 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
-            <div className="text-[10px] font-black uppercase text-art-text/40 tracking-widest mt-2 px-2">Booking</div>
-            <button onClick={() => setActiveTab('bookings')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>Daftar Booking</button>
-            <button onClick={() => setActiveTab('promoCodes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'promoCodes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Kode Promo</button>
-
-            <div className="w-full h-px bg-art-text/10 my-1"></div>
-            
-            <div className="text-[10px] font-black uppercase text-art-text/40 tracking-widest mt-2 px-2">Trip</div>
-            <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip</button>
-            <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
-
-            <div className="w-full h-px bg-art-text/10 my-1"></div>
-            
-            <div className="text-[10px] font-black uppercase text-art-text/40 tracking-widest mt-2 px-2">Website</div>
-            <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Cerita</button>
-            <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
-            <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
-            <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
+            {activeCategory === 'booking' && (
+              <>
+                <button onClick={() => setActiveTab('bookings')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>Daftar Booking</button>
+                <button onClick={() => setActiveTab('promoCodes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'promoCodes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Kode Promo</button>
+              </>
+            )}
+            {activeCategory === 'trip' && (
+              <>
+                <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip</button>
+                <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
+              </>
+            )}
+            {activeCategory === 'website' && (
+              <>
+                <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Cerita</button>
+                <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
+                <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
+                <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
+              </>
+            )}
           </div>
           
           {/* Content */}
@@ -120,8 +132,8 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
       setLoading(false);
     }, (error) => {
       console.error("Firestore onSnapshot error:", error);
-      handleFirestoreError(error, OperationType.LIST, 'bookings');
       setLoading(false);
+      showToast('Gagal memuat booking. Silahkan lapor admin.', 'error');
     });
     return () => unsubscribe();
   }, [user]);
