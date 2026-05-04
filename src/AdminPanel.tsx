@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download } from 'lucide-react';
-import { db } from './firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, OpenTrip } from './useAppConfig';
@@ -107,7 +108,12 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
   const [bookings, setBookings] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 
+  const [user] = useAuthState(auth);
   React.useEffect(() => {
+    if (!user || user.email !== 'mrachmanfm@gmail.com') {
+      setLoading(false);
+      return;
+    }
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snap) => {
       setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -118,7 +124,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [showToast]);
+  }, [user]);
 
   const syncOpenTripQuota = async (currentBookings: any[], updatedBookingId?: string, newStatus?: string, deletedBookingId?: string) => {
     if (!config.openTrips) return;
