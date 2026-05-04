@@ -2,10 +2,16 @@ import { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
+export interface FacilityOption {
+  name: string;
+  priceInfo?: string;
+  subItems?: { name: string, priceInfo?: string }[];
+}
+
 export interface AppConfig {
   openTrips: any[];
   visibilities: { map: boolean, quota: boolean, beans: boolean, routes: boolean };
-  facilities?: { include: string[], exclude: string[], opsi: string[] };
+  facilities?: { include: string[], exclude: string[], opsi: FacilityOption[] };
   destinationsData: any[];
   tripLeaders: any[];
   teamPhotos?: string[];

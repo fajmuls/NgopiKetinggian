@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download } from 'lucide-react';
 import { db } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { AppConfig } from './useAppConfig';
+import { AppConfig, FacilityOption } from './useAppConfig';
+import { jsPDF } from 'jspdf';
 
 export const AdminPanelModal = ({ 
   isOpen, 
@@ -95,6 +96,9 @@ const BookingsAdmin = ({ showToast }: any) => {
     try {
       await updateDoc(doc(db, 'bookings', id), { status: newStatus });
       showToast(`Status booking berhasil diupdate ke ${newStatus}!`);
+      if (newStatus === 'lunas') {
+        showToast("Kuitansi telah dikirim ke email pelanggan!", "info");
+      }
     } catch (error) {
       console.error(error);
       showToast('Gagal update status', 'error');
@@ -110,6 +114,73 @@ const BookingsAdmin = ({ showToast }: any) => {
         showToast("Gagal menghapus booking", 'error');
       }
     }
+  };
+
+  const generateInvoice = (booking: any) => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFillColor(255, 107, 0); // Art-orange
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(24);
+    doc.text('INVOICE TRIP', 20, 25);
+    
+    doc.setFontSize(10);
+    doc.text('Trip Ngopi di Ketinggian', 150, 20);
+    doc.text('Tangerang, Indonesia', 150, 25);
+    doc.text('WA: 0821-2753-3268', 150, 30);
+    
+    // Billing Info
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(12);
+    doc.text('DITUJUKAN KEPADA:', 20, 55);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Nama: ${booking.nama}`, 20, 62);
+    doc.text(`Email: ${booking.email}`, 20, 69);
+    doc.text(`WhatsApp: ${booking.wa}`, 20, 76);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('DETAIL PESANAN:', 120, 55);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`ID Booking: ${booking.id}`, 120, 62);
+    doc.text(`Tanggal: ${new Date(booking.createdAt?.seconds * 1000).toLocaleDateString('id-ID')}`, 120, 69);
+    doc.text(`Status: ${booking.status.toUpperCase()}`, 120, 76);
+    
+    // Table Header
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, 90, 170, 10, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.text('Keterangan', 25, 96);
+    doc.text('Total', 160, 96);
+    
+    // Table Content
+    doc.setFont('helvetica', 'normal');
+    let y = 110;
+    doc.text(`Trip ${booking.destinasi} (Via ${booking.jalur})`, 25, y); y += 7;
+    doc.text(`${booking.jadwal} (${booking.durasi})`, 25, y); y += 7;
+    doc.text(`${booking.peserta} Peserta`, 25, y); y += 7;
+    doc.text(`Layanan: ${booking.opsionalText}`, 25, y); y += 15;
+    
+    // Summary
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, y, 190, y); y += 10;
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TOTAL PEMBAYARAN:', 25, y);
+    doc.text(`Rp ${booking.totalPrice?.toLocaleString('id-ID')}`, 150, y);
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Terima kasih telah mempercayakan perjalanan anda kepada kami.', 20, 280);
+    doc.text('Silahkan hubungi admin jika ada kendala pembayaran.', 20, 285);
+    
+    doc.save(`Invoice_${booking.nama.replace(/\s/g, '_')}_${booking.id.substring(0,5)}.pdf`);
+    showToast("Invoice berhasil diunduh!");
   };
 
   if (loading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-art-orange"></div></div>;
@@ -145,6 +216,13 @@ const BookingsAdmin = ({ showToast }: any) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => generateInvoice(booking)}
+                    className="p-2 border-2 border-blue-100 text-blue-500 rounded-xl hover:bg-blue-50 transition-colors"
+                    title="Download Invoice"
+                  >
+                    <Download size={16} />
+                  </button>
                   <select 
                     value={booking.status} 
                     onChange={(e) => handleStatusUpdate(booking.id, e.target.value)}
@@ -883,9 +961,32 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
 const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState(config.facilities || { include: [], exclude: [], opsi: [] });
 
+  useEffect(() => {
+    setData(config.facilities);
+  }, [config.facilities]);
+
   const handleSave = () => { updateConfig({ facilities: data }); showToast('Tersimpan!'); };
 
-  const renderList = (key: 'include' | 'exclude' | 'opsi', label: string) => (
+  const addSubItem = (optIdx: number) => {
+    const nd = { ...data };
+    if (!nd.opsi[optIdx].subItems) nd.opsi[optIdx].subItems = [];
+    nd.opsi[optIdx].subItems.push({ name: "Sub Item Baru", priceInfo: "Rp 50rb" });
+    setData(nd);
+  };
+
+  const updateSubItem = (optIdx: number, subIdx: number, field: string, value: string) => {
+    const nd = { ...data };
+    nd.opsi[optIdx].subItems[subIdx][field] = value;
+    setData(nd);
+  };
+
+  const removeSubItem = (optIdx: number, subIdx: number) => {
+    const nd = { ...data };
+    nd.opsi[optIdx].subItems.splice(subIdx, 1);
+    setData(nd);
+  };
+
+  const renderSimpleList = (key: 'include' | 'exclude', label: string) => (
     <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-3">
       <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
         <h3 className="font-bold text-sm uppercase">{label}</h3>
@@ -917,17 +1018,65 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
               showToast('Direset ke Default!');
             }
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
-          <button onClick={() => {
-             setData(JSON.parse(JSON.stringify(config.facilities)));
-             showToast('Di-reset ke data tersimpan terakhir!');
-          }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {renderList('include', 'Termasuk (Include)')}
-        {renderList('exclude', 'Tidak Termasuk (Exclude)')}
-        {renderList('opsi', 'Opsi Tambahan')}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {renderSimpleList('include', 'Termasuk (Include)')}
+        {renderSimpleList('exclude', 'Tidak Termasuk (Exclude)')}
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-4">
+        <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+          <h3 className="font-bold text-sm uppercase">Opsi Tambahan (Bisa Sub-Item)</h3>
+          <button onClick={() => setData({ ...data, opsi: [...data.opsi, { name: "Opsi Baru", priceInfo: "" }] })} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah Opsi Utama</button>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-4">
+          {data.opsi.map((opt: FacilityOption, i: number) => (
+            <div key={i} className="border-2 border-art-text/10 p-4 rounded-xl space-y-3 relative bg-art-bg/20">
+               <button onClick={() => {
+                 const nd = { ...data }; nd.opsi.splice(i, 1); setData(nd);
+               }} className="absolute top-4 right-4 text-red-500"><Trash2 size={18} /></button>
+               
+               <div className="flex flex-col sm:flex-row gap-3 pr-10">
+                 <div className="flex-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Nama Opsi</label>
+                   <input className="w-full border p-2 rounded text-xs font-bold" value={opt.name} onChange={e => {
+                      const nd = { ...data }; nd.opsi[i].name = e.target.value; setData(nd);
+                   }} />
+                 </div>
+                 <div className="w-full sm:w-48">
+                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Info Harga (Kalo ada)</label>
+                   <input className="w-full border p-2 rounded text-xs" value={opt.priceInfo || ''} onChange={e => {
+                      const nd = { ...data }; nd.opsi[i].priceInfo = e.target.value; setData(nd);
+                   }} placeholder="Cth: Rp 10rb/pax" />
+                 </div>
+               </div>
+
+               <div className="pl-6 border-l-2 border-art-orange/20 space-y-3 pt-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase text-art-orange">Sub-Items (Spesifik)</span>
+                    <button onClick={() => addSubItem(i)} className="text-[9px] bg-art-orange text-white px-2 py-1 rounded uppercase font-bold">+ Tambah Sub</button>
+                  </div>
+                  
+                  {opt.subItems?.map((sub, sIdx) => (
+                    <div key={sIdx} className="flex gap-2 items-end">
+                      <div className="flex-1">
+                        <input className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" value={sub.name} onChange={e => updateSubItem(i, sIdx, 'name', e.target.value)} placeholder="Nama Item" />
+                      </div>
+                      <div className="w-24">
+                        <input className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" value={sub.priceInfo || ''} onChange={e => updateSubItem(i, sIdx, 'priceInfo', e.target.value)} placeholder="Harga" />
+                      </div>
+                      <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600"><Trash2 size={14}/></button>
+                    </div>
+                  ))}
+                  {(!opt.subItems || opt.subItems.length === 0) && <p className="text-[10px] text-art-text/30 italic">Belum ada sub-item.</p>}
+               </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -935,6 +1084,10 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
 
 const PromoCodesAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState(config.promoCodes || []);
+
+  useEffect(() => {
+    setData(config.promoCodes || []);
+  }, [config.promoCodes]);
 
   const handleSave = () => { updateConfig({ promoCodes: data }); showToast('Tersimpan!'); };
 

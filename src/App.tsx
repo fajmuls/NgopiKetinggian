@@ -53,6 +53,8 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   const [promoCode, setPromoCode] = useState('');
   
   const [selectedOpsional, setSelectedOpsional] = useState<string[]>([]);
+  const [subSelected, setSubSelected] = useState<Record<string, number>>({});
+
   const [formState, setFormState] = useState({
     nama: '',
     email: '',
@@ -73,6 +75,19 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
   const handleToggleOption = (opt: string) => {
     setSelectedOpsional(prev => prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev, opt]);
+  };
+
+  const handleUpdateSubItem = (optName: string, subItemName: string, delta: number) => {
+    const key = `${optName}|${subItemName}`;
+    setSubSelected(prev => {
+      const current = prev[key] || 0;
+      const next = Math.max(0, current + delta);
+      if (next === 0) {
+        const { [key]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [key]: next };
+    });
   };
 
   const calculateEndDate = (startDateStr: string, durationLabel: string) => {
@@ -156,6 +171,16 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     const { nama, email, wa, deskripsi } = formState;
     const finalJadwalLabel = currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal;
 
+    const subItemsFormatted = Object.entries(subSelected).map(([key, qty]) => {
+      const [parent, item] = key.split('|');
+      return `${item} (${qty}x)`;
+    }).join(', ');
+
+    const finalOpsionalText = [
+      ...selectedOpsional.filter(opt => !config?.facilities?.opsi?.find((o: any) => o.name === opt)?.subItems),
+      subItemsFormatted
+    ].filter(Boolean).join(' | ');
+
     if (user) {
       try {
         await addDoc(collection(db, 'bookings'), {
@@ -166,7 +191,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
           durasi: selectedDurasi, 
           jadwal: finalJadwalLabel, 
           peserta: pesertaCount,
-          opsionalText: selectedOpsional.join(' | ') || 'Tidak ada',
+          opsionalText: finalOpsionalText || 'Tidak ada',
           deskripsi: deskripsi || 'Tidak ada catatan khusus',
           type: currentType,
           totalPrice: netPrice,
@@ -190,7 +215,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
       }
     }
 
-    const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${isPromoValid ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${selectedOpsional.map(o => `• ${o}`).join('\n') || '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
+    const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Jalur: ${selectedJalur}\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${isPromoValid ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${finalOpsionalText ? finalOpsionalText.split(' | ').map(o => `• ${o}`).join('\n') : '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
     
     window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(waMsg)}`, '_blank');
     
@@ -332,7 +357,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
                 <div className="space-y-4">
                    <div className="relative">
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 1: Pilih Destinasi</label>
+                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Destinasi</label>
                       <select 
                         name="destinasi" 
                         required 
@@ -352,7 +377,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
                    <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
-                        <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 2: Jalur</label>
+                        <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jalur</label>
                         <select 
                           name="jalur" 
                           required 
@@ -368,7 +393,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                         </select>
                       </div>
                       <div className="relative">
-                        <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 2: Durasi</label>
+                        <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Durasi</label>
                         <select 
                           name="durasi" 
                           required 
@@ -387,7 +412,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
                    <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
-                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 3: Rencana Tanggal</label>
+                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Rencana Tanggal</label>
                          <input 
                            name="jadwal" 
                            required 
@@ -399,17 +424,17 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                          />
                       </div>
                       <div className="relative">
-                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 3: Peserta</label>
-                         <div className="flex items-center gap-1 bg-white border-2 border-art-text rounded-xl px-1.5 h-[42px] shadow-sm">
-                            <button type="button" onClick={() => setPesertaCount(Math.max(1, (Number(pesertaCount) || 1) - 1))} className="w-5 h-5 flex items-center justify-center bg-art-text text-white rounded font-black hover:bg-art-orange transition-colors text-[10px]">-</button>
-                            <input name="peserta" type="number" value={pesertaCount} onChange={e => setPesertaCount(e.target.value)} className="flex-1 text-center font-black text-art-text outline-none text-[10px]" min={1} />
-                            <button type="button" onClick={() => setPesertaCount((Number(pesertaCount) || 0) + 1)} className="w-5 h-5 flex items-center justify-center bg-art-text text-white rounded font-black hover:bg-art-green transition-colors text-[10px]">+</button>
+                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Jumlah Peserta</label>
+                         <div className="flex items-center gap-2 bg-white border-2 border-art-text rounded-xl px-2 h-[42px] shadow-sm">
+                            <button type="button" onClick={() => setPesertaCount(Math.max(1, (Number(pesertaCount) || 1) - 1))} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-orange transition-colors text-[12px]">-</button>
+                            <input name="peserta" type="number" value={pesertaCount} onChange={e => setPesertaCount(e.target.value)} className="w-full text-center font-black text-art-text outline-none text-xs bg-transparent" min={1} />
+                            <button type="button" onClick={() => setPesertaCount((Number(pesertaCount) || 0) + 1)} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-green transition-colors text-[12px]">+</button>
                          </div>
                       </div>
                    </div>
 
                    <div className="relative">
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 4: Opsi Layanan Tambahan</label>
+                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
                       <div className="relative">
                          <button 
                            type="button" 
@@ -419,34 +444,63 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                            }}
                            className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black text-left text-[10px] flex justify-between items-center shadow-sm"
                          >
-                           <span className="truncate">{selectedOpsional.length === 0 ? 'PILIH LAYANAN TAMBAHAN...' : `${selectedOpsional.length} LAYANAN DIPILIH`}</span>
+                           <span className="truncate">{selectedOpsional.length === 0 && Object.keys(subSelected).length === 0 ? 'PILIH LAYANAN TAMBAHAN...' : `${selectedOpsional.length + Object.keys(subSelected).length} LAYANAN DIPILIH`}</span>
                            <ChevronDown size={14} className="text-art-text/40" />
                          </button>
-                         <div id="addon-dropdown" className="hidden absolute z-30 left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-2xl p-3 max-h-40 overflow-y-auto">
-                            <div className="grid grid-cols-1 gap-1">
-                              {config?.facilities?.opsi?.map((opt: string, i: number) => (
-                                 <label key={i} className="flex items-center gap-3 p-2 hover:bg-art-bg rounded-xl cursor-pointer transition-colors group">
-                                    <input 
-                                      type="checkbox" 
-                                      checked={selectedOpsional.includes(opt)}
-                                      onChange={() => handleToggleOption(opt)}
-                                      className="w-3.5 h-3.5 accent-art-orange"
-                                    />
-                                    <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt}</span>
-                                 </label>
-                              ))}
+                         <div id="addon-dropdown" className="hidden absolute z-30 left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-2xl p-4 max-h-64 overflow-y-auto">
+                            <div className="grid grid-cols-1 gap-2">
+                              {config?.facilities?.opsi?.map((opt: any, i: number) => {
+                                 const isSelected = selectedOpsional.includes(opt.name);
+                                 return (
+                                    <div key={i} className="space-y-2 border-b border-art-text/5 last:border-0 pb-2">
+                                       <label className="flex items-center gap-3 p-1 hover:bg-art-bg rounded-xl cursor-pointer transition-colors group">
+                                          <input 
+                                            type="checkbox" 
+                                            checked={isSelected}
+                                            onChange={() => handleToggleOption(opt.name)}
+                                            className="w-4 h-4 accent-art-orange"
+                                          />
+                                          <div className="flex flex-col">
+                                             <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name}</span>
+                                             {opt.priceInfo && <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>}
+                                          </div>
+                                       </label>
+                                       
+                                       {isSelected && opt.subItems && (
+                                          <div className="ml-8 space-y-2 pt-1 border-l-2 border-art-orange/20 pl-4">
+                                             {opt.subItems.map((sub: any, sIdx: number) => {
+                                                const qty = subSelected[`${opt.name}|${sub.name}`] || 0;
+                                                return (
+                                                   <div key={sIdx} className="flex items-center justify-between gap-4">
+                                                      <div className="flex flex-col">
+                                                         <span className="text-[9px] font-bold text-art-text/60 uppercase">{sub.name}</span>
+                                                         {sub.priceInfo && <span className="text-[8px] font-medium text-art-text/30 italic">{sub.priceInfo}</span>}
+                                                      </div>
+                                                      <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
+                                                         <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, -1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
+                                                         <span className="w-5 text-center font-black text-[10px] text-art-text">{qty}</span>
+                                                         <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, 1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
+                                                      </div>
+                                                   </div>
+                                                );
+                                             })}
+                                          </div>
+                                       )}
+                                    </div>
+                                 );
+                              })}
                             </div>
                          </div>
                       </div>
                    </div>
 
                    <div className="relative">
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 5: Catatan Khusus / Kesehatan</label>
+                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Catatan Khusus / Kesehatan</label>
                       <textarea name="deskripsi" className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-bold outline-none focus:border-art-orange text-xs h-20 resize-none placeholder:text-art-text/20 shadow-sm" placeholder="Tuliskan jika ada request khusus..."></textarea>
                    </div>
 
                    <div className="relative">
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Layer 6: Kode Promo</label>
+                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Kode Promo</label>
                       <input 
                         name="promo" 
                         type="text" 
@@ -461,7 +515,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
              <div className="bg-art-text p-6 rounded-[2.5rem] border-2 border-art-text overflow-hidden shadow-[8px_8px_0px_0px_rgba(255,107,0,0.2)]">
                 <div className="flex justify-between items-center mb-5 border-b border-white/10 pb-3">
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 italic">Layer 7: Rincian Estimasi Biaya</span>
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 italic">Rincian Estimasi Biaya</span>
                    <div className="flex items-center gap-1.5 bg-art-orange/20 px-2 py-0.5 rounded-full border border-art-orange/30">
                       <ShoppingBag size={10} className="text-art-orange" />
                       <span className="text-[8px] font-black text-art-orange uppercase tracking-widest">Premium</span>
