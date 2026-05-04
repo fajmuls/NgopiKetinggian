@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download } from 'lucide-react';
 import { db } from './firebase';
-import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, OpenTrip } from './useAppConfig';
 import { jsPDF } from 'jspdf';
@@ -45,27 +45,50 @@ export const AdminPanelModal = ({
             >
               Reset ke Default
             </button>
+            <button 
+              onClick={async () => {
+                if (window.confirm("Jadikan tampilan website saat ini sebagai default?")) {
+                  try {
+                    await updateDoc(doc(db, 'appConfig', 'default'), config);
+                  } catch (e) {
+                    await setDoc(doc(db, 'appConfig', 'default'), config);
+                  }
+                  showToast("Berhasil di-set sebagai default!", "success");
+                }
+              }} 
+              className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors"
+            >
+              Set Default
+            </button>
           </div>
           <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
         </div>
         
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
           {/* Sidebar Tabs */}
-          <div className="flex sm:flex-col gap-2 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
+          <div className="flex sm:flex-col gap-1.5 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
+            <div className="text-[10px] font-black uppercase text-art-text/40 tracking-widest mt-2 px-2">Booking</div>
             <button onClick={() => setActiveTab('bookings')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>Daftar Booking</button>
-            <div className="w-full h-px bg-art-text/10 my-2"></div>
-            <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip (Bebas)</button>
-            <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
-            <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
-            <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
-            <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
             <button onClick={() => setActiveTab('promoCodes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'promoCodes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Kode Promo</button>
-            <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Secangkir Cerita</button>
+
+            <div className="w-full h-px bg-art-text/10 my-1"></div>
+            
+            <div className="text-[10px] font-black uppercase text-art-text/40 tracking-widest mt-2 px-2">Trip</div>
+            <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip</button>
+            <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
+
+            <div className="w-full h-px bg-art-text/10 my-1"></div>
+            
+            <div className="text-[10px] font-black uppercase text-art-text/40 tracking-widest mt-2 px-2">Website</div>
+            <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Cerita</button>
+            <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
+            <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
+            <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
           </div>
           
           {/* Content */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-art-bg/50">
-            {activeTab === 'bookings' && <BookingsAdmin showToast={showToast} />}
+            {activeTab === 'bookings' && <BookingsAdmin showToast={showToast} config={config} updateConfig={updateConfig} />}
             {activeTab === 'openTrips' && <OpenTripsAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'destinations' && <DestinationsAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.destinations} />}
             {activeTab === 'leaders' && <LeadersAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.leaders} />}
@@ -80,7 +103,7 @@ export const AdminPanelModal = ({
   );
 };
 
-const BookingsAdmin = ({ showToast }: any) => {
+const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
   const [bookings, setBookings] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 

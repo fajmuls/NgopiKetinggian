@@ -218,66 +218,73 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     playClick();
   };
 
-  const handleBookingFinal = async () => {
-    const { nama, email, wa, deskripsi } = formState;
-    const finalJadwalLabel = currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal;
+    const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
-    const subItemsFormatted = Object.entries(subSelected).map(([key, qty]) => {
-      const [parent, item] = key.split('|');
-      return `${item} (${qty}x)`;
-    }).join(', ');
+    const handleBookingFinal = async () => {
+      const { nama, email, wa, deskripsi } = formState;
+      const finalJadwalLabel = currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal;
+  
+      const subItemsFormatted = Object.entries(subSelected).map(([key, qty]) => {
+        const [parent, item] = key.split('|');
+        return `${item} (${qty}x)`;
+      }).join(', ');
+  
+      const finalOpsionalText = [
+        ...selectedOpsional.filter(opt => !config?.facilities?.opsi?.find((o: any) => o.name === opt)?.subItems),
+        subItemsFormatted
+      ].filter(Boolean).join(' | ');
+  
+      setIsSubmittingBooking(true);
 
-    const finalOpsionalText = [
-      ...selectedOpsional.filter(opt => !config?.facilities?.opsi?.find((o: any) => o.name === opt)?.subItems),
-      subItemsFormatted
-    ].filter(Boolean).join(' | ');
-
-    if (user) {
-      try {
-        await addDoc(collection(db, 'bookings'), {
-          userId: user.uid,
-          nama, email, wa,
-          destinasi: selectedDestinasi, 
-          jalur: selectedJalur,
-          durasi: selectedDurasi, 
-          jadwal: finalJadwalLabel, 
-          peserta: pesertaCount,
-          opsionalText: finalOpsionalText || 'Tidak ada',
-          deskripsi: deskripsi || 'Tidak ada catatan khusus',
-          type: currentType,
-          totalPrice: netPrice,
-          createdAt: serverTimestamp(),
-          status: 'pending'
-        });
-
-        if (currentType === 'open' && config) {
-           const updatedOpenTrips = (config.openTrips || []).map((ot: any) => {
-              if (ot.name === selectedDestinasi && ot.jadwal === selectedJadwal) {
-                 const currentKuota = typeof ot.kuotaNum === 'number' ? ot.kuotaNum : 10;
-                 const newKuota = Math.max(0, currentKuota - Number(pesertaCount));
-                 return { ...ot, kuotaNum: newKuota, kuota: `${newKuota} Pax Tersisa` };
-              }
-              return ot;
-           });
-           updateConfig({ openTrips: updatedOpenTrips });
+      if (user) {
+        try {
+          await addDoc(collection(db, 'bookings'), {
+            userId: user.uid,
+            nama: nama || 'Tanpa Nama', 
+            email: email || user.email || 'tanpa@email.com', 
+            wa: wa || '08000000',
+            destinasi: selectedDestinasi || '-', 
+            jalur: selectedJalur || '-',
+            durasi: selectedDurasi || '-', 
+            jadwal: finalJadwalLabel || '-', 
+            peserta: pesertaCount || 1,
+            opsionalText: finalOpsionalText || 'Tidak ada',
+            deskripsi: deskripsi || 'Tidak ada catatan khusus',
+            type: currentType || 'private',
+            totalPrice: netPrice || 0,
+            createdAt: serverTimestamp(),
+            status: 'pending'
+          });
+  
+          if (currentType === 'open' && config) {
+             const updatedOpenTrips = (config.openTrips || []).map((ot: any) => {
+                if (ot.name === selectedDestinasi && ot.jadwal === selectedJadwal) {
+                   const currentKuota = typeof ot.kuotaNum === 'number' ? ot.kuotaNum : 10;
+                   const newKuota = Math.max(0, currentKuota - Number(pesertaCount));
+                   return { ...ot, kuotaNum: newKuota, kuota: `${newKuota} Pax Tersisa` };
+                }
+                return ot;
+             });
+             updateConfig({ openTrips: updatedOpenTrips });
+          }
+        } catch (error) {
+          console.error("Booking addDoc error: ", error);
         }
-      } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, 'bookings');
       }
-    }
-
-    const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Jalur: ${selectedJalur}\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${isPromoValid ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${finalOpsionalText ? finalOpsionalText.split(' | ').map(o => `• ${o}`).join('\n') : '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
-    
-    window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(waMsg)}`, '_blank');
-    
-    playSuccess();
-    setShowSuccess(true);
-    setTimeout(() => { 
-      setShowSuccess(false); 
-      setIsConfirming(false);
-      onClose(); 
-    }, 1500);
-  };
+  
+      const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Jalur: ${selectedJalur}\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${isPromoValid ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${finalOpsionalText ? finalOpsionalText.split(' | ').map(o => `• ${o}`).join('\n') : '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
+      
+      window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(waMsg)}`, '_blank');
+      
+      playSuccess();
+      setShowSuccess(true);
+      setTimeout(() => { 
+        setShowSuccess(false); 
+        setIsConfirming(false);
+        setIsSubmittingBooking(false);
+        onClose(); 
+      }, 1500);
+    };
 
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left">
@@ -325,6 +332,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    <div className="text-right">
                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-0.5">Total Estimasi</p>
                       <p className="text-lg font-black text-art-orange">Rp {netPrice.toLocaleString('id-ID')}</p>
+                      {currentPesertaCount > 1 && (
+                         <p className="text-[8px] font-bold text-art-text/40 mt-1 uppercase italic">(Rp {Math.round(netPrice / currentPesertaCount).toLocaleString('id-ID')} / orang)</p>
+                      )}
                    </div>
                 </div>
              </div>
@@ -336,8 +346,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 >Revisi Data</button>
                 <button 
                   onClick={handleBookingFinal} 
-                  className="flex-[2] py-4 bg-art-text text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[6px_6px_0px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2"
-                >Konfirmasi & Kirim <Send size={14} /></button>
+                  disabled={isSubmittingBooking}
+                  className="flex-[2] py-4 bg-art-text text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[6px_6px_0px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >{isSubmittingBooking ? 'Memproses...' : 'Konfirmasi & Kirim'} <Send size={14} /></button>
              </div>
           </div>
         ) : viewType === 'selection' ? (
@@ -659,6 +670,14 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    <div>
                       <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">TOTAL ESTIMASI AKHIR:</p>
                       <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</h4>
+                      {currentPesertaCount > 1 && (
+                         <div className="flex items-center gap-2 mt-1">
+                            <div className="w-1 h-1 rounded-full bg-art-orange"></div>
+                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                              Rp {Math.round(netPrice / currentPesertaCount).toLocaleString('id-ID')} / orang
+                            </p>
+                         </div>
+                      )}
                    </div>
                    <div className="text-right">
                       <p className="text-[7px] font-bold text-white/20 uppercase italic leading-tight max-w-[100px]">
