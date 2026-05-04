@@ -11,7 +11,7 @@ export interface FacilityOption {
   subItems?: { name: string, priceInfo?: string, price?: number }[];
 }
 
-export const DIFFICULTY_LEVELS = ["Pemula", "Pemula Menengah", "Menengah", "Menengah Ahli", "Ahli", "Sangat Ahli"];
+export const DIFFICULTY_LEVELS = ["Beginner to Intermediate", "Intermediate Only", "Intermediate to Advanced", "Very Advanced"];
 export const DURATION_LEVELS = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
 
 import { customAlert } from './GlobalDialog';

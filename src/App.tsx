@@ -191,6 +191,14 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   const currentPesertaCount = typeof pesertaCount === 'number' && pesertaCount > 0 ? pesertaCount : 1;
   const grossPrice = basePricePerPax * currentPesertaCount;
 
+  // Calculate days for pricing
+  const getDaysFromLabel = (label: string) => {
+    if (!label) return 1;
+    const hIndex = label.indexOf('H');
+    return hIndex !== -1 ? Math.max(1, parseInt(label.substring(0, hIndex).trim())) : 1;
+  };
+  const tripDays = getDaysFromLabel(selectedDurasi);
+
   // Calculate optional items price
   const opsionalItemsList: any[] = [];
   let totalOpsionalPrice = 0;
@@ -201,31 +209,36 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
     const subItem = parentOpt?.subItems?.find((s: any) => s.name === subName);
     if (subItem && subItem.price) {
-      const price = Number(subItem.price) * 1000;
+      const pricePerDay = Number(subItem.price) * 1000;
       const numQty = Number(qty);
+      const totalItemPrice = pricePerDay * numQty * tripDays;
+      
       opsionalItemsList.push({
         name: subName,
-        price: price,
+        price: pricePerDay,
         count: numQty,
-        subtotal: price * numQty
+        days: tripDays,
+        subtotal: totalItemPrice
       });
-      totalOpsionalPrice += (price * numQty);
+      totalOpsionalPrice += totalItemPrice;
     }
   });
 
   // Items from selectedOpsional (standalone items)
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
-    // Only if it doesn't have subItems (if it has, it should be handled by subSelected)
     if (opt && !opt.subItems && opt.price) {
-      const price = Number(opt.price) * 1000;
+      const pricePerDay = Number(opt.price) * 1000;
+      const totalItemPrice = pricePerDay * tripDays;
+      
       opsionalItemsList.push({
         name: optName,
-        price: price,
-        count: currentPesertaCount, // Default to per pax if standalone? Or just 1? 
-        subtotal: price
+        price: pricePerDay,
+        count: 1,
+        days: tripDays,
+        subtotal: totalItemPrice
       });
-      totalOpsionalPrice += price;
+      totalOpsionalPrice += totalItemPrice;
     }
   });
 
@@ -1777,9 +1790,11 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     if (booking.opsionalItems && booking.opsionalItems.length > 0) {
       booking.opsionalItems.forEach((item: any) => {
         doc.setFontSize(9);
-        doc.text(`(+) ${item.name} (${item.count}x)`, 25, currentY);
+        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari)`;
+        const splitItem = doc.splitTextToSize(itemLine, 130);
+        doc.text(splitItem, 25, currentY);
         doc.text(`Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
-        currentY += 6;
+        currentY += (splitItem.length * 6);
       });
       doc.setFontSize(10);
     }
@@ -2078,7 +2093,9 @@ export default function App() {
 
   const filteredOpenTrips = (config.openTrips || []).filter((ot: any) => {
     const matchesRegion = openFilterRegion === 'Semua' || ot.region === openFilterRegion;
-    const matchesDifficulty = openFilterDifficulty === 'Semua' || ot.difficulty === openFilterDifficulty;
+    const matchesDifficulty = openFilterDifficulty === 'Semua' || 
+                             ot.difficulty === openFilterDifficulty || 
+                             (openFilterDifficulty.toLowerCase().includes('intermediate') && ot.difficulty.toLowerCase().includes('intermediate'));
     const matchesSearch = ot.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesRegion && matchesDifficulty && matchesSearch;
   });
@@ -2106,7 +2123,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
 
   const filteredDestinations = currentDestinations.filter(dest => {
     if (dest.isActive === false) return false;
-    const matchesDifficulty = filterDifficulty === 'Semua' || dest.difficulty === filterDifficulty;
+    const matchesDifficulty = filterDifficulty === 'Semua' || 
+                             dest.difficulty === filterDifficulty || 
+                             (filterDifficulty.toLowerCase().includes('intermediate') && dest.difficulty.toLowerCase().includes('intermediate'));
     const matchesRegion = filterRegion === 'Semua' || dest.region === filterRegion;
     const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           dest.desc.toLowerCase().includes(searchQuery.toLowerCase());

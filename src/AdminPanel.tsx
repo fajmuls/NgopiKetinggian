@@ -298,23 +298,24 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.text(`Rp ${baseTotal.toLocaleString('id-ID')}`, 160, currentY);
     currentY += 8;
 
-    // Optional Services detailed
     if (booking.opsionalItems && booking.opsionalItems.length > 0) {
       booking.opsionalItems.forEach((item: any) => {
         doc.setFontSize(9);
         doc.setTextColor(80, 80, 80);
-        doc.text(`(+) ${item.name}`, 25, currentY);
-        doc.text(`${item.count || 1} UNIT`, 130, currentY);
-        doc.text(`Rp ${item.price.toLocaleString('id-ID')}`, 160, currentY);
-        currentY += 6;
+        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari)`;
+        const splitItem = doc.splitTextToSize(itemLine, 130);
+        doc.text(splitItem, 25, currentY);
+        doc.text(`Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        currentY += (splitItem.length * 6);
       });
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setFontSize(10);
     } else if (booking.opsionalText) {
       doc.setFontSize(9);
-      doc.text(`(+) LAYANAN TAMBAHAN: ${booking.opsionalText}`, 25, currentY);
+      const splitText = doc.splitTextToSize(`(+) LAYANAN TAMBAHAN: ${booking.opsionalText}`, 130);
+      doc.text(splitText, 25, currentY);
       doc.text(`Rp ${(booking.opsionalPrice || 0).toLocaleString('id-ID')}`, 160, currentY);
-      currentY += 8;
+      currentY += (splitText.length * 6) + 2;
     }
 
     // Promo Code
@@ -342,15 +343,37 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     // Status Badge
     currentY += 20;
     const isLunas = booking.status === 'lunas';
-    doc.setFillColor(isLunas ? successColor[0] : accentColor[0], isLunas ? successColor[1] : accentColor[1], isLunas ? successColor[2] : accentColor[2]);
+    const isDP = booking.status === 'dp' || booking.status === 'dp_partial';
+    
+    if (isLunas) {
+      doc.setFillColor(successColor[0], successColor[1], successColor[2]);
+    } else if (isDP) {
+      doc.setFillColor(255, 193, 7); // Yellow/Amber for DP
+    } else {
+      doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+    }
+    
     doc.rect(20, currentY, 40, 10, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(10);
-    doc.text(isLunas ? 'LUNAS' : booking.status.toUpperCase(), 40, currentY + 6.5, { align: 'center' });
+    const statusLabel = booking.status === 'lunas' ? 'LUNAS' : 
+                        booking.status === 'dp' ? 'DP PAID' : 
+                        booking.status === 'dp_partial' ? 'PARTIAL DP' : 
+                        booking.status.toUpperCase();
+    doc.text(statusLabel, 40, currentY + 6.5, { align: 'center' });
 
-    // Payment Info
+    // Note Section with Wrap (Fix Overflow)
+    currentY += 20;
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CATATAN KHUSUS:', 20, currentY);
+    doc.setFont('helvetica', 'normal');
+    const splitDesc = doc.splitTextToSize(booking.deskripsi || "Tidak ada catatan khusus.", 170);
+    doc.text(splitDesc, 20, currentY + 5);
+
+    // Payment Info
+    currentY += (splitDesc.length * 5) + 10;
     doc.setFont('helvetica', 'bold');
     doc.text('METODE PEMBAYARAN:', 120, currentY);
     doc.setFont('helvetica', 'normal');
@@ -423,6 +446,8 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                   >
                     <option value="pending">⏳ Pending</option>
                     <option value="processing">⚙️ Processing</option>
+                    <option value="dp">💰 DP</option>
+                    <option value="dp_partial">💸 Partial DP</option>
                     <option value="lunas">💳 Lunas</option>
                     <option value="selesai">🏆 Selesai</option>
                     <option value="batal">❌ Batal</option>
@@ -461,8 +486,11 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                        {booking.opsionalItems && booking.opsionalItems.length > 0 ? (
                          booking.opsionalItems.map((item: any, idx: number) => (
                            <div key={idx} className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-orange/30">
-                             <span className="text-art-text/50 font-bold uppercase">+ {item.name} ({item.count || 1}x)</span>
-                             <span className="font-bold text-art-orange">Rp {item.price.toLocaleString('id-ID')}</span>
+                             <div className="flex flex-col">
+                               <span className="text-art-text/50 font-bold uppercase">+ {item.name}</span>
+                               <span className="text-[8px] text-art-text/30">{item.count || 1}x • {item.days || 1} Hari • Rp {item.price.toLocaleString('id-ID')}</span>
+                             </div>
+                             <span className="font-bold text-art-orange">Rp {item.subtotal.toLocaleString('id-ID')}</span>
                            </div>
                          ))
                        ) : booking.opsionalText && (
@@ -487,9 +515,20 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                       <div className="flex items-center gap-2 mb-2">
                          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
                             booking.status === 'lunas' ? 'bg-art-green text-white' : 
+                            booking.status === 'selesai' ? 'bg-gray-800 text-white' :
                             booking.status === 'dp' ? 'bg-art-orange text-white' : 
-                            'bg-gray-100 text-art-text/40'
-                         }`}>{booking.status === 'pending' ? 'Pending' : booking.status === 'processing' ? 'Processing' : booking.status === 'lunas' ? 'Lunas' : 'Batal'}</div>
+                            booking.status === 'dp_partial' ? 'bg-yellow-500 text-white' :
+                            booking.status === 'processing' ? 'bg-blue-600 text-white' :
+                            'bg-gray-200 text-art-text/60'
+                         }`}>{
+                            booking.status === 'pending' ? 'Menunggu' : 
+                            booking.status === 'processing' ? 'Diproses' : 
+                            booking.status === 'dp' ? 'DP Masuk' :
+                            booking.status === 'dp_partial' ? 'DP Sebagian' :
+                            booking.status === 'lunas' ? 'Lunas' : 
+                            booking.status === 'selesai' ? 'Selesai' :
+                            'Batal'
+                         }</div>
                          <span className="text-[10px] font-bold text-art-text/40">Dipesan: {new Date(booking.createdAt?.seconds * 1000).toLocaleDateString('id-ID')}</span>
                       </div>
                       <p className="text-[10px] font-medium italic text-art-text/60 leading-relaxed break-words bg-white border border-art-text/5 p-2 rounded-lg">"{booking.deskripsi || 'Tidak ada catatan.'}"</p>
@@ -778,16 +817,36 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                       }}>
                         {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
                       </select>
-                      <input type="number" className="border p-2 rounded text-xs w-20" value={dur.originalPrice} onChange={e => {
-                            const nd = [...data];
-                            nd[i].paths[pIdx].durations[j].originalPrice = parseInt(e.target.value) || 0;
-                            setData(nd);
-                          }} placeholder="Coret" />
-                      <input type="number" className="border p-2 rounded text-xs w-20" value={dur.price} onChange={e => {
-                            const nd = [...data];
-                            nd[i].paths[pIdx].durations[j].price = parseInt(e.target.value) || 0;
-                            setData(nd);
-                          }} placeholder="Final" />
+                      <input 
+                        type="text"
+                        inputMode="numeric"
+                        className="border p-2 rounded text-xs w-20 font-mono" 
+                        value={dur.originalPrice ?? 0} 
+                        onChange={e => {
+                          let valStr = e.target.value.replace(/^0+/, '');
+                          if (valStr === '') valStr = '0';
+                          const val = parseInt(valStr) || 0;
+                          const nd = [...data];
+                          nd[i].paths[pIdx].durations[j].originalPrice = val;
+                          setData(nd);
+                        }} 
+                        placeholder="Coret" 
+                      />
+                      <input 
+                        type="text"
+                        inputMode="numeric"
+                        className="border p-2 rounded text-xs w-20 font-mono" 
+                        value={dur.price ?? 0} 
+                        onChange={e => {
+                          let valStr = e.target.value.replace(/^0+/, '');
+                          if (valStr === '') valStr = '0';
+                          const val = parseInt(valStr) || 0;
+                          const nd = [...data];
+                          nd[i].paths[pIdx].durations[j].price = val;
+                          setData(nd);
+                        }} 
+                        placeholder="Final" 
+                      />
                         <button onClick={() => {
                           const nd = [...data];
                           nd[i].paths[pIdx].durations.splice(j, 1);
@@ -882,33 +941,74 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
       </div>
       <div className="space-y-4">
         {data.map((leader, i) => (
-          <div key={i} className="bg-white p-3 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all">
+          <div key={i} className="bg-white p-6 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all group">
             <button onClick={() => {
               const nd = [...data];
               nd.splice(i, 1);
               setData(nd);
-            }} className="absolute top-2 right-2 text-red-500 hover:scale-110 transition-transform"><Trash2 size={16}/></button>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="w-16 h-16 shrink-0">
-                <ImageUploader value={leader.avatar} onChange={url => {
-                    setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: url } : item));
-                }} placeholder="IMG" />
+            }} className="absolute top-4 right-4 text-red-500 hover:scale-110 transition-transform"><Trash2 size={20}/></button>
+            
+            <div className="flex flex-col gap-6">
+              {/* Leader Image Preview at Top */}
+              <div className="w-full h-48 sm:h-64 rounded-xl border-2 border-dashed border-art-text/10 overflow-hidden bg-art-bg flex items-center justify-center p-2">
+                <ImageUploader 
+                  value={leader.avatar} 
+                  onChange={url => setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: url } : item))} 
+                />
               </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex gap-2 w-full pr-6">
-                  <input className="border p-1.5 rounded text-xs font-bold w-1/2 block" value={leader.name} onChange={e => {
-                        setData(prev => prev.map((item, idx) => idx === i ? { ...item, name: e.target.value } : item));
-                  }} placeholder="Nama" />
-                  <input className="border p-1.5 rounded text-[10px] w-1/2 block" value={leader.age || ''} onChange={e => {
-                        setData(prev => prev.map((item, idx) => idx === i ? { ...item, age: e.target.value } : item));
-                  }} placeholder="Pengalaman (cth: 10 th)" />
+
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Link Gambar (Eksplisit)</label>
+                  <input 
+                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-mono bg-gray-50 text-art-text/60" 
+                    value={leader.avatar} 
+                    onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: e.target.value } : item))} 
+                    placeholder="URL Image (Auto-update if uploaded above)" 
+                  />
                 </div>
-                <input className="border p-1.5 rounded text-[10px] w-full block" value={leader.description} onChange={e => {
-                      setData(prev => prev.map((item, idx) => idx === i ? { ...item, description: e.target.value } : item));
-                }} placeholder="Deskripsi Singkat" />
-                <input className="border p-1.5 rounded text-[9px] w-full block border-blue-200 bg-blue-50/30" value={leader.voiceLine || ''} onChange={e => {
-                      setData(prev => prev.map((item, idx) => idx === i ? { ...item, voiceLine: e.target.value } : item));
-                }} placeholder="Voice Audio URL" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-art-text/40">Nama Lengkap</label>
+                    <input 
+                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-sm font-black outline-none focus:border-art-orange" 
+                      value={leader.name} 
+                      onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, name: e.target.value } : item))} 
+                      placeholder="Contoh: Alex Honnold" 
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-art-text/40">Pengalaman / Usia</label>
+                    <input 
+                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-sm font-bold outline-none focus:border-art-orange" 
+                      value={leader.age || ''} 
+                      onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, age: e.target.value } : item))} 
+                      placeholder="Contoh: 10 Tahun / 28 Th" 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Deskripsi / Bio</label>
+                  <textarea 
+                    rows={4}
+                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium outline-none focus:border-art-orange resize-none" 
+                    value={leader.description} 
+                    onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, description: e.target.value } : item))} 
+                    placeholder="Tuliskan pengalaman atau moto hidup..." 
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/60">Voice Audio URL</label>
+                  <input 
+                    className="w-full border-2 border-blue-100 p-3 rounded-xl text-[11px] font-medium outline-none focus:border-blue-400 bg-blue-50/20" 
+                    value={leader.voiceLine || ''} 
+                    onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, voiceLine: e.target.value } : item))} 
+                    placeholder="https://firebasestorage... (URL Audio)" 
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1368,20 +1468,33 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-art-text/40">Jalur Pendakian</label>
-                  <input 
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Jalur (Sesuai Destinasi)</label>
+                  <select 
                     className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all" 
                     value={ot.path || ""} 
                     onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }}
-                    placeholder="Contoh: Via Wates"
-                  />
+                  >
+                    <option value="">-- Pilih Jalur --</option>
+                    {config.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.map((p: any) => (
+                      <option key={p.name} value={p.name}>{p.name}</option>
+                    ))}
+                    <option value="custom">-- Ketik Manual --</option>
+                  </select>
+                  {ot.path === "custom" && (
+                    <input 
+                      autoFocus
+                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all mt-1" 
+                      placeholder="Ketik Jalur..."
+                      onBlur={e => { if(e.target.value) { const nd = [...data]; nd[i].path = e.target.value; setData(nd); } }}
+                    />
+                  )}
                 </div>
               </div>
 
-              {/* Layer 3: Date + Mepo */}
+              {/* Layer 3: Date + Automatic Schedule */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-art-text/40">Tanggal</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Keberangkatan</label>
                   <input 
                     type="date"
                     className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
@@ -1396,23 +1509,13 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-art-text/40">Meeting Point</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Jadwal (Automatis)</label>
                   <input 
-                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all" 
-                    value={ot.mepo || ""} 
-                    onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }}
-                    placeholder="Mepo..."
+                    readOnly
+                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold bg-gray-50 text-art-green outline-none uppercase" 
+                    value={ot.jadwal || "Otomatis..."} 
                   />
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase text-art-text/40">Jadwal (Automatis)</label>
-                <input 
-                  readOnly
-                  className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold bg-gray-50 text-art-green outline-none uppercase" 
-                  value={ot.jadwal || "Otomatis..."} 
-                />
               </div>
 
               {/* Layer 4: Capacity + Availability */}
@@ -1420,11 +1523,14 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                  <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase text-art-text/40">Kapasitas (Pax)</label>
                     <input 
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
-                      value={ot.maxKuota || 15} 
+                      value={ot.maxKuota ?? 15} 
                       onChange={e => { 
-                        const val = parseInt(e.target.value) || 0;
+                        let valStr = e.target.value.replace(/^0+/, '');
+                        if (valStr === '') valStr = '0';
+                        const val = parseInt(valStr) || 0;
                         const nd = [...data]; 
                         nd[i].maxKuota = val; 
                         nd[i].kuotaNum = val; 
@@ -1435,9 +1541,9 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                  </div>
                  <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase text-art-green">Sisa Slot</label>
-                    <div className="w-full border-2 border-dashed border-art-green/20 bg-art-green/5 p-2 rounded-xl flex items-center justify-between">
-                       <span className="text-[10px] font-black uppercase text-art-green bg-white px-2 py-0.5 rounded shadow-sm">
-                          {ot.maxKuota - (ot.consumedKuota || 0)} Pax
+                    <div className="w-full border-2 border-dashed border-art-green/20 bg-art-green/10 p-2 rounded-xl flex items-center justify-center">
+                       <span className="text-[10px] font-black uppercase text-art-green">
+                          {Math.max(0, (ot.maxKuota || 0) - (ot.consumedKuota || 0))} Pax Tersisa
                        </span>
                     </div>
                  </div>
@@ -1449,10 +1555,18 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                   <label className="text-[9px] font-black uppercase text-art-text/40">Harga (k)</label>
                   <div className="relative">
                     <input 
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono pl-6" 
-                      value={ot.price || 0} 
-                      onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} 
+                      value={ot.price ?? 0} 
+                      onChange={e => { 
+                        let valStr = e.target.value.replace(/^0+/, '');
+                        if (valStr === '') valStr = '0';
+                        const val = parseInt(valStr) || 0;
+                        const nd = [...data]; 
+                        nd[i].price = val; 
+                        setData(nd); 
+                      }} 
                     />
                     <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30">Rp</span>
                   </div>
@@ -1461,10 +1575,18 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                   <label className="text-[9px] font-black uppercase text-art-text/40">Coret (k)</label>
                   <div className="relative">
                     <input 
-                      type="number"
-                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-black outline-none focus:border-art-orange transition-all font-mono pl-6 text-red-400" 
-                      value={ot.originalPrice || 0} 
-                      onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} 
+                      type="text"
+                      inputMode="numeric"
+                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-black outline-none focus:border-art-orange transition-all font-mono pl-6 text-red-500" 
+                      value={ot.originalPrice ?? 0} 
+                      onChange={e => { 
+                        let valStr = e.target.value.replace(/^0+/, '');
+                        if (valStr === '') valStr = '0';
+                        const val = parseInt(valStr) || 0;
+                        const nd = [...data]; 
+                        nd[i].originalPrice = val; 
+                        setData(nd); 
+                      }} 
                     />
                     <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-red-300">Rp</span>
                   </div>
@@ -1494,15 +1616,33 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
               <div className="space-y-1">
                  <label className="text-[10px] font-black uppercase text-art-text/40">Meeting Point</label>
                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input 
-                      className="flex-1 border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all" 
-                      value={ot.mepo || ""} 
-                      onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }}
-                      placeholder="Contoh: Basecamp Patak Banteng"
-                    />
+                    <div className="flex-1 relative">
+                       <input 
+                         className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all pr-10" 
+                         value={ot.mepo || ""} 
+                         onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }}
+                         placeholder="Contoh: Basecamp Patak Banteng"
+                         id={`mepo-input-${i}`}
+                       />
+                       <button 
+                         onClick={async () => {
+                            try {
+                              const text = await navigator.clipboard.readText();
+                              const nd = [...data]; nd[i].mepo = text; setData(nd);
+                            } catch (e) {
+                              showToast("Gagal paste dari klipbor", "error");
+                            }
+                         }}
+                         className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40 hover:text-art-orange"
+                         title="Paste from Clipboard"
+                       >
+                         <FileText size={14} />
+                       </button>
+                    </div>
                     <button 
                       onClick={() => {
-                        const searchQuery = ot.mepo || ot.name + " via " + (ot.path || '');
+                        // User wants to search for mountain first
+                        const searchQuery = (ot.name || '') + " " + (ot.mepo || '');
                         window.open(`https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`, '_blank');
                       }}
                       className="flex items-center justify-center gap-2 px-4 py-2 bg-art-bg border-2 border-art-text rounded-xl hover:bg-art-orange hover:text-white transition-all text-[10px] font-black uppercase tracking-tight"
