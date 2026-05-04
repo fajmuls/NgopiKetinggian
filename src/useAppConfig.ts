@@ -47,6 +47,7 @@ export interface AppConfig {
     heroTitle: string;
     heroDescription: string;
     heroPhotoUrl: string;
+    heroSlides?: { name: string, height: string, image: string }[];
   };
 }
 
@@ -55,10 +56,10 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     destinationsData: defaultDestinations,
     tripLeaders: defaultLeaders,
     teamPhotos: [
-      "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
+      "",
+      "",
+      "",
+      ""
     ],
     galleryPhotos: defaultPhotos,
     ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
@@ -66,6 +67,17 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       { code: "Ari ganteng", discount: 50 },
       { code: "Emikari", discount: 10 }
     ],
+    homepage: {
+      heroTitle: "Trip Ngopi di Ketinggian",
+      heroDescription: "Rasakan sensasi ngopi di atas awan.",
+      heroPhotoUrl: "",
+      heroSlides: [
+        { name: "Gunung Gede Pangrango", height: "2.958", image: "" },
+        { name: "Gunung Salak", height: "2.211", image: "" },
+        { name: "Gunung Semeru", height: "3.676", image: "" },
+        { name: "Gunung Rinjani", height: "3.726", image: "" }
+      ]
+    },
     openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",
@@ -105,11 +117,6 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         },
         { name: "Upgrade Tenda Privat", priceInfo: "Rp 100rb / Tenda", subItems: [] }
       ]
-    },
-    homepage: {
-      heroTitle: "Trip Ngopi di Ketinggian",
-      heroDescription: "Rasakan sensasi ngopi di atas awan.",
-      heroPhotoUrl: ""
     }
   });
   const [loading, setLoading] = useState(true);
@@ -137,6 +144,33 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
             { code: "Ari ganteng", discount: 50 },
             { code: "Emikari", discount: 10 }
           ],
+          homepage: {
+             heroTitle: "Trip Ngopi di Ketinggian",
+             heroDescription: "Rasakan sensasi ngopi di atas awan.",
+             heroPhotoUrl: "",
+             heroSlides: [
+                {
+                   name: "Gunung Gede Pangrango",
+                   height: "2.958",
+                   image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop"
+                },
+                {
+                   name: "Gunung Salak",
+                   height: "2.211",
+                   image: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop"
+                },
+                {
+                   name: "Gunung Semeru",
+                   height: "3.676",
+                   image: "https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop"
+                },
+                {
+                   name: "Gunung Rinjani",
+                   height: "3.726",
+                   image: "https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2659&auto=format&fit=crop"
+                }
+             ]
+          },
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",
@@ -192,16 +226,27 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         tripLeaders: defaultLeaders,
         galleryPhotos: defaultPhotos,
         teamPhotos: [
-          "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
+          "",
+          "",
+          "",
+          ""
         ],
         ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
         promoCodes: [
           { code: "Ari ganteng", discount: 50 },
           { code: "Emikari", discount: 10 }
         ],
+        homepage: {
+          heroTitle: "Trip Ngopi di Ketinggian",
+          heroDescription: "Rasakan sensasi ngopi di atas awan.",
+          heroPhotoUrl: "",
+          heroSlides: [
+            { name: "Gunung Gede Pangrango", height: "2.958", image: "" },
+            { name: "Gunung Salak", height: "2.211", image: "" },
+            { name: "Gunung Semeru", height: "3.676", image: "" },
+            { name: "Gunung Rinjani", height: "3.726", image: "" }
+          ]
+        },
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",
@@ -266,16 +311,27 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       tripLeaders: defaultLeaders,
       galleryPhotos: defaultPhotos,
       teamPhotos: [
-        "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?w=600&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1550983570-5b65df05eaca?w=600&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1517400508440-20dc951dc84d?w=600&auto=format&fit=crop"
+        "",
+        "",
+        "",
+        ""
       ],
       ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
       promoCodes: [
         { code: "Ari ganteng", discount: 50 },
         { code: "Emikari", discount: 10 }
       ],
+      homepage: {
+        heroTitle: "Trip Ngopi di Ketinggian",
+        heroDescription: "Rasakan sensasi ngopi di atas awan.",
+        heroPhotoUrl: "",
+        heroSlides: [
+          { name: "Gunung Gede Pangrango", height: "2.958", image: "" },
+          { name: "Gunung Salak", height: "2.211", image: "" },
+          { name: "Gunung Semeru", height: "3.676", image: "" },
+          { name: "Gunung Rinjani", height: "3.726", image: "" }
+        ]
+      },
           openTrips: [], visibilities: { map: true, quota: true, beans: true, routes: true }, facilities: {
       include: [
         "Tiket masuk & asuransi pendakian resmi (Simaksi)",

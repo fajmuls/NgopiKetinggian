@@ -433,7 +433,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
              setExpandedIndexes([]);
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
-          <button onClick={() => {
+          <button type="button" onClick={(e) => {
+             e.preventDefault();
              const nd = [...data];
              nd.unshift({ id: Date.now().toString(), name: "Gunung Baru", desc: "Deskripsi", region: "Jawa", difficulty: "Pemula", image: "https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?w=500", paths: [] });
              setData(nd);
@@ -516,16 +517,14 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               }}
               placeholder="Nama Gunung"
             />
-            <button 
-              onClick={() => {
-                const nd = [...data];
-                if (!nd[i].paths) nd[i].paths = [];
-                nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] });
-                setData(nd);
-                if (!expandedIndexes.includes(i)) setExpandedIndexes([...expandedIndexes, i]);
-              }}
-              className="text-[10px] bg-art-text text-white px-3 py-1.5 rounded whitespace-nowrap hidden sm:block"
-            >+ Jalur</button>
+          <button type="button" onClick={(e) => {
+             e.preventDefault();
+             const nd = [...data];
+             if (!nd[i].paths) nd[i].paths = [];
+             nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] });
+             setData(nd);
+             if (!expandedIndexes.includes(i)) setExpandedIndexes([...expandedIndexes, i]);
+          }} className="text-[10px] bg-art-text text-white px-3 py-1.5 rounded whitespace-nowrap hidden sm:block">+ Jalur</button>
             <button onClick={() => {
                const nd = [...data]; nd.splice(i, 1); setData(nd);
             }} className="text-red-500 hover:text-red-600 hidden sm:block"><Trash2 size={16}/></button>
@@ -588,8 +587,9 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               </select>
             </div>
             
-            <button 
-              onClick={() => {
+            <button type="button" 
+              onClick={(e) => {
+                e.preventDefault();
                 const nd = [...data];
                 if (!nd[i].paths) nd[i].paths = [];
                 nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] });
@@ -612,7 +612,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                     nd[i].paths[pIdx].name = e.target.value;
                     setData(nd);
                   }} placeholder="Nama Jalur" />
-                  <button onClick={() => {
+                  <button type="button" onClick={(e) => {
+                    e.preventDefault();
                     const nd = [...data];
                     nd[i].paths[pIdx].durations.push({ label: "1H (Tektok)", price: 0, originalPrice: 0 });
                     setData(nd);
@@ -851,7 +852,7 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
 };
 
 const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
-  const [data, setData] = useState({ ...config.homepage });
+  const [data, setData] = useState({ ...config.homepage, heroSlides: config.homepage.heroSlides || [] });
   const [uploading, setUploading] = useState(false);
 
   const handleSave = () => {
@@ -875,17 +876,54 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-4">
-      <h3 className="font-bold text-sm uppercase">Edit Homepage</h3>
-      <input className="w-full border p-2 rounded" value={data.heroTitle} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Hero Title" />
-      <input className="w-full border p-2 rounded" value={data.heroDescription} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description" />
-      <div className="space-y-2">
-        <label className="text-xs font-bold">Hero Photo</label>
-        {data.heroPhotoUrl && <img src={data.heroPhotoUrl} className="w-full h-32 object-cover rounded" />}
-        <input type="file" onChange={handleFileChange} disabled={uploading} />
-        {uploading && <p className="text-xs">Mengunggah...</p>}
+    <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-8">
+      <div className="space-y-4">
+        <h3 className="font-bold text-sm uppercase">Edit Teks Homepage</h3>
+        <input className="w-full border p-2 rounded" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Hero Title" />
+        <input className="w-full border p-2 rounded" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description" />
+        <div className="space-y-2">
+          <label className="text-xs font-bold">Foto Latar Belakang Alternatif</label>
+          <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
+        </div>
       </div>
-      <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase">Simpan Homepage</button>
+
+      <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
+        <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+          <h3 className="font-bold text-sm uppercase">Edit Slide Gunung (Ketinggian MDPL)</h3>
+          <button type="button" onClick={(e) => { e.preventDefault(); setData({ ...data, heroSlides: [...data.heroSlides, { name: "Gunung Contoh", height: "0.000", image: "" }] })}} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Slide</button>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           {data.heroSlides.map((slide: any, i: number) => (
+             <div key={i} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20">
+                <button onClick={() => {
+                   const ns = [...data.heroSlides]; ns.splice(i, 1); setData({...data, heroSlides: ns});
+                }} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
+
+                <div>
+                   <label className="text-[10px] font-bold uppercase block mb-1">Nama Gunung</label>
+                   <input className="w-full border p-2 rounded text-xs" value={slide.name} onChange={e => {
+                      const ns = [...data.heroSlides]; ns[i].name = e.target.value; setData({...data, heroSlides: ns});
+                   }} placeholder="Nama Gunung" />
+                </div>
+                <div>
+                   <label className="text-[10px] font-bold uppercase block mb-1">Ketinggian (Cth: 3.676)</label>
+                   <input className="w-full border p-2 rounded text-xs" value={slide.height} onChange={e => {
+                      const ns = [...data.heroSlides]; ns[i].height = e.target.value; setData({...data, heroSlides: ns});
+                   }} placeholder="Ketinggian MDPL" />
+                </div>
+                <div>
+                   <label className="text-[10px] font-bold uppercase block mb-1">Foto Background</label>
+                   <ImageUploader value={slide.image} onChange={(url) => {
+                      const ns = [...data.heroSlides]; ns[i].image = url; setData({...data, heroSlides: ns});
+                   }} placeholder="URL Foto Gunung" />
+                </div>
+             </div>
+           ))}
+        </div>
+      </div>
+
+      <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase w-full">Simpan Homepage</button>
     </div>
   );
 };
@@ -934,10 +972,18 @@ const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value:
   };
 
   return (
-    <div className="space-y-1">
-      <input className="border p-2 rounded text-xs w-full" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
-      <input type="file" onChange={handleFileChange} disabled={uploading} className="text-xs mt-1" />
-      {uploading && <p className="text-[10px]">Mengunggah...</p>}
+    <div className="space-y-2 border-2 border-dashed border-art-orange/30 p-3 rounded-xl bg-orange-50/50">
+      <div className="flex flex-col gap-2">
+        <label className="text-xs bg-art-orange text-white px-4 py-3 rounded-lg font-black uppercase tracking-widest cursor-pointer hover:bg-orange-600 transition-colors flex items-center justify-center shadow-md w-full">
+          📸 Unggah Foto ke Database
+          <input type="file" onChange={handleFileChange} disabled={uploading} className="hidden" accept="image/*" />
+        </label>
+        {uploading && <span className="text-[10px] text-center font-bold text-art-orange animate-pulse">Mengunggah... Mohon tunggu.</span>}
+      </div>
+      <div className="flex items-center gap-2">
+		<span className="text-[10px] font-bold text-art-text/40 uppercase">Atau</span>
+      	<input className="border p-2 rounded text-[10px] w-full text-art-text/60 bg-white" value={value || ''} onChange={e => onChange(e.target.value)} placeholder={"Gunakan Link URL (Opsional)"} />
+      </div>
     </div>
   );
 };
@@ -1043,7 +1089,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
       <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
         <p className="text-xs font-bold uppercase text-art-text/60">Custom Trip (Open Trip)</p>
         <div className="flex gap-2">
-           <button onClick={(e) => {
+           <button type="button" onClick={(e) => {
              e.preventDefault();
              const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0 }, ...data];
              setData(nd);
@@ -1170,7 +1216,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Durasi</span>
-              <select className="border p-2 rounded text-sm" value={ot.duration} onChange={e => { 
+              <select className="border p-2 rounded text-sm flex-1" value={ot.duration} onChange={e => { 
                   const dur = e.target.value;
                   const nd = [...data]; 
                   nd[i].duration = dur; 
@@ -1178,7 +1224,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                   setData(nd); 
                 }}>
                 <option value="">-- Pilih Durasi --</option>
-                {durationLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
               </select>
             </div>
             <div className="flex flex-col">
@@ -1248,7 +1294,10 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
     <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-3">
       <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
         <h3 className="font-bold text-sm uppercase">{label}</h3>
-        <button onClick={() => setData({ ...data, [key]: [...data[key], "Item Baru"] })} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah</button>
+          <button type="button" onClick={(e) => {
+            e.preventDefault();
+            setData({ ...data, [key]: [...data[key], "Item Baru"] });
+          }} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah</button>
       </div>
       {data[key].map((item: string, i: number) => (
         <div key={i} className="flex gap-2">
@@ -1316,7 +1365,7 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
                <div className="pl-6 border-l-2 border-art-orange/20 space-y-3 pt-2">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black uppercase text-art-orange">Sub-Items (Spesifik)</span>
-                    <button onClick={() => addSubItem(i)} className="text-[9px] bg-art-orange text-white px-2 py-1 rounded uppercase font-bold">+ Tambah Sub</button>
+          <button type="button" onClick={(e) => { e.preventDefault(); addSubItem(i); }} className="text-[9px] bg-art-orange text-white px-2 py-1 rounded uppercase font-bold">+ Tambah Sub</button>
                   </div>
                   
                   {opt.subItems?.map((sub, sIdx) => (
@@ -1354,7 +1403,7 @@ const PromoCodesAdmin = ({ config, updateConfig, showToast }: any) => {
       <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
         <p className="text-xs font-bold uppercase text-art-text/60 font-black">Manajemen Kode Promo</p>
         <div className="flex gap-2">
-           <button onClick={(e) => {
+           <button type="button" onClick={(e) => {
              e.preventDefault();
              const nd = [{ code: "BARU", discount: 10 }, ...data];
              setData(nd);

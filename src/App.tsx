@@ -1202,28 +1202,7 @@ const destinationsData = [
   }
 ];
 
-const heroSlides = [
-  {
-    name: "Gunung Gede Pangrango",
-    height: "2.958",
-    image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop"
-  },
-  {
-    name: "Gunung Salak",
-    height: "2.211",
-    image: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop"
-  },
-  {
-    name: "Gunung Semeru",
-    height: "3.676",
-    image: "https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop"
-  },
-  {
-    name: "Gunung Rinjani",
-    height: "3.726",
-    image: "https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2659&auto=format&fit=crop"
-  }
-];
+// Removed hardcoded heroSlides
 
 const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number }> = ({ ot, onJoin, getSisaKuota }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -1232,7 +1211,7 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col">
       <div className="h-56 relative overflow-hidden border-b-2 border-art-text">
-        <img src={ot.image} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
+        <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
          <div className="absolute top-4 left-4 bg-art-green text-white text-[9px] font-black px-2 py-1 rounded border border-white/20 uppercase shadow-sm">{ot.jadwal}</div>
          <div className="absolute top-4 right-4 bg-white text-art-text text-[9px] font-black px-2 py-1 rounded border border-art-text/10 uppercase shadow-sm">{ot.difficulty}</div>
          <div className={`absolute bottom-4 left-4 backdrop-blur-sm px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green'}`}>
@@ -1356,7 +1335,7 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
       className="group bg-white border-2 border-art-text rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300"
     >
       <div className="relative h-64 overflow-hidden border-b-2 border-art-text">
-        <img src={dest.image} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+        <img src={dest.image || undefined} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
         <div className="absolute top-4 right-4 bg-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
         <div className="absolute top-4 left-4 bg-art-orange text-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.difficulty}</div>
       </div>
@@ -1737,13 +1716,20 @@ export default function App() {
     return () => window.removeEventListener('adminModeToggled', onAdminToggle);
   }, []);
 
+const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlides.length > 0 
+    ? config.homepage.heroSlides 
+    : [
+        { name: "Gunung Gede Pangrango", height: "2.958", image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop" },
+        { name: "Gunung Salak", height: "2.211", image: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop" }
+      ];
+
   // Hero slideshow auto-play
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlideIndex((prev) => (prev + 1) % heroSlidesConfig.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlidesConfig.length]);
 
   const filteredDestinations = currentDestinations.filter(dest => {
     if (dest.isActive === false) return false;
@@ -1935,9 +1921,13 @@ export default function App() {
       {/* Hero Section */}
       <section className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden bg-art-bg pt-32 pb-20 md:py-0">
         {/* Parallax Background using Grid layout pattern */}
-        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
-          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Cover bg" />
-        </div>
+          <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
+            {config.homepage?.heroPhotoUrl ? (
+               <img src={config.homepage.heroPhotoUrl} className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Cover bg" />
+            ) : (
+               <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Cover bg" />
+            )}
+          </div>
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-[1] hidden md:block">
           <div className="grid grid-cols-12 h-full w-full opacity-[0.03]">
             <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div>
@@ -2001,8 +1991,8 @@ export default function App() {
                    initial={{ opacity: 0, scale: 1.05 }}
                    animate={{ opacity: 1, scale: 1 }}
                    transition={{ duration: 1 }}
-                   src={heroSlides[currentSlideIndex].image} 
-                   alt={heroSlides[currentSlideIndex].name} 
+                   src={heroSlidesConfig[currentSlideIndex]?.image || undefined} 
+                   alt={heroSlidesConfig[currentSlideIndex]?.name} 
                    className="w-full h-full object-cover grayscale-[15%] absolute inset-0 z-0"
                  />
                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
@@ -2016,7 +2006,7 @@ export default function App() {
                      transition={{ duration: 0.5, delay: 0.3 }}
                      className="text-2xl md:text-3xl font-serif italic drop-shadow-md"
                    >
-                     {heroSlides[currentSlideIndex].name}
+                     {heroSlidesConfig[currentSlideIndex]?.name}
                    </motion.h3>
                  </div>
                </div>
@@ -2030,7 +2020,7 @@ export default function App() {
                  className="absolute -top-4 -left-4 md:-top-8 md:-left-8 w-20 h-20 md:w-24 md:h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white -rotate-[12deg] border-4 border-white shadow-2xl z-[100]"
                >
                  <span className="text-[6px] md:text-[8px] uppercase font-bold tracking-tighter">Ketinggian</span>
-                 <span className="text-xl md:text-2xl font-black leading-none my-0.5">{heroSlides[currentSlideIndex].height}</span>
+                 <span className="text-xl md:text-2xl font-black leading-none my-0.5">{heroSlidesConfig[currentSlideIndex]?.height}</span>
                  <span className="text-[6px] md:text-[8px] opacity-80 uppercase">MDPL</span>
                </motion.div>
              </div>
@@ -2140,7 +2130,7 @@ export default function App() {
             {currentTripLeaders.map((leader, i) => (
               <div key={i} className="border border-art-text/10 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow bg-art-bg flex flex-col items-center p-6 text-center">
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md mb-4 relative">
-                   <img src={leader.avatar} alt={leader.name} className="w-full h-full object-cover grayscale-[20%]" />
+                   <img src={leader.avatar || undefined} alt={leader.name} className="w-full h-full object-cover grayscale-[20%]" />
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-widest text-art-text">{leader.name}</h3>
                 <p className="text-[10px] uppercase tracking-widest font-bold text-art-orange mt-2 mb-4">{leader.age}</p>
@@ -2163,7 +2153,7 @@ export default function App() {
               <p className="text-art-text/60 font-medium mt-2">Momen kebersamaan dan dedikasi tim di alam bebas</p>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-8 snap-x scrollbar-hide px-4">
-              {(config.teamPhotos || []).map((url: string, idx: number) => (
+              {(config.teamPhotos || []).filter((url: string) => url && url.trim() !== '').map((url: string, idx: number) => (
                 <img 
                   key={idx}
                   src={url} 
@@ -2171,7 +2161,7 @@ export default function App() {
                   className="w-80 h-64 object-cover rounded-2xl snap-center flex-shrink-0 grayscale-[20%] border-2 border-art-text hover:grayscale-0 hover:shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all" 
                 />
               ))}
-              {(!config.teamPhotos || config.teamPhotos.length === 0) && (
+              {(!config.teamPhotos || config.teamPhotos.filter((url: string) => url && url.trim() !== '').length === 0) && (
                 <p className="text-xs font-bold text-art-text/40 italic mx-auto">Upload foto tim di dashboard admin.</p>
               )}
             </div>
