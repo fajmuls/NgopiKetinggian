@@ -41,52 +41,49 @@ export const AdminPanelModal = ({
             <div className="flex items-center gap-4">
               <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
               <p className="text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
-              <button 
-                onClick={() => {
-                  customConfirm("Are you sure you want to set the current configuration as the global default? This action cannot be undone.", async () => {
-                    try {
-                      const { writeBatch, doc } = await import('firebase/firestore');
-                      const batch = writeBatch(db);
-                      batch.set(doc(db, 'destinations', 'data'), { items: config.destinationsData });
-                      batch.set(doc(db, 'leaders', 'data'), { items: config.tripLeaders });
-                      batch.set(doc(db, 'gallery', 'data'), { items: config.galleryPhotos });
-                      batch.set(doc(db, 'openTrips', 'data'), { items: config.openTrips });
-                      
-                      const websiteData = { ...config };
-                      delete (websiteData as any).destinationsData;
-                      delete (websiteData as any).tripLeaders;
-                      delete (websiteData as any).galleryPhotos;
-                      delete (websiteData as any).openTrips;
-
-                      batch.set(doc(db, 'website', 'data'), websiteData);
-
-                      await batch.commit();
-
-                      // Also store backup
-                      batch.set(doc(db, 'website', 'default_backup'), websiteData);
-
-                      showToast("Berhasil di-set sebagai default!", "success");
-                    } catch (e) {
-                      console.error(e);
-                      showToast("Gagal menyimpan ke default", "error");
-                    }
-                  });
-                }} 
-                className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors hidden sm:block"
-              >
-                Set to default.
-              </button>
-              <button 
-                onClick={() => {
-                  customConfirm("Reset to default?", () => {
-                    revertToDefault();
-                    showToast("Direset ke default!");
-                  });
-                }} 
-                className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors hidden sm:block"
-              >
-                Reset to default
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    customConfirm("Jadikan pengaturan saat ini sebagai default global? Tindakan ini tidak bisa dibatalkan.", async () => {
+                      try {
+                        const { writeBatch, doc } = await import('firebase/firestore');
+                        const batch = writeBatch(db);
+                        batch.set(doc(db, 'destinations', 'data'), { items: config.destinationsData });
+                        batch.set(doc(db, 'leaders', 'data'), { items: config.tripLeaders });
+                        batch.set(doc(db, 'gallery', 'data'), { items: config.galleryPhotos });
+                        batch.set(doc(db, 'openTrips', 'data'), { items: config.openTrips });
+                        
+                        const websiteData = { ...config };
+                        delete (websiteData as any).destinationsData;
+                        delete (websiteData as any).tripLeaders;
+                        delete (websiteData as any).galleryPhotos;
+                        delete (websiteData as any).openTrips;
+  
+                        batch.set(doc(db, 'website', 'data'), websiteData);
+                        await batch.commit();
+                        showToast("Berhasil di-set sebagai default!", "success");
+                      } catch (e) {
+                        console.error(e);
+                        showToast("Gagal menyimpan ke default", "error");
+                      }
+                    });
+                  }} 
+                  className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors shadow-sm"
+                >
+                  Set Default
+                </button>
+                <button 
+                  onClick={() => {
+                    customConfirm("Kembalikan semua pengaturan ke awal (factory reset)?", () => {
+                      revertToDefault();
+                      showToast("Direset ke default!");
+                    });
+                  }} 
+                  className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors shadow-sm"
+                >
+                  Reset Default
+                </button>
+              </div>
             </div>
             <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
           </div>
