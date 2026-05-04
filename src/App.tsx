@@ -53,6 +53,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   
   const [selectedOpsional, setSelectedOpsional] = useState<string[]>([]);
   const [subSelected, setSubSelected] = useState<Record<string, number>>({});
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
   const [formState, setFormState] = useState({
     nama: '',
@@ -217,8 +218,6 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     setIsConfirming(true);
     playClick();
   };
-
-    const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
     const handleBookingFinal = async () => {
       const { nama, email, wa, deskripsi } = formState;

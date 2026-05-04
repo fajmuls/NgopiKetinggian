@@ -817,14 +817,20 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState<OpenTrip[]>(config.openTrips || []);
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [user] = useAuthState(auth);
 
   useEffect(() => {
+    if (!user || user.email !== 'mrachmanfm@gmail.com') {
+      return;
+    }
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snap) => {
       setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'bookings');
     });
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (config.openTrips) {
