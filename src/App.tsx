@@ -3,12 +3,12 @@ import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import { useAppConfig } from './useAppConfig';
+import { DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, useAppConfig } from './useAppConfig';
 import { AdminPanelModal } from './AdminPanel';
 
 function Button({ children, className = '', variant = 'primary', onClick, ...props }: any) {
@@ -40,15 +40,14 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   const { playClick, playHover, playSuccess } = useSound();
   const [showSuccess, setShowSuccess] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [viewType, setViewType] = useState<'selection' | 'trip_list' | 'form'>('selection');
   const [user] = useAuthState(auth);
-  const [bookingType, setBookingType] = useState<'selection' | 'form'>(prefill?.destinasi ? 'form' : 'selection');
 
-  const [currentType, setCurrentType] = useState<'private' | 'open'>(prefill?.type || 'private');
-  
-  const [selectedDestinasi, setSelectedDestinasi] = useState(prefill?.destinasi || '');
-  const [selectedJalur, setSelectedJalur] = useState(prefill?.jalur || '');
-  const [selectedDurasi, setSelectedDurasi] = useState(prefill?.durasi || '');
-  const [selectedJadwal, setSelectedJadwal] = useState(prefill?.jadwal || ''); // For open trip this is the "jadwal" string, for private it's the "startDate" string
+  const [currentType, setCurrentType] = useState<'private' | 'open'>('private');
+  const [selectedDestinasi, setSelectedDestinasi] = useState('');
+  const [selectedJalur, setSelectedJalur] = useState('');
+  const [selectedDurasi, setSelectedDurasi] = useState('');
+  const [selectedJadwal, setSelectedJadwal] = useState(''); 
   const [pesertaCount, setPesertaCount] = useState<number | string>(currentType === 'private' ? 2 : 1);
   const [promoCode, setPromoCode] = useState('');
   
@@ -62,6 +61,50 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     deskripsi: ''
   });
 
+  // Load from local storage on mount
+  useEffect(() => {
+    if (!isOpen) return;
+    const saved = localStorage.getItem('ngopi_booking_draft');
+    if (saved && !prefill) {
+      try {
+        const data = JSON.parse(saved);
+        setFormState({
+          nama: data.nama || '',
+          email: data.email || '',
+          wa: data.wa || '',
+          deskripsi: data.deskripsi || ''
+        });
+        setPromoCode(data.promoCode || '');
+        if (data.destinasi) setSelectedDestinasi(data.destinasi);
+        if (data.jalur) setSelectedJalur(data.jalur);
+        if (data.durasi) setSelectedDurasi(data.durasi);
+        if (data.jadwal) setSelectedJadwal(data.jadwal);
+        if (data.pesertaCount) setPesertaCount(data.pesertaCount);
+        if (data.type) setCurrentType(data.type);
+        if (data.viewType && data.viewType !== 'selection') setViewType(data.viewType);
+      } catch (e) {
+        console.error("Failed to load draft", e);
+      }
+    }
+  }, [isOpen]);
+
+  // Persist to local storage
+  useEffect(() => {
+    if (!isOpen) return;
+    const draft = {
+      ...formState,
+      promoCode,
+      destinasi: selectedDestinasi,
+      jalur: selectedJalur,
+      durasi: selectedDurasi,
+      jadwal: selectedJadwal,
+      pesertaCount,
+      type: currentType,
+      viewType
+    };
+    localStorage.setItem('ngopi_booking_draft', JSON.stringify(draft));
+  }, [formState, promoCode, selectedDestinasi, selectedJalur, selectedDurasi, selectedJadwal, pesertaCount, currentType, viewType, isOpen]);
+
   useEffect(() => {
     if (prefill) {
       setSelectedDestinasi(prefill.destinasi || '');
@@ -69,7 +112,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
       setSelectedDurasi(prefill.durasi || '');
       setSelectedJadwal(prefill.jadwal || '');
       setCurrentType(prefill.type || 'private');
-      if (prefill.destinasi) setBookingType('form');
+      if (prefill.destinasi) setViewType('form');
     }
   }, [prefill]);
 
@@ -125,6 +168,20 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
      if (ot) basePricePerPax = ot.price * 1000;
   }
 
+  const getOpenTripStats = (otName: string, otJadwal: string) => {
+    const ot = config.openTrips?.find((t: any) => t.name === otName && t.jadwal === otJadwal);
+    if (!ot) return { sisa: 0, total: 0 };
+    const total = ot.maxKuota || ot.kuotaNum || 15;
+    const consumed = ot.consumedKuota || 0;
+    return { sisa: Math.max(0, total - consumed), total };
+  };
+
+  const getSisaKuota = (ot: any) => {
+    const total = ot.maxKuota || ot.kuotaNum || 15;
+    const consumed = ot.consumedKuota || 0;
+    return Math.max(0, total - consumed);
+  };
+
   const activePromo = config?.promoCodes?.find((p: any) => p.code.toLowerCase() === promoCode.toLowerCase());
   const isPromoValid = !!activePromo;
   
@@ -139,27 +196,21 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
   const handleSubmitPreview = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    setFormState({
-      nama: formData.get('nama') as string,
-      email: formData.get('email') as string,
-      wa: formData.get('wa') as string,
-      deskripsi: formData.get('deskripsi') as string
-    });
-    
-    if (!formData.get('nama') || !formData.get('wa') || !selectedDestinasi || !selectedJalur || !selectedDurasi || !selectedJadwal || !pesertaCount) {
+    if (!formState.nama || !formState.wa || !selectedDestinasi || !selectedJalur || !selectedDurasi || !selectedJadwal || !pesertaCount) {
       alert("Mohon lengkapi semua data wajib.");
       return;
     }
 
     if (currentType === 'private') {
       const today = new Date();
-      const selectedDate = new Date(selectedJadwal);
-      const diffTime = selectedDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays < 7) {
-        alert("Jadwal private trip harus minimal H-7 dari hari ini.");
-        return;
+      if (selectedJadwal) {
+        const selectedDate = new Date(selectedJadwal);
+        const diffTime = selectedDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays < 7) {
+          alert("Pemesanan private trip minimal H-7 keberangkatan.");
+          return;
+        }
       }
     }
 
@@ -237,7 +288,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
           <div className="text-center py-12 flex flex-col items-center justify-center h-full">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-art-green/20 text-art-green rounded-full flex items-center justify-center mb-6"><CheckCircle2 size={48} /></motion.div>
             <h3 className="text-2xl font-black uppercase text-art-text mb-3">Pesanan Diarahkan ke WhatsApp!</h3>
-            <p className="text-xs font-bold text-art-text/40 uppercase tracking-widest">Silahkan lanjutkan obrolan dengan admin.</p>
+            <p className="text-xs font-bold text-art-text/40 uppercase tracking-widest text-center px-4">Terima kasih, pembayaran akan dikonfirmasi admin segera.</p>
           </div>
         ) : isConfirming ? (
           <div className="pt-4 space-y-6">
@@ -289,13 +340,13 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 >Konfirmasi & Kirim <Send size={14} /></button>
              </div>
           </div>
-        ) : bookingType === 'selection' ? (
+        ) : viewType === 'selection' ? (
           <div className="pt-4 pr-12">
              <h3 className="text-3xl font-black uppercase tracking-tighter text-art-text mb-2">Pilih Petualanganmu</h3>
              <p className="text-[10px] font-bold text-art-text/40 mb-8 uppercase tracking-[0.2em] leading-relaxed">Persiapkan diri untuk perjalanan yang tak terlupakan.</p>
              <div className="grid grid-cols-1 gap-4">
                 <button 
-                  onClick={() => { playClick(); setCurrentType('private'); setBookingType('form'); setPesertaCount(2); }}
+                  onClick={() => { playClick(); setCurrentType('private'); setViewType('form'); setPesertaCount(2); }}
                   className="group bg-white p-6 rounded-[2rem] border-2 border-art-text hover:shadow-[10px_10px_0px_0px_rgba(255,107,0,1)] hover:-translate-x-1 hover:-translate-y-1 transition-all text-left"
                 >
                    <div className="flex justify-between items-start mb-5">
@@ -309,7 +360,17 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 </button>
                 
                 <button 
-                  onClick={() => { playClick(); setCurrentType('open'); setBookingType('form'); setPesertaCount(1); }}
+                  onClick={() => { 
+                    playClick(); 
+                    setCurrentType('open'); 
+                    const available = config.openTrips?.filter((ot: any) => ot.kuotaNum > 0) || [];
+                    if (available.length === 0) {
+                      setViewType('trip_list');
+                    } else {
+                      setViewType('trip_list');
+                    }
+                    setPesertaCount(1);
+                  }}
                   className="group bg-white p-6 rounded-[2rem] border-2 border-art-text hover:shadow-[10px_10px_0px_0px_rgba(72,187,120,1)] hover:-translate-x-1 hover:-translate-y-1 transition-all text-left"
                 >
                    <div className="flex justify-between items-start mb-5">
@@ -323,11 +384,55 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 </button>
              </div>
           </div>
+        ) : viewType === 'trip_list' ? (
+           <div className="pt-4">
+              <button type="button" onClick={() => setViewType('selection')} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-4 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Kembali</button>
+              <h3 className="text-2xl font-black uppercase text-art-text tracking-tight mb-6">Open Trip Tersedia</h3>
+              
+              <div className="space-y-3">
+                 {config.openTrips?.filter((ot: any) => getSisaKuota(ot) > 0).length === 0 ? (
+                    <div className="text-center py-10 bg-art-bg rounded-3xl border-2 border-dashed border-art-text/10 px-4">
+                       <p className="text-[10px] font-black text-art-text/40 uppercase tracking-widest mb-4 italic">Kami belum ada jadwal open trip.</p>
+                       <Button onClick={() => setViewType('selection')} variant="secondary" className="text-[9px] py-1.5 px-3 border-2 border-art-text">Lihat Private Trip</Button>
+                    </div>
+                 ) : (
+                    config.openTrips?.filter((ot: any) => getSisaKuota(ot) > 0).map((ot: any, idx: number) => {
+                       const sisa = getSisaKuota(ot);
+                       return (
+                        <button 
+                          key={idx} 
+                          onClick={() => {
+                            playClick();
+                            setSelectedDestinasi(ot.name);
+                            setSelectedJadwal(ot.jadwal);
+                            setSelectedJalur(ot.path || "Jalur Utama");
+                            setSelectedDurasi(ot.duration || "N/A");
+                            setViewType('form');
+                          }}
+                          className="w-full group bg-white p-4 rounded-2xl border-2 border-art-text hover:bg-art-bg transition-all flex justify-between items-center text-left"
+                        >
+                           <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                 <h4 className="text-sm font-black uppercase text-art-text">{ot.name}</h4>
+                                 <span className="text-[8px] font-black text-art-green bg-art-green/10 px-1.5 py-0.5 rounded border border-art-green/20 uppercase tracking-tighter">{ot.path}</span>
+                              </div>
+                              <p className="text-[10px] font-bold text-art-text/40 uppercase">{ot.jadwal}</p>
+                           </div>
+                           <div className="text-right">
+                              <p className={`text-[10px] font-black uppercase ${sisa <= 3 ? 'text-red-500' : 'text-art-green'}`}>{sisa} Pax Tersisa</p>
+                              <p className="text-[10px] font-black text-art-orange uppercase">Rp {(ot.price*1000).toLocaleString('id-ID')}</p>
+                           </div>
+                        </button>
+                       );
+                    })
+                 )}
+              </div>
+           </div>
         ) : (
           <form className="space-y-6 pt-2" onSubmit={handleSubmitPreview}>
              <div className="flex justify-between items-start pr-12">
                <div>
-                  <button type="button" onClick={() => setBookingType('selection')} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Ganti Jenis Trip</button>
+                  <button type="button" onClick={() => setViewType(currentType === 'open' ? 'trip_list' : 'selection')} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Ganti Pilihan</button>
                   <h3 className="text-2xl font-black uppercase text-art-text tracking-tight">Detail Booking</h3>
                   <p className="text-[9px] font-bold text-art-text/30 uppercase tracking-[0.2em]">{currentType} Adventure</p>
                </div>
@@ -338,21 +443,21 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                </div>
              </div>
              
-             <div className="space-y-5">
+             <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Nama Pemesan</label>
-                     <input name="nama" required type="text" className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="NAMA LENGKAP" />
+                     <input name="nama" required type="text" value={formState.nama} onChange={e => setFormState({...formState, nama: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="NAMA LENGKAP" />
                   </div>
                   <div className="relative">
                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">WhatsApp</label>
-                     <input name="wa" required type="tel" className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="0812..." />
+                     <input name="wa" required type="tel" value={formState.wa} onChange={e => setFormState({...formState, wa: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="0812..." />
                   </div>
                 </div>
 
                 <div className="relative">
                    <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Email</label>
-                   <input name="email" required type="email" className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="ALAMAT@MAIL.COM" />
+                   <input name="email" required type="email" value={formState.email} onChange={e => setFormState({...formState, email: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="ALAMAT@MAIL.COM" />
                 </div>
 
                 <div className="space-y-4">
@@ -423,14 +528,22 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                            className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
                          />
                       </div>
-                      <div className="relative">
-                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Jumlah Peserta</label>
-                         <div className="flex items-center gap-2 bg-white border-2 border-art-text rounded-xl px-2 h-[42px] shadow-sm">
-                            <button type="button" onClick={() => setPesertaCount(Math.max(1, (Number(pesertaCount) || 1) - 1))} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-orange transition-colors text-[12px]">-</button>
-                            <input name="peserta" type="number" value={pesertaCount} onChange={e => setPesertaCount(e.target.value)} className="w-full text-center font-black text-art-text outline-none text-xs bg-transparent" min={1} />
-                            <button type="button" onClick={() => setPesertaCount((Number(pesertaCount) || 0) + 1)} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-green transition-colors text-[12px]">+</button>
-                         </div>
-                      </div>
+                       <div className="relative">
+                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Jumlah Peserta</label>
+                          <div className="flex items-center gap-2 bg-white border-2 border-art-text rounded-xl px-2 h-[42px] shadow-sm">
+                             <button type="button" onClick={() => setPesertaCount(Math.max(1, (Number(pesertaCount) || 1) - 1))} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-orange transition-colors text-[12px]">-</button>
+                             <input name="peserta" type="number" value={pesertaCount} onChange={e => setPesertaCount(e.target.value)} className="w-full text-center font-black text-art-text outline-none text-xs bg-transparent" min={1} />
+                             <button type="button" onClick={() => setPesertaCount((Number(pesertaCount) || 0) + 1)} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-green transition-colors text-[12px]">+</button>
+                          </div>
+                          {currentType === 'open' && (
+                             <div className="mt-1 ml-1 flex justify-between items-center">
+                               <span className="text-[7px] font-black uppercase text-art-text/30">Sisa Slot: {getOpenTripStats(selectedDestinasi, selectedJadwal).sisa} Pax</span>
+                               {Number(pesertaCount) > getOpenTripStats(selectedDestinasi, selectedJadwal).sisa && (
+                                 <span className="text-[7px] font-black uppercase text-red-500 animate-pulse">Kuota Tidak Cukup!</span>
+                               )}
+                             </div>
+                          )}
+                       </div>
                    </div>
 
                    <div className="relative">
@@ -496,7 +609,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
                    <div className="relative">
                       <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Catatan Khusus / Kesehatan</label>
-                      <textarea name="deskripsi" className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-bold outline-none focus:border-art-orange text-xs h-20 resize-none placeholder:text-art-text/20 shadow-sm" placeholder="Tuliskan jika ada request khusus..."></textarea>
+                      <textarea name="deskripsi" value={formState.deskripsi} onChange={e => setFormState({...formState, deskripsi: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-bold outline-none focus:border-art-orange text-xs h-20 resize-none placeholder:text-art-text/20 shadow-sm" placeholder="Tuliskan jika ada request khusus..."></textarea>
                    </div>
 
                    <div className="relative">
@@ -1104,7 +1217,7 @@ const heroSlides = [
   }
 ];
 
-const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void }> = ({ ot, onJoin }) => {
+const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number }> = ({ ot, onJoin, getSisaKuota }) => {
   const [showDetails, setShowDetails] = useState(false);
   const { playClick, playHover } = useSound();
   
@@ -1112,11 +1225,11 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col">
       <div className="h-56 relative overflow-hidden border-b-2 border-art-text">
         <img src={ot.image} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
-        <div className="absolute top-4 left-4 bg-art-green text-white text-[9px] font-black px-2 py-1 rounded border border-white/20 uppercase shadow-sm">{ot.jadwal}</div>
-        <div className="absolute top-4 right-4 bg-white text-art-text text-[9px] font-black px-2 py-1 rounded border border-art-text/10 uppercase shadow-sm">{ot.difficulty}</div>
-        <div className="absolute bottom-4 left-4 bg-white/10 backdrop-blur-sm px-2 py-1 rounded text-[8px] font-bold text-white uppercase tracking-widest border border-white/20">
-           {ot.kuota || 'Limited'}
-        </div>
+         <div className="absolute top-4 left-4 bg-art-green text-white text-[9px] font-black px-2 py-1 rounded border border-white/20 uppercase shadow-sm">{ot.jadwal}</div>
+         <div className="absolute top-4 right-4 bg-white text-art-text text-[9px] font-black px-2 py-1 rounded border border-art-text/10 uppercase shadow-sm">{ot.difficulty}</div>
+         <div className={`absolute bottom-4 left-4 backdrop-blur-sm px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green'}`}>
+            {getSisaKuota(ot)} Pax Sisa
+         </div>
       </div>
       <div className="p-6 flex-1 flex flex-col">
          <div className="flex justify-between items-center mb-1">
@@ -1161,6 +1274,12 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                        <span className="text-art-text/40">Sajian Kopi</span>
                        <span className="text-art-text">{ot.beans || 'V60 / Tubruk'}</span>
                     </div>
+                    {ot.leader && (
+                      <div className="flex justify-between text-[9px] font-bold uppercase">
+                         <span className="text-art-text/40">Trip Leader</span>
+                         <span className="text-art-text">{ot.leader}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-[9px] font-bold uppercase">
                        <span className="text-art-text/40">Meeting Point</span>
                        <span className="text-art-text">{ot.mepo || 'Basecamp'}</span>
@@ -1238,7 +1357,7 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
         <div className="flex justify-between items-end mb-4">
            <div>
               <h3 className="text-2xl font-black uppercase text-art-text tracking-tight mb-1">{dest.name}</h3>
-              <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">{dest.height} MDPL</p>
+              <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">{String(dest.height).replace(/mdpl/i, '').trim()} MDPL</p>
            </div>
            <div className="text-right">
               <p className="text-[10px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>
@@ -1496,10 +1615,15 @@ export default function App() {
   const [filterRegion, setFilterRegion] = useState('Semua');
   const [openFilterRegion, setOpenFilterRegion] = useState('Semua');
   const [openFilterDifficulty, setOpenFilterDifficulty] = useState('Semua');
-  const difficultyOptions = ["Semua", "Pemula", "Pemula-Menengah", "Menengah", "Menengah-Ahli", "Ahli", "Sangat Ahli"];
+  const difficultyOptions = ["Semua", ...DIFFICULTY_LEVELS];
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [toast, setToast] = useState<{ msg: string, type: 'success' | 'info' | 'error' } | null>(null);
+  const getSisaKuota = (ot: any) => {
+    const total = ot.maxKuota || ot.kuotaNum || 15;
+    const consumed = ot.consumedKuota || 0;
+    return Math.max(0, total - consumed);
+  };
 
   const showToastMsg = (msg: string, type: 'success' | 'info' | 'error' = 'info') => {
     setToast({ msg, type });
@@ -2087,10 +2211,22 @@ export default function App() {
                  <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><PlusCircle /> Optional (Tambahan)</h3>
                  <p className="text-sm font-medium text-white/70 mb-4">Pilih fasilitas tambahan jika Anda membutuhkannya. <br/><span className="text-art-orange">Catatan: Tambahan opsional ini dikenakan biaya dan tidak termasuk harga tertera.</span></p>
                  <ul className="space-y-4 text-sm font-medium">
-                  {config.facilities?.opsi?.map((item: string, i: number) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
-                      <span>{item}</span>
+                  {config.facilities?.opsi?.map((opt: any, i: number) => (
+                    <li key={i} className="flex flex-col gap-1 items-start">
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
+                        <span>{opt.name} {opt.priceInfo ? `- ${opt.priceInfo}` : ''}</span>
+                      </div>
+                      {opt.subItems && opt.subItems.length > 0 && (
+                        <ul className="ml-5 mt-1 space-y-1">
+                          {opt.subItems.map((sub: any, subIdx: number) => (
+                             <li key={subIdx} className="text-xs text-white/50 flex items-start gap-2">
+                               <span>-</span>
+                               <span>{sub.name} {sub.priceInfo ? `- ${sub.priceInfo}` : ''}</span>
+                             </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))}
                  </ul>
@@ -2117,44 +2253,46 @@ export default function App() {
                 <div className="w-24 h-2 bg-art-green mx-auto mb-10"></div>
                 <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Gabung dengan pendaki lain di jadwal yang sudah ditentukan. Harga lebih hemat namun fasilitas tetap premium.</p>
                 
-                {/* OPEN TRIP FILTERS - INTEGRATED CHIPS */}
-                <div className="mt-16 flex flex-col gap-8 items-center">
-                  <div className="flex flex-col items-center gap-4">
-                    <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Pilih Wilayah</span>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {['Semua', ...Array.from(new Set(config.openTrips.map((ot: any) => ot.region))).filter(Boolean)].sort().map((reg: any) => (
-                        <button 
-                          key={reg}
-                          onClick={() => { playClick(); setOpenFilterRegion(reg); }}
-                          className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${openFilterRegion === reg ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
+                {/* FILTERS */}
+                <div className="mt-12 flex flex-col items-center justify-center gap-6 w-full max-w-2xl mx-auto border-t border-art-text/5 pt-10">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                     {/* Wilayah Filter */}
+                     <div className="flex flex-col relative group">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Wilayah</label>
+                        <select 
+                          value={openFilterRegion}
+                          onChange={(e) => setOpenFilterRegion(e.target.value)}
+                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-green shadow-sm cursor-pointer"
                         >
-                          {reg}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                          {['Semua', ...Array.from(new Set(config.openTrips.map((ot: any) => ot.region))).filter(Boolean)].sort().map((reg: any) => (
+                            <option key={reg} value={reg}>{reg}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                     </div>
 
-                  <div className="flex flex-col items-center gap-4">
-                    <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Tingkat Kesulitan</span>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {['Semua', 'Mudah', 'Sedang', 'Sulit', 'Sangat Sulit'].map((lvl: any) => (
-                        <button 
-                          key={lvl}
-                          onClick={() => { playClick(); setOpenFilterDifficulty(lvl); }}
-                          className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${openFilterDifficulty === lvl ? 'bg-art-green text-white border-art-green shadow-[4px_4px_0px_0px_rgba(26,26,26,.3)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
+                     {/* Kesulitan Filter */}
+                     <div className="flex flex-col relative group">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Tingkat Kesulitan</label>
+                        <select 
+                          value={openFilterDifficulty}
+                          onChange={(e) => setOpenFilterDifficulty(e.target.value)}
+                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-green shadow-sm cursor-pointer"
                         >
-                          {lvl}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                          {['Semua', ...DIFFICULTY_LEVELS].map((lvl: any) => (
+                            <option key={lvl} value={lvl}>{lvl}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                     </div>
+                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredOpenTrips.length > 0 ? (
                   filteredOpenTrips.map((ot: any, i: number) => (
-                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} />
+                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} />
                   ))
                 ) : (
                   <div className="col-span-full py-24 border-4 border-dashed border-art-text/5 rounded-[3rem] flex flex-col items-center justify-center text-center bg-white/40">
@@ -2174,38 +2312,40 @@ export default function App() {
             <div className="w-24 h-2 bg-art-text mx-auto mb-10"></div>
             <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Tentukan sendiri gunung tujuan, jalur pendakian, dan durasi sesuai keinginanmu. Cocok untuk solo traveler maupun rombongan tertutup.</p>
             
-            {/* PRIVATE TRIP FILTERS - INTEGRATED CHIPS */}
-            <div className="mt-16 flex flex-col gap-8 items-center">
-              <div className="flex flex-col items-center gap-4">
-                <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Cari Wilayah</span>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {['Semua', ...Array.from(new Set(currentDestinations.map(d => d.region))).filter(Boolean)].sort().map((reg: any) => (
-                    <button 
-                      key={reg}
-                      onClick={() => { playClick(); setFilterRegion(reg); }}
-                      className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${filterRegion === reg ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
-                    >
-                      {reg}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                {/* FILTERS */}
+                <div className="mt-12 flex flex-col items-center justify-center gap-6 w-full max-w-2xl mx-auto border-t border-art-text/5 pt-10">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                     {/* Wilayah Filter */}
+                     <div className="flex flex-col relative group">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Pilih Wilayah</label>
+                        <select 
+                          value={filterRegion}
+                          onChange={(e) => setFilterRegion(e.target.value)}
+                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
+                        >
+                          {['Semua', ...Array.from(new Set(currentDestinations.map(d => d.region))).filter(Boolean)].sort().map((r: any) => (
+                            <option key={r} value={r}>{r}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                     </div>
 
-              <div className="flex flex-col items-center gap-4">
-                <span className="text-[10px] font-black uppercase text-art-text/30 tracking-[0.3em]">Tingkat Kesulitan</span>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {['Semua', 'Pemula', 'Pemula-Menengah', 'Menengah', 'Ahli'].map((lvl: any) => (
-                    <button 
-                      key={lvl}
-                      onClick={() => { playClick(); setFilterDifficulty(lvl); }}
-                      className={`px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${filterDifficulty === lvl ? 'bg-art-orange text-white border-art-orange shadow-[4px_4px_0px_0px_rgba(255,107,0,.2)]' : 'bg-white text-art-text/40 border-art-text/5 hover:border-art-text/20 hover:text-art-text'}`}
-                    >
-                      {lvl}
-                    </button>
-                  ))}
+                     {/* Kesulitan Filter */}
+                     <div className="flex flex-col relative group">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Tingkat Kesulitan</label>
+                        <select 
+                          value={filterDifficulty}
+                          onChange={(e) => setFilterDifficulty(e.target.value)}
+                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
+                        >
+                          {difficultyOptions.map((opt: any) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                     </div>
+                   </div>
                 </div>
-              </div>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">

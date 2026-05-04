@@ -8,16 +8,39 @@ export interface FacilityOption {
   subItems?: { name: string, priceInfo?: string }[];
 }
 
+export const DIFFICULTY_LEVELS = ["Pemula", "Pemula Menengah", "Menengah", "Menengah Ahli", "Ahli", "Sangat Ahli"];
+export const DURATION_LEVELS = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
+
+export interface OpenTrip {
+  id: string;
+  name: string;
+  region: string;
+  jadwal: string;
+  startDate?: string;
+  kuota: string;
+  kuotaNum: number;
+  consumedKuota?: number;
+  mepo: string;
+  difficulty: string;
+  image: string;
+  beans: string;
+  path: string;
+  duration: string;
+  price: number;
+  originalPrice: number;
+  leader?: string;
+}
+
 export interface AppConfig {
-  openTrips: any[];
+  openTrips: OpenTrip[];
   visibilities: { map: boolean, quota: boolean, beans: boolean, routes: boolean };
-  facilities?: { include: string[], exclude: string[], opsi: FacilityOption[] };
+  facilities: { include: string[], exclude: string[], opsi: FacilityOption[] };
   destinationsData: any[];
   tripLeaders: any[];
-  teamPhotos?: string[];
+  teamPhotos: string[];
   galleryPhotos: any[];
   ceritaVideoUrl: string;
-  promoCodes?: { code: string, discount: number }[];
+  promoCodes: { code: string, discount: number }[];
 }
 
 export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], defaultPhotos: any[]) {
@@ -53,10 +76,27 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         "Porter pribadi (bisa dipesan terpisah)"
       ],
       opsi: [
-        "Sewa Porter Pribadi: Rp 250.000 / Hari",
-        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
-        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
-        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+        { name: "Penjemputan / Transportasi", priceInfo: "Harga menyesuaikan jarak", subItems: [] },
+        { 
+          name: "Sewa Perlengkapan", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Jaket Gunung", priceInfo: "Rp 50rb" },
+            { name: "Sepatu Trekking", priceInfo: "Rp 75rb" },
+            { name: "Ransel (Carrier)", priceInfo: "Rp 60rb" },
+            { name: "Headlamp", priceInfo: "Rp 15rb" }
+          ]
+        },
+        { 
+          name: "Sewa Pakaian", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Pakaian Tebal", priceInfo: "Rp 30rb" },
+            { name: "Sarung Tangan Extra", priceInfo: "Rp 10rb" },
+            { name: "Kupluk / Topi Gunung", priceInfo: "Rp 10rb" }
+          ]
+        },
+        { name: "Upgrade Tenda Privat", priceInfo: "Rp 100rb / Tenda", subItems: [] }
       ]
     }
   });
@@ -102,10 +142,27 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         "Porter pribadi (bisa dipesan terpisah)"
       ],
       opsi: [
-        "Sewa Porter Pribadi: Rp 250.000 / Hari",
-        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
-        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
-        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+        { name: "Penjemputan / Transportasi", priceInfo: "Harga menyesuaikan jarak", subItems: [] },
+        { 
+          name: "Sewa Perlengkapan", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Jaket Gunung", priceInfo: "Rp 50rb" },
+            { name: "Sepatu Trekking", priceInfo: "Rp 75rb" },
+            { name: "Ransel (Carrier)", priceInfo: "Rp 60rb" },
+            { name: "Headlamp", priceInfo: "Rp 15rb" }
+          ]
+        },
+        { 
+          name: "Sewa Pakaian", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Pakaian Tebal", priceInfo: "Rp 30rb" },
+            { name: "Sarung Tangan Extra", priceInfo: "Rp 10rb" },
+            { name: "Kupluk / Topi Gunung", priceInfo: "Rp 10rb" }
+          ]
+        },
+        { name: "Upgrade Tenda Privat", priceInfo: "Rp 100rb / Tenda", subItems: [] }
       ]
     }
         };
@@ -150,10 +207,27 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         "Porter pribadi (bisa dipesan terpisah)"
       ],
       opsi: [
-        "Sewa Porter Pribadi: Rp 250.000 / Hari",
-        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
-        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
-        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+        { name: "Penjemputan / Transportasi", priceInfo: "Harga menyesuaikan jarak", subItems: [] },
+        { 
+          name: "Sewa Perlengkapan", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Jaket Gunung", priceInfo: "Rp 50rb" },
+            { name: "Sepatu Trekking", priceInfo: "Rp 75rb" },
+            { name: "Ransel (Carrier)", priceInfo: "Rp 60rb" },
+            { name: "Headlamp", priceInfo: "Rp 15rb" }
+          ]
+        },
+        { 
+          name: "Sewa Pakaian", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Pakaian Tebal", priceInfo: "Rp 30rb" },
+            { name: "Sarung Tangan Extra", priceInfo: "Rp 10rb" },
+            { name: "Kupluk / Topi Gunung", priceInfo: "Rp 10rb" }
+          ]
+        },
+        { name: "Upgrade Tenda Privat", priceInfo: "Rp 100rb / Tenda", subItems: [] }
       ]
     }
       });
@@ -207,10 +281,27 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         "Porter pribadi (bisa dipesan terpisah)"
       ],
       opsi: [
-        "Sewa Porter Pribadi: Rp 250.000 / Hari",
-        "Sewa Perlengkapan Pribadi (Sepatu, Jaket): Hubungi Admin",
-        "Upgrade Tenda Privat (1-2 orang): Rp 100.000 / Tenda",
-        "Layanan Antar Jemput Kota/Bandara: Harga menyesuaikan jarak"
+        { name: "Penjemputan / Transportasi", priceInfo: "Harga menyesuaikan jarak", subItems: [] },
+        { 
+          name: "Sewa Perlengkapan", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Jaket Gunung", priceInfo: "Rp 50rb" },
+            { name: "Sepatu Trekking", priceInfo: "Rp 75rb" },
+            { name: "Ransel (Carrier)", priceInfo: "Rp 60rb" },
+            { name: "Headlamp", priceInfo: "Rp 15rb" }
+          ]
+        },
+        { 
+          name: "Sewa Pakaian", 
+          priceInfo: "Harga per item/hari", 
+          subItems: [
+            { name: "Pakaian Tebal", priceInfo: "Rp 30rb" },
+            { name: "Sarung Tangan Extra", priceInfo: "Rp 10rb" },
+            { name: "Kupluk / Topi Gunung", priceInfo: "Rp 10rb" }
+          ]
+        },
+        { name: "Upgrade Tenda Privat", priceInfo: "Rp 100rb / Tenda", subItems: [] }
       ]
     }
     };

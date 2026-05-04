@@ -3,7 +3,8 @@ import { motion } from 'motion/react';
 import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download } from 'lucide-react';
 import { db } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { AppConfig, FacilityOption } from './useAppConfig';
+import { handleFirestoreError, OperationType } from './lib/firestore-error';
+import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, OpenTrip } from './useAppConfig';
 import { jsPDF } from 'jspdf';
 
 export const AdminPanelModal = ({ 
@@ -88,13 +89,44 @@ const BookingsAdmin = ({ showToast }: any) => {
     const unsubscribe = onSnapshot(q, (snap) => {
       setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
+    }, (error) => {
+      console.error("Firestore onSnapshot error:", error);
+      handleFirestoreError(error, OperationType.LIST, 'bookings');
+      setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [showToast]);
+
+  const syncOpenTripQuota = async (currentBookings: any[], updatedBookingId?: string, newStatus?: string, deletedBookingId?: string) => {
+    if (!config.openTrips) return;
+    
+    // Create a modified bookings array reflecting the hypothetical database state
+    const simulatedBookings = currentBookings.map(b => 
+      b.id === updatedBookingId ? { ...b, status: newStatus } : b
+    ).filter(b => b.id !== deletedBookingId);
+
+    let needsUpdate = false;
+    const newOpenTrips = config.openTrips.map((ot: any) => {
+      const consumed = simulatedBookings
+        .filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'dp' || b.status === 'lunas'))
+        .reduce((acc, b) => acc + (Number(b.peserta) || 0), 0);
+      
+      if (ot.consumedKuota !== consumed) {
+        needsUpdate = true;
+        return { ...ot, consumedKuota: consumed };
+      }
+      return ot;
+    });
+
+    if (needsUpdate) {
+      await updateConfig({ openTrips: newOpenTrips });
+    }
+  };
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
     try {
       await updateDoc(doc(db, 'bookings', id), { status: newStatus });
+      await syncOpenTripQuota(bookings, id, newStatus);
       showToast(`Status booking berhasil diupdate ke ${newStatus}!`);
       if (newStatus === 'lunas') {
         showToast("Kuitansi telah dikirim ke email pelanggan!", "info");
@@ -109,6 +141,7 @@ const BookingsAdmin = ({ showToast }: any) => {
     if (window.confirm("Beneran mau hapus data booking ini?")) {
       try {
         await deleteDoc(doc(db, 'bookings', id));
+        await syncOpenTripQuota(bookings, undefined, undefined, id);
         showToast("Booking berhasil dihapus!");
       } catch (error) {
         showToast("Gagal menghapus booking", 'error');
@@ -483,7 +516,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 setData(nd);
               }}>
                 <option value="">-- Pilih Kesulitan --</option>
-                {difficultyLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
               </select>
             </div>
             
@@ -752,10 +785,38 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
 
 
 const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
-  const [data, setData] = useState(config.openTrips || []);
+  const [data, setData] = useState<OpenTrip[]>(config.openTrips || []);
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
 
-  const handleSave = () => { updateConfig({ openTrips: data }); showToast('Tersimpan!'); };
+  useEffect(() => {
+    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (config.openTrips) {
+      setData(config.openTrips);
+    }
+  }, [config.openTrips]);
+
+  const getConsumedQuota = (name: string, jadwal: string) => {
+    return bookings
+      .filter(b => b.type === 'open' && b.destinasi === name && b.jadwal === jadwal && (b.status === 'dp' || b.status === 'lunas'))
+      .reduce((acc, b) => acc + (Number(b.peserta) || 0), 0);
+  };
+
+  const handleSave = () => { 
+    const syncedData = data.map(ot => ({
+      ...ot,
+      consumedKuota: getConsumedQuota(ot.name, ot.jadwal)
+    }));
+    updateConfig({ openTrips: syncedData }); 
+    showToast('Tersimpan!'); 
+  };
 
   const calculateDateRange = (startDate: string, duration: string) => {
     if (!startDate || !duration) return "";
@@ -888,32 +949,45 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                <input className="border p-2 rounded text-sm" value={ot.mepo} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
             </div>
             <div className="flex flex-col">
+               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Trip Leader</span>
+               <input className="border p-2 rounded text-sm" value={ot.leader || ''} onChange={e => { const nd = [...data]; nd[i].leader = e.target.value; setData(nd); }} placeholder="Trip Leader" />
+            </div>
+            <div className="flex flex-col">
                <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Beans (Biji Kopi)</span>
                <input className="border p-2 rounded text-sm" value={ot.beans} onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }} placeholder="Beans" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Sisa Kuota (Numerik)</span>
-              <input 
-                className="border p-2 rounded text-sm font-bold border-art-orange/30" 
-                type="number" 
-                value={ot.kuotaNum || 0} 
-                onChange={e => { 
-                  const num = parseInt(e.target.value) || 0;
-                  const nd = [...data]; 
-                  nd[i].kuotaNum = num; 
-                  nd[i].kuota = `${num} Pax Tersisa`; // Auto sync text kuota
-                  setData(nd); 
-                }} 
-                placeholder="Kuota Tersisa" 
-              />
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Kuota Maksimal (Kapasitas Tolal)</span>
+              <div className="flex items-center gap-2">
+                <input 
+                  className="w-20 border p-2 rounded text-sm font-bold border-art-orange/30" 
+                  type="number" 
+                  value={ot.maxKuota || ot.kuotaNum || 15} 
+                  onChange={e => { 
+                    const num = parseInt(e.target.value) || 0;
+                    const nd = [...data]; 
+                    nd[i].maxKuota = num; 
+                    nd[i].kuotaNum = num; // Fallback sync
+                    nd[i].kuota = `${num - getConsumedQuota(ot.name, ot.jadwal)} Pax Tersisa`;
+                    setData(nd); 
+                  }} 
+                />
+                <div className="flex-1 bg-art-orange/5 border border-art-orange/20 p-2 rounded flex justify-between items-center">
+                  <span className="text-[10px] font-bold uppercase text-art-orange">Terisi: {getConsumedQuota(ot.name, ot.jadwal)}</span>
+                  <span className="text-[10px] font-bold uppercase text-art-green">Sisa: {(ot.maxKuota || ot.kuotaNum || 15) - getConsumedQuota(ot.name, ot.jadwal)}</span>
+                </div>
+              </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Tampilan Kuota (Teks)</span>
-              <input className="border p-2 rounded text-sm bg-gray-50" value={ot.kuota} readOnly placeholder="Kuota Display" />
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Tampilan Kuota (Otomatis)</span>
+              <input className="border p-2 rounded text-sm bg-gray-50 font-bold text-art-green" value={`${(ot.maxKuota || ot.kuotaNum || 15) - getConsumedQuota(ot.name, ot.jadwal)} Pax Tersisa`} readOnly />
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Kesulitan</span>
-              <input className="border p-2 rounded text-sm" value={ot.difficulty} onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }} placeholder="Kesulitan (Pemula / Menengah)" />
+              <select className="border p-2 rounded text-sm font-bold" value={ot.difficulty} onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}>
+                <option value="">-- Pilih Kesulitan --</option>
+                {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+              </select>
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jalur (Via)</span>
@@ -962,15 +1036,29 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
   const [data, setData] = useState(config.facilities || { include: [], exclude: [], opsi: [] });
 
   useEffect(() => {
-    setData(config.facilities);
+    if (config.facilities) {
+      setData(config.facilities);
+    }
   }, [config.facilities]);
 
-  const handleSave = () => { updateConfig({ facilities: data }); showToast('Tersimpan!'); };
+  const handleSave = () => { 
+    updateConfig({ facilities: data }); 
+    showToast('Tersimpan!'); 
+  };
+
+  const addOption = () => {
+    const nd = { ...data };
+    if (!nd.opsi) nd.opsi = [];
+    nd.opsi = [...nd.opsi, { name: "Opsi Baru", priceInfo: "", subItems: [] }];
+    setData(nd);
+  };
 
   const addSubItem = (optIdx: number) => {
     const nd = { ...data };
-    if (!nd.opsi[optIdx].subItems) nd.opsi[optIdx].subItems = [];
-    nd.opsi[optIdx].subItems.push({ name: "Sub Item Baru", priceInfo: "Rp 50rb" });
+    const targetOpsi = { ...nd.opsi[optIdx] };
+    if (!targetOpsi.subItems) targetOpsi.subItems = [];
+    targetOpsi.subItems = [...targetOpsi.subItems, { name: "Sub Item Baru", priceInfo: "Rp 50rb" }];
+    nd.opsi[optIdx] = targetOpsi;
     setData(nd);
   };
 
@@ -1030,7 +1118,7 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
       <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-4">
         <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
           <h3 className="font-bold text-sm uppercase">Opsi Tambahan (Bisa Sub-Item)</h3>
-          <button onClick={() => setData({ ...data, opsi: [...data.opsi, { name: "Opsi Baru", priceInfo: "" }] })} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah Opsi Utama</button>
+          <button onClick={addOption} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah Opsi Utama</button>
         </div>
         
         <div className="grid grid-cols-1 gap-4">
