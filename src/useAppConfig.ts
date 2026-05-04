@@ -33,6 +33,7 @@ export interface OpenTrip {
   price: number;
   originalPrice: number;
   leader?: string;
+  status?: 'draft' | 'published';
 }
 
 export interface AppConfig {

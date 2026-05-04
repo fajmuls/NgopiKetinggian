@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -872,26 +872,10 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
 
 const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState({ ...config.homepage, heroSlides: config.homepage.heroSlides || [] });
-  const [uploading, setUploading] = useState(false);
 
   const handleSave = () => {
     updateConfig({ homepage: data });
     showToast('Homepage Tersimpan!');
-  };
-
-  const handleFileChange = async (e: any) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const url = await uploadFile(file, 'homepage');
-      setData({ ...data, heroPhotoUrl: url });
-      showToast('Foto Terunggah!');
-    } catch (e: any) {
-      customAlert(e.message || 'Gagal upload foto.');
-    } finally {
-      setUploading(false);
-    }
   };
 
   return (
@@ -901,7 +885,7 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         <input className="w-full border p-2 rounded" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Hero Title" />
         <input className="w-full border p-2 rounded" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description" />
         <div className="space-y-2">
-          <label className="text-xs font-bold">Foto Latar Belakang Alternatif</label>
+          <label className="text-xs font-bold">Link Foto Latar Belakang Hero</label>
           <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
         </div>
       </div>
@@ -973,36 +957,17 @@ const CleanupPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
 
 
 const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value: string, onChange: (url: string) => void, placeholder?: string }) => {
-  const [uploading, setUploading] = useState(false);
-  
-  const handleFileChange = async (e: any) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const url = await uploadFile(file, 'images');
-      onChange(url);
-    } catch (e: any) {
-      console.error(e);
-      customAlert(e.message || 'Gagal upload foto.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
-    <div className="space-y-2 border-2 border-dashed border-art-orange/30 p-3 rounded-xl bg-orange-50/50">
-      <div className="flex flex-col gap-2">
-        <label className="text-xs bg-art-orange text-white px-4 py-3 rounded-lg font-black uppercase tracking-widest cursor-pointer hover:bg-orange-600 transition-colors flex items-center justify-center shadow-md w-full">
-          📸 Unggah Foto ke Database
-          <input type="file" onChange={handleFileChange} disabled={uploading} className="hidden" accept="image/*" />
-        </label>
-        {uploading && <span className="text-[10px] text-center font-bold text-art-orange animate-pulse">Mengunggah... Mohon tunggu.</span>}
-      </div>
+    <div className="space-y-1 p-2 rounded-lg bg-art-bg/30 border border-art-text/10">
       <div className="flex items-center gap-2">
-		<span className="text-[10px] font-bold text-art-text/40 uppercase">Atau</span>
-      	<input className="border p-2 rounded text-[10px] w-full text-art-text/60 bg-white" value={value || ''} onChange={e => onChange(e.target.value)} placeholder={"Gunakan Link URL (Opsional)"} />
+      	<input 
+          className="border border-art-text/20 p-2 rounded text-[10px] w-full text-art-text bg-white outline-none focus:border-art-orange transition-colors" 
+          value={value || ''} 
+          onChange={e => onChange(e.target.value)} 
+          placeholder={placeholder || "Masukkan Link URL Foto"} 
+        />
       </div>
+      {value && <p className="text-[8px] text-art-green font-bold uppercase truncate">Link Terdeteksi</p>}
     </div>
   );
 };
@@ -1089,9 +1054,11 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
         beans: dest.beans, 
         image: dest.image,
         kuotaNum: 15,
+        maxKuota: 15,
         kuota: "15 Pax Tersisa",
         path: defaultPath,
-        duration: defaultDuration
+        duration: defaultDuration,
+        status: 'draft'
       };
       
       if (nd[i].startDate) {
@@ -1106,166 +1073,234 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
-        <p className="text-xs font-bold uppercase text-art-text/60">Custom Trip (Open Trip)</p>
+        <p className="text-xs font-bold uppercase text-art-text/60">Manajemen Open Trip</p>
         <div className="flex gap-2">
            <button type="button" onClick={(e) => {
              e.preventDefault();
-             const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0 }, ...data];
+             const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, status: 'draft' }, ...data];
              setData(nd);
              setExpandedIndexes([0]);
            }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Custom Trip</button>
-           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
+           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest shadow-lg">Simpan Ke Database</button>
         </div>
       </div>
-      {data.map((ot: any, i: number) => (
-        <div key={i} className="bg-white p-4 rounded-lg border-2 border-art-text space-y-3 relative overflow-hidden transition-all">
-          <div className="absolute top-2 right-2 flex items-center gap-2">
-            <button 
-              onClick={() => { const nd = [...data]; nd.splice(i, 1); setData(nd); }} 
-              className="text-red-500 hover:bg-red-50 p-2 rounded"
-            >
-              <Trash2 size={16}/>
-            </button>
-          </div>
-          
-          <div className="flex items-center gap-4 cursor-pointer" onClick={() => setExpandedIndexes(prev => prev.includes(i) ? prev.filter(idx => idx !== i) : [...prev, i])}>
-             <span className="font-black text-xl w-6 text-center">{expandedIndexes.includes(i) ? '-' : '+'}</span>
-             <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1">
-                <span className="text-sm font-black uppercase tracking-tight">{ot.name || 'Gunung Belum Dipilih'}</span>
-                {ot.jadwal && <span className="text-[10px] font-bold bg-art-green/10 text-art-green px-2 py-0.5 rounded uppercase">{ot.jadwal}</span>}
-                {ot.path && <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">{ot.path}</span>}
-                {ot.region && <span className="text-[8px] font-black uppercase text-art-text/40 tracking-widest bg-gray-100 px-1.5 py-0.5 rounded ml-auto">{ot.region}</span>}
+      <div className="grid grid-cols-1 gap-4">
+      {data.map((ot: any, i: number) => {
+        const consumed = getConsumedQuota(ot.name, ot.jadwal);
+        const isPublished = ot.status === 'published';
+        const isLocked = isPublished; // If published, some fields are locked. User said "Once published and confirmed by admin, it cannot be edited" - I'll use published as the trigger for now.
+
+        return (
+        <div key={i} className={`bg-white rounded-xl border-2 transition-all p-4 ${isPublished ? 'border-art-green shadow-md' : 'border-art-text bg-gray-50/30'}`}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+             <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => setExpandedIndexes(prev => prev.includes(i) ? prev.filter(idx => idx !== i) : [...prev, i])}>
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-black ${isPublished ? 'bg-art-green text-white' : 'bg-art-text text-white'}`}>
+                   {expandedIndexes.includes(i) ? '-' : '+'}
+                </span>
+                <div>
+                   <h4 className="font-black uppercase text-sm tracking-tight flex items-center gap-2">
+                      {ot.name || 'Pilih Gunung'} 
+                      {isPublished && <CheckCircle size={14} className="text-art-green" />}
+                      {!ot.name && <span className="text-[8px] bg-red-100 text-red-500 px-1.5 py-0.5 rounded">Draft</span>}
+                   </h4>
+                   <div className="flex gap-2 flex-wrap mt-1">
+                      {ot.jadwal && <span className="text-[8px] font-bold bg-white border border-art-text/10 px-2 py-0.5 rounded uppercase">{ot.jadwal}</span>}
+                      {ot.path && <span className="text-[8px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">Via {ot.path}</span>}
+                      {isPublished && <span className="text-[8px] font-black bg-art-green text-white px-2 py-0.5 rounded uppercase flex items-center gap-1"><Globe size={8}/> Terbit</span>}
+                      {consumed > 0 && <span className="text-[8px] font-black bg-art-orange text-white px-2 py-0.5 rounded uppercase">DP: {consumed} Pax</span>}
+                   </div>
+                </div>
+             </div>
+             
+             <div className="flex items-center gap-2">
+                {!isPublished ? (
+                  <button 
+                    disabled={!ot.name || !ot.jadwal || !ot.price}
+                    onClick={() => {
+                        const nd = [...data];
+                        nd[i].status = 'published';
+                        setData(nd);
+                        showToast("Trip diterbitkan!");
+                    }}
+                    className="flex items-center gap-1.5 text-[9px] font-black uppercase px-3 py-1.5 bg-art-green text-white rounded-lg hover:shadow-md transition-all disabled:opacity-30"
+                  >
+                    <Send size={12}/> Terbitkan
+                  </button>
+                ) : (
+                  <button 
+                    disabled={consumed > 0}
+                    onClick={() => {
+                        const nd = [...data];
+                        nd[i].status = 'draft';
+                        setData(nd);
+                        showToast("Trip ditarik ke draft.");
+                    }}
+                    className="text-[9px] font-black uppercase px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition-all disabled:opacity-30"
+                  >
+                    Tarik ke Draft
+                  </button>
+                )}
+                
+                <button 
+                  disabled={consumed > 0}
+                  onClick={() => {
+                    if (consumed > 0) {
+                      customAlert("Tidak bisa menghapus trip yang sudah ada DP (Down Payment) masuk.");
+                      return;
+                    }
+                    customConfirm("Beneran mau hapus trip ini?", () => {
+                      const nd = [...data]; nd.splice(i, 1); setData(nd);
+                    });
+                  }} 
+                  className={`p-2 rounded-lg transition-all ${consumed > 0 ? 'text-gray-300 opacity-50 cursor-not-allowed' : 'text-red-400 hover:bg-red-50'}`}
+                >
+                  <Trash2 size={16}/>
+                </button>
              </div>
           </div>
 
           {expandedIndexes.includes(i) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pr-8 pt-4 border-t border-dashed border-art-text/10 mt-4">
-            <div className="flex flex-col sm:col-span-2">
-               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Provinsi / Wilayah</span>
-               <select className="border p-2 rounded text-sm font-bold" value={ot.region ?? ""} onChange={e => { const nd = [...data]; nd[i].region = e.target.value; setData(nd); }}>
-                  <option value="">-- Pilih Provinsi --</option>
-                  {INDONESIA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-               </select>
-            </div>
-            <div className="flex flex-col sm:col-span-2">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Gunung Tujuan</span>
-              <select className="border p-2 rounded text-sm font-bold bg-gray-50" value={ot.name ?? ""} onChange={e => handleMountainSelect(i, e.target.value)}>
-                <option value="">-- Pilih Gunung --</option>
-                {config.destinationsData?.map((d: any) => (
-                  <option key={d.id} value={d.name}>{d.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Tanggal Mulai</span>
-              <input 
-                type="date"
-                className="border p-2 rounded text-sm font-bold" 
-                value={ot.startDate || ""} 
-                onChange={e => { 
-                  const date = e.target.value;
-                  const nd = [...data]; 
-                  nd[i].startDate = date; 
-                  nd[i].jadwal = calculateDateRange(date, ot.duration);
-                  setData(nd); 
-                }} 
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jadwal Keberangkatan (Display)</span>
-              <input className="border p-2 rounded text-sm bg-gray-50 font-bold" value={ot.jadwal ?? ""} readOnly placeholder="Otomatis (cth: 15-16 Ags)" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Upload Foto (URL / Unggah)</span>
-              <ImageUploader value={ot.image ?? ""} onChange={url => { const nd = [...data]; nd[i].image = url; setData(nd); }} />
-            </div>
-            <div className="flex flex-col">
-               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Meeting Point</span>
-               <input className="border p-2 rounded text-sm" value={ot.mepo ?? ""} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
-            </div>
-            <div className="flex flex-col">
-               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Trip Leader</span>
-               <input className="border p-2 rounded text-sm" value={ot.leader || ''} onChange={e => { const nd = [...data]; nd[i].leader = e.target.value; setData(nd); }} placeholder="Trip Leader" />
-            </div>
-            <div className="flex flex-col">
-               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Beans (Biji Kopi)</span>
-               <input className="border p-2 rounded text-sm" value={ot.beans ?? ""} onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }} placeholder="Beans" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Kuota Maksimal (Kapasitas Tolal)</span>
-              <div className="flex items-center gap-2">
-                <input 
-                  className="w-20 border p-2 rounded text-sm font-bold border-art-orange/30" 
-                  type="number" 
-                  value={ot.maxKuota || ot.kuotaNum || 15} 
-                  onChange={e => { 
-                    const num = parseInt(e.target.value) || 0;
-                    const nd = [...data]; 
-                    nd[i].maxKuota = num; 
-                    nd[i].kuotaNum = num; // Fallback sync
-                    nd[i].kuota = `${num - getConsumedQuota(ot.name, ot.jadwal)} Pax Tersisa`;
-                    setData(nd); 
-                  }} 
-                />
-                <div className="flex-1 bg-art-orange/5 border border-art-orange/20 p-2 rounded flex justify-between items-center">
-                  <span className="text-[10px] font-bold uppercase text-art-orange">Terisi: {getConsumedQuota(ot.name, ot.jadwal)}</span>
-                  <span className="text-[10px] font-bold uppercase text-art-green">Sisa: {(ot.maxKuota || ot.kuotaNum || 15) - getConsumedQuota(ot.name, ot.jadwal)}</span>
+          <div className="mt-4 pt-4 border-t-2 border-dashed border-art-text/10 space-y-4">
+             {/* Row 1: Difficulty & Mountain Name */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">1. Tingkat Kesulitan</label>
+                   <select 
+                      className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs font-bold focus:border-art-orange outline-none" 
+                      value={ot.difficulty ?? ""} 
+                      onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}
+                   >
+                    <option value="">-- Pilih Kesulitan --</option>
+                    {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                  </select>
                 </div>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Tampilan Kuota (Otomatis)</span>
-              <input className="border p-2 rounded text-sm bg-gray-50 font-bold text-art-green" value={`${(ot.maxKuota || ot.kuotaNum || 15) - getConsumedQuota(ot.name, ot.jadwal)} Pax Tersisa`} readOnly />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Kesulitan</span>
-              <select className="border p-2 rounded text-sm font-bold" value={ot.difficulty ?? ""} onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}>
-                <option value="">-- Pilih Kesulitan --</option>
-                {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jalur (Via)</span>
-              <select className="border p-2 rounded text-sm disabled:bg-gray-100" value={ot.path ?? ""} onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }} disabled={!ot.name}>
-                <option value="">-- Pilih Jalur --</option>
-                {ot.name && config.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.map((p: any) => (
-                  <option key={p.name} value={p.name}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Durasi</span>
-              <select className="border p-2 rounded text-sm flex-1" value={ot.duration ?? ""} onChange={e => { 
-                  const dur = e.target.value;
-                  const nd = [...data]; 
-                  nd[i].duration = dur; 
-                  nd[i].jadwal = calculateDateRange(ot.startDate, dur);
-                  setData(nd); 
-                }}>
-                <option value="">-- Pilih Durasi --</option>
-                {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Harga Akhir (K)</span>
-              <input className="border p-2 rounded text-sm font-black text-art-orange" type="number" value={ot.price ?? ""} onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Akhir (k)" />
-              <p className="text-[8px] text-art-text/50">Contoh: 1500 = 1,5 Juta</p>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Harga Coret (K)</span>
-              <input className="border p-2 rounded text-sm" type="number" value={ot.originalPrice ?? ""} onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Coret (k)" />
-            </div>
-            <div className="flex flex-col sm:col-span-2">
-              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">URL Gambar Banner</span>
-              <input className="border p-2 rounded text-sm" value={ot.image ?? ""} onChange={e => { const nd = [...data]; nd[i].image = e.target.value; setData(nd); }} placeholder="URL Gambar" />
-            </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">2. Destinasi Gunung {isLocked && <span className="text-red-500">(Terkunci)</span>}</label>
+                  <select 
+                    disabled={isLocked}
+                    className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs font-bold bg-gray-50/50 outline-none disabled:bg-gray-100" 
+                    value={ot.name ?? ""} 
+                    onChange={e => handleMountainSelect(i, e.target.value)}
+                  >
+                    <option value="">-- Pilih Gunung --</option>
+                    {config.destinationsData?.map((d: any) => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+             </div>
+
+             {/* Row 2: Duration & Path */}
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">3. Durasi</label>
+                   <select 
+                      className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs font-bold outline-none" 
+                      value={ot.duration ?? ""} 
+                      onChange={e => { 
+                        const dur = e.target.value;
+                        const nd = [...data]; 
+                        nd[i].duration = dur; 
+                        nd[i].jadwal = calculateDateRange(ot.startDate, dur);
+                        setData(nd); 
+                      }}
+                    >
+                    <option value="">-- Pilih Durasi --</option>
+                    {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
+                  </select>
+                </div>
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">4. Jalur Pendakian {isLocked && <span className="text-red-500">(Terkunci)</span>}</label>
+                  <select 
+                    disabled={isLocked}
+                    className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs font-bold disabled:bg-gray-100" 
+                    value={ot.path ?? ""} 
+                    onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }}
+                  >
+                    <option value="">-- Pilih Jalur --</option>
+                    {ot.name && config.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.map((p: any) => (
+                      <option key={p.name} value={p.name}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+             </div>
+
+             {/* Row 3: Schedule */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">5. Tanggal Mulai {isLocked && <span className="text-red-500">(Terkunci)</span>}</label>
+                   <input 
+                    type="date"
+                    disabled={isLocked}
+                    className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs font-bold outline-none disabled:bg-gray-100" 
+                    value={ot.startDate || ""} 
+                    onChange={e => { 
+                      const date = e.target.value;
+                      const nd = [...data]; 
+                      nd[i].startDate = date; 
+                      nd[i].jadwal = calculateDateRange(date, ot.duration);
+                      setData(nd); 
+                    }} 
+                  />
+                </div>
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">Jadwal Tampilan (Otomatis)</label>
+                   <div className="p-2 border-2 border-art-text/10 bg-art-green/5 text-art-green font-black uppercase text-xs rounded-lg">{ot.jadwal || "Belum ada jadwal"}</div>
+                </div>
+             </div>
+
+             {/* Row 4: Pricing & Quota */}
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">6. Harga Final (K)</label>
+                   <input className="w-full border-2 border-art-text/10 p-2 rounded-lg font-black text-art-orange text-sm" type="number" value={ot.price || ''} onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Cth: 1500" />
+                </div>
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">Harga Coret (K)</label>
+                   <input className="w-full border-2 border-art-text/10 p-2 rounded-lg text-sm text-art-text/40" type="number" value={ot.originalPrice || ''} onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Cth: 1800" />
+                </div>
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">7. Kuota Maksimal</label>
+                   <input className="w-full border-2 border-art-orange/20 p-2 rounded-lg font-bold text-xs" type="number" value={ot.maxKuota || ot.kuotaNum || 15} onChange={e => { 
+                      const num = parseInt(e.target.value) || 0;
+                      const nd = [...data]; 
+                      nd[i].maxKuota = num; 
+                      nd[i].kuotaNum = num;
+                      nd[i].kuota = `${num - consumed} Pax Tersisa`;
+                      setData(nd); 
+                   }} />
+                </div>
+             </div>
+
+             {/* Row 5: Details (Beans, Mepo, Leader) */}
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">8. Biji Kopi (Beans)</label>
+                   <input className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs" value={ot.beans || ''} onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }} placeholder="Cth: Arabica Blend" />
+                </div>
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">9. Meeting Point</label>
+                   <input className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs" value={ot.mepo || ''} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Cth: Basecamp" />
+                </div>
+                <div className="space-y-1">
+                   <label className="text-[10px] font-black uppercase text-art-text/40">10. Pendamping (Leader)</label>
+                   <input className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs bg-orange-50/30" value={ot.leader || ''} onChange={e => { const nd = [...data]; nd[i].leader = e.target.value; setData(nd); }} placeholder="Nama Leader" />
+                </div>
+             </div>
+
+             {/* Row 6: Photo Link at Bottom */}
+             <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-art-text/40">11. Link Foto Banner (Paling Bawah)</label>
+                <input className="w-full border-2 border-art-text/10 p-2 rounded-lg text-xs italic text-blue-500" value={ot.image || ''} onChange={e => { const nd = [...data]; nd[i].image = e.target.value; setData(nd); }} placeholder="https://link-foto-gunung.jpg" />
+             </div>
           </div>
           )}
         </div>
-      ))}
+      )})}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState(config.facilities || { include: [], exclude: [], opsi: [] });

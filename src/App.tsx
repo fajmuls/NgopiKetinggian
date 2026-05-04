@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
@@ -1211,37 +1211,44 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
   
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col">
-      <div className="h-56 relative overflow-hidden border-b-2 border-art-text">
-        <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
-         <div className="absolute top-4 left-4 bg-art-green text-white text-[9px] font-black px-2 py-1 rounded border border-white/20 uppercase shadow-sm">{ot.jadwal}</div>
-         <div className="absolute top-4 right-4 bg-white text-art-text text-[9px] font-black px-2 py-1 rounded border border-art-text/10 uppercase shadow-sm">{ot.difficulty}</div>
-         <div className={`absolute bottom-4 left-4 backdrop-blur-sm px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green'}`}>
-            {getSisaKuota(ot)} Pax Sisa
+      <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
+        <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+         <div className="absolute top-3 left-3 bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1">
+            <Calendar size={10}/> {ot.jadwal}
+         </div>
+         <div className="absolute top-3 right-3 bg-white text-art-text text-[8px] font-black px-2 py-1 rounded-lg border border-art-text/10 uppercase shadow-sm">
+            {ot.difficulty}
+         </div>
+         <div className={`absolute bottom-3 left-3 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
+            {getSisaKuota(ot)} Pax Left
          </div>
       </div>
-      <div className="p-6 flex-1 flex flex-col">
+      <div className="p-5 flex-1 flex flex-col">
          <div className="flex justify-between items-center mb-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-art-text/40">{ot.region}</span>
-            <span className="text-[9px] font-black text-art-green flex items-center gap-1 uppercase"><Map size={10}/> {ot.path}</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-art-text/40">{ot.region}</span>
+            <span className="text-[8px] font-black text-art-green flex items-center gap-1 uppercase bg-art-green/5 px-2 py-0.5 rounded-full border border-art-green/10">
+               <Globe size={10}/> Via {ot.path}
+            </span>
          </div>
-         <h3 className="text-2xl font-black uppercase text-art-text mb-4 leading-tight">{ot.name}</h3>
+         <h3 className="text-xl font-black uppercase text-art-text mb-3 leading-tight group-hover:text-art-green transition-colors">{ot.name}</h3>
          
-         <div className="grid grid-cols-2 gap-3 mb-6 bg-art-bg/50 p-3 rounded-xl border border-art-text/5">
-            <div className="flex items-center gap-2">
-               <MapPin size={12} className="text-art-orange" />
-               <span className="text-[9px] font-bold uppercase truncate">{ot.mepo || "Basecamp"}</span>
+         <div className="flex flex-col gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+               <div className="flex items-center gap-1.5 min-w-[70px]">
+                  <MapPin size={10} className="text-art-orange" />
+                  <span className="text-[8px] font-black uppercase text-art-text/70">{ot.mepo || "Basecamp"}</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                  <Coffee size={10} className="text-art-green" />
+                  <span className="text-[8px] font-black uppercase text-art-text/70">{ot.beans || "Premium"}</span>
+               </div>
+               {ot.leader && (
+                 <div className="flex items-center gap-1.5">
+                    <Users size={10} className="text-art-orange" />
+                    <span className="text-[8px] font-black uppercase text-art-text/70">{ot.leader}</span>
+                 </div>
+               )}
             </div>
-            <div className="flex items-center gap-2">
-               <Calendar size={12} className="text-art-green" />
-               <span className="text-[9px] font-bold uppercase">{ot.duration || "N/A"}</span>
-            </div>
-         </div>
-
-         <div className="flex items-center gap-2 mb-6 text-art-text/60">
-           <div className="bg-art-bg p-1.5 rounded-full">
-             <Coffee size={12} className="text-art-green" />
-           </div>
-           <span className="text-[9px] font-bold uppercase tracking-wider">{ot.beans || "Premium Blend"}</span>
          </div>
 
          <AnimatePresence>
@@ -1252,25 +1259,23 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden mb-6 border-t border-dashed border-art-text/10 pt-4"
               >
-                 <p className="text-[10px] font-medium text-art-text/70 mb-4 italic leading-relaxed">{ot.desc || "Nikmati petualangan bersama pendaki lain di gunung yang memukau ini."}</p>
-                 <div className="space-y-2">
-                    <div className="flex justify-between text-[9px] font-bold uppercase">
-                       <span className="text-art-text/40">Kesulitan</span>
+                 <p className="text-[9px] font-medium text-art-text/60 mb-3 italic leading-relaxed">{ot.desc || "Nikmati petualangan khas kopi di gunung memukau ini."}</p>
+                 <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
+                       <span className="text-art-text/30">Mepo</span>
+                       <span className="text-art-text truncate max-w-[60px]">{ot.mepo || 'Basecamp'}</span>
+                    </div>
+                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
+                       <span className="text-art-text/30">Durasi</span>
+                       <span className="text-art-text">{ot.duration}</span>
+                    </div>
+                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
+                       <span className="text-art-text/30">Difficulty</span>
                        <span className="text-art-text">{ot.difficulty}</span>
                     </div>
-                    <div className="flex justify-between text-[9px] font-bold uppercase">
-                       <span className="text-art-text/40">Sajian Kopi</span>
-                       <span className="text-art-text">{ot.beans || 'V60 / Tubruk'}</span>
-                    </div>
-                    {ot.leader && (
-                      <div className="flex justify-between text-[9px] font-bold uppercase">
-                         <span className="text-art-text/40">Trip Leader</span>
-                         <span className="text-art-text">{ot.leader}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-[9px] font-bold uppercase">
-                       <span className="text-art-text/40">Meeting Point</span>
-                       <span className="text-art-text">{ot.mepo || 'Basecamp'}</span>
+                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
+                       <span className="text-art-text/30">Leader</span>
+                       <span className="text-art-text truncate max-w-[60px]">{ot.leader || '-'}</span>
                     </div>
                  </div>
               </motion.div>
@@ -2257,10 +2262,12 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 
                 {/* FILTERS */}
                 <div className="mt-12 flex flex-col items-center justify-center gap-6 w-full max-w-2xl mx-auto border-t border-art-text/5 pt-10">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                     {/* Wilayah Filter */}
+                   <div className="grid grid-cols-2 gap-4 w-full">
+                     {/* Wilayah Filter (Left) */}
                      <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Wilayah</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
+                           <MapPin size={10} className="text-art-green" /> Wilayah
+                        </label>
                         <select 
                           value={openFilterRegion}
                           onChange={(e) => setOpenFilterRegion(e.target.value)}
@@ -2270,12 +2277,14 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                             <option key={reg} value={reg}>{reg}</option>
                           ))}
                         </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
                      </div>
 
-                     {/* Kesulitan Filter */}
+                     {/* Kesulitan Filter (Right) */}
                      <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Tingkat Kesulitan</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
+                           <AlertCircle size={10} className="text-art-orange" /> Kesulitan
+                        </label>
                         <select 
                           value={openFilterDifficulty}
                           onChange={(e) => setOpenFilterDifficulty(e.target.value)}
@@ -2285,7 +2294,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                             <option key={lvl} value={lvl}>{lvl}</option>
                           ))}
                         </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
                      </div>
                    </div>
                 </div>
@@ -2316,25 +2325,12 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             
                 {/* FILTERS */}
                 <div className="mt-12 flex flex-col items-center justify-center gap-6 w-full max-w-2xl mx-auto border-t border-art-text/5 pt-10">
-                   <div className="grid grid-cols-2 gap-6 w-full">
-                     {/* Kesulitan Filter (Left) */}
+                   <div className="grid grid-cols-2 gap-4 w-full">
+                     {/* Wilayah Filter (Left) */}
                      <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Tingkat Kesulitan</label>
-                        <select 
-                          value={filterDifficulty}
-                          onChange={(e) => setFilterDifficulty(e.target.value)}
-                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
-                        >
-                          {difficultyOptions.map((opt: any) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
-                     </div>
-
-                     {/* Wilayah Filter (Right) */}
-                     <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2">Pilih Wilayah</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
+                           <MapPin size={10} className="text-art-green" /> Wilayah
+                        </label>
                         <select 
                           value={filterRegion}
                           onChange={(e) => setFilterRegion(e.target.value)}
@@ -2344,7 +2340,24 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                             <option key={r} value={r}>{r}</option>
                           ))}
                         </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronRight size={16} className="rotate-90" /></div>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
+                     </div>
+
+                     {/* Kesulitan Filter (Right) */}
+                     <div className="flex flex-col relative group">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
+                           <AlertCircle size={10} className="text-art-orange" /> Kesulitan
+                        </label>
+                        <select 
+                          value={filterDifficulty}
+                          onChange={(e) => setFilterDifficulty(e.target.value)}
+                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
+                        >
+                          {difficultyOptions.map((opt: any) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
                      </div>
                    </div>
                 </div>
