@@ -41,29 +41,14 @@ export const AdminPanelModal = ({
               <p className="text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
               <button 
                 onClick={() => {
-                  if (window.confirm("Beneran mau reset semua ke default global?")) {
+                  if (window.confirm("Are you sure you want to set to default? This action cannot be undone and will overwrite all current configurations.")) {
                     revertToDefault();
-                    showToast("Berhasil direset global!");
+                    showToast("Berhasil diset ke default!");
                   }
                 }} 
-                className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors hidden sm:block"
+                className="text-[10px] bg-red-600 text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-700 transition-colors"
               >
-                Reset ke Default
-              </button>
-              <button 
-                onClick={async () => {
-                  if (window.confirm("Jadikan tampilan website saat ini sebagai default?")) {
-                    try {
-                      await updateDoc(doc(db, 'appConfig', 'default'), config as any);
-                    } catch (e) {
-                      await setDoc(doc(db, 'appConfig', 'default'), config as any);
-                    }
-                    showToast("Berhasil di-set sebagai default!", "success");
-                  }
-                }} 
-                className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors hidden sm:block"
-              >
-                Set Default
+                Set to default.
               </button>
             </div>
             <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
@@ -1123,14 +1108,14 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pr-8 pt-4 border-t border-dashed border-art-text/10 mt-4">
             <div className="flex flex-col sm:col-span-2">
                <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Provinsi / Wilayah</span>
-               <select className="border p-2 rounded text-sm font-bold" value={ot.region} onChange={e => { const nd = [...data]; nd[i].region = e.target.value; setData(nd); }}>
+               <select className="border p-2 rounded text-sm font-bold" value={ot.region ?? ""} onChange={e => { const nd = [...data]; nd[i].region = e.target.value; setData(nd); }}>
                   <option value="">-- Pilih Provinsi --</option>
                   {INDONESIA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                </select>
             </div>
             <div className="flex flex-col sm:col-span-2">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Gunung Tujuan</span>
-              <select className="border p-2 rounded text-sm font-bold bg-gray-50" value={ot.name} onChange={e => handleMountainSelect(i, e.target.value)}>
+              <select className="border p-2 rounded text-sm font-bold bg-gray-50" value={ot.name ?? ""} onChange={e => handleMountainSelect(i, e.target.value)}>
                 <option value="">-- Pilih Gunung --</option>
                 {config.destinationsData?.map((d: any) => (
                   <option key={d.id} value={d.name}>{d.name}</option>
@@ -1154,15 +1139,15 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jadwal Keberangkatan (Display)</span>
-              <input className="border p-2 rounded text-sm bg-gray-50 font-bold" value={ot.jadwal} readOnly placeholder="Otomatis (cth: 15-16 Ags)" />
+              <input className="border p-2 rounded text-sm bg-gray-50 font-bold" value={ot.jadwal ?? ""} readOnly placeholder="Otomatis (cth: 15-16 Ags)" />
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Upload Foto (URL / Unggah)</span>
-              <ImageUploader value={ot.image} onChange={url => { const nd = [...data]; nd[i].image = url; setData(nd); }} />
+              <ImageUploader value={ot.image ?? ""} onChange={url => { const nd = [...data]; nd[i].image = url; setData(nd); }} />
             </div>
             <div className="flex flex-col">
                <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Meeting Point</span>
-               <input className="border p-2 rounded text-sm" value={ot.mepo} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
+               <input className="border p-2 rounded text-sm" value={ot.mepo ?? ""} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
             </div>
             <div className="flex flex-col">
                <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Trip Leader</span>
@@ -1170,7 +1155,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             </div>
             <div className="flex flex-col">
                <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Beans (Biji Kopi)</span>
-               <input className="border p-2 rounded text-sm" value={ot.beans} onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }} placeholder="Beans" />
+               <input className="border p-2 rounded text-sm" value={ot.beans ?? ""} onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }} placeholder="Beans" />
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Kuota Maksimal (Kapasitas Tolal)</span>
@@ -1200,14 +1185,14 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Kesulitan</span>
-              <select className="border p-2 rounded text-sm font-bold" value={ot.difficulty} onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}>
+              <select className="border p-2 rounded text-sm font-bold" value={ot.difficulty ?? ""} onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}>
                 <option value="">-- Pilih Kesulitan --</option>
                 {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
               </select>
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jalur (Via)</span>
-              <select className="border p-2 rounded text-sm disabled:bg-gray-100" value={ot.path} onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }} disabled={!ot.name}>
+              <select className="border p-2 rounded text-sm disabled:bg-gray-100" value={ot.path ?? ""} onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }} disabled={!ot.name}>
                 <option value="">-- Pilih Jalur --</option>
                 {ot.name && config.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.map((p: any) => (
                   <option key={p.name} value={p.name}>{p.name}</option>
@@ -1216,7 +1201,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Durasi</span>
-              <select className="border p-2 rounded text-sm flex-1" value={ot.duration} onChange={e => { 
+              <select className="border p-2 rounded text-sm flex-1" value={ot.duration ?? ""} onChange={e => { 
                   const dur = e.target.value;
                   const nd = [...data]; 
                   nd[i].duration = dur; 
@@ -1229,16 +1214,16 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Harga Akhir (K)</span>
-              <input className="border p-2 rounded text-sm font-black text-art-orange" type="number" value={ot.price} onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Akhir (k)" />
+              <input className="border p-2 rounded text-sm font-black text-art-orange" type="number" value={ot.price ?? ""} onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Akhir (k)" />
               <p className="text-[8px] text-art-text/50">Contoh: 1500 = 1,5 Juta</p>
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Harga Coret (K)</span>
-              <input className="border p-2 rounded text-sm" type="number" value={ot.originalPrice} onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Coret (k)" />
+              <input className="border p-2 rounded text-sm" type="number" value={ot.originalPrice ?? ""} onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Harga Coret (k)" />
             </div>
             <div className="flex flex-col sm:col-span-2">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">URL Gambar Banner</span>
-              <input className="border p-2 rounded text-sm" value={ot.image} onChange={e => { const nd = [...data]; nd[i].image = e.target.value; setData(nd); }} placeholder="URL Gambar" />
+              <input className="border p-2 rounded text-sm" value={ot.image ?? ""} onChange={e => { const nd = [...data]; nd[i].image = e.target.value; setData(nd); }} placeholder="URL Gambar" />
             </div>
           </div>
           )}

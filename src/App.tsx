@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send } from 'lucide-react';
 import { useSound } from './hooks/useSound';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -1312,19 +1312,20 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
   const [showDetails, setShowDetails] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
   
-  const safePaths = dest.paths && dest.paths.length > 0 ? dest.paths : [{ name: "Jalur Utama", durations: dest.durations || [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] }];
+  const safePaths = useMemo(() => dest.paths && dest.paths.length > 0 ? dest.paths : [{ name: "Jalur Utama", durations: dest.durations || [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] }], [dest.paths, dest.durations]);
   const currentPath = safePaths[selectedPath] || safePaths[0];
   
-  const [selectedDuration, setSelectedDuration] = useState(currentPath.durations?.findIndex((d: any) => d.label === '2H 1M') >= 0 ? currentPath.durations.findIndex((d: any) => d.label === '2H 1M') : 0);
+  const safeDurations = useMemo(() => currentPath.durations && currentPath.durations.length > 0 ? currentPath.durations : [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }], [currentPath.durations]);
+  
+  const [selectedDuration, setSelectedDuration] = useState(safeDurations.findIndex((d: any) => d.label === '2H 1M') >= 0 ? safeDurations.findIndex((d: any) => d.label === '2H 1M') : 0);
   const { playHover, playClick } = useSound();
   
   useEffect(() => {
-    if (currentPath.durations && selectedDuration >= currentPath.durations.length) {
+    if (safeDurations && selectedDuration >= safeDurations.length) {
       setSelectedDuration(0);
     }
-  }, [selectedPath, currentPath, selectedDuration]);
+  }, [selectedPath, safeDurations, selectedDuration]);
 
-  const safeDurations = currentPath.durations && currentPath.durations.length > 0 ? currentPath.durations : [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }];
   const currentDur = safeDurations[selectedDuration] || safeDurations[0];
   
   return (
@@ -1592,6 +1593,13 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
   );
 };
 
+const defaultGalleryPhotos = [
+  { src: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=2070&auto=format&fit=crop", desc: "Momen ngopi pagi" },
+  { src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop", desc: "Suasana sunrise" },
+  { src: "https://images.unsplash.com/photo-1519181245277-cffeb31da2e3?q=80&w=2070&auto=format&fit=crop", desc: "Trekking bersama" },
+  { src: "https://images.unsplash.com/photo-1498855926480-d98e83099315?q=80&w=2070&auto=format&fit=crop", desc: "Istirahat di camp" }
+];
+
 export default function App() {
   const [user] = useAuthState(auth);
   const [showSplash, setShowSplash] = useState(true);
@@ -1689,13 +1697,6 @@ export default function App() {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
-
-  const defaultGalleryPhotos = [
-    { src: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=2070&auto=format&fit=crop", desc: "Momen ngopi pagi" },
-    { src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop", desc: "Suasana sunrise" },
-    { src: "https://images.unsplash.com/photo-1519181245277-cffeb31da2e3?q=80&w=2070&auto=format&fit=crop", desc: "Trekking bersama" },
-    { src: "https://images.unsplash.com/photo-1498855926480-d98e83099315?q=80&w=2070&auto=format&fit=crop", desc: "Istirahat di camp" }
-  ];
 
   const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   
