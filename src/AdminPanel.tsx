@@ -92,6 +92,7 @@ export const AdminPanelModal = ({
             )}
             {activeCategory === 'website' && (
               <>
+                <button onClick={() => setActiveTab('homepage')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'homepage' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Homepage</button>
                 <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Cerita</button>
                 <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
                 <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
@@ -393,10 +394,19 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
 
   const [visibilities, setVisibilities] = useState(config.visibilities || { map: true, quota: true, beans: true, routes: true });
 
+  useEffect(() => {
+    setData(JSON.parse(JSON.stringify(config.destinationsData)));
+  }, [config.destinationsData]);
+  
+  useEffect(() => {
+    if (config.visibilities) setVisibilities(config.visibilities);
+  }, [config.visibilities]);
+
   const handleSave = () => {
     updateConfig({ destinationsData: data, visibilities });
     showToast('Tersimpan!');
   };
+
 
   const regions = ["Semua", ...Array.from(new Set(data.map((d: any) => d.region || "Jawa")))];
 
@@ -519,6 +529,17 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
 
           {expandedIndexes.includes(i) && (
           <div className="grid gap-4 mt-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
+              <span className="text-xs font-bold w-16">Foto:</span>
+              <div className="w-full sm:flex-1">
+                <ImageUploader value={dest.image} onChange={url => {
+                  const nd = [...data];
+                  nd[i].image = url;
+                  setData(nd);
+                }} placeholder="URL Gambar / Unggah File" />
+              </div>
+            </div>
+            
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
               <span className="text-xs font-bold w-16">Region:</span>
               <input className="border p-2 rounded text-xs w-full sm:w-32" value={dest.region || 'Jawa'} onChange={e => {
@@ -672,6 +693,10 @@ const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
 const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState([...config.tripLeaders]);
 
+  useEffect(() => {
+    setData(JSON.parse(JSON.stringify(config.tripLeaders)));
+  }, [config.tripLeaders]);
+
   const handleSave = () => {
     updateConfig({ tripLeaders: data });
     showToast('Disimpan!');
@@ -719,9 +744,11 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
             <input className="border p-2 rounded text-xs w-full mb-2 block" value={leader.description} onChange={e => {
                   setData(prev => prev.map((item, idx) => idx === i ? { ...item, description: e.target.value } : item));
             }} placeholder="Deskripsi" />
-            <input className="border p-2 rounded text-xs w-full mb-2 block" value={leader.avatar} onChange={e => {
-                  setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: e.target.value } : item));
-            }} placeholder="URL Foto URL" />
+            <div className="mb-2">
+              <ImageUploader value={leader.avatar} onChange={url => {
+                  setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: url } : item));
+              }} placeholder="URL Foto Foto" />
+            </div>
             <input className="border p-2 rounded text-xs w-full mb-2 block border-blue-300 bg-blue-50" value={leader.voiceLine || ''} onChange={e => {
                   setData(prev => prev.map((item, idx) => idx === i ? { ...item, voiceLine: e.target.value } : item));
             }} placeholder="URL Voice Audio (Dari Firebase Storage / URL)" />
@@ -853,6 +880,34 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         {uploading && <p className="text-xs">Mengunggah...</p>}
       </div>
       <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase">Simpan Homepage</button>
+    </div>
+  );
+};
+
+
+const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value: string, onChange: (url: string) => void, placeholder?: string }) => {
+  const [uploading, setUploading] = useState(false);
+  
+  const handleFileChange = async (e: any) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadFile(file, 'images');
+      onChange(url);
+    } catch (e) {
+      console.error(e);
+      alert('Gagal upload foto.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-1">
+      <input className="border p-2 rounded text-xs w-full" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+      <input type="file" onChange={handleFileChange} disabled={uploading} className="text-xs mt-1" />
+      {uploading && <p className="text-[10px]">Mengunggah...</p>}
     </div>
   );
 };
@@ -1023,6 +1078,10 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Jadwal Keberangkatan (Display)</span>
               <input className="border p-2 rounded text-sm bg-gray-50 font-bold" value={ot.jadwal} readOnly placeholder="Otomatis (cth: 15-16 Ags)" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Upload Foto (URL / Unggah)</span>
+              <ImageUploader value={ot.image} onChange={url => { const nd = [...data]; nd[i].image = url; setData(nd); }} />
             </div>
             <div className="flex flex-col">
                <span className="text-[10px] uppercase font-bold mb-1 opacity-50">Meeting Point</span>

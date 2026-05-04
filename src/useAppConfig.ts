@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.0";
+export const WEBSITE_VERSION = "1.0.1";
 
 export interface FacilityOption {
   name: string;
