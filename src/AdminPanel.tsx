@@ -97,6 +97,7 @@ export const AdminPanelModal = ({
                 <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
                 <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
                 <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
+                <button onClick={() => setActiveTab('cleanupPhotos')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cleanupPhotos' ? 'bg-red-600 text-white' : 'hover:bg-red-50 text-red-600'}`}>Cleanup Foto</button>
               </>
             )}
           </div>
@@ -112,6 +113,7 @@ export const AdminPanelModal = ({
             {activeTab === 'promoCodes' && <PromoCodesAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cerita' && <CeritaAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultVideo={defaultLists.cerita} />}
             {activeTab === 'homepage' && <HomepageAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'cleanupPhotos' && <CleanupPhotosAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
           </div>
         </div>
       </motion.div>
@@ -395,7 +397,9 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
   const [visibilities, setVisibilities] = useState(config.visibilities || { map: true, quota: true, beans: true, routes: true });
 
   useEffect(() => {
-    setData(JSON.parse(JSON.stringify(config.destinationsData)));
+    if (JSON.stringify(data) !== JSON.stringify(config.destinationsData)) {
+      setData(JSON.parse(JSON.stringify(config.destinationsData)));
+    }
   }, [config.destinationsData]);
   
   useEffect(() => {
@@ -678,7 +682,7 @@ const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
               const np = [...photos]; np.splice(i, 1); setPhotos(np);
             }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md z-10"><Trash2 size={12}/></button>
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border border-art-text/10">
-              <img src={url} className="w-full h-full object-cover" />
+              {url && <img src={url} className="w-full h-full object-cover" />}
             </div>
             <input className="w-full border p-1 text-[10px] rounded" value={url} onChange={e => {
               const np = [...photos]; np[i] = e.target.value; setPhotos(np);
@@ -694,7 +698,9 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
   const [data, setData] = useState([...config.tripLeaders]);
 
   useEffect(() => {
-    setData(JSON.parse(JSON.stringify(config.tripLeaders)));
+    if (JSON.stringify(data) !== JSON.stringify(config.tripLeaders)) {
+      setData(JSON.parse(JSON.stringify(config.tripLeaders)));
+    }
   }, [config.tripLeaders]);
 
   const handleSave = () => {
@@ -801,7 +807,7 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
             <button onClick={() => {
               const nd = [...data]; nd.splice(i, 1); setData(nd);
             }} className="absolute top-2 right-2 text-red-500 bg-white p-1 rounded"><Trash2 size={16}/></button>
-            <img src={photo.src} className="w-full h-32 object-cover rounded" />
+            {photo.src && <img src={photo.src} className="w-full h-32 object-cover rounded" />}
             <input className="border p-1 text-xs w-full rounded" value={photo.src} onChange={e => {
                   const nd = [...data]; nd[i].src = e.target.value; setData(nd);
             }} placeholder="URL Image" />
@@ -880,6 +886,30 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         {uploading && <p className="text-xs">Mengunggah...</p>}
       </div>
       <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase">Simpan Homepage</button>
+    </div>
+  );
+};
+
+const CleanupPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
+  const handleCleanup = () => {
+    if (!window.confirm("Beneran mau hapus semua URL foto? Tindakan ini tidak bisa dibatalkan!")) return;
+    
+    const newConfig = {
+      ...config,
+      destinationsData: config.destinationsData.map((d: any) => ({ ...d, image: "" })),
+      tripLeaders: config.tripLeaders.map((l: any) => ({ ...l, avatar: "" })),
+      homepage: { ...config.homepage, heroPhotoUrl: "" },
+      galleryPhotos: []
+    };
+    updateConfig(newConfig);
+    showToast('Foto dibersihkan!');
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-lg border-2 border-red-500 space-y-4">
+      <h3 className="font-bold text-sm uppercase text-red-600">Cleanup Database</h3>
+      <p className="text-xs">Hapus semua referensi foto dari database untuk memperbarui secara manual.</p>
+      <button onClick={handleCleanup} className="bg-red-600 text-white px-4 py-2 rounded text-xs font-bold uppercase">Hapus Semua Foto</button>
     </div>
   );
 };
@@ -1013,7 +1043,8 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
       <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
         <p className="text-xs font-bold uppercase text-art-text/60">Custom Trip (Open Trip)</p>
         <div className="flex gap-2">
-           <button onClick={() => {
+           <button onClick={(e) => {
+             e.preventDefault();
              const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0 }, ...data];
              setData(nd);
              setExpandedIndexes([0]);
@@ -1257,7 +1288,7 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
       <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-4">
         <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
           <h3 className="font-bold text-sm uppercase">Opsi Tambahan (Bisa Sub-Item)</h3>
-          <button onClick={addOption} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah Opsi Utama</button>
+          <button onClick={(e) => { e.preventDefault(); addOption(); }} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah Opsi Utama</button>
         </div>
         
         <div className="grid grid-cols-1 gap-4">
@@ -1323,7 +1354,8 @@ const PromoCodesAdmin = ({ config, updateConfig, showToast }: any) => {
       <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
         <p className="text-xs font-bold uppercase text-art-text/60 font-black">Manajemen Kode Promo</p>
         <div className="flex gap-2">
-           <button onClick={() => {
+           <button onClick={(e) => {
+             e.preventDefault();
              const nd = [{ code: "BARU", discount: 10 }, ...data];
              setData(nd);
            }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest font-black">+ Kode Promo</button>
