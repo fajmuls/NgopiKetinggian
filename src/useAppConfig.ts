@@ -7,7 +7,8 @@ export const WEBSITE_VERSION = "1.0.1";
 export interface FacilityOption {
   name: string;
   priceInfo?: string;
-  subItems?: { name: string, priceInfo?: string }[];
+  price?: number; // Added numeric price
+  subItems?: { name: string, priceInfo?: string, price?: number }[];
 }
 
 export const DIFFICULTY_LEVELS = ["Pemula", "Pemula Menengah", "Menengah", "Menengah Ahli", "Ahli", "Sangat Ahli"];
@@ -32,7 +33,7 @@ export interface OpenTrip {
   duration: string;
   price: number;
   originalPrice: number;
-  leader?: string;
+  leaders?: string[];
   status?: 'draft' | 'published';
 }
 
@@ -78,22 +79,22 @@ const getDefaultWebsiteData = () => ({
         name: "Sewa Perlengkapan", 
         priceInfo: "Harga per item/hari", 
         subItems: [
-          { name: "Jaket Gunung", priceInfo: "Rp 50rb" },
-          { name: "Sepatu Trekking", priceInfo: "Rp 75rb" },
-          { name: "Ransel (Carrier)", priceInfo: "Rp 60rb" },
-          { name: "Headlamp", priceInfo: "Rp 15rb" }
+          { name: "Jaket Gunung", price: 50000, priceInfo: "Rp 50rb" },
+          { name: "Sepatu Trekking", price: 75000, priceInfo: "Rp 75rb" },
+          { name: "Ransel (Carrier)", price: 60000, priceInfo: "Rp 60rb" },
+          { name: "Headlamp", price: 15000, priceInfo: "Rp 15rb" }
         ]
       },
       { 
         name: "Sewa Pakaian", 
         priceInfo: "Harga per item/hari", 
         subItems: [
-          { name: "Pakaian Tebal", priceInfo: "Rp 30rb" },
-          { name: "Sarung Tangan Extra", priceInfo: "Rp 10rb" },
-          { name: "Kupluk / Topi Gunung", priceInfo: "Rp 10rb" }
+          { name: "Pakaian Tebal", price: 30000, priceInfo: "Rp 30rb" },
+          { name: "Sarung Tangan Extra", price: 10000, priceInfo: "Rp 10rb" },
+          { name: "Kupluk / Topi Gunung", price: 10000, priceInfo: "Rp 10rb" }
         ]
       },
-      { name: "Upgrade Tenda Privat", priceInfo: "Rp 100rb / Tenda", subItems: [] }
+      { name: "Upgrade Tenda Privat", price: 100000, priceInfo: "Rp 100rb / Tenda", subItems: [] }
     ]
   },
   teamPhotos: [
@@ -257,8 +258,8 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       const defaultDoc = await getDoc(doc(db, 'defaults', 'data'));
       
       let destinations = defaultDestinations;
-      let leaders = defaultTripLeaders;
-      let gallery = defaultGalleryPhotos;
+      let leaders = defaultLeaders;
+      let gallery = defaultPhotos;
       let website = getDefaultWebsiteData();
       let openTripsData: any[] = [];
 

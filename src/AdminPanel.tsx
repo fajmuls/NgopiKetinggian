@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
-import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, OpenTrip, WEBSITE_VERSION } from './useAppConfig';
+import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, WEBSITE_VERSION } from './useAppConfig';
 import { jsPDF } from 'jspdf';
 
 import { customConfirm, customAlert } from './GlobalDialog';
@@ -84,9 +84,9 @@ export const AdminPanelModal = ({
                 </button>
                 <button 
                   onClick={() => {
-                    customConfirm("Kembalikan semua pengaturan ke awal (factory reset)?", () => {
-                      revertToDefault();
-                      showToast("Direset ke default!");
+                    customConfirm("Kembalikan ke pengaturan awal tersimpan?", async () => {
+                      await revertToDefault();
+                      showToast("Direset ke default!", "success");
                     });
                   }} 
                   className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors shadow-sm"
@@ -183,7 +183,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     let needsUpdate = false;
     const newOpenTrips = config.openTrips.map((ot: any) => {
       const consumed = simulatedBookings
-        .filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'dp' || b.status === 'lunas'))
+        .filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai'))
         .reduce((acc, b) => acc + (Number(b.peserta) || 0), 0);
       
       if (ot.consumedKuota !== consumed) {
@@ -415,14 +415,16 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                     onChange={(e) => handleStatusUpdate(booking.id, e.target.value)}
                     className={`text-[10px] font-black uppercase px-4 py-2 rounded-xl outline-none cursor-pointer border-2 transition-all ${
                       booking.status === 'lunas' ? 'bg-art-green text-white border-art-green' : 
-                      booking.status === 'dp' ? 'bg-art-orange text-white border-art-orange' :
+                      booking.status === 'selesai' ? 'bg-gray-800 text-white border-gray-800' :
+                      booking.status === 'processing' ? 'bg-blue-600 text-white border-blue-600' :
                       booking.status === 'batal' ? 'bg-red-500 text-white border-red-500' : 
                       'bg-white border-art-text'
                     }`}
                   >
                     <option value="pending">⏳ Pending</option>
-                    <option value="dp">💰 DP Masuk</option>
+                    <option value="processing">⚙️ Processing</option>
                     <option value="lunas">💳 Lunas</option>
+                    <option value="selesai">🏆 Selesai</option>
                     <option value="batal">❌ Batal</option>
                   </select>
                   <button onClick={() => handleDelete(booking.id)} className="p-2 border-2 border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
@@ -487,7 +489,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                             booking.status === 'lunas' ? 'bg-art-green text-white' : 
                             booking.status === 'dp' ? 'bg-art-orange text-white' : 
                             'bg-gray-100 text-art-text/40'
-                         }`}>{booking.status}</div>
+                         }`}>{booking.status === 'pending' ? 'Pending' : booking.status === 'processing' ? 'Processing' : booking.status === 'lunas' ? 'Lunas' : 'Batal'}</div>
                          <span className="text-[10px] font-bold text-art-text/40">Dipesan: {new Date(booking.createdAt?.seconds * 1000).toLocaleDateString('id-ID')}</span>
                       </div>
                       <p className="text-[10px] font-medium italic text-art-text/60 leading-relaxed break-words bg-white border border-art-text/5 p-2 rounded-lg">"{booking.deskripsi || 'Tidak ada catatan.'}"</p>
@@ -683,48 +685,54 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
-              <span className="text-xs font-bold w-16">Region:</span>
-              <input className="border p-2 rounded text-xs w-full sm:w-32" value={dest.region || 'Jawa'} onChange={e => {
-                const nd = [...data];
-                nd[i].region = e.target.value;
-                setData(nd);
-              }} placeholder="Contoh: Jawa Tengah" />
+            <div className="flex flex-wrap gap-2 sm:items-center mb-2">
+              <div className="flex items-center flex-1 min-w-[120px]">
+                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Region:</span>
+                <input className="border p-2 rounded text-xs w-full" value={dest.region || 'Jawa'} onChange={e => {
+                  const nd = [...data];
+                  nd[i].region = e.target.value;
+                  setData(nd);
+                }} placeholder="Cth: Jawa Tengah" />
+              </div>
               
-              <span className="text-xs font-bold w-12 sm:ml-4">Kuota:</span>
-              <input className="border p-2 rounded text-xs w-full sm:flex-1" value={dest.kuota} onChange={e => {
-                const nd = [...data];
-                nd[i].kuota = e.target.value;
-                setData(nd);
-              }} placeholder="Contoh: Min 2 - Max 12 Pax" />
-            </div>
+              <div className="flex items-center flex-1 min-w-[120px]">
+                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Kuota:</span>
+                <input className="border p-2 rounded text-xs w-full" value={dest.kuota} onChange={e => {
+                  const nd = [...data];
+                  nd[i].kuota = e.target.value;
+                  setData(nd);
+                }} placeholder="Cth: 2-12 Pax" />
+              </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
-              <span className="text-xs font-bold w-16">Mepo:</span>
-              <input className="border p-2 rounded text-xs w-full sm:flex-1" value={dest.mepo || ''} onChange={e => {
-                const nd = [...data];
-                nd[i].mepo = e.target.value;
-                setData(nd);
-              }} placeholder="Meeting Point (Contoh: Basecamp)" />
+              <div className="flex items-center flex-1 min-w-[120px]">
+                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Mepo:</span>
+                <input className="border p-2 rounded text-xs w-full" value={dest.mepo || ''} onChange={e => {
+                  const nd = [...data];
+                  nd[i].mepo = e.target.value;
+                  setData(nd);
+                }} placeholder="Basecamp" />
+              </div>
               
-              <span className="text-xs font-bold w-12 sm:ml-4">Beans:</span>
-              <input className="border p-2 rounded text-xs w-full sm:flex-1" value={dest.beans || ''} onChange={e => {
-                const nd = [...data];
-                nd[i].beans = e.target.value;
-                setData(nd);
-              }} placeholder="Biji Kopi (Contoh: Arabica Blend)" />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
-              <span className="text-xs font-bold w-16">Kesulitan:</span>
-              <select className="border p-2 rounded text-xs w-full sm:flex-1" value={dest.difficulty || ''} onChange={e => {
-                const nd = [...data];
-                nd[i].difficulty = e.target.value;
-                setData(nd);
-              }}>
-                <option value="">-- Pilih Kesulitan --</option>
-                {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
-              </select>
+              <div className="flex items-center flex-1 min-w-[120px]">
+                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Beans:</span>
+                <input className="border p-2 rounded text-xs w-full" value={dest.beans || ''} onChange={e => {
+                  const nd = [...data];
+                  nd[i].beans = e.target.value;
+                  setData(nd);
+                }} placeholder="Kopi" />
+              </div>
+              
+              <div className="flex items-center flex-1 min-w-[120px]">
+                <span className="text-[10px] font-bold w-14 shrink-0 uppercase">Level:</span>
+                <select className="border p-2 rounded text-xs w-full" value={dest.difficulty || ''} onChange={e => {
+                  const nd = [...data];
+                  nd[i].difficulty = e.target.value;
+                  setData(nd);
+                }}>
+                  <option value="">Status</option>
+                  {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                </select>
+              </div>
             </div>
             
             <button type="button" 
@@ -874,31 +882,35 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
       </div>
       <div className="space-y-4">
         {data.map((leader, i) => (
-          <div key={i} className="bg-white p-4 rounded-lg border-2 border-art-text relative">
+          <div key={i} className="bg-white p-3 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all">
             <button onClick={() => {
               const nd = [...data];
               nd.splice(i, 1);
               setData(nd);
-            }} className="absolute top-4 right-4 text-red-500"><Trash2 size={16}/></button>
-            <div className="flex gap-2 mb-2 w-full pr-8">
-              <input className="border p-2 rounded text-sm font-bold w-1/2 block" value={leader.name} onChange={e => {
-                    setData(prev => prev.map((item, idx) => idx === i ? { ...item, name: e.target.value } : item));
-              }} placeholder="Nama" />
-              <input className="border p-2 rounded text-sm font-bold w-1/2 block" value={leader.age || ''} onChange={e => {
-                    setData(prev => prev.map((item, idx) => idx === i ? { ...item, age: e.target.value } : item));
-              }} placeholder="Pengalaman (cth: Pengalaman 10+ Tahun)" />
+            }} className="absolute top-2 right-2 text-red-500 hover:scale-110 transition-transform"><Trash2 size={16}/></button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-16 h-16 shrink-0">
+                <ImageUploader value={leader.avatar} onChange={url => {
+                    setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: url } : item));
+                }} placeholder="IMG" />
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex gap-2 w-full pr-6">
+                  <input className="border p-1.5 rounded text-xs font-bold w-1/2 block" value={leader.name} onChange={e => {
+                        setData(prev => prev.map((item, idx) => idx === i ? { ...item, name: e.target.value } : item));
+                  }} placeholder="Nama" />
+                  <input className="border p-1.5 rounded text-[10px] w-1/2 block" value={leader.age || ''} onChange={e => {
+                        setData(prev => prev.map((item, idx) => idx === i ? { ...item, age: e.target.value } : item));
+                  }} placeholder="Pengalaman (cth: 10 th)" />
+                </div>
+                <input className="border p-1.5 rounded text-[10px] w-full block" value={leader.description} onChange={e => {
+                      setData(prev => prev.map((item, idx) => idx === i ? { ...item, description: e.target.value } : item));
+                }} placeholder="Deskripsi Singkat" />
+                <input className="border p-1.5 rounded text-[9px] w-full block border-blue-200 bg-blue-50/30" value={leader.voiceLine || ''} onChange={e => {
+                      setData(prev => prev.map((item, idx) => idx === i ? { ...item, voiceLine: e.target.value } : item));
+                }} placeholder="Voice Audio URL" />
+              </div>
             </div>
-            <input className="border p-2 rounded text-xs w-full mb-2 block" value={leader.description} onChange={e => {
-                  setData(prev => prev.map((item, idx) => idx === i ? { ...item, description: e.target.value } : item));
-            }} placeholder="Deskripsi" />
-            <div className="mb-2">
-              <ImageUploader value={leader.avatar} onChange={url => {
-                  setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: url } : item));
-              }} placeholder="URL Foto Foto" />
-            </div>
-            <input className="border p-2 rounded text-xs w-full mb-2 block border-blue-300 bg-blue-50" value={leader.voiceLine || ''} onChange={e => {
-                  setData(prev => prev.map((item, idx) => idx === i ? { ...item, voiceLine: e.target.value } : item));
-            }} placeholder="URL Voice Audio (Dari Firebase Storage / URL)" />
           </div>
         ))}
         <p className="text-[10px] text-art-text/50">Kosongkan URL Voice Line agar admin bisa mengisi audionya secara manual dari luar jika dibutuhkan, atau isikan URL Firebase/Public HTTPS yang sudah dihosting. Karena Firestore hanya menampung teks url.</p>
@@ -1146,7 +1158,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
 
   const getConsumedQuota = (name: string, jadwal: string) => {
     return bookings
-      .filter(b => b.type === 'open' && b.destinasi === name && b.jadwal === jadwal && (b.status === 'dp' || b.status === 'lunas'))
+      .filter(b => b.type === 'open' && b.destinasi === name && b.jadwal === jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai'))
       .reduce((acc, b) => acc + (Number(b.peserta) || 0), 0);
   };
 
@@ -1204,6 +1216,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
         kuota: "15 Pax Tersisa",
         path: defaultPath,
         duration: defaultDuration,
+        leaders: [],
         status: 'draft'
       };
       
@@ -1223,7 +1236,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
         <div className="flex gap-2">
            <button type="button" onClick={(e) => {
              e.preventDefault();
-             const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, status: 'draft' }, ...data];
+             const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft' }, ...data];
              setData(nd);
              setExpandedIndexes([0]);
            }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Custom Trip</button>
@@ -1307,76 +1320,71 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
 
           {expandedIndexes.includes(i) && (
           <div className="mt-4 pt-4 border-t-2 border-dashed border-art-text/10 space-y-4">
-             {/* Layer 1: Destination Mountain */}
-             <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-art-text/40">Destinasi Gunung {isLocked && <span className="text-red-500">(Terkunci)</span>}</label>
-                <select 
-                  disabled={isLocked}
-                  className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all disabled:bg-gray-100" 
-                  value={ot.name ?? ""} 
-                  onChange={e => handleMountainSelect(i, e.target.value)}
-                >
-                  <option value="">-- Pilih Gunung --</option>
-                  {config.destinationsData?.map((d: any) => (
-                    <option key={d.id} value={d.name}>{d.name}</option>
-                  ))}
-                </select>
-             </div>
+              {/* Layer 1: Mountain Destination + Level */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Destinasi Gunung</label>
+                  <select 
+                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
+                    value={ot.name ?? ""} 
+                    onChange={e => handleMountainSelect(i, e.target.value)}
+                  >
+                    <option value="">-- Pilih Gunung --</option>
+                    {config.destinationsData?.map((d: any) => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Tingkat Kesulitan</label>
+                  <select 
+                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
+                    value={ot.difficulty ?? ""} 
+                    onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}
+                  >
+                    <option value="">-- Pilih Level --</option>
+                    {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                  </select>
+                </div>
+              </div>
 
-             {/* Layer 2: Difficulty & Duration */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Layer 2: Duration + Trail */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Tingkat Kesulitan</label>
-                   <select 
-                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
-                      value={ot.difficulty ?? ""} 
-                      onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}
-                   >
-                     <option value="">-- Pilih Kesulitan --</option>
-                     {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
-                   </select>
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Durasi Trip</label>
+                  <select 
+                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none transition-all" 
+                    value={ot.duration ?? ""} 
+                    onChange={e => { 
+                      const dur = e.target.value;
+                      const nd = [...data]; 
+                      nd[i].duration = dur; 
+                      nd[i].jadwal = calculateDateRange(ot.startDate, dur);
+                      setData(nd); 
+                    }}
+                  >
+                    <option value="">-- Pilih Durasi --</option>
+                    {DURATION_LEVELS.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
+                  </select>
                 </div>
                 <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Durasi Perjalanan</label>
-                   <select 
-                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none transition-all" 
-                      value={ot.duration ?? ""} 
-                      onChange={e => { 
-                        const dur = e.target.value;
-                        const nd = [...data]; 
-                        nd[i].duration = dur; 
-                        nd[i].jadwal = calculateDateRange(ot.startDate, dur);
-                        setData(nd); 
-                      }}
-                    >
-                     <option value="">-- Pilih Durasi --</option>
-                     {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
-                   </select>
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Jalur Pendakian</label>
+                  <input 
+                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all" 
+                    value={ot.path || ""} 
+                    onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }}
+                    placeholder="Contoh: Via Patak Banteng"
+                  />
                 </div>
-             </div>
+              </div>
 
-             {/* Layer 3: Path & Start Date */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Layer 3: Departure Date + Display Schedule */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Jalur Pendakian {isLocked && <span className="text-red-500">(Terkunci)</span>}</label>
-                   <select 
-                     disabled={isLocked}
-                     className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold disabled:bg-gray-100 outline-none transition-all" 
-                     value={ot.path ?? ""} 
-                     onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }}
-                   >
-                     <option value="">-- Pilih Jalur --</option>
-                     {ot.name && config.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.map((p: any) => (
-                       <option key={p.name} value={p.name}>{p.name}</option>
-                     ))}
-                   </select>
-                </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Tanggal Keberangkatan {isLocked && <span className="text-red-500">(Terkunci)</span>}</label>
-                   <input 
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Tanggal Berangkat</label>
+                  <input 
                     type="date"
-                    disabled={isLocked}
-                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none disabled:bg-gray-100 transition-all font-mono" 
+                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all font-mono" 
                     value={ot.startDate || ""} 
                     onChange={e => { 
                       const date = e.target.value;
@@ -1385,79 +1393,161 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                       nd[i].jadwal = calculateDateRange(date, ot.duration);
                       setData(nd); 
                     }} 
-                   />
+                  />
                 </div>
-             </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Tampilan Jadwal (Otomatis)</label>
+                  <input 
+                    readOnly
+                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-[10px] font-black bg-gray-50 text-art-green outline-none uppercase tracking-tight" 
+                    value={ot.jadwal || "Akan dihitung otomatis..."} 
+                  />
+                </div>
+              </div>
 
-             {/* Layer 4: Schedule Preview */}
-             <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-art-text/40 italic">Jadwal Tampilan (Generate Otomatis)</label>
-                <div className="p-3 border-2 border-art-text/5 bg-art-green/5 text-art-green font-black uppercase text-[11px] rounded-xl flex items-center">{ot.jadwal || "Belum ada jadwal yang terbentuk"}</div>
-             </div>
+              {/* Layer 4: Capacity + Availability */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-art-text/40">Kapasitas Maksimal (Pax)</label>
+                    <input 
+                      type="number"
+                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                      value={ot.maxKuota || 15} 
+                      onChange={e => { 
+                        const val = parseInt(e.target.value) || 0;
+                        const nd = [...data]; 
+                        nd[i].maxKuota = val; 
+                        nd[i].kuotaNum = val; // for legacy
+                        nd[i].kuota = `${val - (ot.consumedKuota || 0)} Pax Tersisa`;
+                        setData(nd); 
+                      }} 
+                    />
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-art-green">Status Ketersediaan</label>
+                    <div className="w-full border-2 border-dashed border-art-green/20 bg-art-green/5 p-2.5 rounded-xl flex items-center justify-between">
+                       <span className="text-[10px] font-black uppercase text-art-green">Tersisa:</span>
+                       <span className="text-xs font-black text-art-green">{(ot.maxKuota || 15) - consumed} PAX</span>
+                    </div>
+                 </div>
+              </div>
 
-             {/* Layer 5: Quota Management */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Layer 5: Price (K) + Strike Price */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Kuota Peserta Maksimal</label>
-                   <input className="w-full border-2 border-art-orange/20 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-art-orange transition-all" type="number" value={ot.maxKuota || ot.kuotaNum || 15} onChange={e => { 
-                      const num = parseInt(e.target.value) || 0;
-                      const nd = [...data]; 
-                      nd[i].maxKuota = num; 
-                      nd[i].kuotaNum = num;
-                      nd[i].kuota = `${num - consumed} Pax Tersisa`;
-                      setData(nd); 
-                   }} />
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Harga Paket (dalam ribuan: 650 = 650rb)</label>
+                  <div className="relative">
+                    <input 
+                      type="number"
+                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all font-mono pl-8" 
+                      value={ot.price || 0} 
+                      onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} 
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-art-text/30">Rp</span>
+                  </div>
                 </div>
                 <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Status Ketersediaan</label>
-                   <div className="flex items-center gap-3 h-[42px] bg-art-bg/20 rounded-xl px-3 border-2 border-transparent">
-                      <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
-                        <div className="h-full bg-art-orange" style={{ width: `${Math.min(100, (consumed / (ot.maxKuota || 15)) * 100)}%` }}></div>
-                      </div>
-                      <span className="text-[10px] font-black text-art-text uppercase whitespace-nowrap">{consumed} / {ot.maxKuota || 15} TERISI</span>
-                   </div>
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Harga Coret (Ribuan)</label>
+                  <div className="relative">
+                    <input 
+                      type="number"
+                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-black outline-none focus:border-art-orange transition-all font-mono pl-8 text-red-400" 
+                      value={ot.originalPrice || 0} 
+                      onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} 
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-red-300">Rp</span>
+                  </div>
                 </div>
-             </div>
+              </div>
 
-             {/* Layer 6: Pricing Layer */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Harga Fix (Per Pax dalam Ribuan)</label>
-                   <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-art-text/30">Rp</span>
-                      <input className="w-full border-2 border-art-text/10 p-2.5 pl-8 rounded-xl font-black text-art-orange text-sm outline-none focus:border-art-orange transition-all" type="number" value={ot.price || ''} onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Cth: 1500" />
-                   </div>
-                </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Harga Sebelum Diskon (Jika Ada)</label>
-                   <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-art-text/30">Rp</span>
-                      <input className="w-full border-2 border-art-text/10 p-2.5 pl-8 rounded-xl text-sm text-art-text/40 outline-none focus:border-art-orange transition-all" type="number" value={ot.originalPrice || ''} onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} placeholder="Cth: 1900" />
-                   </div>
-                </div>
-             </div>
+              {/* Layer 6: Trip Leaders (Multiple) */}
+              <div className="space-y-2">
+                 <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-black uppercase text-art-text/40">Trip Leader(s)</label>
+                    <button 
+                      onClick={() => {
+                         const nd = [...data];
+                         if (!nd[i].leaders) nd[i].leaders = [];
+                         nd[i].leaders.push("");
+                         setData(nd);
+                      }}
+                      className="text-[9px] bg-art-text text-white px-3 py-1.5 rounded-lg uppercase font-black tracking-widest shadow-sm active:scale-95 transition-all"
+                    >+ Tambah Leader</button>
+                 </div>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {(ot.leaders || []).map((leaderId: any, lIdx: number) => (
+                       <div key={lIdx} className="flex gap-2">
+                          <select 
+                             className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange"
+                             value={leaderId}
+                             onChange={e => {
+                                const nd = [...data];
+                                nd[i].leaders[lIdx] = e.target.value;
+                                setData(nd);
+                             }}
+                          >
+                             <option value="">Pilih Leader</option>
+                             {config.tripLeaders?.map((l: any) => (
+                               <option key={l.name} value={l.name}>{l.name}</option>
+                             ))}
+                          </select>
+                          <button 
+                            onClick={() => {
+                               const nd = [...data];
+                               nd[i].leaders.splice(lIdx, 1);
+                               setData(nd);
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          ><Trash2 size={14}/></button>
+                       </div>
+                    ))}
+                    {(ot.leaders || []).length === 0 && <p className="text-[10px] text-art-text/30 italic px-2">Belum ada leader terpilih.</p>}
+                 </div>
+              </div>
 
-             {/* Layer 7: Grouped Metadata */}
-             <div className="bg-art-bg/20 p-4 rounded-2xl border-2 border-art-text/5 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Kopi (Beans)</label>
-                   <input className="w-full border-transparent bg-white/50 p-2 rounded-lg text-[11px] font-bold outline-none focus:bg-white" value={ot.beans || ''} onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }} placeholder="Arabica Blend" />
-                </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Mepo</label>
-                   <input className="w-full border-transparent bg-white/50 p-2 rounded-lg text-[11px] font-bold outline-none focus:bg-white" value={ot.mepo || ''} onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }} placeholder="Meeting Point" />
-                </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40">Trip Leader</label>
-                   <input className="w-full border-transparent bg-white/50 p-2 rounded-lg text-[11px] font-bold outline-none focus:bg-white" value={ot.leader || ''} onChange={e => { const nd = [...data]; nd[i].leader = e.target.value; setData(nd); }} placeholder="Nama Pendamping" />
-                </div>
-             </div>
+              {/* Layer 7: Meeting Point with Maps Helper */}
+              <div className="space-y-1">
+                 <label className="text-[10px] font-black uppercase text-art-text/40">Meeting Point</label>
+                 <div className="flex flex-col sm:flex-row gap-2">
+                    <input 
+                      className="flex-1 border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all" 
+                      value={ot.mepo || ""} 
+                      onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }}
+                      placeholder="Contoh: Basecamp Patak Banteng"
+                    />
+                    <button 
+                      onClick={() => {
+                        const searchQuery = ot.mepo || ot.name + " via " + (ot.path || '');
+                        window.open(`https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`, '_blank');
+                      }}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-art-bg border-2 border-art-text rounded-xl hover:bg-art-orange hover:text-white transition-all text-[10px] font-black uppercase tracking-tight"
+                    >
+                      <Map size={14} /> Pilih di Maps
+                    </button>
+                 </div>
+              </div>
 
-             {/* Layer 8: Photo Attachment */}
-             <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-art-text/40">Link Poster Perjalanan</label>
-                <input className="w-full border-2 border-art-text/5 p-2.5 rounded-xl text-[11px] italic text-blue-600 bg-white shadow-inner outline-none focus:border-art-orange transition-all" value={ot.image || ''} onChange={e => { const nd = [...data]; nd[i].image = e.target.value; setData(nd); }} placeholder="Masukan link URL foto poster" />
-             </div>
+              {/* Optional: Beans */}
+              <div className="space-y-1">
+                 <label className="text-[10px] font-black uppercase text-art-text/40 italic">Biji Kopi (Opsional)</label>
+                 <input 
+                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-medium outline-none focus:border-art-orange transition-all" 
+                    value={ot.beans || ""} 
+                    onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }}
+                    placeholder="Contoh: Arabica Gayo Blend"
+                 />
+              </div>
+
+              {/* Poster Link */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-art-text/40">Link Gambar Poster</label>
+                <div className="w-full">
+                  <ImageUploader 
+                    value={ot.image} 
+                    onChange={url => { const nd = [...data]; nd[i].image = url; setData(nd); }} 
+                  />
+                </div>
+              </div>
           </div>
           )}
         </div>

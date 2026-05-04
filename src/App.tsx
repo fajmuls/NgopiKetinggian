@@ -1,9 +1,9 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
@@ -11,6 +11,7 @@ import "yet-another-react-lightbox/styles.css";
 import { customAlert, customConfirm, GlobalDialogProvider } from './GlobalDialog';
 import { DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, useAppConfig } from './useAppConfig';
 import { AdminPanelModal } from './AdminPanel';
+import { jsPDF } from 'jspdf';
 
 function Button({ children, className = '', variant = 'primary', onClick, ...props }: any) {
   const { playClick, playHover } = useSound();
@@ -189,10 +190,48 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   
   const currentPesertaCount = typeof pesertaCount === 'number' && pesertaCount > 0 ? pesertaCount : 1;
   const grossPrice = basePricePerPax * currentPesertaCount;
-  
+
+  // Calculate optional items price
+  const opsionalItemsList: any[] = [];
+  let totalOpsionalPrice = 0;
+
+  // Items from subSelected (sub-items with quantities)
+  Object.entries(subSelected).forEach(([key, qty]) => {
+    const [parentName, subName] = key.split('|');
+    const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
+    const subItem = parentOpt?.subItems?.find((s: any) => s.name === subName);
+    if (subItem && subItem.price) {
+      const price = Number(subItem.price) * 1000;
+      const numQty = Number(qty);
+      opsionalItemsList.push({
+        name: subName,
+        price: price,
+        count: numQty,
+        subtotal: price * numQty
+      });
+      totalOpsionalPrice += (price * numQty);
+    }
+  });
+
+  // Items from selectedOpsional (standalone items)
+  selectedOpsional.forEach(optName => {
+    const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
+    // Only if it doesn't have subItems (if it has, it should be handled by subSelected)
+    if (opt && !opt.subItems && opt.price) {
+      const price = Number(opt.price) * 1000;
+      opsionalItemsList.push({
+        name: optName,
+        price: price,
+        count: currentPesertaCount, // Default to per pax if standalone? Or just 1? 
+        subtotal: price
+      });
+      totalOpsionalPrice += price;
+    }
+  });
+
   const discountRate = activePromo ? activePromo.discount / 100 : 0;
   const discountAmount = grossPrice * discountRate;
-  const netPrice = grossPrice - discountAmount;
+  const netPrice = (grossPrice - discountAmount) + totalOpsionalPrice;
   
   if (!isOpen) return null;
 
@@ -249,11 +288,15 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
             jadwal: finalJadwalLabel || '-', 
             peserta: pesertaCount || 1,
             opsionalText: finalOpsionalText || 'Tidak ada',
+            opsionalItems: opsionalItemsList,
+            opsionalPrice: totalOpsionalPrice,
+            discountAmount: discountAmount,
+            promoCode: isPromoValid ? promoCode : '',
             deskripsi: deskripsi || 'Tidak ada catatan khusus',
             type: currentType || 'private',
             totalPrice: netPrice || 0,
             createdAt: serverTimestamp(),
-            status: 'pending'
+            status: 'pending' // Displayed as "Menunggu Konfirmasi Admin"
           });
   
           if (currentType === 'open' && config) {
@@ -324,16 +367,34 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    </div>
                 </div>
 
-                <div className="pt-3 border-t border-art-text/5 flex justify-between items-center">
-                   <div className="flex items-center gap-1.5">
-                      <Users size={12} className="text-art-orange" />
-                      <span className="text-[10px] font-black text-art-text/60 uppercase">{pesertaCount} Peserta</span>
+                <div className="pt-3 border-t border-art-text/5 space-y-2">
+                   <div className="flex justify-between items-center text-[10px]">
+                      <span className="font-bold text-art-text/40 uppercase">Trip Pax ({pesertaCount}x)</span>
+                      <span className="font-bold">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
                    </div>
-                   <div className="text-right">
-                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-0.5">Total Estimasi</p>
-                      <p className="text-lg font-black text-art-orange">Rp {netPrice.toLocaleString('id-ID')}</p>
+                   {opsionalItemsList.length > 0 && (
+                     <div className="space-y-1">
+                        {opsionalItemsList.map((item, idx) => (
+                           <div key={idx} className="flex justify-between items-center text-[9px] text-art-text/50 italic">
+                             <span>(+) {item.name} ({item.count}x)</span>
+                             <span>Rp {item.subtotal.toLocaleString('id-ID')}</span>
+                           </div>
+                        ))}
+                     </div>
+                   )}
+                   {isPromoValid && (
+                     <div className="flex justify-between items-center text-[9px] text-art-green font-bold">
+                        <span>Promo: {promoCode}</span>
+                        <span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                     </div>
+                   )}
+                   <div className="pt-3 border-t-2 border-dashed border-art-text/10 flex justify-between items-end">
+                      <div>
+                        <p className="text-[9px] font-black text-art-text/30 uppercase mb-0.5">Total Bayar</p>
+                        <p className="text-xl font-black text-art-orange tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</p>
+                      </div>
                       {currentPesertaCount > 1 && (
-                         <p className="text-[8px] font-bold text-art-text/40 mt-1 uppercase italic">(Rp {Math.round(netPrice / currentPesertaCount).toLocaleString('id-ID')} / orang)</p>
+                         <p className="text-[8px] font-bold text-art-text/40 mb-1 uppercase italic">(Rp {Math.round(netPrice / currentPesertaCount).toLocaleString('id-ID')} / orang)</p>
                       )}
                    </div>
                 </div>
@@ -1451,7 +1512,7 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
   );
 }
 
-const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, onClose: () => void, theme: string, setTheme: (t: string) => void }) => {
+const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: { isOpen: boolean, onClose: () => void, theme: string, setTheme: (t: string) => void, setIsHistoryOpen: (v: boolean) => void }) => {
   const { playClick, playHover } = useSound();
   const [user] = useAuthState(auth);
   const [showTokenInput, setShowTokenInput] = useState(false);
@@ -1531,6 +1592,15 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
               </div>
             )}
             
+            <button 
+              onClick={() => { playClick(); setIsHistoryOpen(true); onClose(); }} 
+              className="flex items-center justify-center gap-2 border-2 border-art-orange py-3 px-4 rounded-lg bg-art-orange/5 text-art-orange hover:bg-art-orange hover:text-white transition-colors mt-4" 
+              onMouseEnter={playHover}
+            >
+              <FileText size={18} />
+              <span className="text-xs uppercase font-bold tracking-widest">Riwayat Booking</span>
+            </button>
+            
             {showTokenInput ? (
               <div className="flex gap-2 w-full mt-2">
                 <input 
@@ -1599,6 +1669,284 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme }: { isOpen: boolean, 
   );
 };
 
+const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, onClose: () => void, showToast: (m: string, t?: any) => void }) => {
+  const { playClick, playHover } = useSound();
+  const [user] = useAuthState(auth);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'proses' | 'lunas'>('proses');
+
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    setLoading(true);
+    const q = query(
+      collection(db, 'bookings'), 
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    }, (error) => {
+      console.error("History fetch error:", error);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [isOpen, user]);
+
+  const filteredBookings = bookings.filter(b => {
+    if (activeTab === 'proses') {
+      return b.status === 'pending' || b.status === 'processing';
+    } else {
+      return b.status === 'lunas' || b.status === 'selesai';
+    }
+  });
+
+  const generateInvoice = (booking: any) => {
+    const doc = new jsPDF();
+    const primaryColor = [26, 26, 26];
+    const accentColor = [255, 107, 0];
+    const successColor = [0, 160, 0];
+    
+    doc.setFillColor(250, 250, 250);
+    doc.rect(0, 0, 210, 297, 'F');
+    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.rect(0, 0, 210, 50, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text('NGOPI DI KETINGGIAN', 20, 25);
+    doc.setFontSize(9);
+    doc.text('ADVENTURE & BREW • EST. 2026', 20, 32);
+    doc.setFontSize(10);
+    doc.text('KUITANSI PEMBAYARAN', 140, 20);
+    doc.setFontSize(14);
+    doc.text(`#${booking.id.substring(0, 8).toUpperCase()}`, 140, 30);
+    doc.setFontSize(9);
+    doc.text(`TANGGAL: ${new Date(booking.createdAt?.seconds * 1000).toLocaleDateString('id-ID')}`, 140, 38);
+
+    const drawHeader = (title: string, y: number) => {
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, y, 170, 8, 'F');
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title, 25, y + 5.5);
+    };
+
+    drawHeader('INFORMASI PELANGGAN', 60);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`NAMA: ${booking.nama.toUpperCase()}`, 25, 75);
+    doc.text(`WHATSAPP: ${booking.wa}`, 25, 82);
+    doc.text(`EMAIL: ${booking.email}`, 25, 89);
+    
+    drawHeader('DETAIL PERJALANAN', 100);
+    doc.text(`DESTINASI: ${booking.destinasi.toUpperCase()} (VIA ${booking.jalur.toUpperCase()})`, 25, 115);
+    doc.text(`JADWAL: ${booking.jadwal}`, 25, 122);
+    doc.text(`PESERTA: ${booking.peserta} PAX`, 25, 129);
+    doc.text(`TIPE: ${booking.type === 'open' ? 'OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 136);
+
+    drawHeader('RINCIAN BIAYA', 150);
+    doc.text('KETERANGAN', 25, 165);
+    doc.text('SUBTOTAL', 160, 165);
+    doc.line(20, 168, 190, 168);
+    
+    let currentY = 175;
+    const baseTotal = (booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0);
+    doc.text(`PAKET TRIP ${booking.destinasi.toUpperCase()}`, 25, currentY);
+    doc.text(`Rp ${baseTotal.toLocaleString('id-ID')}`, 160, currentY);
+    currentY += 8;
+
+    if (booking.opsionalItems && booking.opsionalItems.length > 0) {
+      booking.opsionalItems.forEach((item: any) => {
+        doc.setFontSize(9);
+        doc.text(`(+) ${item.name} (${item.count}x)`, 25, currentY);
+        doc.text(`Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        currentY += 6;
+      });
+      doc.setFontSize(10);
+    }
+
+    if (booking.promoCode) {
+      doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+      doc.text(`KODE PROMO: ${booking.promoCode}`, 25, currentY);
+      doc.text(`- Rp ${booking.discountAmount?.toLocaleString('id-ID')}`, 160, currentY);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      currentY += 8;
+    }
+
+    currentY += 4;
+    doc.line(140, currentY, 190, currentY);
+    currentY += 10;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TOTAL:', 140, currentY);
+    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+    doc.text(`Rp ${booking.totalPrice?.toLocaleString('id-ID')}`, 160, currentY);
+
+    doc.save(`Invoice_${booking.nama.replace(/\s/g, '_')}.pdf`);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[115] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left text-art-text">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border-4 border-art-text relative shadow-2xl overflow-hidden">
+        <div className="p-6 md:p-8 flex justify-between items-center bg-white border-b-4 border-art-text shrink-0">
+          <div className="flex items-center gap-3">
+             <div className="p-2 bg-art-orange/10 rounded-xl text-art-orange"><Clock size={24} /></div>
+             <div>
+               <h3 className="text-xl font-black uppercase tracking-tight leading-none">Riwayat Booking</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest mt-1">Pantau status & detail pesananmu</p>
+             </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
+        </div>
+
+        <div className="bg-white border-b-2 border-art-text/10 px-6 py-2 flex gap-4 shrink-0">
+           <button 
+             onClick={() => setActiveTab('proses')}
+             className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest border-b-4 transition-all ${
+               activeTab === 'proses' ? 'border-art-orange text-art-orange' : 'border-transparent text-art-text/30 hover:text-art-text/60'
+             }`}
+           >
+             🛒 Diproses
+           </button>
+           <button 
+             onClick={() => setActiveTab('lunas')}
+             className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest border-b-4 transition-all ${
+               activeTab === 'lunas' ? 'border-art-green text-art-green' : 'border-transparent text-art-text/30 hover:text-art-text/60'
+             }`}
+           >
+             ✅ Lunas / Selesai
+           </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-art-bg/30">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="w-10 h-10 border-4 border-art-orange border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-art-text/40">Memuat Data...</p>
+            </div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="text-center py-20 border-4 border-dashed border-art-text/5 rounded-[2rem] bg-white/50">
+              <ShoppingBag size={64} className="mx-auto mb-6 text-art-text/10" />
+              <p className="text-sm font-black uppercase text-art-text/30 tracking-widest leading-loose">Belum ada riwayat {activeTab === 'proses' ? 'aktif' : 'selesai'}.<br/>Mulai petualanganmu sekarang!</p>
+              <Button variant="primary" className="mt-8 mx-auto py-3 px-8 text-xs uppercase" onClick={onClose}>Jelajahi Trip</Button>
+            </div>
+          ) : (
+            filteredBookings.map((b: any) => (
+              <div key={b.id} className="bg-white rounded-[2rem] border-2 border-art-text/10 p-6 relative overflow-hidden group hover:border-art-text/30 transition-all shadow-sm">
+                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform">
+                   <Mountain size={80} />
+                </div>
+                
+                <div className="flex flex-col md:flex-row gap-6 relative z-10">
+                   <div className="flex-1 space-y-4">
+                     <div className="flex items-center justify-between">
+                        <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
+                          b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
+                          b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
+                          'bg-art-orange/10 text-art-orange border-art-orange'
+                        }`}>
+                          {b.status === 'pending' ? 'Diproses' : 
+                           b.status === 'processing' ? 'Admin Memproses' : 
+                           b.status === 'lunas' ? 'Sudah Lunas' : 
+                           b.status === 'selesai' ? 'Trip Selesai' : 
+                           'Dibatalkan'}
+                        </div>
+                        <span className="text-[10px] font-bold text-art-text/30">{new Date(b.createdAt?.seconds * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                     </div>
+
+                     {b.status === 'pending' && activeTab === 'proses' && (
+                       <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10">"Menunggu konfirmasi admin."</p>
+                     )}
+                     
+                     <div>
+                       <h4 className="text-xl font-black uppercase tracking-tighter text-art-text mb-1">{b.destinasi}</h4>
+                       <p className="text-[11px] font-bold text-art-text/50 uppercase tracking-widest flex items-center gap-1.5"><MapPin size={10} /> {b.jalur} • {b.durasi}</p>
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-4 pb-4 border-b border-art-text/5">
+                        <div className="flex flex-col">
+                           <span className="text-[9px] font-bold text-art-text/30 uppercase">Tanggal</span>
+                           <span className="text-xs font-bold text-art-text">{b.jadwal}</span>
+                        </div>
+                        <div className="flex flex-col">
+                           <span className="text-[9px] font-bold text-art-text/30 uppercase">Peserta</span>
+                           <span className="text-xs font-bold text-art-text">{b.peserta} Pax ({b.type === 'open' ? 'Open' : 'Private'})</span>
+                        </div>
+                     </div>
+
+                     <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-[0.2em]">Fasilitas Tambahan:</p>
+                        <p className="text-[11px] font-medium text-art-text/80 leading-relaxed italic">"{b.opsionalText || 'Menunggu konfirmasi oleh admin.'}"</p>
+                     </div>
+                   </div>
+
+                   <div className="md:w-56 shrink-0 flex flex-col md:border-l border-art-text/10 md:pl-6 justify-between gap-6">
+                      <div>
+                        <span className="text-[10px] font-black text-art-text/30 uppercase block mb-1">Total Biaya</span>
+                        <p className="text-2xl font-black text-art-orange tracking-tighter">Rp {b.totalPrice?.toLocaleString('id-ID')}</p>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        {(b.status === 'lunas' || b.status === 'selesai') ? (
+                          <button 
+                            onClick={() => { playClick(); generateInvoice(b); }}
+                            className="w-full flex items-center justify-center gap-2 bg-art-green text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 transition-colors shadow-sm"
+                          >
+                            <Download size={14} /> Download Kuitansi
+                          </button>
+                        ) : (
+                          <div className="bg-art-bg border border-art-text/10 p-3 rounded-xl flex items-start gap-2">
+                            <Info size={12} className="text-art-text/30 mt-0.5" />
+                            <p className="text-[9px] font-bold text-art-text/40 leading-relaxed italic uppercase tracking-tighter">Kuitansi dapat diunduh jika status sudah "Lunas".</p>
+                          </div>
+                        )}
+                        
+                        <button 
+                          onClick={() => window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin menanyakan status booking ID: ${b.id.substring(0,8)}`)}`, '_blank')}
+                          className="w-full flex items-center justify-center gap-2 border-2 border-art-text py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-text hover:text-white transition-colors"
+                        >
+                          <Send size={14} /> Chat Admin
+                        </button>
+
+                        {b.status === 'pending' && (
+                          <button 
+                            onClick={() => {
+                              customConfirm("Apakah Anda yakin ingin membatalkan pesanan ini?", async () => {
+                                try {
+                                  const { doc, deleteDoc } = await import('firebase/firestore');
+                                  await deleteDoc(doc(db, 'bookings', b.id));
+                                  showToast("Booking berhasil dibatalkan.", "info");
+                                } catch (e) {
+                                  console.error(e);
+                                  showToast("Gagal membatalkan booking.", "error");
+                                }
+                              });
+                            }}
+                            className="w-full text-red-500 text-[9px] font-bold uppercase tracking-widest hover:underline mt-2"
+                          >
+                            Batalkan Pesanan
+                          </button>
+                        )}
+                      </div>
+                   </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        <div className="p-6 md:p-8 bg-white border-t-2 border-art-text shrink-0 text-center">
+           <p className="text-[9px] font-black text-art-text/30 uppercase tracking-[0.3em]">Ngopi di Ketinggian • Adventure & Brew</p>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 const defaultGalleryPhotos = [
   { src: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=2070&auto=format&fit=crop", desc: "Momen ngopi pagi" },
   { src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop", desc: "Suasana sunrise" },
@@ -1611,6 +1959,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [bookingPrefill, setBookingPrefill] = useState({ destinasi: '', jalur: '', durasi: '', type: 'private' as 'private' | 'open', jadwal: '' });
   const [filterDifficulty, setFilterDifficulty] = useState('Semua');
   const [filterRegion, setFilterRegion] = useState('Semua');
@@ -1844,7 +2193,12 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         config={config}
         updateConfig={updateConfig}
       />
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} />
+      <BookingHistoryModal 
+        isOpen={isHistoryOpen} 
+        onClose={() => setIsHistoryOpen(false)} 
+        showToast={showToastMsg}
+      />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} setIsHistoryOpen={setIsHistoryOpen} />
       <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
