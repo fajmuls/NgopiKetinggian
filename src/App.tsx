@@ -38,7 +38,7 @@ function Button({ children, className = '', variant = 'primary', onClick, ...pro
   );
 }
 
-const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void }) => {
+const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig, setIsHistoryOpen }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void, setIsHistoryOpen: (v: boolean) => void }) => {
   const { playClick, playHover, playSuccess } = useSound();
   const [showSuccess, setShowSuccess] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -240,6 +240,14 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     if (!formState.nama || !formState.wa || !selectedDestinasi || !selectedJalur || !selectedDurasi || !selectedJadwal || !pesertaCount) {
       customAlert("Mohon lengkapi semua data wajib.");
       return;
+    }
+
+    if (currentType === 'open') {
+      const stats = getOpenTripStats(selectedDestinasi, selectedJadwal);
+      if (Number(pesertaCount) > stats.sisa) {
+        customAlert(`Mohon kurangi jumlah peserta. Kuota tidak mencukupi, sisa slot tersedia: ${stats.sisa} Pax.`, "Kuota Terbatas");
+        return;
+      }
     }
 
     if (currentType === 'private') {
@@ -454,6 +462,24 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    <h4 className="text-2xl font-black uppercase text-art-text mb-1 tracking-tight">Open Trip</h4>
                    <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">Gabung tim daki lain di jadwal yang ada.</p>
                 </button>
+
+                {user && (
+                   <button 
+                     onClick={() => { playClick(); setIsHistoryOpen(true); onClose(); }}
+                     className="mt-4 w-full group bg-art-bg/30 p-5 rounded-[2rem] border-2 border-art-text/10 hover:border-art-orange hover:bg-white transition-all flex items-center justify-between transition-all shadow-sm"
+                   >
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white rounded-2xl border border-art-text/10 group-hover:bg-art-orange group-hover:text-white transition-colors">
+                            <ShoppingBag size={24}/>
+                         </div>
+                         <div className="text-left">
+                            <h5 className="text-sm font-black uppercase text-art-text tracking-widest">Riwayat Booking</h5>
+                            <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-tighter">Pantau status & detail pesananmu</p>
+                         </div>
+                      </div>
+                      <ChevronRight size={20} className="text-art-text/20 group-hover:text-art-orange group-hover:translate-x-1 transition-all" />
+                   </button>
+                )}
              </div>
           </div>
         ) : viewType === 'trip_list' ? (
@@ -1288,7 +1314,7 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
          <div className="flex justify-between items-center mb-1">
             <span className="text-[9px] font-black uppercase tracking-widest text-art-text/40">{ot.region}</span>
             <span className="text-[8px] font-black text-art-green flex items-center gap-1 uppercase bg-art-green/5 px-2 py-0.5 rounded-full border border-art-green/10">
-               <Globe size={10}/> Via {ot.path}
+               <Globe size={10}/> {ot.path}
             </span>
          </div>
          <h3 className="text-xl font-black uppercase text-art-text mb-3 leading-tight group-hover:text-art-green transition-colors">{ot.name}</h3>
@@ -1592,15 +1618,6 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: {
               </div>
             )}
             
-            <button 
-              onClick={() => { playClick(); setIsHistoryOpen(true); onClose(); }} 
-              className="flex items-center justify-center gap-2 border-2 border-art-orange py-3 px-4 rounded-lg bg-art-orange/5 text-art-orange hover:bg-art-orange hover:text-white transition-colors mt-4" 
-              onMouseEnter={playHover}
-            >
-              <FileText size={18} />
-              <span className="text-xs uppercase font-bold tracking-widest">Riwayat Booking</span>
-            </button>
-            
             {showTokenInput ? (
               <div className="flex gap-2 w-full mt-2">
                 <input 
@@ -1741,7 +1758,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     doc.text(`EMAIL: ${booking.email}`, 25, 89);
     
     drawHeader('DETAIL PERJALANAN', 100);
-    doc.text(`DESTINASI: ${booking.destinasi.toUpperCase()} (VIA ${booking.jalur.toUpperCase()})`, 25, 115);
+    doc.text(`DESTINASI: ${booking.destinasi.toUpperCase()} (${booking.jalur.toUpperCase()})`, 25, 115);
     doc.text(`JADWAL: ${booking.jadwal}`, 25, 122);
     doc.text(`PESERTA: ${booking.peserta} PAX`, 25, 129);
     doc.text(`TIPE: ${booking.type === 'open' ? 'OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 136);
@@ -2192,6 +2209,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         facilities={config.facilities}
         config={config}
         updateConfig={updateConfig}
+        setIsHistoryOpen={setIsHistoryOpen}
       />
       <BookingHistoryModal 
         isOpen={isHistoryOpen} 

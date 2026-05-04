@@ -438,7 +438,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                       <MapPin size={16} className="text-art-orange shrink-0" />
                       <div>
                         <p className="text-[10px] font-black uppercase text-art-text/30">Destinasi</p>
-                        <p className="text-xs font-bold uppercase">{booking.destinasi} (Via {booking.jalur})</p>
+                        <p className="text-xs font-bold uppercase">{booking.destinasi} ({booking.jalur})</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -1264,7 +1264,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                    </h4>
                    <div className="flex gap-2 flex-wrap mt-1">
                       {ot.jadwal && <span className="text-[8px] font-bold bg-white border border-art-text/10 px-2 py-0.5 rounded uppercase">{ot.jadwal}</span>}
-                      {ot.path && <span className="text-[8px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">Via {ot.path}</span>}
+                      {ot.path && <span className="text-[8px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">{ot.path}</span>}
                       {isPublished && <span className="text-[8px] font-black bg-art-green text-white px-2 py-0.5 rounded uppercase flex items-center gap-1"><Globe size={8}/> Terbit</span>}
                       {consumed > 0 && <span className="text-[8px] font-black bg-art-orange text-white px-2 py-0.5 rounded uppercase">DP: {consumed} Pax</span>}
                    </div>
@@ -1320,40 +1320,40 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
 
           {expandedIndexes.includes(i) && (
           <div className="mt-4 pt-4 border-t-2 border-dashed border-art-text/10 space-y-4">
-              {/* Layer 1: Mountain Destination + Level */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Layer 1: Mountain + Difficulty */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Destinasi Gunung</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Gunung</label>
                   <select 
-                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
+                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
                     value={ot.name ?? ""} 
                     onChange={e => handleMountainSelect(i, e.target.value)}
                   >
-                    <option value="">-- Pilih Gunung --</option>
+                    <option value=""> Pilih Gunung </option>
                     {config.destinationsData?.map((d: any) => (
                       <option key={d.id} value={d.name}>{d.name}</option>
                     ))}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Tingkat Kesulitan</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Level</label>
                   <select 
-                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
+                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
                     value={ot.difficulty ?? ""} 
                     onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}
                   >
-                    <option value="">-- Pilih Level --</option>
+                    <option value=""> Level </option>
                     {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
                   </select>
                 </div>
               </div>
 
               {/* Layer 2: Duration + Trail */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Durasi Trip</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Durasi</label>
                   <select 
-                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none transition-all" 
+                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none transition-all" 
                     value={ot.duration ?? ""} 
                     onChange={e => { 
                       const dur = e.target.value;
@@ -1363,28 +1363,28 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                       setData(nd); 
                     }}
                   >
-                    <option value="">-- Pilih Durasi --</option>
+                    <option value=""> Durasi </option>
                     {DURATION_LEVELS.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Jalur Pendakian</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Jalur Pendakian</label>
                   <input 
-                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all" 
+                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all" 
                     value={ot.path || ""} 
                     onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }}
-                    placeholder="Contoh: Via Patak Banteng"
+                    placeholder="Contoh: Via Wates"
                   />
                 </div>
               </div>
 
-              {/* Layer 3: Departure Date + Display Schedule */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Layer 3: Date + Mepo */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Tanggal Berangkat</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Tanggal</label>
                   <input 
                     type="date"
-                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
                     value={ot.startDate || ""} 
                     onChange={e => { 
                       const date = e.target.value;
@@ -1396,112 +1396,97 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Tampilan Jadwal (Otomatis)</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Meeting Point</label>
                   <input 
-                    readOnly
-                    className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-[10px] font-black bg-gray-50 text-art-green outline-none uppercase tracking-tight" 
-                    value={ot.jadwal || "Akan dihitung otomatis..."} 
+                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all" 
+                    value={ot.mepo || ""} 
+                    onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }}
+                    placeholder="Mepo..."
                   />
                 </div>
               </div>
 
+              <div className="space-y-1">
+                <label className="text-[9px] font-black uppercase text-art-text/40">Jadwal (Automatis)</label>
+                <input 
+                  readOnly
+                  className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold bg-gray-50 text-art-green outline-none uppercase" 
+                  value={ot.jadwal || "Otomatis..."} 
+                />
+              </div>
+
               {/* Layer 4: Capacity + Availability */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-art-text/40">Kapasitas Maksimal (Pax)</label>
+                    <label className="text-[9px] font-black uppercase text-art-text/40">Kapasitas (Pax)</label>
                     <input 
                       type="number"
-                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
                       value={ot.maxKuota || 15} 
                       onChange={e => { 
                         const val = parseInt(e.target.value) || 0;
                         const nd = [...data]; 
                         nd[i].maxKuota = val; 
-                        nd[i].kuotaNum = val; // for legacy
+                        nd[i].kuotaNum = val; 
                         nd[i].kuota = `${val - (ot.consumedKuota || 0)} Pax Tersisa`;
                         setData(nd); 
                       }} 
                     />
                  </div>
                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-art-green">Status Ketersediaan</label>
-                    <div className="w-full border-2 border-dashed border-art-green/20 bg-art-green/5 p-2.5 rounded-xl flex items-center justify-between">
-                       <span className="text-[10px] font-black uppercase text-art-green">Tersisa:</span>
-                       <span className="text-xs font-black text-art-green">{(ot.maxKuota || 15) - consumed} PAX</span>
+                    <label className="text-[9px] font-black uppercase text-art-green">Sisa Slot</label>
+                    <div className="w-full border-2 border-dashed border-art-green/20 bg-art-green/5 p-2 rounded-xl flex items-center justify-between">
+                       <span className="text-[10px] font-black uppercase text-art-green bg-white px-2 py-0.5 rounded shadow-sm">
+                          {ot.maxKuota - (ot.consumedKuota || 0)} Pax
+                       </span>
                     </div>
                  </div>
               </div>
 
               {/* Layer 5: Price (K) + Strike Price */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Harga Paket (dalam ribuan: 650 = 650rb)</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Harga (k)</label>
                   <div className="relative">
                     <input 
                       type="number"
-                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all font-mono pl-8" 
+                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono pl-6" 
                       value={ot.price || 0} 
                       onChange={e => { const nd = [...data]; nd[i].price = parseInt(e.target.value) || 0; setData(nd); }} 
                     />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-art-text/30">Rp</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30">Rp</span>
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-art-text/40">Harga Coret (Ribuan)</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Coret (k)</label>
                   <div className="relative">
                     <input 
                       type="number"
-                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-black outline-none focus:border-art-orange transition-all font-mono pl-8 text-red-400" 
+                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-black outline-none focus:border-art-orange transition-all font-mono pl-6 text-red-400" 
                       value={ot.originalPrice || 0} 
                       onChange={e => { const nd = [...data]; nd[i].originalPrice = parseInt(e.target.value) || 0; setData(nd); }} 
                     />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-red-300">Rp</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-red-300">Rp</span>
                   </div>
                 </div>
               </div>
 
-              {/* Layer 6: Trip Leaders (Multiple) */}
+              {/* Layer 7: Leaders */}
               <div className="space-y-2">
                  <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-black uppercase text-art-text/40">Trip Leader(s)</label>
-                    <button 
-                      onClick={() => {
-                         const nd = [...data];
-                         if (!nd[i].leaders) nd[i].leaders = [];
-                         nd[i].leaders.push("");
-                         setData(nd);
-                      }}
-                      className="text-[9px] bg-art-text text-white px-3 py-1.5 rounded-lg uppercase font-black tracking-widest shadow-sm active:scale-95 transition-all"
-                    >+ Tambah Leader</button>
+                    <label className="text-[9px] font-black uppercase text-art-text/40">Leaders</label>
+                    <button onClick={() => { const nd = [...data]; if (!nd[i].leaders) nd[i].leaders = []; nd[i].leaders.push(""); setData(nd); }} className="text-[8px] bg-art-text text-white px-2 py-1 rounded uppercase font-black">+ Add</button>
                  </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                 <div className="grid grid-cols-2 gap-2">
                     {(ot.leaders || []).map((leaderId: any, lIdx: number) => (
-                       <div key={lIdx} className="flex gap-2">
-                          <select 
-                             className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange"
-                             value={leaderId}
-                             onChange={e => {
-                                const nd = [...data];
-                                nd[i].leaders[lIdx] = e.target.value;
-                                setData(nd);
-                             }}
-                          >
-                             <option value="">Pilih Leader</option>
-                             {config.tripLeaders?.map((l: any) => (
-                               <option key={l.name} value={l.name}>{l.name}</option>
-                             ))}
+                       <div key={lIdx} className="flex gap-1">
+                          <select className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-[9px] font-bold outline-none" value={leaderId} onChange={e => { const nd = [...data]; nd[i].leaders[lIdx] = e.target.value; setData(nd); }}>
+                             <option value="">Pilih</option>
+                             {config.tripLeaders?.map((l: any) => (<option key={l.name} value={l.name}>{l.name}</option>))}
                           </select>
-                          <button 
-                            onClick={() => {
-                               const nd = [...data];
-                               nd[i].leaders.splice(lIdx, 1);
-                               setData(nd);
-                            }}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                          ><Trash2 size={14}/></button>
+                          <button onClick={() => { const nd = [...data]; nd[i].leaders.splice(lIdx, 1); setData(nd); }} className="p-1 text-red-500"><Trash2 size={12}/></button>
                        </div>
                     ))}
-                    {(ot.leaders || []).length === 0 && <p className="text-[10px] text-art-text/30 italic px-2">Belum ada leader terpilih.</p>}
                  </div>
               </div>
 
