@@ -1642,7 +1642,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: {
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      if (e.currentTarget.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com') {
+                      if (e.currentTarget.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com' || user?.email === 'mrahmanfm@gmail.com') {
                         localStorage.setItem('isAdminValid', 'true');
                         window.dispatchEvent(new Event('adminModeToggled'));
                         onClose();
@@ -1657,7 +1657,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: {
                     playClick();
                     const inputElement = document.getElementById('adminTokenInput') as HTMLInputElement;
                     if (inputElement) {
-                      if (inputElement.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com') {
+                      if (inputElement.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com' || user?.email === 'mrahmanfm@gmail.com') {
                         localStorage.setItem('isAdminValid', 'true');
                         window.dispatchEvent(new Event('adminModeToggled'));
                         onClose();
@@ -1675,7 +1675,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: {
               <button 
                 onClick={(e) => { 
                   playClick(); 
-                  if (user?.email === 'mrachmanfm@gmail.com') {
+                  if (user?.email === 'mrachmanfm@gmail.com' || user?.email === 'mrahmanfm@gmail.com') {
                     localStorage.setItem('isAdminValid', 'true');
                     window.dispatchEvent(new Event('adminModeToggled'));
                     onClose();
@@ -1752,9 +1752,11 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     doc.setFontSize(10);
     doc.text('KUITANSI PEMBAYARAN', 140, 20);
     doc.setFontSize(14);
-    doc.text(`#${booking.id.substring(0, 8).toUpperCase()}`, 140, 30);
+    doc.text(`#${(booking.id || '').substring(0, 8).toUpperCase()}`, 140, 30);
     doc.setFontSize(9);
-    doc.text(`TANGGAL: ${new Date(booking.createdAt?.seconds * 1000).toLocaleDateString('id-ID')}`, 140, 38);
+    const bookingDate = booking.createdAt ? new Date(booking.createdAt.seconds * 1000) : new Date();
+    const displayDate = isNaN(bookingDate.getTime()) ? new Date() : bookingDate;
+    doc.text(`TANGGAL: ${displayDate.toLocaleDateString('id-ID')}`, 140, 38);
 
     const drawHeader = (title: string, y: number) => {
       doc.setFillColor(240, 240, 240);
@@ -1791,7 +1793,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     if (booking.opsionalItems && booking.opsionalItems.length > 0) {
       booking.opsionalItems.forEach((item: any) => {
         doc.setFontSize(9);
-        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari)`;
+        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari @ Rp ${item.price.toLocaleString('id-ID')})`;
         const splitItem = doc.splitTextToSize(itemLine, 130);
         doc.text(splitItem, 25, currentY);
         doc.text(item.price === 0 ? 'Dikonfirmasi Admin' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
@@ -1915,13 +1917,21 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
 
                      <div className="space-y-2">
                         <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-[0.2em]">Fasilitas Tambahan:</p>
+
+                        {b.penjemputan && (
+                           <div className="flex justify-between items-center text-[10px] border-b border-art-green/10 pb-1 mb-1">
+                              <span className="font-bold text-art-green flex items-center gap-1.5"><MapPin size={10} /> PENJEMPUTAN ({b.mepo})</span>
+                              <span className="font-black text-art-green">AKTIF</span>
+                           </div>
+                        )}
+
                         {b.opsionalItems && b.opsionalItems.length > 0 ? (
                            <div className="space-y-1 mt-2">
                              {b.opsionalItems.map((item: any, idx: number) => (
                                <div key={idx} className="flex justify-between items-center text-[10px] border-b border-art-text/5 pb-1">
                                  <div>
                                    <span className="font-bold text-art-text/80">{item.name}</span>
-                                   <span className="text-[9px] text-art-text/50 ml-1">({item.count}x • {item.days}h)</span>
+                                   <span className="text-[9px] text-art-text/50 ml-1">({item.count}x • {item.days}h @ Rp {item.price.toLocaleString('id-ID')})</span>
                                  </div>
                                  <span className="font-medium italic text-art-text/80">
                                    {item.price === 0 ? "Dikonfirmasi Admin" : `Rp ${item.subtotal.toLocaleString('id-ID')}`}
@@ -1957,7 +1967,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                         )}
                         
                         <button 
-                          onClick={() => window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin menanyakan status booking ID: ${b.id.substring(0,8)}`)}`, '_blank')}
+                          onClick={() => window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin menanyakan status booking ID: ${(b.id || '').substring(0,8)}`)}`, '_blank')}
                           className="w-full flex items-center justify-center gap-2 border-2 border-art-text py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-text hover:text-white transition-colors"
                         >
                           <Send size={14} /> Chat Admin
@@ -2355,13 +2365,15 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
 
         <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-8 md:mt-0">
           <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-40 relative">
-            <motion.div
+              <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-art-green mb-3 md:mb-4 w-full text-center md:text-left"
+              className="mb-3 md:mb-4 w-full text-center md:text-left"
             >
-              <p className="font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">{config.homepage?.heroSub || "Open Trip Eksklusif"}</p>
+              <p className="font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">
+                <span className="text-art-green">Open</span> <span className="text-art-orange">Trip</span> <span className="text-blue-500">Exclusive</span>
+              </p>
               <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
             </motion.div>
             
@@ -2371,7 +2383,12 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className={`text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-text' : 'text-art-text'}`}
               >
-                <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block text-art-green">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
+                <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block">
+                  <span className="text-art-green">T</span>
+                  <span className="text-art-orange">r</span>
+                  <span className="text-blue-500">i</span>
+                  <span className="text-art-green">p</span>
+                </sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
               </motion.h1>
               
               <motion.p 

@@ -156,7 +156,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
 
   const [user] = useAuthState(auth);
   React.useEffect(() => {
-    if (!user || user.email !== 'mrachmanfm@gmail.com') {
+    if (!user || (user.email !== 'mrachmanfm@gmail.com' && user.email !== 'mrahmanfm@gmail.com')) {
       setLoading(false);
       return;
     }
@@ -275,10 +275,11 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.setFontSize(10);
     doc.text('KUITANSI PEMBAYARAN', 140, 20);
     doc.setFontSize(14);
-    doc.text(`#${booking.id.substring(0, 8).toUpperCase()}`, 140, 30);
+    doc.text(`#${(booking.id || '').substring(0, 8).toUpperCase()}`, 140, 30);
     doc.setFontSize(9);
     const bookingDate = booking.createdAt ? new Date(booking.createdAt.seconds * 1000) : new Date();
-    doc.text(`TANGGAL: ${bookingDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 140, 38);
+    const displayDate = isNaN(bookingDate.getTime()) ? new Date() : bookingDate;
+    doc.text(`TANGGAL: ${displayDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 140, 38);
 
     // Section colors and borders
     const drawSectionHeader = (title: string, y: number) => {
@@ -327,10 +328,10 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
       booking.opsionalItems.forEach((item: any) => {
         doc.setFontSize(9);
         doc.setTextColor(80, 80, 80);
-        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari)`;
+        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari @ Rp ${item.price.toLocaleString('id-ID')})`;
         const splitItem = doc.splitTextToSize(itemLine, 130);
         doc.text(splitItem, 25, currentY);
-        doc.text(`Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        doc.text(item.price === 0 ? 'Dikonfirmasi Admin' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
         currentY += (splitItem.length * 6);
       });
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -413,7 +414,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.text('Dokumen ini sah dikeluarkan secara digital oleh Ngopi di Ketinggian.', 105, 278, { align: 'center' });
     doc.text('https://ngopidiketinggian.id', 105, 283, { align: 'center' });
     
-    doc.save(`Kuitansi_${booking.nama.replace(/\s/g, '_')}_${booking.id.substring(0,5)}.pdf`);
+    doc.save(`Kuitansi_${booking.nama.replace(/\s/g, '_')}_${(booking.id || '').substring(0,5)}.pdf`);
     showToast("Kuitansi berhasil diunduh!");
   };
 
@@ -506,6 +507,16 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                           <span className="font-black">Rp {((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
                        </div>
                        
+                       {booking.penjemputan && (
+                         <div className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-green/30 py-1">
+                            <div className="flex flex-col">
+                              <span className="text-art-green font-bold uppercase">+ LAYANAN PENJEMPUTAN</span>
+                              <span className="text-[8px] text-art-text/30 italic">Lokasi: {booking.mepo}</span>
+                            </div>
+                            <span className="font-bold text-art-green">AKTIF</span>
+                         </div>
+                       )}
+
                        {booking.opsionalItems && booking.opsionalItems.length > 0 ? (
                          booking.opsionalItems.map((item: any, idx: number) => (
                            <div key={idx} className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-orange/30">
@@ -936,6 +947,9 @@ const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
 
 const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState([...config.tripLeaders]);
+  const [leaderTitle, setLeaderTitle] = useState(config.homepage?.leaderTitle || '');
+  const [leaderSub, setLeaderSub] = useState(config.homepage?.leaderSub || '');
+  const [leaderParagraph, setLeaderParagraph] = useState(config.homepage?.leaderParagraph || '');
 
   useEffect(() => {
     if (JSON.stringify(data) !== JSON.stringify(config.tripLeaders)) {
@@ -945,20 +959,20 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
 
   const handleSave = () => {
     updateConfig({ tripLeaders: data, homepage: { ...config.homepage, leaderTitle, leaderSub, leaderParagraph } });
-    showToast('Disimpan!');
+    showToast('Leaders & Teks Homepage Tersimpan!');
   };
-
-  const [leaderTitle, setLeaderTitle] = useState(config.homepage?.leaderTitle || '');
-  const [leaderSub, setLeaderSub] = useState(config.homepage?.leaderSub || '');
-  const [leaderParagraph, setLeaderParagraph] = useState(config.homepage?.leaderParagraph || '');
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg border-2 border-art-text space-y-4">
-        <h3 className="font-bold text-sm uppercase">Edit Teks Trip Leader (Homepage)</h3>
-        <input className="w-full border p-2 rounded" value={leaderTitle} onChange={e => setLeaderTitle(e.target.value)} placeholder="Judul Bagian Leader (Kenalan dengan)" />
-        <input className="w-full border p-2 rounded" value={leaderSub} onChange={e => setLeaderSub(e.target.value)} placeholder="Sub-judul Bagian Leader (Trip Leader Kami)" />
-        <textarea className="w-full border p-2 rounded h-16" value={leaderParagraph} onChange={e => setLeaderParagraph(e.target.value)} placeholder="Paragraf Trip Leader"></textarea>
+      <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-4">
+        <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+           <Edit2 size={16} className="text-art-orange" /> Edit Teks Trip Leader (Homepage)
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <input className="w-full border p-2 rounded text-xs" value={leaderTitle} onChange={e => setLeaderTitle(e.target.value)} placeholder="Judul Bagian Leader (Kenalan dengan)" />
+           <input className="w-full border p-2 rounded text-xs" value={leaderSub} onChange={e => setLeaderSub(e.target.value)} placeholder="Sub-judul Bagian Leader (Trip Leader Kami)" />
+        </div>
+        <textarea className="w-full border p-2 rounded text-xs h-16" value={leaderParagraph} onChange={e => setLeaderParagraph(e.target.value)} placeholder="Paragraf Trip Leader"></textarea>
       </div>
 
       <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-art-text/20">
@@ -1119,48 +1133,69 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
 
 const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => {
   const [url, setUrl] = useState(config.ceritaVideoUrl);
-  const [data, setData] = useState(config.homepage || {});
+  const [ceritaTitle, setCeritaTitle] = useState(config.homepage?.ceritaTitle || '');
+  const [ceritaSub, setCeritaSub] = useState(config.homepage?.ceritaSub || '');
+  const [ceritaParagraph1, setCeritaParagraph1] = useState(config.homepage?.ceritaParagraph1 || '');
+  const [ceritaParagraph2, setCeritaParagraph2] = useState(config.homepage?.ceritaParagraph2 || '');
+  const [ceritaFeatures, setCeritaFeatures] = useState(config.homepage?.ceritaFeatures || []);
 
   const handleSave = () => {
-    updateConfig({ ceritaVideoUrl: url, homepage: data });
-    showToast('Disimpan!');
+    updateConfig({ 
+       ceritaVideoUrl: url, 
+       homepage: { 
+         ...config.homepage, 
+         ceritaTitle, 
+         ceritaSub, 
+         ceritaParagraph1, 
+         ceritaParagraph2,
+         ceritaFeatures
+       } 
+    });
+    showToast('Cerita Berhasil Disimpan!');
   };
 
   return (
      <div className="space-y-6">
        <div className="flex flex-col gap-4 bg-white p-6 rounded-lg border-2 border-art-text">
-        <p className="font-bold">URL Video Secangkir Cerita</p>
-        <input className="border-2 border-art-text p-3 rounded" value={url} onChange={e => setUrl(e.target.value)} placeholder="Misal: https://www.youtube.com/embed/..." />
-        <p className="text-xs text-art-text/60">Gunakan link embed YouTube atau file MP4 yang didukung.</p>
+        <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+           <Edit2 size={16} className="text-art-orange" /> Edit Konten Cerita (Homepage)
+        </h3>
         
-        <div className="space-y-4 pt-6 border-t border-art-text/10">
-          <h3 className="font-bold text-sm uppercase">Edit Teks Secangkir Cerita</h3>
-          <input className="w-full border p-2 rounded" value={data.ceritaTitle || ''} onChange={e => setData({...data, ceritaTitle: e.target.value})} placeholder="Judul Bagian Cerita" />
-          <input className="w-full border p-2 rounded" value={data.ceritaSub || ''} onChange={e => setData({...data, ceritaSub: e.target.value})} placeholder="Sub-judul Bagian Cerita" />
-          <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph1 || ''} onChange={e => setData({...data, ceritaParagraph1: e.target.value})} placeholder="Paragraf Pertama Cerita"></textarea>
-          <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph2 || ''} onChange={e => setData({...data, ceritaParagraph2: e.target.value})} placeholder="Paragraf Kedua Cerita"></textarea>
+        <div className="space-y-4 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input className="w-full border p-2 rounded text-xs" value={ceritaTitle} onChange={e => setCeritaTitle(e.target.value)} placeholder="Judul Cerita (Secangkir Cerita)" />
+            <input className="w-full border p-2 rounded text-xs" value={ceritaSub} onChange={e => setCeritaSub(e.target.value)} placeholder="Sub-judul (di Atas Awan)" />
+          </div>
+          <textarea className="w-full border p-2 rounded text-xs h-24" value={ceritaParagraph1} onChange={e => setCeritaParagraph1(e.target.value)} placeholder="Paragraf 1"></textarea>
+          <textarea className="w-full border p-2 rounded text-xs h-24" value={ceritaParagraph2} onChange={e => setCeritaParagraph2(e.target.value)} placeholder="Paragraf 2"></textarea>
         
           <div className="pt-4 space-y-4">
             <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
               <h4 className="font-bold text-xs uppercase">Edit Fitur Cerita</h4>
-              <button type="button" onClick={() => setData({...data, ceritaFeatures: [...(data.ceritaFeatures || []), { title: '', desc: '' }]})} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Fitur</button>
+              <button type="button" onClick={() => setCeritaFeatures([...ceritaFeatures, { title: '', desc: '' }])} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Fitur</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {(data.ceritaFeatures || []).map((feat: any, idx: number) => (
+              {(ceritaFeatures || []).map((feat: any, idx: number) => (
                 <div key={idx} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20">
                   <button type="button" onClick={() => {
-                    const nf = [...data.ceritaFeatures]; nf.splice(idx, 1); setData({...data, ceritaFeatures: nf});
+                    const nf = [...ceritaFeatures]; nf.splice(idx, 1); setCeritaFeatures(nf);
                   }} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
                   <input className="w-full border p-2 rounded text-xs" value={feat.title} onChange={e => {
-                    const nf = [...data.ceritaFeatures]; nf[idx].title = e.target.value; setData({...data, ceritaFeatures: nf});
+                    const nf = [...ceritaFeatures]; nf[idx].title = e.target.value; setCeritaFeatures(nf);
                   }} placeholder="Judul Fitur" />
                   <textarea className="w-full border p-2 rounded text-xs h-16" value={feat.desc} onChange={e => {
-                    const nf = [...data.ceritaFeatures]; nf[idx].desc = e.target.value; setData({...data, ceritaFeatures: nf});
+                    const nf = [...ceritaFeatures]; nf[idx].desc = e.target.value; setCeritaFeatures(nf);
                   }} placeholder="Deskripsi Fitur"></textarea>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="space-y-1.5 pt-4 border-t border-art-text/10">
+          <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (Background)</p>
+          <input className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." />
+          <p className="text-[9px] text-art-text/30 italic">Gunakan link embed YouTube atau file MP4.</p>
         </div>
 
         <div className="flex gap-2 w-fit mt-6">
@@ -1204,22 +1239,46 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
 
   const handleSave = () => {
     updateConfig({ homepage: data });
-    showToast('Homepage Tersimpan!');
+    showToast('Hero & Slide Tersimpan!');
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-8">
+    <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8">
       <div className="space-y-4">
-        <h3 className="font-bold text-sm uppercase">Edit Teks Homepage</h3>
-        <input className="w-full border p-2 rounded" value={data.heroSub || ''} onChange={e => setData({...data, heroSub: e.target.value})} placeholder="Slogan Atas (Cth: Open Trip Eksklusif)" />
-        <input className="w-full border p-2 rounded" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fitur Utama (Cth: Fasilitas Premium...)" />
-        <input className="w-full border p-2 rounded" value={data.heroTitlePrefix || ''} onChange={e => setData({...data, heroTitlePrefix: e.target.value})} placeholder="Kata Pertama Judul Hero (Cth: Trip)" />
-        <textarea className="w-full border p-2 rounded" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Sisa Judul Hero (Gunakan baris baru)"></textarea>
-        <textarea className="w-full border p-2 rounded" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description"></textarea>
-        <input className="w-full border p-2 rounded" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="Tagline (Cth: Jaya / Jaya / Jaya)" />
+        <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+           <Edit2 size={16} className="text-art-orange" /> Edit Teks Hero Utama
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Slogan Atas</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroSub || ''} onChange={e => setData({...data, heroSub: e.target.value})} placeholder="Open Trip Eksklusif" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Floating Features</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fasilitas Premium • Pemandu Ahli" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Prefix Judul</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-black uppercase" value={data.heroTitlePrefix || ''} onChange={e => setData({...data, heroTitlePrefix: e.target.value})} placeholder="TRIP" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Tagline Bawah</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="JAYA / JAYA / JAYA" />
+           </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Judul Utama</label>
+              <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-black h-20 resize-none" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Ngopi Di Ketinggian"></textarea>
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Deskripsi Hero</label>
+              <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-medium h-20 resize-none" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Nikmati pengalaman trip tak terlupakan..."></textarea>
+           </div>
+        </div>
         
-        <div className="space-y-2">
-          <label className="text-xs font-bold">Link Foto Latar Belakang Hero</label>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Foto Background Hero</label>
           <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
         </div>
       </div>
