@@ -323,9 +323,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
           if (currentType === 'open' && config) {
              const updatedOpenTrips = (config.openTrips || []).map((ot: any) => {
                 if (ot.name === selectedDestinasi && ot.jadwal === selectedJadwal) {
-                   const currentKuota = typeof ot.kuotaNum === 'number' ? ot.kuotaNum : 10;
-                   const newKuota = Math.max(0, currentKuota - Number(pesertaCount));
-                   return { ...ot, kuotaNum: newKuota, kuota: `${newKuota} Pax Tersisa` };
+                   const currentConsumed = typeof ot.consumedKuota === 'number' ? ot.consumedKuota : 0;
+                   const newConsumed = currentConsumed + Number(pesertaCount);
+                   return { ...ot, consumedKuota: newConsumed };
                 }
                 return ot;
              });
@@ -1569,8 +1569,8 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: {
   };
 
   const themes = [
-    { id: 'default', name: 'Rust (Default)', color: '#421404' },
-    { id: 'algae', name: 'Algae (Hijau)', color: '#afa231' },
+    { id: 'default', name: 'Rush (Default)', color: '#421404' },
+    { id: 'matcha', name: 'Matcha (Hijau)', color: '#afa231' },
     { id: 'wine', name: 'Wine (Merah)', color: '#4c0004' },
     { id: 'wasabi', name: 'Wasabi (Kuning)', color: '#dcd189' },
   ];
@@ -1890,7 +1890,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                            b.status === 'selesai' ? 'Trip Selesai' : 
                            'Dibatalkan'}
                         </div>
-                        <span className="text-[10px] font-bold text-art-text/30">{new Date(b.createdAt?.seconds * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <span className="text-[10px] font-bold text-art-text/30">{b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '...'}</span>
                      </div>
 
                      {b.status === 'pending' && activeTab === 'proses' && (
@@ -2365,24 +2365,24 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
             </motion.div>
             
-            <motion.h1 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap"
-            >
-              <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto"
-            >
-              {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung."}
-              <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-green">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
-            </motion.p>
+              <motion.h1 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className={`text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-text' : 'text-art-text'}`}
+              >
+                <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block text-art-green">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className={`text-sm md:text-xl font-medium max-w-xs sm:max-w-md mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto ${theme === 'default' ? 'text-art-green' : 'text-art-text/80'}`}
+              >
+                {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung."}
+                <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-green">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
+              </motion.p>
             
             <motion.div 
               initial={{ opacity: 0, y: 30 }}

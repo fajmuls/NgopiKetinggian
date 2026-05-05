@@ -183,7 +183,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     let needsUpdate = false;
     const newOpenTrips = config.openTrips.map((ot: any) => {
       const consumed = simulatedBookings
-        .filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai'))
+        .filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai' || b.status === 'dp_partial'))
         .reduce((acc, b) => acc + (Number(b.peserta) || 0), 0);
       
       if (ot.consumedKuota !== consumed) {
@@ -277,7 +277,8 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.setFontSize(14);
     doc.text(`#${booking.id.substring(0, 8).toUpperCase()}`, 140, 30);
     doc.setFontSize(9);
-    doc.text(`TANGGAL: ${new Date(booking.createdAt?.seconds * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 140, 38);
+    const bookingDate = booking.createdAt ? new Date(booking.createdAt.seconds * 1000) : new Date();
+    doc.text(`TANGGAL: ${bookingDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 140, 38);
 
     // Section colors and borders
     const drawSectionHeader = (title: string, y: number) => {
@@ -560,7 +561,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                             booking.status === 'selesai' ? 'Selesai' :
                             'Batal'
                          }</div>
-                         <span className="text-[10px] font-bold text-art-text/40">Dipesan: {new Date(booking.createdAt?.seconds * 1000).toLocaleDateString('id-ID')}</span>
+                         <span className="text-[10px] font-bold text-art-text/40">Dipesan: {booking.createdAt ? new Date(booking.createdAt.seconds * 1000).toLocaleDateString('id-ID') : '...'}</span>
                       </div>
                       <p className="text-[10px] font-medium italic text-art-text/60 leading-relaxed break-words bg-white border border-art-text/5 p-2 rounded-lg">"{booking.deskripsi || 'Tidak ada catatan.'}"</p>
                    </div>
@@ -572,7 +573,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                       </div>
                       <div className="text-right">
                          <p className="text-[9px] font-bold text-art-text/30 uppercase mb-0.5">Booking ID</p>
-                         <p className="text-[10px] font-bold text-art-text/20 uppercase font-mono">{booking.id.substring(0,8)}</p>
+                         <p className="text-[10px] font-bold text-art-text/20 uppercase font-mono">{booking.id?.substring(0,8) || '...'}</p>
                       </div>
                    </div>
                 </div>
@@ -943,12 +944,23 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
   }, [config.tripLeaders]);
 
   const handleSave = () => {
-    updateConfig({ tripLeaders: data });
+    updateConfig({ tripLeaders: data, homepage: { ...config.homepage, leaderTitle, leaderSub, leaderParagraph } });
     showToast('Disimpan!');
   };
 
+  const [leaderTitle, setLeaderTitle] = useState(config.homepage?.leaderTitle || '');
+  const [leaderSub, setLeaderSub] = useState(config.homepage?.leaderSub || '');
+  const [leaderParagraph, setLeaderParagraph] = useState(config.homepage?.leaderParagraph || '');
+
   return (
     <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg border-2 border-art-text space-y-4">
+        <h3 className="font-bold text-sm uppercase">Edit Teks Trip Leader (Homepage)</h3>
+        <input className="w-full border p-2 rounded" value={leaderTitle} onChange={e => setLeaderTitle(e.target.value)} placeholder="Judul Bagian Leader (Kenalan dengan)" />
+        <input className="w-full border p-2 rounded" value={leaderSub} onChange={e => setLeaderSub(e.target.value)} placeholder="Sub-judul Bagian Leader (Trip Leader Kami)" />
+        <textarea className="w-full border p-2 rounded h-16" value={leaderParagraph} onChange={e => setLeaderParagraph(e.target.value)} placeholder="Paragraf Trip Leader"></textarea>
+      </div>
+
       <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-art-text/20">
         <p className="text-xs font-bold text-art-text/60 uppercase">Daftar Trip Leader</p>
         <div className="flex gap-2">
@@ -1212,13 +1224,6 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         </div>
       </div>
 
-      <div className="space-y-4 pt-6 border-t border-art-text/10">
-        <h3 className="font-bold text-sm uppercase">Edit Teks Trip Leader</h3>
-        <input className="w-full border p-2 rounded" value={data.leaderTitle || ''} onChange={e => setData({...data, leaderTitle: e.target.value})} placeholder="Judul Bagian Leader (Kenalan dengan)" />
-        <input className="w-full border p-2 rounded" value={data.leaderSub || ''} onChange={e => setData({...data, leaderSub: e.target.value})} placeholder="Sub-judul Bagian Leader (Trip Leader Kami)" />
-        <textarea className="w-full border p-2 rounded h-16" value={data.leaderParagraph || ''} onChange={e => setData({...data, leaderParagraph: e.target.value})} placeholder="Paragraf Trip Leader"></textarea>
-      </div>
-
       <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
         <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
           <h3 className="font-bold text-sm uppercase">Edit Slide Gunung (Ketinggian MDPL)</h3>
@@ -1354,7 +1359,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
 
   const getConsumedQuota = (name: string, jadwal: string) => {
     return bookings
-      .filter(b => b.type === 'open' && b.destinasi === name && b.jadwal === jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai'))
+      .filter(b => b.type === 'open' && b.destinasi === name && b.jadwal === jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai' || b.status === 'dp_partial'))
       .reduce((acc, b) => acc + (Number(b.peserta) || 0), 0);
   };
 
@@ -1394,6 +1399,9 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
     if (dest) {
       const defaultPath = dest.paths?.[0]?.name || "";
       const defaultDuration = dest.paths?.[0]?.durations?.[0]?.label || "2H 1M";
+      const basePrice = dest.paths?.[0]?.durations?.[0]?.price || 0;
+      const originalPrice = dest.paths?.[0]?.durations?.[0]?.originalPrice || 0;
+
       nd[i] = { 
         ...nd[i], 
         name: dest.name, 
@@ -1404,9 +1412,12 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
         image: dest.image,
         kuotaNum: 15,
         maxKuota: 15,
+        consumedKuota: 0,
         kuota: "15 Pax Tersisa",
         path: defaultPath,
         duration: defaultDuration,
+        price: basePrice,
+        originalPrice: originalPrice,
         leaders: [],
         status: 'draft'
       };
