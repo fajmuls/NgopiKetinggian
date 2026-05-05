@@ -183,7 +183,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     let needsUpdate = false;
     const newOpenTrips = config.openTrips.map((ot: any) => {
       const consumed = simulatedBookings
-        .filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai'))
+        .filter(b => b && b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai' || b.status === 'dp_partial'))
         .reduce((acc, b) => acc + (Number(b.peserta) || 0), 0);
       
       if (ot.consumedKuota !== consumed) {
