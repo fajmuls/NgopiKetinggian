@@ -219,6 +219,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
       const oldSubtotal = item.subtotal || 0;
       item.price = newPricePerDay;
       item.subtotal = newPricePerDay * (item.count || 1) * (item.days || 1);
+      item.status = 'confirmed';
       
       const opsionalPriceDiff = item.subtotal - oldSubtotal;
       const newOpsionalPrice = (booking.opsionalPrice || 0) + opsionalPriceDiff;
@@ -443,17 +444,25 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                   </div>
                   <div>
                     <h4 className="font-black uppercase tracking-tight text-lg leading-none mb-1">{booking.nama}</h4>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-art-text/40 uppercase">
-                      <span>{booking.type === 'open' ? '🟢 Open Trip' : '🔵 Private Trip'}</span>
-                      <span>•</span>
-                      <span>{booking.wa}</span>
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase">
+                      <span className="text-art-text/40">{booking.type === 'open' ? '🟢 Open Trip' : '🔵 Private Trip'}</span>
+                      <span className="text-art-text/20">•</span>
+                      <span className="text-art-text/40">{booking.wa}</span>
+                      <span className="text-art-text/20">•</span>
+                      <span className="text-art-orange lowercase font-medium bg-art-orange/5 px-2 py-0.5 rounded-full">{booking.email || 'no-email'}</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button 
+                   <button 
+                     onClick={() => window.open(`https://wa.me/${booking.wa.startsWith('0') ? '62' + booking.wa.substring(1) : booking.wa}?text=${encodeURIComponent(`Halo ${booking.nama}, ini dari Ngopi di Ketinggian. Kami ingin mengonfirmasi booking Anda untuk trip ${booking.destinasi}.`)}`, '_blank')}
+                     className="px-3 py-2 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-[#20ba59] transition-colors shadow-sm"
+                   >
+                     <Send size={14} /> Contact WA
+                   </button>
+                   <button 
                     onClick={() => generateInvoice(booking)}
-                    className="p-2 border-2 border-blue-100 text-blue-500 rounded-xl hover:bg-blue-50 transition-colors"
+                    className="p-2 border-2 border-art-text/10 text-art-text/60 rounded-xl hover:bg-art-bg transition-colors"
                     title="Download Invoice"
                   >
                     <Download size={16} />
@@ -480,116 +489,131 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                     <Trash2 size={16} />
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-2">
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center gap-3">
-                      <MapPin size={16} className="text-art-orange shrink-0" />
+                      <div className="p-2 bg-art-orange/5 rounded-lg text-art-orange"><MapPin size={16} /></div>
                       <div>
-                        <p className="text-[10px] font-black uppercase text-art-text/30">Destinasi</p>
-                        <p className="text-xs font-bold uppercase">{(booking.destinasi || 'N/A')} ({(booking.jalur || 'N/A')})</p>
+                        <p className="text-[9px] font-black uppercase text-art-text/30 tracking-widest">Destinasi</p>
+                        <p className="text-xs font-black uppercase">{(booking.destinasi || 'N/A')} ({(booking.jalur || 'N/A')})</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Calendar size={16} className="text-art-green shrink-0" />
+                      <div className="p-2 bg-art-green/5 rounded-lg text-art-green"><Calendar size={16} /></div>
                       <div>
-                        <p className="text-[10px] font-black uppercase text-art-text/30">Jadwal</p>
-                        <p className="text-xs font-bold uppercase">{(booking.jadwal || 'N/A')} ({(booking.durasi || 'N/A')})</p>
+                        <p className="text-[9px] font-black uppercase text-art-text/30 tracking-widest">Jadwal</p>
+                        <p className="text-xs font-black uppercase">{(booking.jadwal || 'N/A')} ({(booking.durasi || 'N/A')})</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-art-bg/30 p-4 rounded-2xl border-2 border-art-text/5">
-                    <p className="text-[10px] font-black uppercase text-art-text/40 mb-2">Rincian Layanan & Promo</p>
+                  <div className="bg-art-bg/20 p-4 rounded-2xl border-2 border-art-text/5 space-y-3">
+                    <p className="text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em] mb-2 font-mono">Biling Summary</p>
                     <div className="space-y-2">
-                       <div className="flex justify-between items-center text-xs">
-                          <span className="font-bold text-art-text/60 uppercase">Paket Trip ({booking.peserta} Pax)</span>
-                          <span className="font-black">Rp {((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                       {/* MAIN PACKAGE */}
+                       <div className="flex justify-between items-center text-xs bg-white/50 p-2 rounded-lg border border-art-text/5">
+                          <div className="flex flex-col">
+                            <span className="font-black text-art-text uppercase text-[10px]">📦 Paket Trip {booking.destinasi}</span>
+                            <span className="text-[9px] text-art-text/40">{booking.peserta} Pax • {booking.jadwal}</span>
+                          </div>
+                          <span className="font-black text-art-text">Rp {((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
                        </div>
                        
-                       {booking.penjemputan && (
-                         <div className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-green/30 py-1">
-                            <div className="flex flex-col">
-                              <span className="text-art-green font-bold uppercase">+ LAYANAN PENJEMPUTAN</span>
-                              <span className="text-[8px] text-art-text/30 italic">Lokasi: {booking.mepo}</span>
-                            </div>
-                            <span className="font-bold text-art-green">AKTIF</span>
-                         </div>
-                       )}
-
+                       {/* OPTIONAL ITEMS */}
                        {booking.opsionalItems && booking.opsionalItems.length > 0 ? (
-                         booking.opsionalItems.map((item: any, idx: number) => (
-                           <div key={idx} className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-orange/30">
-                             <div className="flex flex-col">
-                               <span className="text-art-text/50 font-bold uppercase">+ {item.name}</span>
-                               <span className="text-[8px] text-art-text/30 flex items-center gap-1">
-                                 {item.count || 1}x • {item.days || 1} Hari • Rp {(item.price || 0).toLocaleString('id-ID')}
-                                 <button onClick={() => {
-                                     const newPriceStr = window.prompt("Masukkan harga baru per hari (Angka saja):", (item.price || 0).toString());
-                                     if (newPriceStr !== null) {
-                                       const newPrice = parseInt(newPriceStr.replace(/[^0-9]/g, ''));
-                                       if (!isNaN(newPrice)) {
-                                         handleOpsionalPriceUpdate(booking, idx, newPrice);
-                                       }
-                                     }
-                                 }} className="text-art-orange hover:bg-art-orange/10 p-0.5 rounded ml-1"><Edit2 size={8}/></button>
-                               </span>
-                             </div>
-                             <span className="font-bold text-art-orange">Rp {(item.subtotal || 0).toLocaleString('id-ID')}</span>
-                           </div>
-                         ))
-                       ) : booking.opsionalText && (
-                         <div className="text-[10px] text-art-text/40 italic pl-3 border-l-2 border-art-orange/30">
-                            Layanan: {booking.opsionalText}
+                         <div className="space-y-1.5 pt-1">
+                            <p className="text-[9px] font-bold text-art-orange uppercase tracking-widest pl-2 mb-1">Layanan Tambahan:</p>
+                            {booking.opsionalItems.map((item: any, idx: number) => {
+                               const canEdit = !item.isRental;
+                               return (
+                                 <div key={idx} className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-orange/20 py-1">
+                                   <div className="flex flex-col">
+                                     <span className="text-art-text/70 font-black uppercase flex items-center gap-1.5">
+                                       {item.isRental ? '🎒' : '✨'} {item.name}
+                                       {canEdit && (
+                                         <button onClick={() => {
+                                             const newPriceStr = window.prompt("Masukkan harga baru per hari (Angka saja):", (item.price || 0).toString());
+                                             if (newPriceStr !== null) {
+                                               const newPrice = parseInt(newPriceStr.replace(/[^0-9]/g, ''));
+                                               if (!isNaN(newPrice)) {
+                                                 handleOpsionalPriceUpdate(booking, idx, newPrice);
+                                               }
+                                             }
+                                         }} className="text-art-orange hover:bg-art-orange/10 p-1 rounded-full transition-colors"><Edit2 size={10}/></button>
+                                       )}
+                                     </span>
+                                     <span className="text-[9px] text-art-text/30">
+                                       {item.count || 1}x • {item.days || 1} Hari • @Rp {(item.price || 0).toLocaleString('id-ID')}
+                                     </span>
+                                   </div>
+                                   <span className={`font-black ${item.status === 'pending_price' ? 'text-art-orange italic' : 'text-art-text/80'}`}>
+                                     {item.status === 'pending_price' ? "TUNGGU KONF." : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                                   </span>
+                                 </div>
+                               );
+                            })}
                          </div>
+                       ) : (
+                         booking.opsionalText && booking.opsionalText !== 'Tidak ada' && (
+                           <div className="text-[10px] text-art-text/40 italic pl-3 border-l-2 border-art-orange/30">
+                              Layanan: {booking.opsionalText}
+                           </div>
+                         )
                        )}
 
                        {booking.promoCode && (
-                         <div className="flex justify-between items-center text-[10px] bg-red-50 p-2 rounded-xl border border-red-100 mt-2">
-                           <span className="text-red-500 font-black uppercase">Promo: {booking.promoCode}</span>
-                           <span className="font-black text-red-600">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
+                         <div className="flex justify-between items-center text-[10px] bg-art-green/5 p-2 rounded-xl border border-art-green/10 mt-2">
+                           <span className="text-art-green font-black uppercase flex items-center gap-2">🎁 Promo: {booking.promoCode}</span>
+                           <span className="font-black text-art-green">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
                          </div>
                        )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col justify-between">
-                   <div className="space-y-2">
-                      <p className="text-[10px] font-black uppercase text-art-text/30">Status & Catatan</p>
-                      <div className="flex items-center gap-2 mb-2">
-                         <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                            booking.status === 'lunas' ? 'bg-art-green text-white' : 
-                            booking.status === 'selesai' ? 'bg-gray-800 text-white' :
-                            booking.status === 'dp_partial' ? 'bg-yellow-500 text-white' :
-                            booking.status === 'processing' ? 'bg-blue-600 text-white' :
-                            'bg-gray-200 text-art-text/60'
-                         }`}>{
-                            booking.status === 'pending' ? 'Menunggu' : 
-                            booking.status === 'processing' ? 'Diproses' : 
-                            booking.status === 'dp_partial' ? 'DP Parsial' :
-                            booking.status === 'lunas' ? 'Lunas' : 
-                            booking.status === 'selesai' ? 'Selesai' :
-                            'Batal'
-                         }</div>
-                         <span className="text-[10px] font-bold text-art-text/40">Dipesan: {booking.createdAt ? new Date(booking.createdAt.seconds * 1000).toLocaleDateString('id-ID') : '...'}</span>
-                      </div>
-                      <p className="text-[10px] font-medium italic text-art-text/60 leading-relaxed break-words bg-white border border-art-text/5 p-2 rounded-lg">"{booking.deskripsi || 'Tidak ada catatan.'}"</p>
-                   </div>
-
-                   <div className="mt-4 pt-4 border-t border-art-text/5 flex justify-between items-end">
+                <div className="flex flex-col justify-between border-l border-art-text/5 pl-6">
+                   <div className="space-y-4">
                       <div>
-                         <p className="text-[10px] font-black uppercase text-art-text/30">Total Tagihan</p>
-                         <p className="text-2xl font-black text-art-text tracking-tighter">Rp {booking.totalPrice?.toLocaleString('id-ID')}</p>
+                        <p className="text-[10px] font-black uppercase text-art-text/30 tracking-widest mb-2 font-mono">Status & Note</p>
+                        <div className="flex items-center gap-2 mb-3">
+                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm ${
+                              booking.status === 'lunas' ? 'bg-art-green text-white' : 
+                              booking.status === 'selesai' ? 'bg-gray-800 text-white' :
+                              booking.status === 'dp_partial' ? 'bg-yellow-500 text-white' :
+                              booking.status === 'processing' ? 'bg-blue-600 text-white' :
+                              'bg-art-bg text-art-text/60 border border-art-text/10'
+                           }`}>{
+                              booking.status === 'pending' ? 'Pending' : 
+                              booking.status === 'processing' ? 'Diproses' : 
+                              booking.status === 'dp_partial' ? 'DP Parsial' :
+                              booking.status === 'lunas' ? 'Lunas' : 
+                              booking.status === 'selesai' ? 'Selesai' :
+                              'Batal'
+                           }</div>
+                        </div>
+                        <p className="text-[11px] font-medium italic text-art-text/50 leading-relaxed break-words bg-white border-2 border-dashed border-art-text/5 p-3 rounded-2xl">
+                          "{booking.deskripsi || 'Tidak ada catatan dari pelanggan.'}"
+                        </p>
                       </div>
-                      <div className="text-right">
-                         <p className="text-[9px] font-bold text-art-text/30 uppercase mb-0.5">Booking ID</p>
-                         <p className="text-[10px] font-bold text-art-text/20 uppercase font-mono">{booking.id?.substring(0,8) || '...'}</p>
+
+                      <div className="bg-art-orange/5 p-4 rounded-2xl border-2 border-art-orange/10">
+                         <div className="flex justify-between items-end">
+                            <div>
+                               <p className="text-[10px] font-black uppercase text-art-orange/60 tracking-widest mb-1">Total Piutang</p>
+                               <p className="text-3xl font-black text-art-text tracking-tighter">Rp {booking.totalPrice?.toLocaleString('id-ID')}</p>
+                            </div>
+                            <div className="text-right">
+                               <p className="text-[9px] font-bold text-art-text/30 uppercase mb-0.5">Ref ID</p>
+                               <p className="text-[10px] font-black text-art-text/20 uppercase font-mono tracking-tighter">{booking.id?.substring(0,8) || '...'}</p>
+                            </div>
+                         </div>
                       </div>
                    </div>
                 </div>
               </div>
-             </div>
             </div>
           ))
         )}
