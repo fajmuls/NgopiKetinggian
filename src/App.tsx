@@ -208,10 +208,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     const [parentName, subName] = key.split('|');
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
     const subItem = parentOpt?.subItems?.find((s: any) => s.name === subName);
-    if (subItem && subItem.price) {
-      const pricePerDay = Number(subItem.price) * 1000;
+    if (subItem) {
+      const pricePerDay = subItem.price ? Number(subItem.price) * 1000 : 0;
       const numQty = Number(qty);
-      const totalItemPrice = pricePerDay * numQty * tripDays;
+      const totalItemPrice = pricePerDay ? pricePerDay * numQty * tripDays : 0;
       
       opsionalItemsList.push({
         name: subName,
@@ -227,9 +227,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   // Items from selectedOpsional (standalone items)
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
-    if (opt && !opt.subItems && opt.price) {
-      const pricePerDay = Number(opt.price) * 1000;
-      const totalItemPrice = pricePerDay * tripDays;
+    if (opt && !opt.subItems) {
+      const pricePerDay = opt.price ? Number(opt.price) * 1000 : 0;
+      const totalItemPrice = pricePerDay ? pricePerDay * tripDays : 0;
       
       opsionalItemsList.push({
         name: optName,
@@ -1727,7 +1727,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
 
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'proses') {
-      return b.status === 'pending' || b.status === 'processing';
+      return b.status === 'pending' || b.status === 'processing' || b.status === 'dp_partial';
     } else {
       return b.status === 'lunas' || b.status === 'selesai';
     }
@@ -1794,7 +1794,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
         const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari)`;
         const splitItem = doc.splitTextToSize(itemLine, 130);
         doc.text(splitItem, 25, currentY);
-        doc.text(`Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        doc.text(item.price === 0 ? 'Dikonfirmasi Admin' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
         currentY += (splitItem.length * 6);
       });
       doc.setFontSize(10);
@@ -1880,10 +1880,12 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                         <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
                           b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
                           b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
+                          b.status === 'dp_partial' ? 'bg-yellow-50 text-yellow-600 border-yellow-600' :
                           'bg-art-orange/10 text-art-orange border-art-orange'
                         }`}>
                           {b.status === 'pending' ? 'Diproses' : 
                            b.status === 'processing' ? 'Admin Memproses' : 
+                           b.status === 'dp_partial' ? 'DP Parsial' :
                            b.status === 'lunas' ? 'Sudah Lunas' : 
                            b.status === 'selesai' ? 'Trip Selesai' : 
                            'Dibatalkan'}
@@ -1913,7 +1915,23 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
 
                      <div className="space-y-2">
                         <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-[0.2em]">Fasilitas Tambahan:</p>
-                        <p className="text-[11px] font-medium text-art-text/80 leading-relaxed italic">"{b.opsionalText || 'Menunggu konfirmasi oleh admin.'}"</p>
+                        {b.opsionalItems && b.opsionalItems.length > 0 ? (
+                           <div className="space-y-1 mt-2">
+                             {b.opsionalItems.map((item: any, idx: number) => (
+                               <div key={idx} className="flex justify-between items-center text-[10px] border-b border-art-text/5 pb-1">
+                                 <div>
+                                   <span className="font-bold text-art-text/80">{item.name}</span>
+                                   <span className="text-[9px] text-art-text/50 ml-1">({item.count}x • {item.days}h)</span>
+                                 </div>
+                                 <span className="font-medium italic text-art-text/80">
+                                   {item.price === 0 ? "Dikonfirmasi Admin" : `Rp ${item.subtotal.toLocaleString('id-ID')}`}
+                                 </span>
+                               </div>
+                             ))}
+                           </div>
+                        ) : (
+                          <p className="text-[11px] font-medium text-art-text/80 leading-relaxed italic">"{b.opsionalText || 'Tidak ada'}"</p>
+                        )}
                      </div>
                    </div>
 

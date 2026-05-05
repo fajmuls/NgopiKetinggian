@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2 } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -212,6 +212,30 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     }
   };
 
+  const handleOpsionalPriceUpdate = async (booking: any, itemIndex: number, newPricePerDay: number) => {
+    try {
+      const updatedItems = [...booking.opsionalItems];
+      const item = updatedItems[itemIndex];
+      const oldSubtotal = item.subtotal || 0;
+      item.price = newPricePerDay;
+      item.subtotal = newPricePerDay * (item.count || 1) * (item.days || 1);
+      
+      const opsionalPriceDiff = item.subtotal - oldSubtotal;
+      const newOpsionalPrice = (booking.opsionalPrice || 0) + opsionalPriceDiff;
+      const newTotalPrice = (booking.totalPrice || 0) + opsionalPriceDiff;
+      
+      await updateDoc(doc(db, 'bookings', booking.id), { 
+        opsionalItems: updatedItems,
+        opsionalPrice: newOpsionalPrice,
+        totalPrice: newTotalPrice
+      });
+      showToast(`Harga layanan berhasil diupdate!`);
+    } catch (error) {
+      console.error(error);
+      showToast("Gagal update harga layanan", "error");
+    }
+  };
+
   const handleDelete = async (id: string) => {
     customConfirm("Beneran mau hapus data booking ini?", async () => {
       try {
@@ -343,7 +367,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     // Status Badge
     currentY += 20;
     const isLunas = booking.status === 'lunas';
-    const isDP = booking.status === 'dp' || booking.status === 'dp_partial';
+    const isDP = booking.status === 'dp_partial';
     
     if (isLunas) {
       doc.setFillColor(successColor[0], successColor[1], successColor[2]);
@@ -357,8 +381,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(10);
     const statusLabel = booking.status === 'lunas' ? 'LUNAS' : 
-                        booking.status === 'dp' ? 'DP PAID' : 
-                        booking.status === 'dp_partial' ? 'PARTIAL DP' : 
+                        booking.status === 'dp_partial' ? 'PARSIAL DP' : 
                         booking.status.toUpperCase();
     doc.text(statusLabel, 40, currentY + 6.5, { align: 'center' });
 
@@ -446,8 +469,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                   >
                     <option value="pending">⏳ Pending</option>
                     <option value="processing">⚙️ Processing</option>
-                    <option value="dp">💰 DP</option>
-                    <option value="dp_partial">💸 Partial DP</option>
+                    <option value="dp_partial">💸 DP (Parsial)</option>
                     <option value="lunas">💳 Lunas</option>
                     <option value="selesai">🏆 Selesai</option>
                     <option value="batal">❌ Batal</option>
@@ -488,7 +510,18 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                            <div key={idx} className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-orange/30">
                              <div className="flex flex-col">
                                <span className="text-art-text/50 font-bold uppercase">+ {item.name}</span>
-                               <span className="text-[8px] text-art-text/30">{item.count || 1}x • {item.days || 1} Hari • Rp {item.price.toLocaleString('id-ID')}</span>
+                               <span className="text-[8px] text-art-text/30 flex items-center gap-1">
+                                 {item.count || 1}x • {item.days || 1} Hari • Rp {item.price.toLocaleString('id-ID')}
+                                 <button onClick={() => {
+                                     const newPriceStr = window.prompt("Masukkan harga baru per hari (Angka saja):", item.price.toString());
+                                     if (newPriceStr !== null) {
+                                       const newPrice = parseInt(newPriceStr.replace(/[^0-9]/g, ''));
+                                       if (!isNaN(newPrice)) {
+                                         handleOpsionalPriceUpdate(booking, idx, newPrice);
+                                       }
+                                     }
+                                 }} className="text-art-orange hover:bg-art-orange/10 p-0.5 rounded ml-1"><Edit2 size={8}/></button>
+                               </span>
                              </div>
                              <span className="font-bold text-art-orange">Rp {item.subtotal.toLocaleString('id-ID')}</span>
                            </div>
@@ -516,15 +549,13 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
                             booking.status === 'lunas' ? 'bg-art-green text-white' : 
                             booking.status === 'selesai' ? 'bg-gray-800 text-white' :
-                            booking.status === 'dp' ? 'bg-art-orange text-white' : 
                             booking.status === 'dp_partial' ? 'bg-yellow-500 text-white' :
                             booking.status === 'processing' ? 'bg-blue-600 text-white' :
                             'bg-gray-200 text-art-text/60'
                          }`}>{
                             booking.status === 'pending' ? 'Menunggu' : 
                             booking.status === 'processing' ? 'Diproses' : 
-                            booking.status === 'dp' ? 'DP Masuk' :
-                            booking.status === 'dp_partial' ? 'DP Sebagian' :
+                            booking.status === 'dp_partial' ? 'DP Parsial' :
                             booking.status === 'lunas' ? 'Lunas' : 
                             booking.status === 'selesai' ? 'Selesai' :
                             'Batal'
@@ -1345,18 +1376,13 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
       const end = new Date(start);
       end.setDate(start.getDate() + (days - 1));
       
-      const formatDay = (date: Date) => date.getDate();
-      const formatMonth = (date: Date) => {
-        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-        return months[date.getMonth()];
+      const formatDate = (date: Date) => {
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
       };
 
-      if (start.getMonth() === end.getMonth()) {
-        if (days === 1) return `${formatDay(start)} ${formatMonth(start)}`;
-        return `${formatDay(start)}-${formatDay(end)} ${formatMonth(start)}`;
-      } else {
-        return `${formatDay(start)} ${formatMonth(start)} - ${formatDay(end)} ${formatMonth(end)}`;
-      }
+      if (days === 1) return formatDate(start);
+      return `${formatDate(start)} - ${formatDate(end)}`;
     } catch (e) {
       return "";
     }
