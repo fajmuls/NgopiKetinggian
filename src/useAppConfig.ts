@@ -17,7 +17,6 @@ export const DIFFICULTY_LEVELS = [
   "Menengah",
   "Menengah - Mahir",
   "Mahir",
-  "Sangat Mahir",
   "Ahli"
 ];
 export const DURATION_LEVELS = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
@@ -58,6 +57,7 @@ export interface AppConfig {
   homepage: {
     heroSub?: string;
     heroFeatures?: string;
+    heroTitlePrefix?: string;
     heroTitle: string;
     heroDescription: string;
     heroTagline?: string;
@@ -130,7 +130,8 @@ const getDefaultWebsiteData = () => ({
   homepage: {
     heroSub: "Open Trip Eksklusif",
     heroFeatures: "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin",
-    heroTitle: "Trip Ngopi di Ketinggian",
+    heroTitlePrefix: "Trip",
+    heroTitle: "Ngopi Di\nKetinggian",
     heroDescription: "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.",
     heroTagline: "Jaya / Jaya / Jaya",
     heroPhotoUrl: "",
@@ -208,7 +209,13 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         if (snap.exists()) {
           const data = snap.data();
           if (name === 'website') {
-            currentConfig = { ...currentConfig, ...data };
+            currentConfig = { 
+              ...currentConfig, 
+              ...data,
+              facilities: data.facilities || currentConfig.facilities,
+              visibilities: { ...currentConfig.visibilities, ...(data.visibilities || {}) },
+              homepage: { ...currentConfig.homepage, ...(data.homepage || {}) }
+            };
           } else if (name === 'destinations') {
             currentConfig.destinationsData = data.items || [];
           } else if (name === 'leaders') {

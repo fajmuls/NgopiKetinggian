@@ -347,6 +347,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         setIsConfirming(false);
         setIsSubmittingBooking(false);
         onClose(); 
+        setIsHistoryOpen(true);
       }, 1500);
     };
 
@@ -2352,7 +2353,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap"
             >
-              {config.homepage?.heroTitle || "Trip Ngopi Di Ketinggian"}
+              <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
             </motion.h1>
             
             <motion.p 
@@ -2475,11 +2476,11 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="absolute inset-0 bg-art-orange rounded-[40px] transform rotate-3 scale-105 z-0" />
+              <div className="absolute inset-0 bg-art-orange rounded-3xl transform rotate-3 scale-105 z-0" />
               {config.ceritaVideoUrl.includes('youtube.com') || config.ceritaVideoUrl.includes('youtu.be') ? (
                 <iframe 
                   src={config.ceritaVideoUrl}
-                  className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/5] grayscale-[10%] border-8 border-white"
+                  className="relative z-10 rounded-3xl shadow-2xl w-full aspect-video grayscale-[10%] border-8 border-white"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
@@ -2488,7 +2489,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                   autoPlay loop muted playsInline controls
                   src={config.ceritaVideoUrl} 
                   poster="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop"
-                  className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/5] grayscale-[10%] border-8 border-white"
+                  className="relative z-10 rounded-3xl shadow-2xl w-full object-cover aspect-video grayscale-[10%] border-8 border-white"
                 />
               )}
               <motion.div 

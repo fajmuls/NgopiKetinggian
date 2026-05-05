@@ -1076,9 +1076,10 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
 
 const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => {
   const [url, setUrl] = useState(config.ceritaVideoUrl);
+  const [data, setData] = useState(config.homepage || {});
 
   const handleSave = () => {
-    updateConfig({ ceritaVideoUrl: url });
+    updateConfig({ ceritaVideoUrl: url, homepage: data });
     showToast('Disimpan!');
   };
 
@@ -1088,7 +1089,38 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
         <p className="font-bold">URL Video Secangkir Cerita</p>
         <input className="border-2 border-art-text p-3 rounded" value={url} onChange={e => setUrl(e.target.value)} placeholder="Misal: https://www.youtube.com/embed/..." />
         <p className="text-xs text-art-text/60">Gunakan link embed YouTube atau file MP4 yang didukung.</p>
-        <div className="flex gap-2 w-fit">
+        
+        <div className="space-y-4 pt-6 border-t border-art-text/10">
+          <h3 className="font-bold text-sm uppercase">Edit Teks Secangkir Cerita</h3>
+          <input className="w-full border p-2 rounded" value={data.ceritaTitle || ''} onChange={e => setData({...data, ceritaTitle: e.target.value})} placeholder="Judul Bagian Cerita" />
+          <input className="w-full border p-2 rounded" value={data.ceritaSub || ''} onChange={e => setData({...data, ceritaSub: e.target.value})} placeholder="Sub-judul Bagian Cerita" />
+          <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph1 || ''} onChange={e => setData({...data, ceritaParagraph1: e.target.value})} placeholder="Paragraf Pertama Cerita"></textarea>
+          <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph2 || ''} onChange={e => setData({...data, ceritaParagraph2: e.target.value})} placeholder="Paragraf Kedua Cerita"></textarea>
+        
+          <div className="pt-4 space-y-4">
+            <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+              <h4 className="font-bold text-xs uppercase">Edit Fitur Cerita</h4>
+              <button type="button" onClick={() => setData({...data, ceritaFeatures: [...(data.ceritaFeatures || []), { title: '', desc: '' }]})} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Fitur</button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(data.ceritaFeatures || []).map((feat: any, idx: number) => (
+                <div key={idx} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20">
+                  <button type="button" onClick={() => {
+                    const nf = [...data.ceritaFeatures]; nf.splice(idx, 1); setData({...data, ceritaFeatures: nf});
+                  }} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
+                  <input className="w-full border p-2 rounded text-xs" value={feat.title} onChange={e => {
+                    const nf = [...data.ceritaFeatures]; nf[idx].title = e.target.value; setData({...data, ceritaFeatures: nf});
+                  }} placeholder="Judul Fitur" />
+                  <textarea className="w-full border p-2 rounded text-xs h-16" value={feat.desc} onChange={e => {
+                    const nf = [...data.ceritaFeatures]; nf[idx].desc = e.target.value; setData({...data, ceritaFeatures: nf});
+                  }} placeholder="Deskripsi Fitur"></textarea>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 w-fit mt-6">
           <button onClick={() => {
             customConfirm("Beneran mau reset cerita ke default?", () => {
               setUrl(defaultVideo);
@@ -1138,43 +1170,14 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         <h3 className="font-bold text-sm uppercase">Edit Teks Homepage</h3>
         <input className="w-full border p-2 rounded" value={data.heroSub || ''} onChange={e => setData({...data, heroSub: e.target.value})} placeholder="Slogan Atas (Cth: Open Trip Eksklusif)" />
         <input className="w-full border p-2 rounded" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fitur Utama (Cth: Fasilitas Premium...)" />
-        <textarea className="w-full border p-2 rounded" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Judul Hero (Gunakan baris baru untuk membuat jarak)"></textarea>
+        <input className="w-full border p-2 rounded" value={data.heroTitlePrefix || ''} onChange={e => setData({...data, heroTitlePrefix: e.target.value})} placeholder="Kata Pertama Judul Hero (Cth: Trip)" />
+        <textarea className="w-full border p-2 rounded" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Sisa Judul Hero (Gunakan baris baru)"></textarea>
         <textarea className="w-full border p-2 rounded" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description"></textarea>
         <input className="w-full border p-2 rounded" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="Tagline (Cth: Jaya / Jaya / Jaya)" />
         
         <div className="space-y-2">
           <label className="text-xs font-bold">Link Foto Latar Belakang Hero</label>
           <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
-        </div>
-      </div>
-
-      <div className="space-y-4 pt-6 border-t border-art-text/10">
-        <h3 className="font-bold text-sm uppercase">Edit Teks Secangkir Cerita</h3>
-        <input className="w-full border p-2 rounded" value={data.ceritaTitle || ''} onChange={e => setData({...data, ceritaTitle: e.target.value})} placeholder="Judul Bagian Cerita" />
-        <input className="w-full border p-2 rounded" value={data.ceritaSub || ''} onChange={e => setData({...data, ceritaSub: e.target.value})} placeholder="Sub-judul Bagian Cerita" />
-        <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph1 || ''} onChange={e => setData({...data, ceritaParagraph1: e.target.value})} placeholder="Paragraf Pertama Cerita"></textarea>
-        <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph2 || ''} onChange={e => setData({...data, ceritaParagraph2: e.target.value})} placeholder="Paragraf Kedua Cerita"></textarea>
-      
-        <div className="pt-4 space-y-4">
-          <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-            <h4 className="font-bold text-xs uppercase">Edit Fitur Cerita</h4>
-            <button type="button" onClick={() => setData({...data, ceritaFeatures: [...(data.ceritaFeatures || []), { title: '', desc: '' }]})} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Fitur</button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(data.ceritaFeatures || []).map((feat: any, idx: number) => (
-              <div key={idx} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20">
-                <button type="button" onClick={() => {
-                  const nf = [...data.ceritaFeatures]; nf.splice(idx, 1); setData({...data, ceritaFeatures: nf});
-                }} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
-                <input className="w-full border p-2 rounded text-xs" value={feat.title} onChange={e => {
-                  const nf = [...data.ceritaFeatures]; nf[idx].title = e.target.value; setData({...data, ceritaFeatures: nf});
-                }} placeholder="Judul Fitur" />
-                <textarea className="w-full border p-2 rounded text-xs h-16" value={feat.desc} onChange={e => {
-                  const nf = [...data.ceritaFeatures]; nf[idx].desc = e.target.value; setData({...data, ceritaFeatures: nf});
-                }} placeholder="Deskripsi Fitur"></textarea>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
