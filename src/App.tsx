@@ -203,6 +203,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
   Object.entries(subSelected).forEach(([key, qty]) => {
     const [parentName, subName] = key.split('|');
+    if (!selectedOpsional.includes(parentName)) return; // Only count if parent option is selected
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
     const subItem = parentOpt?.subItems?.find((s: any) => s.name === subName);
     if (subItem) {
@@ -1931,12 +1932,18 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                    <div className="flex-1 space-y-4">
                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
+                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 flex items-center gap-1.5 ${
                              b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
                              b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
                              b.status === 'dp_partial' ? 'bg-yellow-50 text-yellow-600 border-yellow-600' :
                              'bg-art-orange/10 text-art-orange border-art-orange'
                            }`}>
+                          {b.status === 'pending' ? <Clock size={10} /> : 
+                           b.status === 'processing' ? <Send size={10} /> :
+                           b.status === 'dp_partial' ? <CreditCard size={10} /> :
+                           b.status === 'lunas' ? <CheckCircle2 size={10} /> :
+                           b.status === 'selesai' ? <CheckCircle2 size={10} /> : null
+                          }
                           {b.status === 'pending' ? 'Diproses' : 
                            b.status === 'processing' ? 'Admin Memproses' : 
                            b.status === 'dp_partial' ? 'DP Parsial' :
