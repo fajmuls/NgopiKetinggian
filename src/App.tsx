@@ -1,9 +1,9 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2 } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, deleteDoc, doc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
@@ -208,8 +208,8 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     if (subItem) {
       const pricePerDay = subItem.price ? Number(subItem.price) * 1000 : 0;
       const numQty = Number(qty);
-      // Rental items (sub-items) always have fixed prices or are auto-calculated
-      const totalItemPrice = pricePerDay ? pricePerDay * numQty * tripDays : 0;
+      // Rental items (sub-items) always calculated: price * qty * days
+      const totalItemPrice = pricePerDay * numQty * tripDays;
       
       opsionalItemsList.push({
         name: subName,
@@ -218,7 +218,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         count: numQty,
         days: tripDays,
         subtotal: totalItemPrice,
-        status: 'confirmed',
+        status: pricePerDay > 0 ? 'confirmed' : 'pending_price',
         isRental: true
       });
       totalOpsionalPrice += totalItemPrice;
@@ -227,23 +227,22 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
-    // Only add if it doesn't have sub-items (standalone options)
     if (opt && (!opt.subItems || opt.subItems.length === 0)) {
-      const pricePerDay = opt.price ? Number(opt.price) * 1000 : 0;
-      const isPending = !pricePerDay || pricePerDay === 0;
-      const totalItemPrice = pricePerDay ? pricePerDay * tripDays : 0;
+      const basePrice = opt.price ? Number(opt.price) * 1000 : 0;
+      // Fixed items (standalone): no multiplication by days or pax
+      const isPending = basePrice === 0;
       
       opsionalItemsList.push({
         name: optName,
         parentName: optName,
-        price: pricePerDay,
-        count: currentPesertaCount, // Default to per pax for standalone if no sub-items
-        days: tripDays,
-        subtotal: pricePerDay * currentPesertaCount * tripDays,
+        price: basePrice,
+        count: 1,
+        days: 1, 
+        subtotal: basePrice,
         status: isPending ? 'pending_price' : 'confirmed',
         isRental: false
       });
-      totalOpsionalPrice += (pricePerDay * currentPesertaCount * tripDays);
+      totalOpsionalPrice += basePrice;
     }
   });
 
@@ -1931,12 +1930,13 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                 <div className="flex flex-col md:flex-row gap-6 relative z-10">
                    <div className="flex-1 space-y-4">
                      <div className="flex items-center justify-between">
-                        <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
-                          b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
-                          b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
-                          b.status === 'dp_partial' ? 'bg-yellow-50 text-yellow-600 border-yellow-600' :
-                          'bg-art-orange/10 text-art-orange border-art-orange'
-                        }`}>
+                        <div className="flex items-center gap-2">
+                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
+                             b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
+                             b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
+                             b.status === 'dp_partial' ? 'bg-yellow-50 text-yellow-600 border-yellow-600' :
+                             'bg-art-orange/10 text-art-orange border-art-orange'
+                           }`}>
                           {b.status === 'pending' ? 'Diproses' : 
                            b.status === 'processing' ? 'Admin Memproses' : 
                            b.status === 'dp_partial' ? 'DP Parsial' :
@@ -1944,7 +1944,24 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                            b.status === 'selesai' ? 'Trip Selesai' : 
                            'Dibatalkan'}
                         </div>
-                        <span className="text-[10px] font-bold text-art-text/30">{b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '...'}</span>
+                           <span className="text-[10px] font-bold text-art-text/30 border-l border-art-text/10 pl-2">🕒 {b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '...'}</span>
+                        </div>
+                         <button 
+                           onClick={async () => {
+                             if (window.confirm("Hapus riwayat pesanan ini?")) {
+                               try {
+                                 await deleteDoc(doc(db, 'bookings', b.id));
+                                 playPop();
+                                 showToast("Pesanan dihapus!");
+                               } catch (error) {
+                                 console.error("Error:", error);
+                               }
+                             }
+                           }}
+                           className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
+                         >
+                           <Trash2 size={12} /> Hapus
+                         </button>
                      </div>
 
                      {b.status === 'pending' && activeTab === 'proses' && (
@@ -1952,7 +1969,13 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                      )}
                      
                      <div>
-                        <h4 className="text-xl font-black uppercase tracking-tighter text-art-text mb-1">{b.destinasi}</h4>
+                        <h4 className="text-2xl font-black uppercase tracking-tighter text-art-text mb-1">{b.destinasi}</h4>
+                          <div className="text-right">
+                             <p className="text-[9px] font-black text-art-text/30 uppercase tracking-widest leading-tight">Keberangkatan</p>
+                             <div className="bg-art-bg border border-art-text/10 px-2 py-0.5 rounded-lg inline-block">
+                               <p className="text-[10px] font-black text-art-text">{b.jadwal}</p>
+                             </div>
+                          </div>
                         <div className="flex flex-wrap items-center gap-1.5 md:gap-3">
                            <p className="text-[11px] font-bold text-art-text/50 uppercase tracking-widest flex items-center gap-1.5"><MapPin size={10} /> {b.jalur} • {b.durasi}</p>
                            <span className="text-[10px] text-art-text/20">•</span>
@@ -1964,7 +1987,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                         <div className="flex justify-between items-center text-xs border-b border-art-text/5 pb-2">
                            <div className="flex flex-col">
                               <span className="text-[9px] font-black text-art-orange uppercase tracking-widest">Utama: Paket Trip {b.destinasi}</span>
-                              <span className="font-black text-art-text text-xs">{b.peserta} Pax • {b.jadwal}</span>
+                              <span className="font-black text-art-text text-xs">{b.peserta} Pax</span>
                            </div>
                            <span className="font-black text-art-text">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
                         </div>

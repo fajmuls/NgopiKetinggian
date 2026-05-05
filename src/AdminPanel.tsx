@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2 } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -423,9 +423,28 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-black uppercase tracking-widest text-art-text">Daftar Booking Masuk</h3>
-        <span className="text-[10px] font-black uppercase px-3 py-1 bg-art-text text-white rounded-full">{bookings.length} Pesanan</span>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-3xl border-2 border-art-text shadow-sm">
+        <div>
+          <h2 className="text-3xl font-black text-art-text uppercase tracking-tighter">Booking Dashboard</h2>
+          <p className="text-xs font-bold text-art-text/40 uppercase tracking-widest">Manajemen reservasi dan rincian pembayaran</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-black uppercase px-4 py-2 bg-art-bg border-2 border-art-text text-art-text rounded-xl">{bookings.length} Total Pesanan</span>
+          <button 
+            onClick={async () => {
+              if (window.confirm("⚠️ PERINGATAN: Hapus SELURUH database booking? Tindakan ini tidak bisa dibatalkan.")) {
+                const bookingsToDelete = bookings.map(b => b.id);
+                for (const id of bookingsToDelete) {
+                  await deleteDoc(doc(db, 'bookings', id));
+                }
+                showToast("Database berhasil direset!");
+              }
+            }}
+            className="px-6 py-2.5 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-[4px_4px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none"
+          >
+            Reset Database
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -453,41 +472,50 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                   <button 
-                     onClick={() => window.open(`https://wa.me/${booking.wa.startsWith('0') ? '62' + booking.wa.substring(1) : booking.wa}?text=${encodeURIComponent(`Halo ${booking.nama}, ini dari Ngopi di Ketinggian. Kami ingin mengonfirmasi booking Anda untuk trip ${booking.destinasi}.`)}`, '_blank')}
-                     className="px-3 py-2 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-[#20ba59] transition-colors shadow-sm"
-                   >
-                     <Send size={14} /> Contact WA
-                   </button>
-                   <button 
-                    onClick={() => generateInvoice(booking)}
-                    className="p-2 border-2 border-art-text/10 text-art-text/60 rounded-xl hover:bg-art-bg transition-colors"
-                    title="Download Invoice"
-                  >
-                    <Download size={16} />
-                  </button>
-                  <select 
-                    value={booking.status} 
-                    onChange={(e) => handleStatusUpdate(booking.id, e.target.value)}
-                    className={`text-[10px] font-black uppercase px-4 py-2 rounded-xl outline-none cursor-pointer border-2 transition-all ${
-                      booking.status === 'lunas' ? 'bg-art-green text-white border-art-green' : 
-                      booking.status === 'selesai' ? 'bg-gray-800 text-white border-gray-800' :
-                      booking.status === 'processing' ? 'bg-blue-600 text-white border-blue-600' :
-                      booking.status === 'batal' ? 'bg-red-500 text-white border-red-500' : 
-                      'bg-white border-art-text'
-                    }`}
-                  >
-                    <option value="pending">⏳ Pending</option>
-                    <option value="processing">⚙️ Processing</option>
-                    <option value="dp_partial">💸 DP (Parsial)</option>
-                    <option value="lunas">💳 Lunas</option>
-                    <option value="selesai">🏆 Selesai</option>
-                    <option value="batal">❌ Batal</option>
-                  </select>
-                  <button onClick={() => handleDelete(booking.id)} className="p-2 border-2 border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
-                    <Trash2 size={16} />
-                  </button>
+                <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+                   <div className="flex items-center gap-2">
+                     <div className="relative">
+                       <select 
+                         value={booking.status || 'pending'} 
+                         onChange={(e) => handleStatusUpdate(booking.id, e.target.value)}
+                         className={`pl-3 pr-8 py-2 rounded-xl text-[10px] font-black uppercase appearance-none cursor-pointer transition-all border-2 ${
+                           booking.status === 'lunas' ? 'bg-art-green/10 border-art-green/20 text-art-green' : 
+                               booking.status === 'selesai' ? 'bg-gray-100 border-gray-200 text-gray-500' :
+                               booking.status === 'dp_partial' ? 'bg-yellow-100 border-yellow-200 text-yellow-700' :
+                               booking.status === 'processing' ? 'bg-blue-100 border-blue-200 text-blue-700' :
+                               'bg-white border-art-text/20 text-art-text/60'
+                         }`}
+                       >
+                         <option value="pending">Pending</option>
+                         <option value="processing">Proses</option>
+                         <option value="dp_partial">DP Parsial</option>
+                         <option value="lunas">Lunas</option>
+                         <option value="selesai">Selesai</option>
+                         <option value="batal">Batal</option>
+                       </select>
+                       <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-40" />
+                     </div>
+
+                     <button 
+                       onClick={() => window.open(`https://wa.me/${booking.wa.startsWith('0') ? '62' + booking.wa.substring(1) : booking.wa}?text=${encodeURIComponent(`Halo ${booking.nama}, ini dari Ngopi di Ketinggian. Kami ingin mengonfirmasi booking Anda untuk trip ${booking.destinasi}.`)}`, '_blank')}
+                       className="px-4 py-2 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-[#20ba59] transition-all shadow-sm active:scale-95"
+                     >
+                       <Send size={14} /> Contact WA
+                     </button>
+                   </div>
+
+                   <div className="flex items-center gap-2 border-l border-art-text/10 pl-2">
+                     <button 
+                      onClick={() => generateInvoice(booking)}
+                      className="p-2 border-2 border-art-text/10 text-art-text/60 rounded-xl hover:bg-art-bg transition-colors"
+                      title="Download Invoice"
+                    >
+                      <Download size={16} />
+                    </button>
+                    <button onClick={() => handleDelete(booking.id)} className="p-2 border-2 border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-colors">
+                      <Trash2 size={16} />
+                    </button>
+                   </div>
                 </div>
               </div>
               
