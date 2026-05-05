@@ -237,13 +237,13 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         name: optName,
         parentName: optName,
         price: pricePerDay,
-        count: 1,
+        count: currentPesertaCount, // Default to per pax for standalone if no sub-items
         days: tripDays,
-        subtotal: totalItemPrice,
+        subtotal: pricePerDay * currentPesertaCount * tripDays,
         status: isPending ? 'pending_price' : 'confirmed',
         isRental: false
       });
-      totalOpsionalPrice += totalItemPrice;
+      totalOpsionalPrice += (pricePerDay * currentPesertaCount * tripDays);
     }
   });
 
@@ -401,30 +401,30 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       <p className="text-xs font-black text-art-text">{pesertaCount} Pax</p>
                    </div>
                 </div>
-
-                    <div className="pt-3 border-t border-white/5 space-y-2">
+ 
+                    <div className="pt-3 border-t border-art-text/10 space-y-2">
                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-bold text-white/50 uppercase tracking-widest">Trip Pax ({pesertaCount}x)</span>
-                          <span className="font-black text-white">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
+                          <span className="font-bold text-art-text/50 uppercase tracking-widest">Trip Pax ({pesertaCount}x)</span>
+                          <span className="font-black text-art-text">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
                        </div>
                        
                        {opsionalItemsList.length > 0 && (
                          <div className="space-y-1.5 pt-1">
                             <p className="text-[9px] font-black text-art-orange uppercase tracking-widest mb-1 italic">Opsi Tambahan Terpilih:</p>
                             {opsionalItemsList.map((item, idx) => (
-                               <div key={idx} className="flex justify-between items-center text-[10px] bg-white/5 p-2 rounded-lg border border-white/10">
+                               <div key={idx} className="flex justify-between items-center text-[10px] bg-art-text/5 p-2 rounded-lg border border-art-text/10">
                                  <div className="flex flex-col">
-                                   <span className="font-black text-white uppercase text-[9px]">{item.name}</span>
-                                   <span className="text-[8px] text-white/40">{item.count}x • {item.days} Hari</span>
+                                   <span className="font-black text-art-text uppercase text-[9px]">{item.name}</span>
+                                   <span className="text-[8px] text-art-text/40">{item.count}x • {item.days} Hari</span>
                                  </div>
-                                 <span className={`font-black text-[10px] ${item.status === 'pending_price' ? 'text-art-orange animate-pulse italic' : 'text-white'}`}>
+                                 <span className={`font-black text-[10px] ${item.status === 'pending_price' ? 'text-art-orange animate-pulse italic' : 'text-art-text'}`}>
                                    {item.status === 'pending_price' ? 'Menunggu Konf. Admin' : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
                                  </span>
                                </div>
                             ))}
                          </div>
                        )}
-
+ 
                        {isPromoValid && (
                          <div className="flex justify-between items-center text-[10px] pt-1">
                             <span className="font-black text-art-green uppercase">🎁 Promo: {promoCode}</span>
@@ -432,11 +432,11 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                          </div>
                        )}
                     </div>
-
-                    <div className="pt-4 border-t-2 border-dashed border-white/10 flex justify-between items-end">
+ 
+                    <div className="pt-4 border-t-2 border-dashed border-art-text/10 flex justify-between items-end">
                        <div>
-                          <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Total Estimasi:</p>
-                          <p className="text-3xl font-black text-white tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</p>
+                          <p className="text-[9px] font-black text-art-text/30 uppercase tracking-widest mb-1">Total Estimasi:</p>
+                          <p className="text-3xl font-black text-art-text tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</p>
                        </div>
                     </div>
              </div>
@@ -706,7 +706,11 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                                           />
                                           <div className="flex flex-col">
                                              <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name}</span>
-                                             {opt.priceInfo && <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>}
+                                             {opt.price ? (
+                                               <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {(opt.price * 1000).toLocaleString('id-ID')} / Hari</span>
+                                             ) : opt.priceInfo && (
+                                               <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>
+                                             )}
                                           </div>
                                        </label>
                                        
@@ -718,7 +722,11 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                                                    <div key={sIdx} className="flex items-center justify-between gap-4">
                                                       <div className="flex flex-col">
                                                          <span className="text-[9px] font-bold text-art-text/60 uppercase">{sub.name}</span>
-                                                         {sub.priceInfo && <span className="text-[8px] font-medium text-art-text/30 italic">{sub.priceInfo}</span>}
+                                                         {sub.price ? (
+                                                            <span className="text-[8px] font-black text-art-orange/70 italic uppercase tracking-tighter">Rp {(sub.price * 1000).toLocaleString('id-ID')} / Hari</span>
+                                                          ) : sub.priceInfo && (
+                                                            <span className="text-[8px] font-medium text-art-text/30 italic">{sub.priceInfo}</span>
+                                                          )}
                                                       </div>
                                                       <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
                                                          <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, -1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
@@ -1731,7 +1739,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     setLoading(true);
     const q = query(
       collection(db, 'bookings'), 
-      where('email', '==', user.email)
+      where('userId', '==', user.uid)
     );
     const unsubscribe = onSnapshot(q, (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
