@@ -11,7 +11,15 @@ export interface FacilityOption {
   subItems?: { name: string, priceInfo?: string, price?: number }[];
 }
 
-export const DIFFICULTY_LEVELS = ["Beginner to Intermediate", "Intermediate Only", "Intermediate to Advanced", "Very Advanced"];
+export const DIFFICULTY_LEVELS = [
+  "Pemula",
+  "Pemula - Menengah",
+  "Menengah",
+  "Menengah - Mahir",
+  "Mahir",
+  "Sangat Mahir",
+  "Ahli"
+];
 export const DURATION_LEVELS = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
 
 import { customAlert } from './GlobalDialog';
@@ -48,10 +56,21 @@ export interface AppConfig {
   ceritaVideoUrl: string;
   promoCodes: { code: string, discount: number }[];
   homepage: {
+    heroSub?: string;
+    heroFeatures?: string;
     heroTitle: string;
     heroDescription: string;
+    heroTagline?: string;
     heroPhotoUrl: string;
     heroSlides?: { name: string, height: string, image: string }[];
+    ceritaTitle?: string;
+    ceritaSub?: string;
+    ceritaParagraph1?: string;
+    ceritaParagraph2?: string;
+    ceritaFeatures?: { title: string, desc: string }[];
+    leaderTitle?: string;
+    leaderSub?: string;
+    leaderParagraph?: string;
   };
 }
 
@@ -109,9 +128,24 @@ const getDefaultWebsiteData = () => ({
     { code: "Emikari", discount: 10 }
   ],
   homepage: {
+    heroSub: "Open Trip Eksklusif",
+    heroFeatures: "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin",
     heroTitle: "Trip Ngopi di Ketinggian",
-    heroDescription: "Rasakan sensasi ngopi di atas awan.",
+    heroDescription: "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.",
+    heroTagline: "Jaya / Jaya / Jaya",
     heroPhotoUrl: "",
+    ceritaTitle: "Secangkir Cerita",
+    ceritaSub: "di Atas Awan",
+    ceritaParagraph1: "Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman.",
+    ceritaParagraph2: "Berbekal pengalaman panjang ini, meracik kopi di alam terbuka tak lagi sekadar ritual bagi kami, ia menjelma jadi perayaan kebersamaan. Lupakan sejenak semrawutnya ibukota. Kami siapkan ritme perjalanan yang santai, aman, penuh cerita, dan tentu saja... kopi rindu tebal yang diseduh di waktu yang paling tepat. Sesuatu yang tak akan pernah Anda temukan walau di coffee shop semewah apa pun di tengah kota.",
+    ceritaFeatures: [
+      { title: "Manual Brew Experience", desc: "Nikmati V60, Chemex, atau Aeropress dari barista kami." },
+      { title: "Grup Eksklusif", desc: "Maksimal 12 orang per perjalanan untuk keintiman." },
+      { title: "Peralatan Premium", desc: "Tenda The North Face dll untuk kenyamanan istirahat." }
+    ],
+    leaderTitle: "Kenalan dengan",
+    leaderSub: "Trip Leader Kami",
+    leaderParagraph: "Beberapa kawan daki yang akan memandu dan memastikan keamanan serta kenyamanan perjalananmu ke puncak.",
     heroSlides: [
       {
          name: "Gunung Gede Pangrango",

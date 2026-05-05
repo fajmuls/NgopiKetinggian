@@ -15,7 +15,7 @@ service cloud.firestore {
 
     function isValidBooking(data) {
       return data.keys().hasAll(['userId', 'nama', 'email', 'wa', 'destinasi', 'jalur', 'durasi', 'jadwal', 'peserta', 'createdAt', 'status', 'type', 'totalPrice'])
-        && data.size() >= 13 && data.size() <= 15
+        && data.size() >= 13 && data.size() <= 20
         && (data.userId == request.auth.uid || isAdmin())
         && data.nama is string && data.nama.size() <= 200
         && data.email is string && data.email.size() <= 200
@@ -28,6 +28,10 @@ service cloud.firestore {
         && data.status is string && data.status.size() <= 50
         && data.type is string && (data.type == 'open' || data.type == 'private')
         && data.totalPrice is number
+        && (!('opsionalItems' in data) || data.opsionalItems is list)
+        && (!('opsionalPrice' in data) || data.opsionalPrice is number)
+        && (!('discountAmount' in data) || data.discountAmount is number)
+        && (!('promoCode' in data) || data.promoCode is string)
         && data.createdAt is timestamp
         && (!('opsionalText' in data) || (data.opsionalText is string && data.opsionalText.size() <= 1000))
         && (!('deskripsi' in data) || (data.deskripsi is string && data.deskripsi.size() <= 2000));

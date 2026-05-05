@@ -724,9 +724,9 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 sm:items-center mb-2">
-              <div className="flex items-center flex-1 min-w-[120px]">
-                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Region:</span>
+            <div className="flex flex-wrap gap-2 sm:items-start mb-2">
+              <div className="flex flex-col flex-1 min-w-[120px]">
+                <span className="text-[9px] font-bold uppercase mb-1">Region:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.region || 'Jawa'} onChange={e => {
                   const nd = [...data];
                   nd[i].region = e.target.value;
@@ -734,8 +734,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Cth: Jawa Tengah" />
               </div>
               
-              <div className="flex items-center flex-1 min-w-[120px]">
-                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Kuota:</span>
+              <div className="flex flex-col flex-1 min-w-[120px]">
+                <span className="text-[9px] font-bold uppercase mb-1">Kuota:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.kuota} onChange={e => {
                   const nd = [...data];
                   nd[i].kuota = e.target.value;
@@ -743,8 +743,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Cth: 2-12 Pax" />
               </div>
 
-              <div className="flex items-center flex-1 min-w-[120px]">
-                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Mepo:</span>
+              <div className="flex flex-col flex-1 min-w-[120px]">
+                <span className="text-[9px] font-bold uppercase mb-1">Mepo:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.mepo || ''} onChange={e => {
                   const nd = [...data];
                   nd[i].mepo = e.target.value;
@@ -752,8 +752,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Basecamp" />
               </div>
               
-              <div className="flex items-center flex-1 min-w-[120px]">
-                <span className="text-[10px] font-bold w-12 shrink-0 uppercase">Beans:</span>
+              <div className="flex flex-col flex-1 min-w-[120px]">
+                <span className="text-[9px] font-bold uppercase mb-1">Beans:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.beans || ''} onChange={e => {
                   const nd = [...data];
                   nd[i].beans = e.target.value;
@@ -761,9 +761,9 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Kopi" />
               </div>
               
-              <div className="flex items-center flex-1 min-w-[120px]">
-                <span className="text-[10px] font-bold w-14 shrink-0 uppercase">Level:</span>
-                <select className="border p-2 rounded text-xs w-full" value={dest.difficulty || ''} onChange={e => {
+              <div className="flex flex-col flex-1 min-w-[120px]">
+                <span className="text-[9px] font-bold uppercase mb-1">Level:</span>
+                <select className="border p-2 rounded text-[11px] w-full" value={dest.difficulty || ''} onChange={e => {
                   const nd = [...data];
                   nd[i].difficulty = e.target.value;
                   setData(nd);
@@ -1098,6 +1098,27 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
           }} className="bg-red-100 text-red-600 px-4 py-3 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
         </div>
+        
+        {/* Video Preview */}
+        {url && (
+          <div className="mt-4 border-2 border-art-text/20 p-4 rounded-lg bg-gray-50 flex flex-col max-w-sm">
+            <p className="text-xs font-bold mb-2 uppercase">Preview Video</p>
+            {url.includes('youtube.com') || url.includes('youtu.be') ? (
+              <iframe 
+                src={url}
+                className="w-full aspect-[4/5] object-cover rounded shadow"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video 
+                autoPlay loop muted playsInline controls
+                src={url} 
+                className="w-full aspect-[4/5] object-cover rounded shadow bg-black"
+              />
+            )}
+          </div>
+        )}
        </div>
     </div>
   )
@@ -1115,12 +1136,53 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
     <div className="bg-white p-4 rounded-lg border-2 border-art-text space-y-8">
       <div className="space-y-4">
         <h3 className="font-bold text-sm uppercase">Edit Teks Homepage</h3>
-        <input className="w-full border p-2 rounded" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Hero Title" />
-        <input className="w-full border p-2 rounded" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description" />
+        <input className="w-full border p-2 rounded" value={data.heroSub || ''} onChange={e => setData({...data, heroSub: e.target.value})} placeholder="Slogan Atas (Cth: Open Trip Eksklusif)" />
+        <input className="w-full border p-2 rounded" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fitur Utama (Cth: Fasilitas Premium...)" />
+        <textarea className="w-full border p-2 rounded" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Judul Hero (Gunakan baris baru untuk membuat jarak)"></textarea>
+        <textarea className="w-full border p-2 rounded" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Hero Description"></textarea>
+        <input className="w-full border p-2 rounded" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="Tagline (Cth: Jaya / Jaya / Jaya)" />
+        
         <div className="space-y-2">
           <label className="text-xs font-bold">Link Foto Latar Belakang Hero</label>
           <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
         </div>
+      </div>
+
+      <div className="space-y-4 pt-6 border-t border-art-text/10">
+        <h3 className="font-bold text-sm uppercase">Edit Teks Secangkir Cerita</h3>
+        <input className="w-full border p-2 rounded" value={data.ceritaTitle || ''} onChange={e => setData({...data, ceritaTitle: e.target.value})} placeholder="Judul Bagian Cerita" />
+        <input className="w-full border p-2 rounded" value={data.ceritaSub || ''} onChange={e => setData({...data, ceritaSub: e.target.value})} placeholder="Sub-judul Bagian Cerita" />
+        <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph1 || ''} onChange={e => setData({...data, ceritaParagraph1: e.target.value})} placeholder="Paragraf Pertama Cerita"></textarea>
+        <textarea className="w-full border p-2 rounded h-24" value={data.ceritaParagraph2 || ''} onChange={e => setData({...data, ceritaParagraph2: e.target.value})} placeholder="Paragraf Kedua Cerita"></textarea>
+      
+        <div className="pt-4 space-y-4">
+          <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+            <h4 className="font-bold text-xs uppercase">Edit Fitur Cerita</h4>
+            <button type="button" onClick={() => setData({...data, ceritaFeatures: [...(data.ceritaFeatures || []), { title: '', desc: '' }]})} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Fitur</button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {(data.ceritaFeatures || []).map((feat: any, idx: number) => (
+              <div key={idx} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20">
+                <button type="button" onClick={() => {
+                  const nf = [...data.ceritaFeatures]; nf.splice(idx, 1); setData({...data, ceritaFeatures: nf});
+                }} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
+                <input className="w-full border p-2 rounded text-xs" value={feat.title} onChange={e => {
+                  const nf = [...data.ceritaFeatures]; nf[idx].title = e.target.value; setData({...data, ceritaFeatures: nf});
+                }} placeholder="Judul Fitur" />
+                <textarea className="w-full border p-2 rounded text-xs h-16" value={feat.desc} onChange={e => {
+                  const nf = [...data.ceritaFeatures]; nf[idx].desc = e.target.value; setData({...data, ceritaFeatures: nf});
+                }} placeholder="Deskripsi Fitur"></textarea>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4 pt-6 border-t border-art-text/10">
+        <h3 className="font-bold text-sm uppercase">Edit Teks Trip Leader</h3>
+        <input className="w-full border p-2 rounded" value={data.leaderTitle || ''} onChange={e => setData({...data, leaderTitle: e.target.value})} placeholder="Judul Bagian Leader (Kenalan dengan)" />
+        <input className="w-full border p-2 rounded" value={data.leaderSub || ''} onChange={e => setData({...data, leaderSub: e.target.value})} placeholder="Sub-judul Bagian Leader (Trip Leader Kami)" />
+        <textarea className="w-full border p-2 rounded h-16" value={data.leaderParagraph || ''} onChange={e => setData({...data, leaderParagraph: e.target.value})} placeholder="Paragraf Trip Leader"></textarea>
       </div>
 
       <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">

@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// Help prevent double-triggering within a very short timeframe
+let lastPlayTime = 0;
+const debouncePlay = (fn: () => void) => {
+  const now = Date.now();
+  if (now - lastPlayTime < 50) return; // ignore if played within 50ms
+  lastPlayTime = now;
+  fn();
+};
+
 export const useSound = () => {
   const [volume, setVolume] = useState(() => {
     const saved = localStorage.getItem('appVolume');
@@ -15,11 +24,16 @@ export const useSound = () => {
     return () => window.removeEventListener('volumeChange', handleStorage);
   }, []);
 
-  const playClick = useCallback(() => {
+  const initCtx = () => {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return null;
+    return new AudioContext();
+  };
+
+  const playClick = useCallback(() => debouncePlay(() => {
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
+      const ctx = initCtx();
+      if (!ctx || volume <= 0) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       
@@ -35,16 +49,58 @@ export const useSound = () => {
       
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.05);
-    } catch (e) {
-      // Ignore audio errors silently
-    }
-  }, [volume]);
+    } catch (e) {}
+  }), [volume]);
+
+  const playPop = useCallback(() => debouncePlay(() => {
+    try {
+      const ctx = initCtx();
+      if (!ctx || volume <= 0) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
+      
+      gain.gain.setValueAtTime(0.0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(2.0 * volume, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.1);
+    } catch (e) {}
+  }), [volume]);
+
+  const playBack = useCallback(() => debouncePlay(() => {
+    try {
+      const ctx = initCtx();
+      if (!ctx || volume <= 0) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.15);
+      
+      gain.gain.setValueAtTime(1.5 * volume, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+    } catch (e) {}
+  }), [volume]);
 
   const playHover = useCallback(() => {
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
+      const ctx = initCtx();
+      if (!ctx || volume <= 0) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       
@@ -61,16 +117,13 @@ export const useSound = () => {
       
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.08);
-    } catch (e) {
-      // Ignore audio errors silently
-    }
+    } catch (e) {}
   }, [volume]);
 
-  const playSuccess = useCallback(() => {
+  const playSuccess = useCallback(() => debouncePlay(() => {
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
+      const ctx = initCtx();
+      if (!ctx || volume <= 0) return;
       
       // First note
       const osc1 = ctx.createOscillator();
@@ -98,11 +151,9 @@ export const useSound = () => {
       osc2.start(ctx.currentTime + 0.1);
       osc2.stop(ctx.currentTime + 0.5);
       
-    } catch (e) {
-      // Ignore audio errors silently
-    }
-  }, [volume]);
+    } catch (e) {}
+  }), [volume]);
 
-  return { playClick, playHover, playSuccess };
+  return { playClick, playHover, playSuccess, playPop, playBack };
 };
 

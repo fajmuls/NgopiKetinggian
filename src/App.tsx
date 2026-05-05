@@ -39,7 +39,7 @@ function Button({ children, className = '', variant = 'primary', onClick, ...pro
 }
 
 const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig, setIsHistoryOpen }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void, setIsHistoryOpen: (v: boolean) => void }) => {
-  const { playClick, playHover, playSuccess } = useSound();
+  const { playClick, playHover, playSuccess, playBack, playPop } = useSound();
   const [showSuccess, setShowSuccess] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [viewType, setViewType] = useState<'selection' | 'trip_list' | 'form'>('selection');
@@ -353,7 +353,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-lg rounded-[2.5rem] p-6 md:p-10 border-2 border-art-text relative max-h-[92vh] overflow-y-auto shadow-2xl">
-        <button onClick={() => { playClick(); onClose(); }} className="absolute top-8 right-8 z-10 text-art-text hover:text-art-orange transition-colors"><X size={24} /></button>
+        <button onClick={() => { playBack(); onClose(); }} className="absolute top-8 right-8 z-10 text-art-text hover:text-art-orange transition-colors"><X size={24} /></button>
         
         {showSuccess ? (
           <div className="text-center py-12 flex flex-col items-center justify-center h-full">
@@ -423,11 +423,11 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
              <div className="flex gap-3">
                 <button 
-                  onClick={() => setIsConfirming(false)} 
+                  onClick={() => { playBack(); setIsConfirming(false); }} 
                   className="flex-1 py-4 border-2 border-art-text rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-art-bg"
                 >Revisi Data</button>
                 <button 
-                  onClick={handleBookingFinal} 
+                  onClick={() => { playPop(); handleBookingFinal(); }} 
                   disabled={isSubmittingBooking}
                   className="flex-[2] py-4 bg-art-text text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[6px_6px_0px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >{isSubmittingBooking ? 'Memproses...' : 'Konfirmasi & Kirim'} <Send size={14} /></button>
@@ -439,7 +439,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
              <p className="text-[10px] font-bold text-art-text/40 mb-8 uppercase tracking-[0.2em] leading-relaxed">Persiapkan diri untuk perjalanan yang tak terlupakan.</p>
              <div className="grid grid-cols-1 gap-4">
                 <button 
-                  onClick={() => { playClick(); setCurrentType('private'); setViewType('form'); setPesertaCount(2); }}
+                  onClick={() => { playPop(); setCurrentType('private'); setViewType('form'); setPesertaCount(2); }}
                   className="group bg-white p-6 rounded-[2rem] border-2 border-art-text hover:shadow-[10px_10px_0px_0px_rgba(255,107,0,1)] hover:-translate-x-1 hover:-translate-y-1 transition-all text-left"
                 >
                    <div className="flex justify-between items-start mb-5">
@@ -454,7 +454,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 
                 <button 
                   onClick={() => { 
-                    playClick(); 
+                    playPop(); 
                     setCurrentType('open'); 
                     const available = config.openTrips?.filter((ot: any) => ot.kuotaNum > 0) || [];
                     if (available.length === 0) {
@@ -497,7 +497,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
           </div>
         ) : viewType === 'trip_list' ? (
            <div className="pt-4">
-              <button type="button" onClick={() => setViewType('selection')} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-4 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Kembali</button>
+              <button type="button" onClick={() => { playBack(); setViewType('selection'); }} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-4 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Kembali</button>
               <h3 className="text-2xl font-black uppercase text-art-text tracking-tight mb-6">Open Trip Tersedia</h3>
               
               <div className="space-y-3">
@@ -543,7 +543,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
           <form className="space-y-6 pt-2" onSubmit={handleSubmitPreview}>
              <div className="flex justify-between items-start pr-12">
                <div>
-                  <button type="button" onClick={() => setViewType(currentType === 'open' ? 'trip_list' : 'selection')} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Ganti Pilihan</button>
+                  <button type="button" onClick={() => { playBack(); setViewType(currentType === 'open' ? 'trip_list' : 'selection'); }} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Ganti Pilihan</button>
                   <h3 className="text-2xl font-black uppercase text-art-text tracking-tight">Detail Booking</h3>
                   <p className="text-[9px] font-bold text-art-text/30 uppercase tracking-[0.2em]">{currentType} Adventure</p>
                </div>
@@ -1552,7 +1552,7 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
 }
 
 const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: { isOpen: boolean, onClose: () => void, theme: string, setTheme: (t: string) => void, setIsHistoryOpen: (v: boolean) => void }) => {
-  const { playClick, playHover } = useSound();
+  const { playClick, playHover, playBack, playPop } = useSound();
   const [user] = useAuthState(auth);
   const [showTokenInput, setShowTokenInput] = useState(false);
   const [localVolume, setLocalVolume] = useState(() => {
@@ -1700,7 +1700,7 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: {
 };
 
 const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, onClose: () => void, showToast: (m: string, t?: any) => void }) => {
-  const { playClick, playHover } = useSound();
+  const { playClick, playHover, playBack, playPop } = useSound();
   const [user] = useAuthState(auth);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -2068,7 +2068,7 @@ export default function App() {
     showToastMsg(`Membuka Booking: ${destinasi}`);
   };
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const { playHover, playClick } = useSound();
+  const { playHover, playClick, playPop } = useSound();
   const { scrollY } = useScroll();
 
   // Lock scroll when splash is active
@@ -2094,8 +2094,7 @@ export default function App() {
   const filteredOpenTrips = (config.openTrips || []).filter((ot: any) => {
     const matchesRegion = openFilterRegion === 'Semua' || ot.region === openFilterRegion;
     const matchesDifficulty = openFilterDifficulty === 'Semua' || 
-                             ot.difficulty === openFilterDifficulty || 
-                             (openFilterDifficulty.toLowerCase().includes('intermediate') && ot.difficulty.toLowerCase().includes('intermediate'));
+                             ot.difficulty === openFilterDifficulty;
     const matchesSearch = ot.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesRegion && matchesDifficulty && matchesSearch;
   });
@@ -2124,8 +2123,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
   const filteredDestinations = currentDestinations.filter(dest => {
     if (dest.isActive === false) return false;
     const matchesDifficulty = filterDifficulty === 'Semua' || 
-                             dest.difficulty === filterDifficulty || 
-                             (filterDifficulty.toLowerCase().includes('intermediate') && dest.difficulty.toLowerCase().includes('intermediate'));
+                             dest.difficulty === filterDifficulty;
     const matchesRegion = filterRegion === 'Semua' || dest.region === filterRegion;
     const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           dest.desc.toLowerCase().includes(searchQuery.toLowerCase());
@@ -2289,7 +2287,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             <button className="p-2 text-art-text hover:text-art-orange transition-colors" onClick={(e) => { playClick(); setIsMobileMenuOpen(!isMobileMenuOpen); }} title="Menu">
               {isMobileMenuOpen ? <X size={24} /> : <MoreVertical size={24} />}
             </button>
-            <button onClick={() => { playClick(); setIsSettingsOpen(true); }} className="p-2 text-art-text hover:text-art-orange transition-colors" onMouseEnter={playHover} aria-label="Settings" title="Pengaturan & Akun">
+            <button onClick={() => { playPop(); setIsSettingsOpen(true); }} className="p-2 text-art-text hover:text-art-orange transition-colors" onMouseEnter={playHover} aria-label="Settings" title="Pengaturan & Akun">
               <Settings size={20} />
             </button>
           </div>
@@ -2344,18 +2342,17 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-art-green mb-3 md:mb-4 w-full text-center md:text-left"
             >
-              <p className="font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">Open Trip Eksklusif</p>
-              <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin</p>
+              <p className="font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">{config.homepage?.heroSub || "Open Trip Eksklusif"}</p>
+              <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
             </motion.div>
             
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none"
+              className="text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap"
             >
-              <span className="text-art-green">Trip</span> Ngopi Di<br/>
-              <span className="text-art-orange drop-shadow-sm">Ketinggian</span>
+              {config.homepage?.heroTitle || "Trip Ngopi Di Ketinggian"}
             </motion.h1>
             
             <motion.p 
@@ -2364,8 +2361,8 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ duration: 0.8, delay: 0.6 }}
               className="text-sm md:text-xl font-medium max-w-xs sm:max-w-md text-art-text/80 mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto"
             >
-              Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.
-              <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-green">Jaya / Jaya / Jaya</span>
+              {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung."}
+              <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-green">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
             </motion.p>
             
             <motion.div 
@@ -2446,21 +2443,21 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">Secangkir Cerita <br/><span className="text-art-green font-serif italic normal-case font-normal text-3xl md:text-5xl">di Atas Awan</span></h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">{config.homepage?.ceritaTitle || "Secangkir Cerita"} <br/><span className="text-art-green font-serif italic normal-case font-normal text-3xl md:text-5xl">{config.homepage?.ceritaSub || "di Atas Awan"}</span></h2>
               <div className="w-12 h-1 bg-art-orange mb-8"></div>
               <p className="text-sm md:text-base font-medium text-art-text/80 mb-6 leading-relaxed">
-                Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman.
+                {config.homepage?.ceritaParagraph1 || "Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman."}
               </p>
               <p className="text-sm md:text-base font-medium text-art-text/80 mb-10 leading-relaxed">
-                Berbekal pengalaman panjang ini, meracik kopi di alam terbuka tak lagi sekadar ritual bagi kami, ia menjelma jadi perayaan kebersamaan. Lupakan sejenak semrawutnya ibukota. Kami siapkan ritme perjalanan yang santai, aman, penuh cerita, dan tentu saja... kopi rindu tebal yang diseduh di waktu yang paling tepat. Sesuatu yang tak akan pernah Anda temukan walau di coffee shop semewah apa pun di tengah kota.
+                {config.homepage?.ceritaParagraph2 || "Berbekal pengalaman panjang ini, meracik kopi di alam terbuka tak lagi sekadar ritual bagi kami, ia menjelma jadi perayaan kebersamaan. Lupakan sejenak semrawutnya ibukota. Kami siapkan ritme perjalanan yang santai, aman, penuh cerita, dan tentu saja... kopi rindu tebal yang diseduh di waktu yang paling tepat. Sesuatu yang tak akan pernah Anda temukan walau di coffee shop semewah apa pun di tengah kota."}
               </p>
               
               <div className="space-y-6 border-l-2 border-art-text/10 pl-6">
-                {[
+                {(config.homepage?.ceritaFeatures || [
                   { title: "Manual Brew Experience", desc: "Nikmati V60, Chemex, atau Aeropress dari barista kami." },
                   { title: "Grup Eksklusif", desc: "Maksimal 12 orang per perjalanan untuk keintiman." },
                   { title: "Peralatan Premium", desc: "Tenda The North Face dll untuk kenyamanan istirahat." }
-                ].map((item, i) => (
+                ]).map((item: any, i: number) => (
                   <div key={i} className="flex gap-4 items-start" onMouseEnter={playHover}>
                     <div>
                       <h4 className="font-bold text-art-text uppercase text-sm tracking-widest">{item.title}</h4>
@@ -2519,10 +2516,10 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-art-text mb-4 leading-tight">Kenalan dengan <br/><span className="text-art-green font-serif italic normal-case font-normal text-3xl md:text-5xl">Trip Leader Kami</span></h2>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-art-text mb-4 leading-tight">{config.homepage?.leaderTitle || "Kenalan dengan"} <br/><span className="text-art-green font-serif italic normal-case font-normal text-3xl md:text-5xl">{config.homepage?.leaderSub || "Trip Leader Kami"}</span></h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
             <p className="text-sm md:text-base font-medium text-art-text/80 mb-6 leading-relaxed">
-              Tim profesional kami yang siap memandu perjalanan Anda agar lebih aman, menyenangkan, dan tentunya memastikan seduhan kopi Anda sempurna.
+              {config.homepage?.leaderParagraph || "Tim profesional kami yang siap memandu perjalanan Anda agar lebih aman, menyenangkan, dan tentunya memastikan seduhan kopi Anda sempurna."}
             </p>
           </div>
           
@@ -2638,7 +2635,11 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       <section id="destinasi" className="py-20 md:py-32 bg-[#F3F4F6] relative overflow-hidden">
         {/* Background image same as hero section */}
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
-          <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale-[80%]" alt="Destinasi bg" />
+          {config.homepage?.heroPhotoUrl ? (
+             <img src={config.homepage.heroPhotoUrl} className="w-full h-full object-cover opacity-[0.25] grayscale-[80%]" alt="Destinasi bg" />
+          ) : (
+             <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale-[80%]" alt="Destinasi bg" />
+          )}
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           
