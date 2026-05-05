@@ -92,28 +92,28 @@ const getDefaultWebsiteData = () => ({
       "Obat-obatan pribadi yang spesifik",
       "Porter pribadi (bisa dipesan terpisah)"
     ],
-    opsi: [
+        opsi: [
       { name: "Penjemputan / Transportasi", priceInfo: "Harga menyesuaikan jarak", subItems: [] },
       { 
         name: "Sewa Perlengkapan", 
         priceInfo: "Harga per item/hari", 
         subItems: [
-          { name: "Jaket Gunung", price: 50000, priceInfo: "Rp 50rb" },
-          { name: "Sepatu Trekking", price: 75000, priceInfo: "Rp 75rb" },
-          { name: "Ransel (Carrier)", price: 60000, priceInfo: "Rp 60rb" },
-          { name: "Headlamp", price: 15000, priceInfo: "Rp 15rb" }
+          { name: "Jaket Gunung", price: 50, priceInfo: "Rp 50rb" },
+          { name: "Sepatu Trekking", price: 75, priceInfo: "Rp 75rb" },
+          { name: "Ransel (Carrier)", price: 60, priceInfo: "Rp 60rb" },
+          { name: "Headlamp", price: 15, priceInfo: "Rp 15rb" }
         ]
       },
       { 
         name: "Sewa Pakaian", 
         priceInfo: "Harga per item/hari", 
         subItems: [
-          { name: "Pakaian Tebal", price: 30000, priceInfo: "Rp 30rb" },
-          { name: "Sarung Tangan Extra", price: 10000, priceInfo: "Rp 10rb" },
-          { name: "Kupluk / Topi Gunung", price: 10000, priceInfo: "Rp 10rb" }
+          { name: "Pakaian Tebal", price: 30, priceInfo: "Rp 30rb" },
+          { name: "Sarung Tangan Extra", price: 10, priceInfo: "Rp 10rb" },
+          { name: "Kupluk / Topi Gunung", price: 10, priceInfo: "Rp 10rb" }
         ]
       },
-      { name: "Upgrade Tenda Privat", price: 100000, priceInfo: "Rp 100rb / Tenda", subItems: [] }
+      { name: "Upgrade Tenda Privat", price: 100, priceInfo: "Rp 100rb / Tenda", subItems: [] }
     ]
   },
   teamPhotos: [

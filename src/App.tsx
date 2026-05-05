@@ -188,10 +188,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   const activePromo = config?.promoCodes?.find((p: any) => p.code.toLowerCase() === promoCode.toLowerCase());
   const isPromoValid = !!activePromo;
   
-  const currentPesertaCount = typeof pesertaCount === 'number' && pesertaCount > 0 ? pesertaCount : 1;
+    const currentPesertaCount = typeof pesertaCount === 'number' && pesertaCount > 0 ? pesertaCount : 1;
   const grossPrice = basePricePerPax * currentPesertaCount;
 
-  // Calculate days for pricing
   const getDaysFromLabel = (label: string) => {
     if (!label) return 1;
     const hIndex = label.indexOf('H');
@@ -199,11 +198,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   };
   const tripDays = getDaysFromLabel(selectedDurasi);
 
-  // Calculate optional items price
   const opsionalItemsList: any[] = [];
   let totalOpsionalPrice = 0;
 
-  // Items from subSelected (sub-items with quantities)
   Object.entries(subSelected).forEach(([key, qty]) => {
     const [parentName, subName] = key.split('|');
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
@@ -211,6 +208,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     if (subItem) {
       const pricePerDay = subItem.price ? Number(subItem.price) * 1000 : 0;
       const numQty = Number(qty);
+      const isPending = !pricePerDay || pricePerDay === 0;
       const totalItemPrice = pricePerDay ? pricePerDay * numQty * tripDays : 0;
       
       opsionalItemsList.push({
@@ -218,17 +216,18 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         price: pricePerDay,
         count: numQty,
         days: tripDays,
-        subtotal: totalItemPrice
+        subtotal: totalItemPrice,
+        status: isPending ? 'pending_price' : 'confirmed'
       });
       totalOpsionalPrice += totalItemPrice;
     }
   });
 
-  // Items from selectedOpsional (standalone items)
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
     if (opt && !opt.subItems) {
       const pricePerDay = opt.price ? Number(opt.price) * 1000 : 0;
+      const isPending = !pricePerDay || pricePerDay === 0;
       const totalItemPrice = pricePerDay ? pricePerDay * tripDays : 0;
       
       opsionalItemsList.push({
@@ -236,7 +235,8 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         price: pricePerDay,
         count: 1,
         days: tripDays,
-        subtotal: totalItemPrice
+        subtotal: totalItemPrice,
+        status: isPending ? 'pending_price' : 'confirmed'
       });
       totalOpsionalPrice += totalItemPrice;
     }
@@ -376,6 +376,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       <p className="text-xs font-black text-art-text truncate">{formState.nama}</p>
                    </div>
                    <div>
+                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">WhatsApp & Email</p>
+                      <p className="text-[10px] font-bold text-art-text truncate">{formState.wa} • {formState.email || user?.email}</p>
+                   </div>
+                   <div>
                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Destinasi</p>
                       <p className="text-xs font-black text-art-text truncate">{selectedDestinasi}</p>
                    </div>
@@ -386,6 +390,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    <div>
                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Jadwal</p>
                       <p className="text-xs font-black text-art-text truncate">{currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal}</p>
+                   </div>
+                   <div>
+                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
+                      <p className="text-xs font-black text-art-text">{pesertaCount} Pax</p>
                    </div>
                 </div>
 
@@ -399,7 +407,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                         {opsionalItemsList.map((item, idx) => (
                            <div key={idx} className="flex justify-between items-center text-[9px] text-art-text/50 italic">
                              <span>(+) {item.name} ({item.count}x)</span>
-                             <span>Rp {item.subtotal.toLocaleString('id-ID')}</span>
+                             <span className={item.status === 'pending_price' ? 'text-art-orange font-bold' : ''}>
+                               {item.status === 'pending_price' ? 'Menunggu Konf.' : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                             </span>
                            </div>
                         ))}
                      </div>
@@ -1712,11 +1722,17 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     setLoading(true);
     const q = query(
       collection(db, 'bookings'), 
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+      where('email', '==', user.email)
     );
     const unsubscribe = onSnapshot(q, (snap) => {
-      setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort in memory to avoid requiring composite index
+      const sorted = data.sort((a: any, b: any) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateB - dateA;
+      });
+      setBookings(sorted);
       setLoading(false);
     }, (error) => {
       console.error("History fetch error:", error);
@@ -1793,10 +1809,13 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     if (booking.opsionalItems && booking.opsionalItems.length > 0) {
       booking.opsionalItems.forEach((item: any) => {
         doc.setFontSize(9);
-        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari @ Rp ${item.price.toLocaleString('id-ID')})`;
+        const isPending = item.status === 'pending_price' || (item.price === 0 && (booking.status === 'pending' || booking.status === 'processing'));
+        const priceLabel = isPending ? '(Menunggu Konf. Admin)' : `@ Rp ${item.price.toLocaleString('id-ID')}`;
+        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari ${priceLabel})`;
+        
         const splitItem = doc.splitTextToSize(itemLine, 130);
         doc.text(splitItem, 25, currentY);
-        doc.text(item.price === 0 ? 'Dikonfirmasi Admin' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        doc.text(isPending ? 'Mnggu Konf.' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
         currentY += (splitItem.length * 6);
       });
       doc.setFontSize(10);
@@ -1931,10 +1950,10 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                                <div key={idx} className="flex justify-between items-center text-[10px] border-b border-art-text/5 pb-1">
                                  <div>
                                    <span className="font-bold text-art-text/80">{item.name}</span>
-                                   <span className="text-[9px] text-art-text/50 ml-1">({item.count}x • {item.days}h @ Rp {item.price.toLocaleString('id-ID')})</span>
+                                   <span className="text-[9px] text-art-text/50 ml-1">({item.count}x • {item.days}h @ Rp {(item.price || 0).toLocaleString('id-ID')})</span>
                                  </div>
                                  <span className="font-medium italic text-art-text/80">
-                                   {item.price === 0 ? "Dikonfirmasi Admin" : `Rp ${item.subtotal.toLocaleString('id-ID')}`}
+                                   {(item.status === 'pending_price' || item.price === 0) ? "Dikonfirmasi Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
                                  </span>
                                </div>
                              ))}
