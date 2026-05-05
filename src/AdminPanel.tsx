@@ -487,14 +487,14 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                       <MapPin size={16} className="text-art-orange shrink-0" />
                       <div>
                         <p className="text-[10px] font-black uppercase text-art-text/30">Destinasi</p>
-                        <p className="text-xs font-bold uppercase">{booking.destinasi} ({booking.jalur})</p>
+                        <p className="text-xs font-bold uppercase">{(booking.destinasi || 'N/A')} ({(booking.jalur || 'N/A')})</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Calendar size={16} className="text-art-green shrink-0" />
                       <div>
                         <p className="text-[10px] font-black uppercase text-art-text/30">Jadwal</p>
-                        <p className="text-xs font-bold uppercase">{booking.jadwal} ({booking.durasi})</p>
+                        <p className="text-xs font-bold uppercase">{(booking.jadwal || 'N/A')} ({(booking.durasi || 'N/A')})</p>
                       </div>
                     </div>
                   </div>

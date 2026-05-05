@@ -353,7 +353,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-lg rounded-[2.5rem] p-6 md:p-10 border-2 border-art-text relative max-h-[92vh] overflow-y-auto shadow-2xl">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-2xl rounded-[2.5rem] p-6 md:p-10 border-2 border-art-text relative max-h-[92vh] overflow-y-auto shadow-2xl">
         <button onClick={() => { playBack(); onClose(); }} className="absolute top-8 right-8 z-10 text-art-text hover:text-art-orange transition-colors"><X size={24} /></button>
         
         {showSuccess ? (
@@ -435,7 +435,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
              </div>
           </div>
         ) : viewType === 'selection' ? (
-          <div className="pt-4 pr-12">
+          <div className="pt-4">
              <h3 className="text-3xl font-black uppercase tracking-tighter text-art-text mb-2">Pilih Petualanganmu</h3>
              <p className="text-[10px] font-bold text-art-text/40 mb-8 uppercase tracking-[0.2em] leading-relaxed">Persiapkan diri untuk perjalanan yang tak terlupakan.</p>
              <div className="grid grid-cols-1 gap-4">
@@ -2371,9 +2371,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ duration: 0.8, delay: 0.2 }}
               className="mb-3 md:mb-4 w-full text-center md:text-left"
             >
-              <p className="font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">
-                <span className="text-art-green">Open</span> <span className="text-art-orange">Trip</span> <span className="text-blue-500">Exclusive</span>
-              </p>
+              <p className="text-art-green font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">Open Trip Exclusive</p>
               <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
             </motion.div>
             
@@ -2383,12 +2381,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className={`text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-text' : 'text-art-text'}`}
               >
-                <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block">
-                  <span className="text-art-green">T</span>
-                  <span className="text-art-orange">r</span>
-                  <span className="text-blue-500">i</span>
-                  <span className="text-art-green">p</span>
-                </sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
+                <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
               </motion.h1>
               
               <motion.p 

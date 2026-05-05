@@ -289,7 +289,7 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     } catch (err) {
       console.warn("Could not save to Firestore, trying local state update only", err);
       setConfig((prev) => ({ ...prev, ...newConfig }));
-      customAlert("Perubahan hanya tersimpan lokal (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat.");
+      customAlert("Gagal menyimpan ke Database Cloud. Perubahan akan disimpan sementara di memori browser.");
     }
   };
 
@@ -323,7 +323,7 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       await batch.commit();
     } catch (err) {
       console.warn("Could not revert to default in Firestore", err);
-      customAlert("Pembalikan ke default hanya bekerja di sesi ini (sementara) karena database Firebase Anda belum diset dengan aturan yang tepat.");
+      customAlert("Gagal mereset ke default di Cloud. Reset hanya berlaku untuk sesi ini.");
     }
   };
 

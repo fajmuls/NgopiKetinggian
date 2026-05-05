@@ -37,7 +37,9 @@ service cloud.firestore {
         && (!('deskripsi' in data) || (data.deskripsi is string && data.deskripsi.size() <= 2000));
     }
 
-    function isAdmin() { return isSignedIn() && request.auth.token.email == 'mrachmanfm@gmail.com'; }
+    function isAdmin() { 
+      return isSignedIn() && (request.auth.token.email == 'mrachmanfm@gmail.com' || request.auth.token.email == 'mrahmanfm@gmail.com'); 
+    }
     
     // Explicitly allow read for anyone on these collections
     match /website/{allPaths=**} {
@@ -61,6 +63,10 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /appConfig/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /defaults/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
