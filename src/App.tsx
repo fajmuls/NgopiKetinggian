@@ -354,7 +354,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-2xl rounded-[2.5rem] p-6 md:p-10 border-2 border-art-text relative max-h-[92vh] overflow-y-auto shadow-2xl">
-        <button onClick={() => { playBack(); onClose(); }} className="absolute top-8 right-8 z-10 text-art-text hover:text-art-orange transition-colors"><X size={24} /></button>
+        <button onClick={() => { playBack(); onClose(); }} className="absolute top-6 right-6 z-10 text-art-text hover:text-art-orange transition-colors"><X size={24} /></button>
         
         {showSuccess ? (
           <div className="text-center py-12 flex flex-col items-center justify-center h-full">
@@ -438,10 +438,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
           <div className="pt-4">
              <h3 className="text-3xl font-black uppercase tracking-tighter text-art-text mb-2">Pilih Petualanganmu</h3>
              <p className="text-[10px] font-bold text-art-text/40 mb-8 uppercase tracking-[0.2em] leading-relaxed">Persiapkan diri untuk perjalanan yang tak terlupakan.</p>
-             <div className="grid grid-cols-1 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <button 
                   onClick={() => { playPop(); setCurrentType('private'); setViewType('form'); setPesertaCount(2); }}
-                  className="group bg-white p-6 rounded-[2rem] border-2 border-art-text hover:shadow-[10px_10px_0px_0px_rgba(255,107,0,1)] hover:-translate-x-1 hover:-translate-y-1 transition-all text-left"
+                  className="group bg-white p-6 rounded-[2rem] border-2 border-art-text hover:shadow-[10px_10px_0px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all text-left"
                 >
                    <div className="flex justify-between items-start mb-5">
                       <div className="p-4 bg-art-orange text-white rounded-2xl shadow-lg transform group-hover:rotate-6 transition-transform"><Users size={28}/></div>
@@ -465,7 +465,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                     }
                     setPesertaCount(1);
                   }}
-                  className="group bg-white p-6 rounded-[2rem] border-2 border-art-text hover:shadow-[10px_10px_0px_0px_rgba(72,187,120,1)] hover:-translate-x-1 hover:-translate-y-1 transition-all text-left"
+                  className="group bg-white p-6 rounded-[2rem] border-2 border-art-text hover:shadow-[10px_10px_0px_0px_rgba(72,187,120,1)] hover:translate-x-1 hover:translate-y-1 transition-all text-left"
                 >
                    <div className="flex justify-between items-start mb-5">
                       <div className="p-4 bg-art-green text-white rounded-2xl shadow-lg transform group-hover:-rotate-6 transition-transform"><Calendar size={28}/></div>
@@ -480,7 +480,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 {user && (
                    <button 
                      onClick={() => { playClick(); setIsHistoryOpen(true); onClose(); }}
-                     className="mt-4 w-full group bg-art-bg/30 p-5 rounded-[2rem] border-2 border-art-text/10 hover:border-art-orange hover:bg-white transition-all flex items-center justify-between transition-all shadow-sm"
+                     className="mt-4 w-full md:col-span-2 group bg-art-bg/30 p-5 rounded-[2rem] border-2 border-art-text/10 hover:border-art-orange hover:bg-white transition-all flex items-center justify-between transition-all shadow-sm"
                    >
                       <div className="flex items-center gap-4">
                          <div className="p-3 bg-white rounded-2xl border border-art-text/10 group-hover:bg-art-orange group-hover:text-white transition-colors">
@@ -521,7 +521,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                             setSelectedDurasi(ot.duration || "N/A");
                             setViewType('form');
                           }}
-                          className="w-full group bg-white p-4 rounded-2xl border-2 border-art-text hover:bg-art-bg transition-all flex justify-between items-center text-left"
+                          className="w-full group bg-white p-4 rounded-2xl border-2 border-art-text hover:bg-art-bg hover:translate-x-1 transition-all flex justify-between items-center text-left"
                         >
                            <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
@@ -542,7 +542,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
            </div>
         ) : (
           <form className="space-y-6 pt-2" onSubmit={handleSubmitPreview}>
-             <div className="flex justify-between items-start pr-12">
+             <div className="flex justify-between items-start pr-6">
                <div>
                   <button type="button" onClick={() => { playBack(); setViewType(currentType === 'open' ? 'trip_list' : 'selection'); }} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Ganti Pilihan</button>
                   <h3 className="text-2xl font-black uppercase text-art-text tracking-tight">Detail Booking</h3>
@@ -2371,7 +2371,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ duration: 0.8, delay: 0.2 }}
               className="mb-3 md:mb-4 w-full text-center md:text-left"
             >
-              <p className="text-art-green font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">Open Trip Exclusive</p>
+              <p className="text-art-text font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">Open Trip Exclusive</p>
               <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
             </motion.div>
             
@@ -2379,19 +2379,19 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className={`text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-text' : 'text-art-text'}`}
+                className={`text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
               >
-                <sup className="text-art-green text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
+                <sup className="text-art-orange text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
               </motion.h1>
               
               <motion.p 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
-                className={`text-sm md:text-xl font-medium max-w-xs sm:max-w-md mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto ${theme === 'default' ? 'text-art-green' : 'text-art-text/80'}`}
+                className={`text-sm md:text-xl font-medium max-w-xs sm:max-w-md mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto ${theme === 'default' ? 'text-art-text/90' : 'text-art-text/80'}`}
               >
-                {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung."}
-                <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-green">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
+                {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, and magisnya lautan awan dari puncak gunung."}
+                <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-orange">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
               </motion.p>
             
             <motion.div 

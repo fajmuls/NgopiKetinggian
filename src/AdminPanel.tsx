@@ -31,7 +31,7 @@ export const AdminPanelModal = ({
   const [activeCategory, setActiveCategory] = useState<'booking' | 'trip' | 'website'>('booking');
   const [activeTab, setActiveTab] = useState<string>('bookings');
   
-  if (!isOpen) return null;
+  if (!isOpen || !config) return null;
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left text-art-text">
@@ -156,8 +156,8 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
 
   const [user] = useAuthState(auth);
   React.useEffect(() => {
-    if (!user || (user.email !== 'mrachmanfm@gmail.com' && user.email !== 'mrahmanfm@gmail.com')) {
-      setLoading(false);
+    if (!user || (user.email !== 'mrachmanfm@gmail.com' && user.email !== 'mrahmanfm@gmail.com') || !config) {
+      if (user) setLoading(false);
       return;
     }
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
@@ -523,9 +523,9 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                              <div className="flex flex-col">
                                <span className="text-art-text/50 font-bold uppercase">+ {item.name}</span>
                                <span className="text-[8px] text-art-text/30 flex items-center gap-1">
-                                 {item.count || 1}x • {item.days || 1} Hari • Rp {item.price.toLocaleString('id-ID')}
+                                 {item.count || 1}x • {item.days || 1} Hari • Rp {(item.price || 0).toLocaleString('id-ID')}
                                  <button onClick={() => {
-                                     const newPriceStr = window.prompt("Masukkan harga baru per hari (Angka saja):", item.price.toString());
+                                     const newPriceStr = window.prompt("Masukkan harga baru per hari (Angka saja):", (item.price || 0).toString());
                                      if (newPriceStr !== null) {
                                        const newPrice = parseInt(newPriceStr.replace(/[^0-9]/g, ''));
                                        if (!isNaN(newPrice)) {
@@ -535,7 +535,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                                  }} className="text-art-orange hover:bg-art-orange/10 p-0.5 rounded ml-1"><Edit2 size={8}/></button>
                                </span>
                              </div>
-                             <span className="font-bold text-art-orange">Rp {item.subtotal.toLocaleString('id-ID')}</span>
+                             <span className="font-bold text-art-orange">Rp {(item.subtotal || 0).toLocaleString('id-ID')}</span>
                            </div>
                          ))
                        ) : booking.opsionalText && (
@@ -1398,7 +1398,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
   const [user] = useAuthState(auth);
 
   useEffect(() => {
-    if (!user || user.email !== 'mrachmanfm@gmail.com') {
+    if (!user || (user.email !== 'mrachmanfm@gmail.com' && user.email !== 'mrahmanfm@gmail.com')) {
       return;
     }
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));

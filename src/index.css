@@ -7,6 +7,7 @@
   
   --theme-bg: #F5EFEB;
   --theme-text: #421404;
+  --theme-title: #8C522D; /* Light brown / Cider color for main title */
   --theme-green: #562C1E;
   --theme-orange: #C16804;
   --theme-section: #D3B49F;
@@ -15,6 +16,7 @@
 [data-theme="matcha"] {
   --theme-bg: #fbfaf0;
   --theme-text: #5e561a;
+  --theme-title: #afa231;
   --theme-green: #afa231;
   --theme-orange: #8a7e23;
   --theme-section: #e8e3a8;
@@ -23,6 +25,7 @@
 [data-theme="wine"] {
   --theme-bg: #f8eced;
   --theme-text: #4c0004;
+  --theme-title: #800007;
   --theme-green: #360003;
   --theme-orange: #800007;
   --theme-section: #d19ba0;
@@ -31,6 +34,7 @@
 [data-theme="wasabi"] {
   --theme-bg: #fdfdf9;
   --theme-text: #5a542b;
+  --theme-title: #877f44;
   --theme-green: #877f44;
   --theme-orange: #dcd189;
   --theme-section: #ece5af;
@@ -42,6 +46,7 @@
   
   --color-art-bg: var(--theme-bg);
   --color-art-text: var(--theme-text);
+  --color-art-title: var(--theme-title);
   --color-art-green: var(--theme-green);
   --color-art-orange: var(--theme-orange);
   --color-art-section: var(--theme-section);
