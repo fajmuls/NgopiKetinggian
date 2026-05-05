@@ -209,9 +209,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
     const subItem = parentOpt?.subItems?.find((s: any) => s.name === subName);
     if (subItem) {
-      const pricePerDay = subItem.price ? Number(subItem.price) * 1000 : 0;
+      const pricePerDay = subItem.price !== undefined ? Number(subItem.price) * 1000 : null;
       const numQty = Number(qty);
-      const totalItemPrice = pricePerDay ? pricePerDay * numQty * tripDays : 0;
+      const totalItemPrice = pricePerDay !== null ? pricePerDay * numQty * tripDays : 0;
       
       opsionalItemsList.push({
         name: subName,
@@ -228,8 +228,8 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
     if (opt && !opt.subItems) {
-      const pricePerDay = opt.price ? Number(opt.price) * 1000 : 0;
-      const totalItemPrice = pricePerDay ? pricePerDay * tripDays : 0;
+      const pricePerDay = opt.price !== undefined ? Number(opt.price) * 1000 : null;
+      const totalItemPrice = pricePerDay !== null ? pricePerDay * tripDays : 0;
       
       opsionalItemsList.push({
         name: optName,
@@ -1794,7 +1794,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
         const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari)`;
         const splitItem = doc.splitTextToSize(itemLine, 130);
         doc.text(splitItem, 25, currentY);
-        doc.text(item.price === 0 ? 'Dikonfirmasi Admin' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        doc.text(item.price === null ? 'Dikonfirmasi Admin' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
         currentY += (splitItem.length * 6);
       });
       doc.setFontSize(10);
@@ -1924,7 +1924,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                                    <span className="text-[9px] text-art-text/50 ml-1">({item.count}x • {item.days}h)</span>
                                  </div>
                                  <span className="font-medium italic text-art-text/80">
-                                   {item.price === 0 ? "Dikonfirmasi Admin" : `Rp ${item.subtotal.toLocaleString('id-ID')}`}
+                                   {item.price === null ? "Dikonfirmasi Admin" : `Rp ${item.subtotal.toLocaleString('id-ID')}`}
                                  </span>
                                </div>
                              ))}

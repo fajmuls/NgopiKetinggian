@@ -1188,10 +1188,14 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
 };
 
 const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
-  const [data, setData] = useState({ ...config.homepage, heroSlides: config.homepage.heroSlides || [] });
+  const [data, setData] = useState({ 
+    ...config.homepage, 
+    heroSlides: config.homepage.heroSlides || [], 
+    themeSettings: config.themeSettings || {} 
+  });
 
   const handleSave = () => {
-    updateConfig({ homepage: data });
+    updateConfig({ homepage: { ...data, heroSlides: data.heroSlides }, themeSettings: data.themeSettings });
     showToast('Homepage Tersimpan!');
   };
 
@@ -1218,6 +1222,30 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         <input className="w-full border p-2 rounded" value={data.leaderSub || ''} onChange={e => setData({...data, leaderSub: e.target.value})} placeholder="Sub-judul Bagian Leader (Trip Leader Kami)" />
         <textarea className="w-full border p-2 rounded h-16" value={data.leaderParagraph || ''} onChange={e => setData({...data, leaderParagraph: e.target.value})} placeholder="Paragraf Trip Leader"></textarea>
       </div>
+
+      <div className="space-y-4 pt-6 border-t border-art-text/10">
+         <h3 className="font-bold text-sm uppercase">Edit Teks Cerita</h3>
+         <input className="w-full border p-2 rounded" value={data.ceritaTitle || ''} onChange={e => setData({...data, ceritaTitle: e.target.value})} placeholder="Judul Cerita" />
+         <input className="w-full border p-2 rounded" value={data.ceritaSub || ''} onChange={e => setData({...data, ceritaSub: e.target.value})} placeholder="Sub-judul Cerita" />
+         <textarea className="w-full border p-2 rounded h-20" value={data.ceritaParagraph1 || ''} onChange={e => setData({...data, ceritaParagraph1: e.target.value})} placeholder="Paragraf 1"></textarea>
+         <textarea className="w-full border p-2 rounded h-20" value={data.ceritaParagraph2 || ''} onChange={e => setData({...data, ceritaParagraph2: e.target.value})} placeholder="Paragraf 2"></textarea>
+       </div>
+
+       <div className="space-y-4 pt-6 border-t border-art-text/10">
+         <h3 className="font-bold text-sm uppercase">Edit Warna Tema</h3>
+         {Object.keys(data.themeSettings || {}).map((theme) => (
+            <div key={theme} className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase">{theme} Primary</label>
+                <input type="color" className="w-full h-8" value={data.themeSettings[theme].primaryColor} onChange={e => setData({...data, themeSettings: {...data.themeSettings, [theme]: {...data.themeSettings[theme], primaryColor: e.target.value}}})} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase">{theme} Secondary</label>
+                <input type="color" className="w-full h-8" value={data.themeSettings[theme].secondaryColor} onChange={e => setData({...data, themeSettings: {...data.themeSettings, [theme]: {...data.themeSettings[theme], secondaryColor: e.target.value}}})} />
+              </div>
+            </div>
+         ))}
+       </div>
 
       <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
         <div className="flex justify-between items-center bg-gray-50 p-2 rounded">

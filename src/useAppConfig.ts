@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.1";
+export const WEBSITE_VERSION = "1.0.2";
 
 export interface FacilityOption {
   name: string;
@@ -54,6 +54,9 @@ export interface AppConfig {
   galleryPhotos: any[];
   ceritaVideoUrl: string;
   promoCodes: { code: string, discount: number }[];
+  themeSettings?: {
+    [key: string]: { primaryColor: string, secondaryColor: string }
+  };
   homepage: {
     heroSub?: string;
     heroFeatures?: string;
@@ -127,6 +130,11 @@ const getDefaultWebsiteData = () => ({
     { code: "Ari ganteng", discount: 50 },
     { code: "Emikari", discount: 10 }
   ],
+  themeSettings: {
+    Rasa: { primaryColor: '#de6262', secondaryColor: '#ffb88c' },
+    Wine: { primaryColor: '#4a0e0e', secondaryColor: '#8a2b2b' },
+    Wasabi: { primaryColor: '#2e6b2e', secondaryColor: '#7cfc00' }
+  },
   homepage: {
     heroSub: "Open Trip Eksklusif",
     heroFeatures: "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin",
