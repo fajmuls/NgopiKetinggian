@@ -1148,8 +1148,6 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
            </div>
         </div>
 
-        <p className="text-xs font-medium text-art-text/70 mb-6 leading-relaxed line-clamp-2">{dest.desc}</p>
-
         <div className="flex flex-col gap-3">
            <Button 
             variant="secondary" 
@@ -1165,30 +1163,60 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden space-y-6 pt-4 border-t-2 border-dashed border-art-text/10"
+                className="overflow-hidden space-y-6 pt-4 border-dashed border-art-text/10"
                >
-                  <div className="flex flex-col gap-2.5 p-4 bg-art-bg/30 rounded-xl border border-art-text/5">
-                     <div className="flex items-center gap-2">
-                        <MapPin size={12} className="text-art-orange flex-shrink-0" />
-                        <span className="text-[10px] font-black uppercase text-art-text/70">
-                          MePo: {dest.mepoLink ? (
-                            <a href={dest.mepoLink} target="_blank" rel="noopener noreferrer" className="text-art-text underline hover:text-art-orange">{dest.mepo || "Basecamp"}</a>
-                          ) : (
-                            dest.mepo || "Basecamp"
-                          )}
-                        </span>
-                     </div>
-                     {dest.beans && (
-                       <div className="flex items-center gap-2">
-                          <Coffee size={12} className="text-art-text/40 flex-shrink-0" />
-                          <span className="text-[10px] font-bold uppercase text-art-text/50">Beans: {dest.beans}</span>
-                       </div>
-                     )}
-                     <div className="flex items-center gap-2">
-                        <Users size={12} className="text-blue-500 flex-shrink-0" />
-                        <span className="text-[10px] font-bold uppercase text-art-text/50">Kuota: {dest.kuota || "Min 2 Pax"}</span>
-                     </div>
-                  </div>
+                 <p className="text-[11px] font-medium text-art-text/60 italic leading-loose bg-art-bg/20 p-4 rounded-xl border border-art-text/5">{dest.desc}</p>
+                 <div className="bg-art-bg/30 rounded-xl border border-art-text/5 p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                         <div className="w-8 h-8 rounded-full bg-art-orange/10 flex items-center justify-center text-art-orange animate-pulse"><MapPin size={14}/></div>
+                         <div>
+                           <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Meeting Point (PO)</p>
+                           <p className="text-xs font-black truncate max-w-[150px]">
+                             {dest.mepoLink ? (
+                               <a href={dest.mepoLink} target="_blank" rel="noopener noreferrer" className="text-art-text underline hover:text-art-orange">{dest.mepo || "Basecamp"}</a>
+                             ) : (
+                               dest.mepo || "Basecamp"
+                             )}
+                           </p>
+                         </div>
+                      </div>
+                      {dest.beans && (
+                        <div className="flex items-center gap-3">
+                           <div className="w-8 h-8 rounded-full bg-art-bg flex items-center justify-center text-art-text/40"><Coffee size={14}/></div>
+                           <div>
+                             <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Beans Selection</p>
+                             <p className="text-xs font-black uppercase">{dest.beans}</p>
+                           </div>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                         <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"><Users size={14}/></div>
+                         <div>
+                           <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Minimum Quota</p>
+                           <p className="text-xs font-black uppercase">{dest.kuota || "2 Pax"}</p>
+                         </div>
+                      </div>
+                      {dest.schedule && (
+                        <div className="flex items-center gap-3">
+                           <div className="w-8 h-8 rounded-full bg-art-green/10 flex items-center justify-center text-art-green"><Calendar size={14}/></div>
+                           <div>
+                             <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Jadwal / Schedule</p>
+                             <p className="text-xs font-black uppercase">{dest.schedule}</p>
+                           </div>
+                        </div>
+                      )}
+                   </div>
+
+                   <div className="bg-art-orange/5 p-4 rounded-xl border border-dashed border-art-orange/20">
+                      <div className="flex justify-between items-center mb-1">
+                         <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
+                         <div className="flex items-center gap-2">
+                            {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
+                            <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
+                         </div>
+                      </div>
+                      <p className="text-[8px] font-bold text-art-text/40 uppercase font-mono">IDR Per Orang (Min. 2 Pax)</p>
+                   </div>
 
                   <div className="space-y-4">
                     <div>
@@ -1628,10 +1656,10 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                              {b.status === 'lunas' && <CheckCircle2 size={10} />}
                              {b.status === 'selesai' && <MapPin size={10} />}
                              {b.status === 'batal' && <X size={10} />}
-                             {b.status === 'pending' ? 'Diproses' : 
-                              b.status === 'processing' ? 'Admin Memproses' : 
+                             {b.status === 'pending' ? 'Pending' : 
+                              b.status === 'processing' ? 'Diproses' : 
                               b.status === 'dp_partial' ? 'DP Parsial' :
-                              b.status === 'lunas' ? 'Sudah Lunas' : 
+                              b.status === 'lunas' ? 'Lunas' : 
                               b.status === 'selesai' ? 'Trip Selesai' : 
                               'Dibatalkan'}
                            </div>
@@ -1674,47 +1702,56 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                            </span>
                         </div>
                       
-                        <h4 className="text-2xl font-black uppercase tracking-tighter text-art-text leading-tight mb-1">{b.destinasi}</h4>
-                        
-                        <div className="flex flex-col gap-1 mb-4">
-                           <p className="text-[10px] font-bold text-art-text/30 lowercase tracking-tight flex items-center gap-1.5">
-                             <User size={10} /> {b.email || 'no-email'}
-                           </p>
-                           <p className="text-[10px] font-bold text-art-orange uppercase tracking-widest flex items-center gap-1.5 bg-art-orange/5 w-fit px-2 py-0.5 rounded-md border border-art-orange/10">
-                             <MapPin size={10} /> {b.jalur} • {b.durasi} • {b.peserta} Pax
-                           </p>
-                        </div>
+                        <div className="flex flex-col md:flex-row gap-6 mt-4">
+                           <div className="flex-1">
+                             <h4 className="text-2xl font-black uppercase tracking-tighter text-art-text leading-tight mb-1">{b.destinasi}</h4>
+                             
+                             <div className="flex flex-col gap-1 mb-4">
+                                <p className="text-[10px] font-bold text-art-text/30 lowercase tracking-tight flex items-center gap-1.5">
+                                  <User size={10} /> {b.email || 'no-email'}
+                                </p>
+                                <p className="text-[10px] font-bold text-art-orange uppercase tracking-widest flex items-center gap-1.5 bg-art-orange/5 w-fit px-2 py-0.5 rounded-md border border-art-orange/10">
+                                  <MapPin size={10} /> {b.jalur} • {b.durasi} • {b.peserta} Pax
+                                </p>
+                             </div>
 
-                        <div className="bg-art-bg/20 rounded-2xl border border-art-text/5 p-4 mt-2">
-                           <div className="flex justify-between items-center pb-3">
-                              <div className="flex flex-col">
-                                 <span className="text-[10px] font-black text-art-text/40 uppercase mb-1 tracking-widest">📦 Trip Utama:</span>
-                                 <h5 className="text-sm font-black text-art-text uppercase leading-tight mb-1">{b.destinasi}</h5>
-                                 <span className="text-[9px] font-bold text-art-text/30 tracking-tight">{b.peserta} Pax • {b.jadwal}</span>
-                              </div>
-                              <span className="font-black text-art-text text-lg">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                             <div className="bg-art-bg/20 rounded-2xl border border-art-text/5 p-4 mt-2">
+                                <div className="flex justify-between items-center pb-3">
+                                   <div className="flex flex-col">
+                                      <span className="text-[10px] font-black text-art-text/40 uppercase mb-1 tracking-widest">📦 Trip Utama:</span>
+                                      <h5 className="text-sm font-black text-art-text uppercase leading-tight mb-1">{b.destinasi}</h5>
+                                      <span className="text-[9px] font-bold text-art-text/30 tracking-tight">{b.peserta} Pax • {b.jadwal}</span>
+                                   </div>
+                                   <span className="font-black text-art-text text-lg">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                                </div>
+
+                                {b.opsionalItems && b.opsionalItems.length > 0 && (
+                                  <div className="space-y-1 mt-3 pt-2 border-t border-dashed border-art-text/5">
+                                     <p className="text-[8px] font-black text-art-orange uppercase tracking-[0.2em] mb-1 opacity-60 italic">Layanan Tambahan:</p>
+                                     {b.opsionalItems.map((item: any, idx: number) => {
+                                       const isPending = item.status === 'pending_price';
+                                       return (
+                                         <div key={idx} className="flex justify-between items-start text-[9px] opacity-70">
+                                           <div className="flex flex-col">
+                                             <span className="font-bold text-art-text uppercase tracking-tight">+ {item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
+                                           </div>
+                                           <div className="text-right">
+                                             <span className={`font-black text-[9px] ${isPending ? 'text-art-orange italic' : 'text-art-text/60'}`}>
+                                               {isPending ? "Estimasi Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                                             </span>
+                                           </div>
+                                         </div>
+                                       );
+                                     })}
+                                  </div>
+                                )}
+                             </div>
                            </div>
 
-                           {b.opsionalItems && b.opsionalItems.length > 0 && (
-                             <div className="space-y-1 mt-3 pt-2 border-t border-dashed border-art-text/5">
-                                <p className="text-[8px] font-black text-art-orange uppercase tracking-[0.2em] mb-1 opacity-60 italic">Layanan Tambahan:</p>
-                                {b.opsionalItems.map((item: any, idx: number) => {
-                                  const isPending = item.status === 'pending_price';
-                                  return (
-                                    <div key={idx} className="flex justify-between items-start text-[9px] opacity-70">
-                                      <div className="flex flex-col">
-                                        <span className="font-bold text-art-text uppercase tracking-tight">+ {item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
-                                      </div>
-                                      <div className="text-right">
-                                        <span className={`font-black text-[9px] ${isPending ? 'text-art-orange italic' : 'text-art-text/60'}`}>
-                                          {isPending ? "Pending" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                             </div>
-                           )}
+                           <div className="hidden md:flex w-24 shrink-0 flex-col items-center justify-center border-2 border-art-text/5 rounded-3xl p-4 bg-art-bg/10 grayscale opacity-40">
+                              <Mountain size={32} className="text-art-text mb-2" />
+                              <p className="text-[8px] font-black text-art-text text-center uppercase tracking-tighter leading-tight">NGOPI DI<br/><span className="text-art-orange">KETINGGIAN</span></p>
+                           </div>
                         </div>
                       </div>
 
@@ -2298,7 +2335,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                   autoPlay loop muted playsInline controls
                   src={config.ceritaVideoUrl} 
                   poster="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop"
-                  className="relative z-10 rounded-3xl shadow-2xl w-full object-cover aspect-video grayscale-[10%] border-8 border-white"
+                  className="relative z-10 rounded-3xl shadow-2xl w-full h-auto max-h-[75vh] grayscale-[10%] border-8 border-white shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]"
                 />
               )}
               <motion.div 

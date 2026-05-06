@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -545,71 +545,98 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                     </div>
                   </div>
                   
-                  <div className="bg-art-bg/20 p-4 rounded-2xl border-2 border-art-text/5 mt-2">
-                    <p className="text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em] mb-4 font-mono">Billing Summary</p>
-                    
-                    <div className="flex justify-between items-center pb-3">
-                       <div className="flex flex-col">
-                         <span className="text-[10px] font-black text-art-text uppercase mb-0.5">📦 Paket {booking.type === 'open' ? 'Open' : 'Private'} Trip {booking.destinasi}</span>
-                         <span className="text-[9px] font-bold text-art-text/40">{booking.peserta} Pax • {booking.jadwal}</span>
+                  <div className="space-y-4 mt-4">
+                    <p className="text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em] px-4 font-mono">Billing Details</p>
+
+                    <div className="bg-white rounded-2xl border-2 border-art-text p-4 shadow-sm relative overflow-hidden group/box">
+                       <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none group-hover/box:rotate-12 transition-transform">
+                          <Mountain size={32} />
                        </div>
-                       <span className="font-black text-art-text text-sm">Rp {((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                       <div className="flex justify-between items-start mb-2">
+                          <span className="text-[9px] font-black text-art-text/40 uppercase tracking-[0.2em]">BOX 1: TRIP UTAMA</span>
+                          <span className="text-[8px] bg-art-text text-white px-2 py-0.5 rounded-md font-black uppercase tracking-widest">{booking.type === 'open' ? 'Open' : 'Private'}</span>
+                       </div>
+                       <div className="flex justify-between items-end">
+                          <div>
+                             <h5 className="text-sm font-black text-art-text uppercase leading-none mb-1">{booking.destinasi}</h5>
+                             <p className="text-[9px] font-bold text-art-text/40">{booking.peserta} Pax • Rp {((((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0))) / (Number(booking.peserta) || 1)).toLocaleString('id-ID')} / Pax</p>
+                          </div>
+                          <div className="text-right">
+                             <p className="font-black text-art-text text-sm">Rp {((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0)).toLocaleString('id-ID')}</p>
+                          </div>
+                       </div>
                     </div>
 
-                    {/* OPTIONAL ITEMS */}
-                    {booking.opsionalItems && booking.opsionalItems.length > 0 ? (
-                      <div className="space-y-1.5 pt-3 border-t border-art-text/5">
-                         <p className="text-[9px] font-black text-art-orange uppercase tracking-[0.2em] mb-1">Layanan Tambahan:</p>
-                         {booking.opsionalItems.map((item: any, idx: number) => {
-                            const canEdit = !item.isRental;
-                            return (
-                              <div key={idx} className="flex justify-between items-start text-[10px]">
-                                <div className="flex flex-col">
-                                  <span className="text-art-text/80 font-black uppercase flex items-center gap-1.5">
-                                    + {item.name} {item.isRental ? `(${item.count}x)` : ''}
-                                    {canEdit && (
-                                      <button onClick={() => {
-                                          const newPriceStr = window.prompt("Masukkan harga baru per hari (Angka saja):", (item.price || 0).toString());
-                                          if (newPriceStr !== null) {
-                                            const newPrice = parseInt(newPriceStr.replace(/[^0-9]/g, ''));
-                                            if (!isNaN(newPrice)) {
-                                              handleOpsionalPriceUpdate(booking, idx, newPrice);
-                                            }
-                                          }
-                                      }} className="text-art-orange hover:bg-art-orange/10 p-1 rounded-full transition-colors"><Edit2 size={10}/></button>
-                                    )}
-                                  </span>
-                                  <span className="text-[8px] text-art-text/40 mt-0.5 font-bold">
-                                    {item.isRental ? (
-                                      `${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}`
-                                    ) : (
-                                      item.priceInfo || item.name
-                                    )}
-                                  </span>
-                                </div>
-                                <div className="text-right">
-                                  <span className={`font-black text-[10px] ${item.status === 'pending_price' ? 'text-art-orange italic' : 'text-art-text/80'}`}>
-                                    {item.status === 'pending_price' ? "Input Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                         })}
+                    {/* BOX 2: ADDITIONAL SERVICES */}
+                    {booking.opsionalItems && booking.opsionalItems.length > 0 && (
+                      <div className="bg-white rounded-2xl border-2 border-art-text p-4 shadow-sm relative overflow-hidden group/box">
+                         <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none group-hover/box:rotate-12 transition-transform">
+                            <Coffee size={32} />
+                         </div>
+                         <div className="flex justify-between items-start mb-3">
+                            <span className="text-[9px] font-black text-art-orange uppercase tracking-[0.2em]">BOX 2: LAYANAN TAMBAHAN</span>
+                         </div>
+                         <div className="space-y-3">
+                            {booking.opsionalItems.map((item: any, idx: number) => {
+                               const canEdit = !item.isRental;
+                               return (
+                                 <div key={idx} className="flex justify-between items-start text-[10px] border-b border-dashed border-art-text/5 pb-2 last:border-0 last:pb-0">
+                                   <div className="flex flex-col">
+                                     <span className="font-black text-art-text uppercase tracking-tight flex items-center gap-1.5">
+                                       • {item.name} {item.isRental ? `(${item.count}x)` : ''}
+                                       {canEdit && (
+                                         <button onClick={() => {
+                                             const newPriceStr = window.prompt("Masukkan harga baru:", (item.price || 0).toString());
+                                             if (newPriceStr !== null) {
+                                               const newPrice = parseInt(newPriceStr.replace(/[^0-9]/g, ''));
+                                               if (!isNaN(newPrice)) {
+                                                 handleOpsionalPriceUpdate(booking, idx, newPrice);
+                                               }
+                                             }
+                                         }} className="text-art-orange hover:bg-art-orange/10 p-1 rounded-full transition-colors"><Edit2 size={10}/></button>
+                                       )}
+                                     </span>
+                                     <span className="text-[8px] font-bold text-art-text/40 italic ml-3">
+                                       {item.isRental ? `${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}` : item.priceInfo || item.name}
+                                     </span>
+                                   </div>
+                                   <div className="text-right">
+                                     <span className={`font-black text-[10px] ${item.status === 'pending_price' ? 'text-art-orange italic' : 'text-art-text'}`}>
+                                       {item.status === 'pending_price' ? "Input Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                                     </span>
+                                   </div>
+                                 </div>
+                               );
+                            })}
+                         </div>
+                         <div className="mt-4 pt-3 border-t-2 border-art-text/5 flex justify-between items-center">
+                            <span className="text-[10px] font-black uppercase text-art-text/30">Subtotal Layanan</span>
+                            <span className="text-sm font-black text-art-orange">Rp {(booking.opsionalPrice || 0).toLocaleString('id-ID')}</span>
+                         </div>
                       </div>
-                    ) : (
-                      booking.opsionalText && booking.opsionalText !== 'Tidak ada' && (
-                        <div className="text-[10px] text-art-text/40 italic pt-3 border-t border-art-text/5">
-                           Layanan: {booking.opsionalText}
-                        </div>
-                      )
                     )}
 
-                       {booking.promoCode && (
-                         <div className="flex justify-between items-center text-[10px] bg-art-green/10 p-2.5 rounded-xl border-2 border-art-green/40 mt-3 shadow-sm ring-4 ring-art-green/5">
-                           <span className="text-art-green font-black uppercase flex items-center gap-2 drop-shadow-sm font-mono">🎁 PROMO AKTIF: {booking.promoCode}</span>
-                           <span className="font-black text-white bg-art-green px-2 py-0.5 rounded-lg">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
+                    {booking.opsionalText && booking.opsionalText !== 'Tidak ada' && (
+                      <div className="text-[10px] text-art-text/40 italic pt-3 px-4">
+                         Request: {booking.opsionalText}
+                      </div>
+                    )}
+
+                    {/* BOX PROMO */}
+                    {booking.promoCode && (
+                      <div className="bg-art-green/10 rounded-2xl border-2 border-art-green p-4 relative overflow-hidden group/box">
+                         <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                               <span className="text-lg">🎁</span>
+                               <div>
+                                  <span className="text-[9px] font-black text-art-green uppercase tracking-[0.2em] block">PROMO AKTIF</span>
+                                  <h5 className="text-sm font-black text-art-text uppercase tracking-tight">{booking.promoCode}</h5>
+                               </div>
+                            </div>
+                            <span className="text-sm font-black text-art-green">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
                          </div>
-                       )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -648,7 +675,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                       <div className="bg-art-orange/5 p-4 rounded-2xl border-2 border-art-orange/10">
                          <div className="flex justify-between items-end">
                             <div>
-                               <p className="text-[10px] font-black uppercase text-art-orange/60 tracking-widest mb-1">Total Piutang</p>
+                               <p className="text-[10px] font-black uppercase text-art-orange/60 tracking-widest mb-1">Total Estimasi Akhir:</p>
                                <p className="text-3xl font-black text-art-text tracking-tighter">Rp {booking.totalPrice?.toLocaleString('id-ID')}</p>
                             </div>
                             <div className="text-right">
@@ -866,12 +893,42 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               </div>
 
               <div className="flex flex-col flex-1 min-w-[120px]">
-                <span className="text-[9px] font-bold uppercase mb-1">Google Maps Link:</span>
-                <input className="border p-2 rounded text-xs w-full" value={dest.mepoLink || ''} onChange={e => {
-                  const nd = [...data];
-                  nd[i].mepoLink = e.target.value;
-                  setData(nd);
-                }} placeholder="https://maps.app.goo.gl/..." />
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[9px] font-bold uppercase">Google Maps Link:</span>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const text = await navigator.clipboard.readText();
+                        const nd = [...data];
+                        nd[i].mepoLink = text;
+                        setData(nd);
+                        showToast("Link ditempel!");
+                      } catch (err) {
+                        showToast("Gagal menempel link", "error");
+                      }
+                    }}
+                    className="text-[8px] bg-art-bg border border-art-text/20 px-1.5 rounded hover:bg-art-text/5 active:scale-95 transition-all"
+                  >
+                    Paste
+                  </button>
+                </div>
+                <div className="flex gap-1">
+                  <input className="border p-2 rounded text-xs w-full" value={dest.mepoLink || ''} onChange={e => {
+                    const nd = [...data];
+                    nd[i].mepoLink = e.target.value;
+                    setData(nd);
+                  }} placeholder="https://maps.app.goo.gl/..." />
+                  <button 
+                    onClick={() => {
+                      const query = `Basecamp ${dest.name} ${dest.region || ''} ${dest.mepo || ''}`;
+                      window.open(`https://www.google.com/maps/search/${encodeURIComponent(query)}`, '_blank');
+                    }}
+                    className="p-2 bg-art-orange text-white rounded hover:bg-orange-600 transition-colors"
+                    title="Cari di Google Maps"
+                  >
+                    <Map size={14} />
+                  </button>
+                </div>
               </div>
               
               <div className="flex flex-col flex-1 min-w-[120px]">
@@ -1874,6 +1931,25 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                    </div>
                  </div>
                  <div className="space-y-1">
+                    {ot.leaders?.length > 0 && (
+                      <div className="space-y-1 mb-4">
+                        <label className="text-[9px] font-black uppercase text-art-orange tracking-widest">Primary Leader (Wajah Utama):</label>
+                        <select 
+                          className="w-full border-2 border-art-orange/20 p-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-art-orange transition-all bg-art-orange/5"
+                          value={ot.primaryLeader || ""}
+                          onChange={(e) => {
+                            const nd = [...data];
+                            nd[i].primaryLeader = e.target.value;
+                            setData(nd);
+                          }}
+                        >
+                          <option value="">-- Pilih Leader Utama --</option>
+                          {ot.leaders.map((ln: string) => (
+                            <option key={ln} value={ln}>{ln}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                     <label className="text-[9px] font-black uppercase text-art-text/40">Deskripsi / Itinerary Singkat</label>
                     <textarea 
                       rows={3}
