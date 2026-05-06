@@ -976,7 +976,7 @@ const destinationsData = [
 
 // Removed hardcoded heroSlides
 
-const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any }> = ({ ot, onJoin, getSisaKuota, visibilities }) => {
+const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any, allLeaders: any[] }> = ({ ot, onJoin, getSisaKuota, visibilities, allLeaders }) => {
   const [showDetails, setShowDetails] = useState(false);
   const { playClick, playHover } = useSound();
   
@@ -1016,36 +1016,6 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
          </div>
          <h3 className="text-2xl tracking-tighter font-black uppercase text-art-text mb-4 leading-tight group-hover:text-art-green transition-colors">{ot.name}</h3>
          
-         <div className="flex flex-col gap-1.5 mb-4 border-t border-art-text/5 pt-3">
-            <div className="flex items-center gap-2">
-               <Calendar size={12} className="text-art-green flex-shrink-0" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-art-text">{ot.jadwal}</span>
-               <span className="text-art-text/20">•</span>
-               <span className="text-[10px] font-bold uppercase text-art-text/60">{ot.duration}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-               <MapPin size={12} className="text-art-orange flex-shrink-0" />
-               {ot.mepoLink ? (
-                 <a href={ot.mepoLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase text-art-text underline hover:text-art-orange">{ot.mepo || "Basecamp"}</a>
-               ) : (
-                 <span className="text-[10px] font-bold uppercase text-art-text/70">{ot.mepo || "Basecamp"}</span>
-               )}
-            </div>
-
-            <div className="flex items-center gap-2">
-               <Users size={12} className="text-blue-500 flex-shrink-0" />
-               <span className="text-[10px] font-bold uppercase text-art-text/70">Lead: {leaders.length > 0 ? leaders.join(", ") : 'TBD'}</span>
-            </div>
-
-            {v.beans && (
-              <div className="flex items-center gap-2">
-                 <Coffee size={12} className="text-art-text/40 flex-shrink-0" />
-                 <span className="text-[10px] font-bold uppercase text-art-text/50">{ot.beans || "Premium Beans"}</span>
-              </div>
-            )}
-         </div>
-
          <AnimatePresence>
             {showDetails && (
               <motion.div 
@@ -1054,7 +1024,49 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden mb-6 border-t border-dashed border-art-text/10 pt-4"
               >
-                 <p className="text-[10px] font-medium text-art-text/60 italic leading-relaxed whitespace-pre-wrap">{ot.desc || "Bergabunglah dengan trip kami dan nikmati pengalaman mendaki yang tak terlupakan."}</p>
+                 <p className="text-[10px] font-medium text-art-text/60 italic leading-relaxed whitespace-pre-wrap mb-4">{ot.desc || "Bergabunglah dengan trip kami dan nikmati pengalaman mendaki yang tak terlupakan."}</p>
+                 
+                 <div className="flex flex-col gap-1.5 pt-3 border-t border-art-text/5">
+                    <div className="flex items-center gap-2">
+                       <Calendar size={12} className="text-art-green flex-shrink-0" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-art-text">{ot.jadwal}</span>
+                       <span className="text-art-text/20">•</span>
+                       <span className="text-[10px] font-bold uppercase text-art-text/60">{ot.duration}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                       <MapPin size={12} className="text-art-orange flex-shrink-0" />
+                       {ot.mepoLink ? (
+                         <a href={ot.mepoLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase text-art-text underline hover:text-art-orange">{ot.mepo || "Basecamp"}</a>
+                       ) : (
+                         <span className="text-[10px] font-bold uppercase text-art-text/70">{ot.mepo || "Basecamp"}</span>
+                       )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                       <Users size={12} className="text-blue-500 flex-shrink-0" />
+                       <div className="flex flex-wrap gap-1 items-center">
+                          <span className="text-[10px] font-bold uppercase text-art-text/40">Lead:</span>
+                          {leaders.map((ln: string, idx: number) => {
+                            const leaderObj = allLeaders?.find((l: any) => l.name === ln);
+                            const isPrimary = leaderObj?.isPrimary;
+                            return (
+                              <span key={idx} className={`text-[10px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded ${isPrimary ? 'bg-art-orange text-white' : 'text-art-text/60'}`}>
+                                {ln}{isPrimary ? ' ⭐' : ''}
+                              </span>
+                            );
+                          })}
+                          {leaders.length === 0 && <span className="text-[10px] font-bold uppercase text-art-text/40 italic">TBD</span>}
+                       </div>
+                    </div>
+
+                    {v.beans && (
+                      <div className="flex items-center gap-2">
+                         <Coffee size={12} className="text-art-text/40 flex-shrink-0" />
+                         <span className="text-[10px] font-bold uppercase text-art-text/50">{ot.beans || "Premium Beans"}</span>
+                      </div>
+                    )}
+                 </div>
               </motion.div>
             )}
          </AnimatePresence>
@@ -1138,29 +1150,6 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
 
         <p className="text-xs font-medium text-art-text/70 mb-6 leading-relaxed line-clamp-2">{dest.desc}</p>
 
-        <div className="flex flex-col gap-2 mb-6">
-           <div className="flex items-center gap-2">
-              <MapPin size={12} className="text-art-orange flex-shrink-0" />
-              <span className="text-[10px] font-bold uppercase text-art-text/70">
-                Poin Meeting: {dest.mepoLink ? (
-                  <a href={dest.mepoLink} target="_blank" rel="noopener noreferrer" className="text-art-text underline hover:text-art-orange">{dest.mepo || "Basecamp"}</a>
-                ) : (
-                  dest.mepo || "Basecamp"
-                )}
-              </span>
-           </div>
-           {dest.beans && (
-             <div className="flex items-center gap-2">
-                <Coffee size={12} className="text-art-text/40 flex-shrink-0" />
-                <span className="text-[10px] font-bold uppercase text-art-text/50">Beans: {dest.beans}</span>
-             </div>
-           )}
-           <div className="flex items-center gap-2">
-              <Users size={12} className="text-blue-500 flex-shrink-0" />
-              <span className="text-[10px] font-bold uppercase text-art-text/50">Kuota: {dest.kuota || "Min 2 Pax"}</span>
-           </div>
-        </div>
-
         <div className="flex flex-col gap-3">
            <Button 
             variant="secondary" 
@@ -1178,6 +1167,29 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden space-y-6 pt-4 border-t-2 border-dashed border-art-text/10"
                >
+                  <div className="flex flex-col gap-2.5 p-4 bg-art-bg/30 rounded-xl border border-art-text/5">
+                     <div className="flex items-center gap-2">
+                        <MapPin size={12} className="text-art-orange flex-shrink-0" />
+                        <span className="text-[10px] font-black uppercase text-art-text/70">
+                          MePo: {dest.mepoLink ? (
+                            <a href={dest.mepoLink} target="_blank" rel="noopener noreferrer" className="text-art-text underline hover:text-art-orange">{dest.mepo || "Basecamp"}</a>
+                          ) : (
+                            dest.mepo || "Basecamp"
+                          )}
+                        </span>
+                     </div>
+                     {dest.beans && (
+                       <div className="flex items-center gap-2">
+                          <Coffee size={12} className="text-art-text/40 flex-shrink-0" />
+                          <span className="text-[10px] font-bold uppercase text-art-text/50">Beans: {dest.beans}</span>
+                       </div>
+                     )}
+                     <div className="flex items-center gap-2">
+                        <Users size={12} className="text-blue-500 flex-shrink-0" />
+                        <span className="text-[10px] font-bold uppercase text-art-text/50">Kuota: {dest.kuota || "Min 2 Pax"}</span>
+                     </div>
+                  </div>
+
                   <div className="space-y-4">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-art-text/40 mb-2">Pilihan Jalur:</p>
@@ -1676,32 +1688,26 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                         <div className="bg-art-bg/20 rounded-2xl border border-art-text/5 p-4 mt-2">
                            <div className="flex justify-between items-center pb-3">
                               <div className="flex flex-col">
-                                 <span className="text-[10px] font-black text-art-text uppercase mb-0.5">📦 Paket Trip {b.destinasi}</span>
-                                 <span className="text-[9px] font-bold text-art-text/40">{b.peserta} Pax • {b.jadwal} • {b.type === 'open' ? 'Open Trip' : 'Private Trip'}</span>
+                                 <span className="text-[10px] font-black text-art-text/40 uppercase mb-1 tracking-widest">📦 Trip Utama:</span>
+                                 <h5 className="text-sm font-black text-art-text uppercase leading-tight mb-1">{b.destinasi}</h5>
+                                 <span className="text-[9px] font-bold text-art-text/30 tracking-tight">{b.peserta} Pax • {b.jadwal}</span>
                               </div>
-                              <span className="font-black text-art-text text-sm">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                              <span className="font-black text-art-text text-lg">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
                            </div>
 
                            {b.opsionalItems && b.opsionalItems.length > 0 && (
-                             <div className="space-y-1.5 pt-3 border-t border-art-text/5">
-                                <p className="text-[9px] font-black text-art-orange uppercase tracking-[0.2em] mb-1">Layanan Tambahan:</p>
+                             <div className="space-y-1 mt-3 pt-2 border-t border-dashed border-art-text/5">
+                                <p className="text-[8px] font-black text-art-orange uppercase tracking-[0.2em] mb-1 opacity-60 italic">Layanan Tambahan:</p>
                                 {b.opsionalItems.map((item: any, idx: number) => {
                                   const isPending = item.status === 'pending_price';
                                   return (
-                                    <div key={idx} className="flex justify-between items-start text-[10px]">
+                                    <div key={idx} className="flex justify-between items-start text-[9px] opacity-70">
                                       <div className="flex flex-col">
-                                        <span className="font-black text-art-text/80 uppercase tracking-tight">+ {item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
-                                        <p className="text-[8px] text-art-text/40 mt-0.5 font-bold">
-                                          {item.isRental ? (
-                                            `${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}`
-                                          ) : (
-                                            item.priceInfo || item.name
-                                          )}
-                                        </p>
+                                        <span className="font-bold text-art-text uppercase tracking-tight">+ {item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
                                       </div>
                                       <div className="text-right">
-                                        <span className={`font-black text-[10px] pr-1 ${isPending ? 'text-art-orange italic' : 'text-art-text/80'}`}>
-                                          {isPending ? "Tunggu Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                                        <span className={`font-black text-[9px] ${isPending ? 'text-art-orange italic' : 'text-art-text/60'}`}>
+                                          {isPending ? "Pending" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
                                         </span>
                                       </div>
                                     </div>
@@ -2499,7 +2505,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredOpenTrips.length > 0 ? (
                   filteredOpenTrips.map((ot: any, i: number) => (
-                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} visibilities={config.visibilities} />
+                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} visibilities={config.visibilities} allLeaders={config.tripLeaders} />
                   ))
                 ) : (
                   <div className="col-span-full py-24 border-4 border-dashed border-art-text/5 rounded-[3rem] flex flex-col items-center justify-center text-center bg-white/40">

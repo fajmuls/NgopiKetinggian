@@ -1093,7 +1093,16 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-art-text/40">Status Leader</label>
+                  <button 
+                    onClick={() => setData(prev => prev.map((item, idx) => idx === i ? { ...item, isPrimary: !item.isPrimary } : item))}
+                    className={`w-full p-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${leader.isPrimary ? 'bg-art-green text-white border-art-green' : 'bg-white text-art-text border-art-text/10'}`}
+                  >
+                    {leader.isPrimary ? 'Leader Utama' : 'Set Sebagai Utama'}
+                  </button>
+                </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-art-text/40">Link Gambar (Eksplisit)</label>
                   <input 
@@ -1103,6 +1112,7 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
                     placeholder="URL Image (Auto-update if uploaded above)" 
                   />
                 </div>
+              </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -1147,8 +1157,7 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
         <p className="text-[10px] text-art-text/50">Kosongkan URL Voice Line agar admin bisa mengisi audionya secara manual dari luar jika dibutuhkan, atau isikan URL Firebase/Public HTTPS yang sudah dihosting. Karena Firestore hanya menampung teks url.</p>
       </div>
 
