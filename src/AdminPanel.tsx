@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -683,7 +683,7 @@ const difficultyLevels = ["Pemula", "Pemula-Menengah", "Menengah", "Menengah-Ahl
 const durationLevels = ["1H (Tektok)", "2H 1M", "3H 2M", "4H 3M", "5H 4M"];
 
 const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
-  const [data, setData] = useState(JSON.parse(JSON.stringify(config.destinationsData)));
+  const [data, setData] = useState(JSON.parse(JSON.stringify(config.destinationsData || [])));
   const [search, setSearch] = useState("");
   const [regionFilter, setRegionFilter] = useState("Semua");
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
@@ -691,8 +691,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
   const [visibilities, setVisibilities] = useState(config.visibilities || { map: true, quota: true, beans: true, routes: true });
 
   useEffect(() => {
-    if (JSON.stringify(data) !== JSON.stringify(config.destinationsData)) {
-      setData(JSON.parse(JSON.stringify(config.destinationsData)));
+    if (JSON.stringify(data) !== JSON.stringify(config.destinationsData || [])) {
+      setData(JSON.parse(JSON.stringify(config.destinationsData || [])));
     }
   }, [config.destinationsData]);
   
@@ -722,7 +722,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
             });
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={() => {
-             setData(JSON.parse(JSON.stringify(config.destinationsData)));
+             setData(JSON.parse(JSON.stringify(config.destinationsData || [])));
              if (config.visibilities) setVisibilities(config.visibilities);
              setExpandedIndexes([]);
              showToast('Di-reset ke data tersimpan terakhir!');
@@ -863,6 +863,15 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                   nd[i].mepo = e.target.value;
                   setData(nd);
                 }} placeholder="Basecamp" />
+              </div>
+
+              <div className="flex flex-col flex-1 min-w-[120px]">
+                <span className="text-[9px] font-bold uppercase mb-1">Google Maps Link:</span>
+                <input className="border p-2 rounded text-xs w-full" value={dest.mepoLink || ''} onChange={e => {
+                  const nd = [...data];
+                  nd[i].mepoLink = e.target.value;
+                  setData(nd);
+                }} placeholder="https://maps.app.goo.gl/..." />
               </div>
               
               <div className="flex flex-col flex-1 min-w-[120px]">
@@ -1016,14 +1025,14 @@ const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
 };
 
 const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
-  const [data, setData] = useState([...config.tripLeaders]);
+  const [data, setData] = useState([...(config.tripLeaders || [])]);
   const [leaderTitle, setLeaderTitle] = useState(config.homepage?.leaderTitle || '');
   const [leaderSub, setLeaderSub] = useState(config.homepage?.leaderSub || '');
   const [leaderParagraph, setLeaderParagraph] = useState(config.homepage?.leaderParagraph || '');
 
   useEffect(() => {
-    if (JSON.stringify(data) !== JSON.stringify(config.tripLeaders)) {
-      setData(JSON.parse(JSON.stringify(config.tripLeaders)));
+    if (JSON.stringify(data) !== JSON.stringify(config.tripLeaders || [])) {
+      setData(JSON.parse(JSON.stringify(config.tripLeaders || [])));
     }
   }, [config.tripLeaders]);
 
@@ -1057,7 +1066,7 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
             });
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Reset Default</button>
           <button onClick={() => {
-             setData(JSON.parse(JSON.stringify(config.tripLeaders)));
+             setData(JSON.parse(JSON.stringify(config.tripLeaders || [])));
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           <button onClick={() => {
@@ -1151,7 +1160,7 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
 };
 
 const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
-  const [data, setData] = useState([...config.galleryPhotos]);
+  const [data, setData] = useState([...(config.galleryPhotos || [])]);
   
   const handleSave = () => {
     updateConfig({ galleryPhotos: data });
@@ -1172,7 +1181,7 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
             });
           }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={() => {
-             setData(JSON.parse(JSON.stringify(config.galleryPhotos)));
+             setData(JSON.parse(JSON.stringify(config.galleryPhotos || [])));
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           <button onClick={() => {

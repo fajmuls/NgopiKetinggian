@@ -791,6 +791,23 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       <span className="text-[10px] font-black text-white px-2 py-0.5 border border-white/10 rounded-md">x {currentPesertaCount}</span>
                    </div>
 
+                   {opsionalItemsList.length > 0 && (
+                     <div className="pt-3 mt-1 border-t border-white/10 space-y-2">
+                        <span className="text-[9px] font-black uppercase text-art-orange tracking-widest block mb-1">Layanan Tambahan:</span>
+                        {opsionalItemsList.map((item: any, idx: number) => (
+                           <div key={idx} className="flex justify-between items-start">
+                             <div className="flex flex-col">
+                               <span className="text-[10px] font-bold text-white/80">{item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
+                               <span className="text-[8px] text-white/40">{item.isRental ? `${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}/Hari` : (item.priceInfo || '')}</span>
+                             </div>
+                             <span className="text-[10px] font-black text-white">
+                                {item.status === 'pending_price' ? <span className="text-art-orange text-[8px] italic">Dihitung Admin</span> : `+ Rp ${item.subtotal.toLocaleString('id-ID')}`}
+                             </span>
+                           </div>
+                        ))}
+                     </div>
+                   )}
+
                    {isPromoValid && (
                      <div className="flex justify-between items-center pt-2 border-t border-white/5 bg-art-green/20 -mx-6 px-6 py-2">
                         <span className="text-[11px] font-black text-white uppercase flex items-center gap-1.5 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
@@ -809,7 +826,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                          <div className="flex items-center gap-2 mt-1">
                             <div className="w-1 h-1 rounded-full bg-art-orange"></div>
                             <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
-                              Rp {Math.round(netPrice / currentPesertaCount).toLocaleString('id-ID')} / orang
+                              Rp {Math.round((grossPrice - discountAmount) / currentPesertaCount).toLocaleString('id-ID')} / orang <span className="lowercase normal-case italic opacity-70">(exclude opsional)</span>
                             </p>
                          </div>
                       )}
@@ -851,6 +868,7 @@ const destinationsData = [
     "locationTag": "Basecamp",
     "difficulty": "Menengah",
     "mepo": "Basecamp Wates",
+    "mepoLink": "https://maps.app.goo.gl/PzS2B9115B1cRyT16",
     "kuota": "Min 2 - Max 12 Pax",
     "beans": "Arabica Dieng",
     "paths": [
@@ -1119,6 +1137,29 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
         </div>
 
         <p className="text-xs font-medium text-art-text/70 mb-6 leading-relaxed line-clamp-2">{dest.desc}</p>
+
+        <div className="flex flex-col gap-2 mb-6">
+           <div className="flex items-center gap-2">
+              <MapPin size={12} className="text-art-orange flex-shrink-0" />
+              <span className="text-[10px] font-bold uppercase text-art-text/70">
+                Poin Meeting: {dest.mepoLink ? (
+                  <a href={dest.mepoLink} target="_blank" rel="noopener noreferrer" className="text-art-text underline hover:text-art-orange">{dest.mepo || "Basecamp"}</a>
+                ) : (
+                  dest.mepo || "Basecamp"
+                )}
+              </span>
+           </div>
+           {dest.beans && (
+             <div className="flex items-center gap-2">
+                <Coffee size={12} className="text-art-text/40 flex-shrink-0" />
+                <span className="text-[10px] font-bold uppercase text-art-text/50">Beans: {dest.beans}</span>
+             </div>
+           )}
+           <div className="flex items-center gap-2">
+              <Users size={12} className="text-blue-500 flex-shrink-0" />
+              <span className="text-[10px] font-bold uppercase text-art-text/50">Kuota: {dest.kuota || "Min 2 Pax"}</span>
+           </div>
+        </div>
 
         <div className="flex flex-col gap-3">
            <Button 
