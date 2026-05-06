@@ -846,22 +846,27 @@ const destinationsData = [
     "isActive": true,
     "region": "Jawa Tengah",
     "height": "2.590 mdpl",
-    "desc": "Petualangan premium di Gunung Prau.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "desc": "Lautan awan terbaik di Jawa Tengah dengan jalur yang ramah namun memukau.",
+    "image": "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Pemula Menengah",
-    "mepo": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp Wates",
     "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
+    "beans": "Arabica Dieng",
     "paths": [
       {
         "name": "Via Wates",
         "durations": [
-          { "label": "1H (Tektok)", "price": 450, "originalPrice": 550 },
-          { "label": "2H 1M", "price": 700, "originalPrice": 850 },
-          { "label": "3H 2M", "price": 1000, "originalPrice": 1200 },
-          { "label": "4H 3M", "price": 1400, "originalPrice": 1600 },
-          { "label": "5H 4M", "price": 1700, "originalPrice": 1900 }
+          { "label": "1H (Tektok)", "price": 450, "originalPrice": 520 },
+          { "label": "2H 1M", "price": 750, "originalPrice": 850 },
+          { "label": "3H 2M", "price": 1050, "originalPrice": 1200 }
+        ]
+      },
+      {
+        "name": "Via Patak Banteng",
+        "durations": [
+          { "label": "1H (Tektok)", "price": 400, "originalPrice": 480 },
+          { "label": "2H 1M", "price": 680, "originalPrice": 750 }
         ]
       }
     ]
@@ -872,74 +877,25 @@ const destinationsData = [
     "isActive": true,
     "region": "Jawa Tengah",
     "height": "2.340 mdpl",
-    "desc": "Petualangan menantang dengan jalur terjal di Gunung Kembang.",
+    "desc": "Taman bunga di ketinggian dengan jalur 'Banteng' yang menantang adrenalin.",
     "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Ahli",
-    "mepo": "Basecamp",
+    "difficulty": "Pemula - Menengah",
+    "mepo": "Basecamp Lengkong",
     "kuota": "Min 2 - Max 10 Pax",
-    "beans": "Arabica Blend",
+    "beans": "Java Arabica",
     "paths": [
       {
         "name": "Via Lengkong",
         "durations": [
-          { "label": "1H (Tektok)", "price": 500, "originalPrice": 600 },
-          { "label": "2H 1M", "price": 800, "originalPrice": 950 },
-          { "label": "3H 2M", "price": 1100, "originalPrice": 1300 },
-          { "label": "4H 3M", "price": 1500, "originalPrice": 1700 },
-          { "label": "5H 4M", "price": 1800, "originalPrice": 2000 }
+          { "label": "1H (Tektok)", "price": 380, "originalPrice": 450 },
+          { "label": "2H 1M", "price": 620, "originalPrice": 700 }
         ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-bismo",
-    "name": "Gunung Bismo",
-    "isActive": true,
-    "region": "Jawa Tengah",
-    "height": "2.365 mdpl",
-    "desc": "Pendakian santai dan pemandangan luar biasa di Gunung Bismo.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Pemula-Menengah",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 15 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
+      },
       {
-        "name": "Via Sikunang",
+        "name": "Via Blembem",
         "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 600, "originalPrice": 750 },
-          { "label": "3H 2M", "price": 900, "originalPrice": 1050 },
-          { "label": "4H 3M", "price": 1250, "originalPrice": 1450 },
-          { "label": "5H 4M", "price": 1550, "originalPrice": 1750 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-kembang-+-bismo",
-    "name": "Gunung Kembang + Bismo",
-    "isActive": true,
-    "region": "Jawa Tengah",
-    "height": "2.365 mdpl",
-    "desc": "Petualangan premium di Gunung Kembang + Bismo.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Menengah",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Lengkong & Sikunang",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
+          { "label": "2H 1M", "price": 590, "originalPrice": 650 }
         ]
       }
     ]
@@ -950,326 +906,27 @@ const destinationsData = [
     "isActive": true,
     "region": "Jawa Tengah",
     "height": "3.142 mdpl",
-    "desc": "Petualangan premium di Gunung Merbabu.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "desc": "Sabana luas yang menyejukkan mata, salah satu pemandangan terbaik di Jawa.",
+    "image": "https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop",
     "locationTag": "Basecamp",
-    "difficulty": "Menengah Ahli",
-    "mepo": "Basecamp",
+    "difficulty": "Menengah - Mahir",
+    "mepo": "Selo / Thekelan",
     "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
+    "beans": "Mount Merbabu Blend",
     "paths": [
       {
         "name": "Via Selo",
         "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
+          { "label": "1H (Tektok)", "price": 650, "originalPrice": 750 },
+          { "label": "2H 1M", "price": 1050, "originalPrice": 1200 },
+          { "label": "3H 2M", "price": 1450, "originalPrice": 1650 }
         ]
       },
       {
-        "name": "Via Thekelan",
+        "name": "Via Suwanting",
         "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Swanting",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-slamet",
-    "name": "Gunung Slamet",
-    "isActive": true,
-    "region": "Jawa Tengah",
-    "height": "3.432 mdpl",
-    "desc": "Petualangan premium di Gunung Slamet.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Ahli",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Bambangan",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Guci",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-sindoro",
-    "name": "Gunung Sindoro",
-    "isActive": true,
-    "region": "Jawa Tengah",
-    "height": "3.136 mdpl",
-    "desc": "Petualangan premium di Gunung Sindoro.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Sangat Ahli",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Kledung",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-sumbing",
-    "name": "Gunung Sumbing",
-    "isActive": true,
-    "region": "Jawa Tengah",
-    "height": "3.371 mdpl",
-    "desc": "Petualangan premium di Gunung Sumbing.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Pemula",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Garung",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Gajahmungkur",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-lawu",
-    "name": "Gunung Lawu",
-    "isActive": true,
-    "region": "Jawa Timur",
-    "height": "3.265 mdpl",
-    "desc": "Petualangan premium di Gunung Lawu.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Pemula Menengah",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Candi Cetho",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Cemoro Sewu",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-ciremai",
-    "name": "Gunung Ciremai",
-    "isActive": true,
-    "region": "Jawa Barat",
-    "height": "3.078 mdpl",
-    "desc": "Petualangan premium di Gunung Ciremai.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Menengah",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Apuy",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Sadarehe",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-papandayan",
-    "name": "Gunung Papandayan",
-    "isActive": true,
-    "region": "Jawa Barat",
-    "height": "2.665 mdpl",
-    "desc": "Petualangan premium di Gunung Papandayan.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Menengah Ahli",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Camp David",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-gede",
-    "name": "Gunung Gede",
-    "isActive": true,
-    "region": "Jawa Barat",
-    "height": "2.958 mdpl",
-    "desc": "Petualangan premium di Gunung Gede.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Ahli",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Putri",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Cibodas",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-pangrango",
-    "name": "Gunung Pangrango",
-    "isActive": true,
-    "region": "Jawa Barat",
-    "height": "3.019 mdpl",
-    "desc": "Petualangan premium di Gunung Pangrango.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Sangat Ahli",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Cibodas",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-salak",
-    "name": "Gunung Salak",
-    "isActive": true,
-    "region": "Jawa Barat",
-    "height": "2.211 mdpl",
-    "desc": "Petualangan premium di Gunung Salak.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Pemula",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Cidahu",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
+          { "label": "2H 1M", "price": 1150, "originalPrice": 1300 },
+          { "label": "3H 2M", "price": 1550, "originalPrice": 1750 }
         ]
       }
     ]
@@ -1280,58 +937,19 @@ const destinationsData = [
     "isActive": true,
     "region": "Jawa Timur",
     "height": "3.676 mdpl",
-    "desc": "Petualangan premium di Gunung Semeru.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Pemula Menengah",
-    "mepo": "Basecamp",
+    "desc": "Atap tanah Jawa. Perjalanan spiritual menuju puncak tertinggi Jawa.",
+    "image": "https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Tumpang/Malang",
+    "difficulty": "Mahir",
+    "mepo": "Tumpang/Ranu Pani",
     "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
+    "beans": "Java Semeru Coffee",
     "paths": [
       {
         "name": "Via Ranu Pani",
         "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "gunung-rinjani",
-    "name": "Gunung Rinjani",
-    "isActive": true,
-    "region": "NTB",
-    "height": "3.726 mdpl",
-    "desc": "Petualangan premium di Gunung Rinjani.",
-    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
-    "locationTag": "Basecamp",
-    "difficulty": "Menengah",
-    "mepo": "Basecamp",
-    "kuota": "Min 2 - Max 12 Pax",
-    "beans": "Arabica Blend",
-    "paths": [
-      {
-        "name": "Via Sembalun",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
-        ]
-      },
-      {
-        "name": "Via Senaru",
-        "durations": [
-          { "label": "1H (Tektok)", "price": 350, "originalPrice": 450 },
-          { "label": "2H 1M", "price": 650, "originalPrice": 800 },
-          { "label": "3H 2M", "price": 950, "originalPrice": 1100 },
-          { "label": "4H 3M", "price": 1300, "originalPrice": 1500 },
-          { "label": "5H 4M", "price": 1600, "originalPrice": 1800 }
+          { "label": "3H 2M", "price": 1850, "originalPrice": 2100 },
+          { "label": "4H 3M", "price": 2350, "originalPrice": 2600 }
         ]
       }
     ]
@@ -1340,10 +958,21 @@ const destinationsData = [
 
 // Removed hardcoded heroSlides
 
-const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number }> = ({ ot, onJoin, getSisaKuota }) => {
+const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any }> = ({ ot, onJoin, getSisaKuota, visibilities }) => {
   const [showDetails, setShowDetails] = useState(false);
   const { playClick, playHover } = useSound();
   
+  const v = ot.visibility || {
+    mepo: true,
+    difficulty: true,
+    duration: true,
+    leader: true,
+    beans: visibilities?.beans ?? true,
+    price: true
+  };
+
+  const leaders = Array.isArray(ot.leaders) ? ot.leaders : (ot.leader ? [ot.leader] : []);
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col">
       <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
@@ -1351,9 +980,11 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
          <div className="absolute top-3 left-3 bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1">
             <Calendar size={10}/> {ot.jadwal}
          </div>
-         <div className="absolute top-3 right-3 bg-white text-art-text text-[8px] font-black px-2 py-1 rounded-lg border border-art-text/10 uppercase shadow-sm">
-            {ot.difficulty}
-         </div>
+         {v.difficulty && (
+           <div className="absolute top-3 right-3 bg-white text-art-text text-[8px] font-black px-2 py-1 rounded-lg border border-art-text/10 uppercase shadow-sm">
+              {ot.difficulty}
+           </div>
+         )}
          <div className={`absolute bottom-3 left-3 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
             {getSisaKuota(ot)} Pax Left
          </div>
@@ -1365,25 +996,36 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                <Globe size={10}/> {ot.path}
             </span>
          </div>
-         <h3 className="text-xl font-black uppercase text-art-text mb-3 leading-tight group-hover:text-art-green transition-colors">{ot.name}</h3>
+         <h3 className="text-2xl tracking-tighter font-black uppercase text-art-text mb-4 leading-tight group-hover:text-art-green transition-colors">{ot.name}</h3>
          
-         <div className="flex flex-col gap-2 mb-4">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-               <div className="flex items-center gap-1.5 min-w-[70px]">
-                  <MapPin size={10} className="text-art-orange" />
-                  <span className="text-[8px] font-black uppercase text-art-text/70">{ot.mepo || "Basecamp"}</span>
-               </div>
-               <div className="flex items-center gap-1.5">
-                  <Coffee size={10} className="text-art-green" />
-                  <span className="text-[8px] font-black uppercase text-art-text/70">{ot.beans || "Premium"}</span>
-               </div>
-               {ot.leader && (
-                 <div className="flex items-center gap-1.5">
-                    <Users size={10} className="text-art-orange" />
-                    <span className="text-[8px] font-black uppercase text-art-text/70">{ot.leader}</span>
-                 </div>
+         <div className="flex flex-col gap-1.5 mb-4 border-t border-art-text/5 pt-3">
+            <div className="flex items-center gap-2">
+               <Calendar size={12} className="text-art-green flex-shrink-0" />
+               <span className="text-[10px] font-black uppercase tracking-widest text-art-text">{ot.jadwal}</span>
+               <span className="text-art-text/20">•</span>
+               <span className="text-[10px] font-bold uppercase text-art-text/60">{ot.duration}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+               <MapPin size={12} className="text-art-orange flex-shrink-0" />
+               {ot.mepoLink ? (
+                 <a href={ot.mepoLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase text-art-text underline hover:text-art-orange">{ot.mepo || "Basecamp"}</a>
+               ) : (
+                 <span className="text-[10px] font-bold uppercase text-art-text/70">{ot.mepo || "Basecamp"}</span>
                )}
             </div>
+
+            <div className="flex items-center gap-2">
+               <Users size={12} className="text-blue-500 flex-shrink-0" />
+               <span className="text-[10px] font-bold uppercase text-art-text/70">Lead: {leaders.length > 0 ? leaders.join(", ") : 'TBD'}</span>
+            </div>
+
+            {v.beans && (
+              <div className="flex items-center gap-2">
+                 <Coffee size={12} className="text-art-text/40 flex-shrink-0" />
+                 <span className="text-[10px] font-bold uppercase text-art-text/50">{ot.beans || "Premium Beans"}</span>
+              </div>
+            )}
          </div>
 
          <AnimatePresence>
@@ -1394,25 +1036,7 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden mb-6 border-t border-dashed border-art-text/10 pt-4"
               >
-                 <p className="text-[9px] font-medium text-art-text/60 mb-3 italic leading-relaxed">{ot.desc || "Nikmati petualangan khas kopi di gunung memukau ini."}</p>
-                 <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
-                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
-                       <span className="text-art-text/30">Mepo</span>
-                       <span className="text-art-text truncate max-w-[60px]">{ot.mepo || 'Basecamp'}</span>
-                    </div>
-                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
-                       <span className="text-art-text/30">Durasi</span>
-                       <span className="text-art-text">{ot.duration}</span>
-                    </div>
-                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
-                       <span className="text-art-text/30">Difficulty</span>
-                       <span className="text-art-text">{ot.difficulty}</span>
-                    </div>
-                    <div className="flex justify-between text-[8px] font-bold uppercase py-1 border-b border-art-text/5">
-                       <span className="text-art-text/30">Leader</span>
-                       <span className="text-art-text truncate max-w-[60px]">{ot.leader || '-'}</span>
-                    </div>
-                 </div>
+                 <p className="text-[10px] font-medium text-art-text/60 italic leading-relaxed whitespace-pre-wrap">{ot.desc || "Bergabunglah dengan trip kami dan nikmati pengalaman mendaki yang tak terlupakan."}</p>
               </motion.div>
             )}
          </AnimatePresence>
@@ -1976,69 +1600,76 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                          >
                            <Trash2 size={12} /> Hapus
                          </button>
-                     </div>
+                      </div>
 
-                     {b.status === 'pending' && activeTab === 'proses' && (
-                       <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10">"Menunggu konfirmasi admin."</p>
-                     )}
-                     
-                     <div>
-                        <h4 className="text-3xl font-black uppercase tracking-tighter text-art-text leading-tight">{b.destinasi}</h4>
-                          <div className="absolute top-16 right-6 text-right flex flex-col items-end">
-                             <p className="text-[9px] font-black text-art-text/30 uppercase tracking-widest leading-tight mb-1 font-mono">Keberangkatan</p>
-                             <div className="bg-art-text border-2 border-art-text px-3 py-1 rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.1)] rotate-1">
-                               <p className="text-[12px] font-black text-white">{b.jadwal}</p>
-                             </div>
-                          </div>
-                        <div className="flex flex-wrap items-center gap-1.5 md:gap-3">
-                           <p className="text-[11px] font-bold text-art-text/50 uppercase tracking-widest flex items-center gap-1.5 bg-art-bg/50 px-2 py-0.5 rounded-md w-fit mt-1">
-                             <MapPin size={10} /> {b.jalur} • {b.durasi}
+                      {b.status === 'pending' && activeTab === 'proses' && (
+                        <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10 mt-2">"Menunggu konfirmasi admin."</p>
+                      )}
+                      
+                      <div className="relative pt-6">
+                        <div className="absolute -top-1 right-0">
+                           <span className={`text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ${
+                              b.status === 'lunas' || b.status === 'selesai' ? 'bg-green-100 text-green-700' : 
+                              b.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                              b.status === 'dp_partial' ? 'bg-art-orange/10 text-art-orange' :
+                              'bg-yellow-100 text-yellow-700'
+                           }`}>
+                              {b.status === 'pending' ? 'Pending' : 
+                               b.status === 'processing' ? 'Proses' :
+                               b.status === 'dp_partial' ? 'DP' :
+                               'Lunas'}
+                           </span>
+                        </div>
+                      
+                        <h4 className="text-2xl font-black uppercase tracking-tighter text-art-text leading-tight mb-1">{b.destinasi}</h4>
+                        
+                        <div className="flex flex-col gap-1 mb-4">
+                           <p className="text-[10px] font-bold text-art-text/30 lowercase tracking-tight flex items-center gap-1.5">
+                             <User size={10} /> {b.email || 'no-email'}
                            </p>
-                           <span className="text-[10px] text-art-text/20">•</span>
-                           <p className="text-[11px] font-bold text-art-text/40 lowercase tracking-tight flex items-center gap-1.5"><User size={10} /> {b.email}</p>
-                        </div>
-                     </div>
-
-                     <div className="bg-art-bg/20 rounded-2xl border border-art-text/5 p-4 space-y-3">
-                        <div className="flex justify-between items-center text-xs border-b border-art-text/5 pb-3">
-                           <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-art-orange uppercase tracking-widest mb-1">Utama: Paket Trip {b.destinasi}</span>
-                              <span className="font-extrabold text-art-text text-lg leading-none">{b.peserta} Pax</span>
-                           </div>
-                           <div className="text-right">
-                              <span className="font-black text-art-green text-xl md:text-2xl tracking-tighter block drop-shadow-sm">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
-                              <span className="text-[8px] font-bold text-art-text/30 uppercase">Harga Utama</span>
-                           </div>
+                           <p className="text-[10px] font-bold text-art-orange uppercase tracking-widest flex items-center gap-1.5 bg-art-orange/5 w-fit px-2 py-0.5 rounded-md border border-art-orange/10">
+                             <MapPin size={10} /> {b.jalur} • {b.durasi} • {b.peserta} Pax
+                           </p>
                         </div>
 
-                        {b.opsionalItems && b.opsionalItems.length > 0 && (
-                          <div className="space-y-2">
-                             <p className="text-[9px] font-black text-art-text/30 uppercase tracking-[0.2em] mb-1">Layanan Tambahan:</p>
-                             {b.opsionalItems.map((item: any, idx: number) => {
-                               const isPending = item.status === 'pending_price';
-                               return (
-                                 <div key={idx} className="flex justify-between items-start text-[10px] pl-3 border-l-2 border-art-orange/20 py-1">
-                                   <div>
-                                     <span className="font-black text-art-text/80 uppercase tracking-tight">{item.name}</span>
-                                     <p className="text-[9px] text-art-text/40 mt-0.5 font-medium">
-                                       {item.isRental ? (
-                                         `${item.count}x • ${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}`
-                                       ) : (
-                                         item.priceInfo || item.name
-                                       )}
-                                     </p>
-                                   </div>
-                                   <div className="text-right">
-                                     <span className={`font-black text-[11px] ${isPending ? 'text-art-orange italic' : 'text-art-text/80'}`}>
-                                       {isPending ? "Disesuaikan" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
-                                     </span>
-                                     {isPending && <p className="text-[8px] font-bold text-art-orange/50 uppercase leading-none mt-0.5 font-mono">Tunggu Admin</p>}
-                                   </div>
-                                 </div>
-                               );
-                             })}
-                          </div>
-                        )}
+                        <div className="bg-art-bg/20 rounded-2xl border border-art-text/5 p-4 mt-2">
+                           <div className="flex justify-between items-center pb-3">
+                              <div className="flex flex-col">
+                                 <span className="text-[10px] font-black text-art-text uppercase mb-0.5">📦 Paket Trip {b.destinasi}</span>
+                                 <span className="text-[9px] font-bold text-art-text/40">{b.peserta} Pax • {b.jadwal} • {b.type === 'open' ? 'Open Trip' : 'Private Trip'}</span>
+                              </div>
+                              <span className="font-black text-art-text text-sm">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                           </div>
+
+                           {b.opsionalItems && b.opsionalItems.length > 0 && (
+                             <div className="space-y-1.5 pt-3 border-t border-art-text/5">
+                                <p className="text-[9px] font-black text-art-orange uppercase tracking-[0.2em] mb-1">Layanan Tambahan:</p>
+                                {b.opsionalItems.map((item: any, idx: number) => {
+                                  const isPending = item.status === 'pending_price';
+                                  return (
+                                    <div key={idx} className="flex justify-between items-start text-[10px]">
+                                      <div className="flex flex-col">
+                                        <span className="font-black text-art-text/80 uppercase tracking-tight">+ {item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
+                                        <p className="text-[8px] text-art-text/40 mt-0.5 font-bold">
+                                          {item.isRental ? (
+                                            `${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}`
+                                          ) : (
+                                            item.priceInfo || item.name
+                                          )}
+                                        </p>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className={`font-black text-[10px] pr-1 ${isPending ? 'text-art-orange italic' : 'text-art-text/80'}`}>
+                                          {isPending ? "Tunggu Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                             </div>
+                           )}
+                        </div>
+                      </div>
 
                         {b.promoCode && (
                           <div className="flex justify-between items-center text-[10px] bg-art-green/10 p-2.5 rounded-xl border-2 border-art-green/40 mt-3 shadow-sm ring-4 ring-art-green/5">
@@ -2047,7 +1678,6 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                           </div>
                         )}
                      </div>
-                   </div>
 
                    <div className="md:w-56 shrink-0 flex flex-col md:border-l border-art-text/10 md:pl-6 justify-between gap-6">
                       <div>
@@ -2828,7 +2458,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredOpenTrips.length > 0 ? (
                   filteredOpenTrips.map((ot: any, i: number) => (
-                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} />
+                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} visibilities={config.visibilities} />
                   ))
                 ) : (
                   <div className="col-span-full py-24 border-4 border-dashed border-art-text/5 rounded-[3rem] flex flex-col items-center justify-center text-center bg-white/40">

@@ -34,6 +34,7 @@ export interface OpenTrip {
   kuotaNum: number;
   consumedKuota?: number;
   mepo: string;
+  mepoLink?: string; // Added map link
   difficulty: string;
   image: string;
   beans: string;
@@ -43,11 +44,29 @@ export interface OpenTrip {
   originalPrice: number;
   leaders?: string[];
   status?: 'draft' | 'published';
+  desc?: string;
+  visibility?: {
+    mepo: boolean;
+    difficulty: boolean;
+    duration: boolean;
+    leader: boolean;
+    beans: boolean;
+    price: boolean;
+  };
 }
 
 export interface AppConfig {
   openTrips: OpenTrip[];
-  visibilities: { map: boolean, quota: boolean, beans: boolean, routes: boolean };
+  visibilities: { 
+    map: boolean; 
+    quota: boolean; 
+    beans: boolean; 
+    routes: boolean;
+    openTripMepo: boolean;
+    openTripDifficulty: boolean;
+    openTripDuration: boolean;
+    openTripLeader: boolean;
+  };
   facilities: { include: string[], exclude: string[], opsi: FacilityOption[] };
   destinationsData: any[];
   tripLeaders: any[];
@@ -76,7 +95,16 @@ export interface AppConfig {
 }
 
 const getDefaultWebsiteData = () => ({
-  visibilities: { map: true, quota: true, beans: true, routes: true },
+  visibilities: { 
+    map: true, 
+    quota: true, 
+    beans: true, 
+    routes: true,
+    openTripMepo: true,
+    openTripDifficulty: true,
+    openTripDuration: true,
+    openTripLeader: true
+  },
   facilities: {
     include: [
       "Tiket masuk & asuransi pendakian resmi (Simaksi)",
