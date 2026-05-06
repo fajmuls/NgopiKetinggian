@@ -201,9 +201,12 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   const opsionalItemsList: any[] = [];
   let totalOpsionalPrice = 0;
 
+  // 1. First, handle sub-items (Rental Items)
+  // Only count sub-items if their parent category is checked/selected in selectedOpsional
   Object.entries(subSelected).forEach(([key, qty]) => {
     const [parentName, subName] = key.split('|');
-    // FIX: Only count if parent item is specifically checked in optional checkbox
+    
+    // BUG FIX: Only count sub-item if the parent category is checked
     if (!selectedOpsional.includes(parentName)) return;
 
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
@@ -211,7 +214,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     if (subItem) {
       const pricePerDay = subItem.price ? Number(subItem.price) * 1000 : 0;
       const numQty = Number(qty);
-      // Formula: price * qty * days
+      // Formula: price * qty * tripDays
       const totalItemPrice = pricePerDay * numQty * tripDays;
       
       opsionalItemsList.push({
@@ -228,23 +231,27 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     }
   });
 
+  // 2. Handle standalone items (Items without sub-items)
+  // According to request: "if there's no sub-item, the price is not included (0)"
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
-    if (opt && (!opt.subItems || opt.subItems.length === 0)) {
-      // Standalone items: price is not included according to user formula request
-      // "Then, for items without sub-items, they are slipped into the payment status. This means that if there's no sub-item, the price is not included."
-      
-      opsionalItemsList.push({
-        name: optName,
-        parentName: optName,
-        price: 0,
-        count: 1,
-        days: 1, 
-        subtotal: 0,
-        status: 'confirmed',
-        isRental: false
-      });
-      // totalOpsionalPrice += 0;
+    if (opt) {
+      // Check if this item has NO sub-items or if we want to show it as a standalone included service
+      if (!opt.subItems || opt.subItems.length === 0) {
+        // According to user request: "items without sub-items... price is not included (0)"
+        // We still list it in the slip but with 0 price in the calculation
+        opsionalItemsList.push({
+          name: optName,
+          parentName: optName,
+          price: 0, // Explicitly 0 per request
+          count: 1,
+          days: 1, 
+          subtotal: 0,
+          status: 'confirmed',
+          isRental: false
+        });
+        // totalOpsionalPrice doesn't increase by 0
+      }
     }
   });
 
@@ -427,11 +434,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                        )}
  
                        {isPromoValid && (
-                         <div className="flex justify-between items-center p-2.5 bg-art-green/10 border-2 border-art-green rounded-xl my-2 shadow-[4px_4px_0px_#48bb78]">
-                            <span className="font-black text-art-green uppercase flex items-center gap-2 text-[10px]">
-                              <TrendingUp size={14} /> PROMO AKTIF: {promoCode} 
-                            </span>
-                            <span className="font-black text-art-green text-xs animate-pulse">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                         <div className="flex justify-between items-center text-[10px] pt-1 bg-art-green/10 p-2 rounded-xl border border-art-green/30 mt-2">
+                            <span className="font-black text-art-green uppercase flex items-center gap-1.5 drop-shadow-sm">🎁 Promo: {promoCode}</span>
+                            <span className="font-extrabold text-art-green bg-white/80 px-2 py-0.5 rounded-lg border border-art-green/20">- Rp {discountAmount.toLocaleString('id-ID')}</span>
                          </div>
                        )}
                     </div>
@@ -787,14 +792,14 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       <span className="text-[10px] font-black text-white px-2 py-0.5 border border-white/10 rounded-md">x {currentPesertaCount}</span>
                    </div>
 
-                    {isPromoValid && (
-                      <div className="flex justify-between items-center p-3 bg-white/10 rounded-2xl border-2 border-dashed border-art-green/50 my-2 group transition-all hover:bg-white/20">
-                         <span className="text-xs font-black text-art-green uppercase flex items-center gap-2">
-                           <TrendingUp size={16} /> PROMO: {promoCode} (-{activePromo.discount}%)
-                         </span>
-                         <span className="text-sm font-black text-art-green uppercase">- Rp {discountAmount.toLocaleString('id-ID')}</span>
-                      </div>
-                    )}
+                   {isPromoValid && (
+                     <div className="flex justify-between items-center pt-2 border-t border-white/5 bg-art-green/20 -mx-6 px-6 py-2">
+                        <span className="text-[11px] font-black text-white uppercase flex items-center gap-1.5 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
+                          🎁 PROMO: {promoCode} (-{activePromo.discount}%)
+                        </span>
+                        <span className="text-[11px] font-black text-white bg-art-green px-2 py-0.5 rounded border border-white/20 shadow-sm">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                     </div>
+                   )}
                 </div>
 
                 <div className="flex items-end justify-between pt-2">
@@ -1935,19 +1940,25 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                    <div className="flex-1 space-y-4">
                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
+                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 flex items-center gap-1.5 ${
                              b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
                              b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
                              b.status === 'dp_partial' ? 'bg-yellow-50 text-yellow-600 border-yellow-600' :
                              'bg-art-orange/10 text-art-orange border-art-orange'
                            }`}>
-                          {b.status === 'pending' ? 'Diproses' : 
-                           b.status === 'processing' ? 'Admin Memproses' : 
-                           b.status === 'dp_partial' ? 'DP Parsial' :
-                           b.status === 'lunas' ? 'Sudah Lunas' : 
-                           b.status === 'selesai' ? 'Trip Selesai' : 
-                           'Dibatalkan'}
-                        </div>
+                             {b.status === 'pending' && <Clock size={10} />}
+                             {b.status === 'processing' && <TrendingUp size={10} />}
+                             {b.status === 'dp_partial' && <CreditCard size={10} />}
+                             {b.status === 'lunas' && <CheckCircle2 size={10} />}
+                             {b.status === 'selesai' && <MapPin size={10} />}
+                             {b.status === 'batal' && <X size={10} />}
+                             {b.status === 'pending' ? 'Diproses' : 
+                              b.status === 'processing' ? 'Admin Memproses' : 
+                              b.status === 'dp_partial' ? 'DP Parsial' :
+                              b.status === 'lunas' ? 'Sudah Lunas' : 
+                              b.status === 'selesai' ? 'Trip Selesai' : 
+                              'Dibatalkan'}
+                           </div>
                            <span className="text-[10px] font-bold text-art-text/30 border-l border-art-text/10 pl-2">🕒 {b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '...'}</span>
                         </div>
                          <button 
@@ -2010,6 +2021,13 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                                  </span>
                                </div>
                              ))}
+                          </div>
+                        )}
+
+                        {b.promoCode && (
+                          <div className="flex justify-between items-center text-[10px] bg-art-green/10 p-2.5 rounded-xl border-2 border-art-green/40 mt-3 shadow-sm ring-4 ring-art-green/5">
+                            <span className="text-art-green font-black uppercase flex items-center gap-2 drop-shadow-sm font-mono">🎁 PROMO AKTIF: {b.promoCode}</span>
+                            <span className="font-black text-white bg-art-green px-2 py-0.5 rounded-lg">- Rp {b.discountAmount?.toLocaleString('id-ID')}</span>
                           </div>
                         )}
                      </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -593,11 +593,9 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                        )}
 
                        {booking.promoCode && (
-                         <div className="flex justify-between items-center p-3 bg-art-green/10 rounded-xl border-2 border-art-green mt-2 shadow-[4px_4px_0px_#48bb78]">
-                           <span className="text-art-green font-black uppercase flex items-center gap-2 text-[10px]">
-                              <TrendingUp size={14} /> PROMO: {booking.promoCode}
-                           </span>
-                           <span className="font-black text-art-green animate-pulse text-[10px]">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
+                         <div className="flex justify-between items-center text-[10px] bg-art-green/10 p-2.5 rounded-xl border-2 border-art-green/40 mt-3 shadow-sm ring-4 ring-art-green/5">
+                           <span className="text-art-green font-black uppercase flex items-center gap-2 drop-shadow-sm font-mono">🎁 PROMO AKTIF: {booking.promoCode}</span>
+                           <span className="font-black text-white bg-art-green px-2 py-0.5 rounded-lg">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
                          </div>
                        )}
                     </div>
@@ -609,20 +607,27 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                       <div>
                         <p className="text-[10px] font-black uppercase text-art-text/30 tracking-widest mb-2 font-mono">Status & Note</p>
                         <div className="flex items-center gap-2 mb-3">
-                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm ${
+                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm flex items-center gap-1.5 ${
                               booking.status === 'lunas' ? 'bg-art-green text-white' : 
                               booking.status === 'selesai' ? 'bg-gray-800 text-white' :
                               booking.status === 'dp_partial' ? 'bg-yellow-500 text-white' :
                               booking.status === 'processing' ? 'bg-blue-600 text-white' :
                               'bg-art-bg text-art-text/60 border border-art-text/10'
-                           }`}>{
-                              booking.status === 'pending' ? 'Pending' : 
-                              booking.status === 'processing' ? 'Diproses' : 
-                              booking.status === 'dp_partial' ? 'DP Parsial' :
-                              booking.status === 'lunas' ? 'Lunas' : 
-                              booking.status === 'selesai' ? 'Selesai' :
-                              'Batal'
-                           }</div>
+                           }`}>
+                              {booking.status === 'pending' && <Clock size={10} />}
+                              {booking.status === 'processing' && <TrendingUp size={10} />}
+                              {booking.status === 'dp_partial' && <CreditCard size={10} />}
+                              {booking.status === 'lunas' && <CheckCircle size={10} />}
+                              {booking.status === 'selesai' && <MapPin size={10} />}
+                              {booking.status === 'batal' && <X size={10} />}
+                              {
+                               booking.status === 'pending' ? 'Pending' : 
+                               booking.status === 'processing' ? 'Diproses' : 
+                               booking.status === 'dp_partial' ? 'DP Parsial' :
+                               booking.status === 'lunas' ? 'Lunas' : 
+                               booking.status === 'selesai' ? 'Selesai' :
+                               'Batal'
+                            }</div>
                         </div>
                         <p className="text-[11px] font-medium italic text-art-text/50 leading-relaxed break-words bg-white border-2 border-dashed border-art-text/5 p-3 rounded-2xl">
                           "{booking.deskripsi || 'Tidak ada catatan dari pelanggan.'}"
