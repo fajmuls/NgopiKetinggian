@@ -8,6 +8,7 @@ export interface FacilityOption {
   name: string;
   priceInfo?: string;
   price?: number; // Added numeric price
+  pricingFormat?: 'manual' | 'calculated';
   subItems?: { name: string, priceInfo?: string, price?: number }[];
 }
 
@@ -93,27 +94,29 @@ const getDefaultWebsiteData = () => ({
       "Porter pribadi (bisa dipesan terpisah)"
     ],
         opsi: [
-      { name: "Penjemputan / Transportasi", priceInfo: "Harga menyesuaikan jarak", subItems: [] },
+      { name: "Penjemputan / Transportasi", priceInfo: "Harga menyesuaikan jarak", pricingFormat: 'manual', subItems: [] },
       { 
         name: "Sewa Perlengkapan", 
         priceInfo: "Harga per item/hari", 
+        pricingFormat: 'calculated',
         subItems: [
-          { name: "Jaket Gunung", price: 50, priceInfo: "Rp 50rb" },
-          { name: "Sepatu Trekking", price: 75, priceInfo: "Rp 75rb" },
-          { name: "Ransel (Carrier)", price: 60, priceInfo: "Rp 60rb" },
-          { name: "Headlamp", price: 15, priceInfo: "Rp 15rb" }
+          { name: "Jaket Gunung", price: 50, priceInfo: "50.000" },
+          { name: "Sepatu Trekking", price: 75, priceInfo: "75.000" },
+          { name: "Ransel (Carrier)", price: 60, priceInfo: "60.000" },
+          { name: "Headlamp", price: 15, priceInfo: "15.000" }
         ]
       },
       { 
         name: "Sewa Pakaian", 
         priceInfo: "Harga per item/hari", 
+        pricingFormat: 'calculated',
         subItems: [
-          { name: "Pakaian Tebal", price: 30, priceInfo: "Rp 30rb" },
-          { name: "Sarung Tangan Extra", price: 10, priceInfo: "Rp 10rb" },
-          { name: "Kupluk / Topi Gunung", price: 10, priceInfo: "Rp 10rb" }
+          { name: "Pakaian Tebal", price: 30, priceInfo: "30.000" },
+          { name: "Sarung Tangan Extra", price: 10, priceInfo: "10.000" },
+          { name: "Kupluk / Topi Gunung", price: 10, priceInfo: "10.000" }
         ]
       },
-      { name: "Upgrade Tenda Privat", price: 100, priceInfo: "Rp 100rb / Tenda", subItems: [] }
+      { name: "Upgrade Tenda Privat", price: 100, priceInfo: "Rp 100rb / Tenda", pricingFormat: 'calculated', subItems: [] }
     ]
   },
   teamPhotos: [

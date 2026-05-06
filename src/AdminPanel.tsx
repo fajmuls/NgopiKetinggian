@@ -2001,6 +2001,21 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
                  const nd = { ...data }; nd.opsi.splice(i, 1); setData(nd);
                }} className="absolute top-4 right-4 text-red-500"><Trash2 size={18} /></button>
                
+               <div className="mb-4 w-full sm:w-72">
+                  <label className="text-[10px] font-black uppercase text-art-orange block mb-1 font-mono tracking-tighter">Format Penghargaan (Sistem)</label>
+                  <select 
+                    className="w-full border p-2 rounded text-xs font-bold bg-white uppercase tracking-tight shadow-sm cursor-pointer border-art-text/20"
+                    value={opt.pricingFormat || 'manual'}
+                    onChange={e => {
+                      const nd = { ...data };
+                      nd.opsi[i].pricingFormat = e.target.value as any;
+                      setData(nd);
+                    }}
+                  >
+                    <option value="manual">Disesuaikan Admin (Manual)</option>
+                    <option value="calculated">Kalkulasi Item (Hari x Qty x Harga)</option>
+                  </select>
+               </div>
                <div className="flex flex-col sm:flex-row gap-3 pr-10">
                  <div className="flex-1">
                    <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Nama Opsi</label>
@@ -2009,7 +2024,7 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
                    }} />
                  </div>
                  <div className="w-full sm:w-48">
-                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Info Harga (Kalo ada)</label>
+                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Info Harga (Slip Desc)</label>
                    <input className="w-full border p-2 rounded text-xs" value={opt.priceInfo || ''} onChange={e => {
                       const nd = { ...data }; nd.opsi[i].priceInfo = e.target.value; setData(nd);
                    }} placeholder="Cth: Rp 10rb/pax" />
@@ -2027,8 +2042,21 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
                       <div className="flex-1">
                         <input className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" value={sub.name} onChange={e => updateSubItem(i, sIdx, 'name', e.target.value)} placeholder="Nama Item" />
                       </div>
-                      <div className="w-24">
-                        <input className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" value={sub.priceInfo || ''} onChange={e => updateSubItem(i, sIdx, 'priceInfo', e.target.value)} placeholder="Harga" />
+                      <div className="w-32 relative">
+                        <span className="absolute left-0 bottom-1.5 text-[9px] font-black text-art-text/40 uppercase">Rp</span>
+                        <input 
+                          className="w-full border-b pl-6 p-1 text-[11px] outline-none focus:border-art-orange bg-transparent font-mono" 
+                          value={sub.priceInfo || ''} 
+                          onChange={e => {
+                            const raw = e.target.value.replace(/[^0-9]/g, '');
+                            const num = parseInt(raw);
+                            updateSubItem(i, sIdx, 'priceInfo', raw ? Number(raw).toLocaleString('id-ID') : '');
+                            const nd = { ...data };
+                            nd.opsi[i].subItems[sIdx].price = isNaN(num) ? 0 : num / 1000;
+                            setData(nd);
+                          }} 
+                          placeholder="50.000" 
+                        />
                       </div>
                       <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600"><Trash2 size={14}/></button>
                     </div>

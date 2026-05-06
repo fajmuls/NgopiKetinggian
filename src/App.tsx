@@ -202,11 +202,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   let totalOpsionalPrice = 0;
 
   // 1. First, handle sub-items (Rental Items)
-  // Only count sub-items if their parent category is checked/selected in selectedOpsional
   Object.entries(subSelected).forEach(([key, qty]) => {
     const [parentName, subName] = key.split('|');
     
-    // BUG FIX: Only count sub-item if the parent category is checked
     if (!selectedOpsional.includes(parentName)) return;
 
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
@@ -214,7 +212,6 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     if (subItem) {
       const pricePerDay = subItem.price ? Number(subItem.price) * 1000 : 0;
       const numQty = Number(qty);
-      // Formula: price * qty * tripDays
       const totalItemPrice = pricePerDay * numQty * tripDays;
       
       opsionalItemsList.push({
@@ -225,32 +222,34 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         days: tripDays,
         subtotal: totalItemPrice,
         status: pricePerDay > 0 ? 'confirmed' : 'pending_price',
-        isRental: true
+        isRental: true,
+        priceInfo: subItem.priceInfo
       });
       totalOpsionalPrice += totalItemPrice;
     }
   });
 
   // 2. Handle standalone items (Items without sub-items)
-  // According to request: "if there's no sub-item, the price is not included (0)"
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
     if (opt) {
-      // Check if this item has NO sub-items or if we want to show it as a standalone included service
       if (!opt.subItems || opt.subItems.length === 0) {
-        // According to user request: "items without sub-items... price is not included (0)"
-        // We still list it in the slip but with 0 price in the calculation
+        const isCalculated = opt.pricingFormat === 'calculated';
+        const price = isCalculated ? (opt.price ? Number(opt.price) * 1000 : 0) : 0;
+        const isManual = opt.pricingFormat === 'manual' || !opt.pricingFormat;
+
         opsionalItemsList.push({
           name: optName,
           parentName: optName,
-          price: 0, // Explicitly 0 per request
+          price: price,
           count: 1,
           days: 1, 
-          subtotal: 0,
-          status: 'confirmed',
-          isRental: false
+          subtotal: price,
+          status: isManual ? 'pending_price' : 'confirmed',
+          isRental: false,
+          priceInfo: opt.priceInfo
         });
-        // totalOpsionalPrice doesn't increase by 0
+        totalOpsionalPrice += price;
       }
     }
   });
@@ -1984,43 +1983,60 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                      )}
                      
                      <div>
-                        <h4 className="text-2xl font-black uppercase tracking-tighter text-art-text mb-1">{b.destinasi}</h4>
-                          <div className="text-right">
-                             <p className="text-[9px] font-black text-art-text/30 uppercase tracking-widest leading-tight">Keberangkatan</p>
-                             <div className="bg-art-bg border border-art-text/10 px-2 py-0.5 rounded-lg inline-block">
-                               <p className="text-[10px] font-black text-art-text">{b.jadwal}</p>
+                        <h4 className="text-3xl font-black uppercase tracking-tighter text-art-text leading-tight">{b.destinasi}</h4>
+                          <div className="absolute top-16 right-6 text-right flex flex-col items-end">
+                             <p className="text-[9px] font-black text-art-text/30 uppercase tracking-widest leading-tight mb-1 font-mono">Keberangkatan</p>
+                             <div className="bg-art-text border-2 border-art-text px-3 py-1 rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.1)] rotate-1">
+                               <p className="text-[12px] font-black text-white">{b.jadwal}</p>
                              </div>
                           </div>
                         <div className="flex flex-wrap items-center gap-1.5 md:gap-3">
-                           <p className="text-[11px] font-bold text-art-text/50 uppercase tracking-widest flex items-center gap-1.5"><MapPin size={10} /> {b.jalur} • {b.durasi}</p>
+                           <p className="text-[11px] font-bold text-art-text/50 uppercase tracking-widest flex items-center gap-1.5 bg-art-bg/50 px-2 py-0.5 rounded-md w-fit mt-1">
+                             <MapPin size={10} /> {b.jalur} • {b.durasi}
+                           </p>
                            <span className="text-[10px] text-art-text/20">•</span>
                            <p className="text-[11px] font-bold text-art-text/40 lowercase tracking-tight flex items-center gap-1.5"><User size={10} /> {b.email}</p>
                         </div>
                      </div>
 
                      <div className="bg-art-bg/20 rounded-2xl border border-art-text/5 p-4 space-y-3">
-                        <div className="flex justify-between items-center text-xs border-b border-art-text/5 pb-2">
+                        <div className="flex justify-between items-center text-xs border-b border-art-text/5 pb-3">
                            <div className="flex flex-col">
-                              <span className="text-[9px] font-black text-art-orange uppercase tracking-widest">Utama: Paket Trip {b.destinasi}</span>
-                              <span className="font-black text-art-text text-xs">{b.peserta} Pax</span>
+                              <span className="text-[10px] font-black text-art-orange uppercase tracking-widest mb-1">Utama: Paket Trip {b.destinasi}</span>
+                              <span className="font-extrabold text-art-text text-lg leading-none">{b.peserta} Pax</span>
                            </div>
-                           <span className="font-black text-art-text">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                           <div className="text-right">
+                              <span className="font-black text-art-green text-xl md:text-2xl tracking-tighter block drop-shadow-sm">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                              <span className="text-[8px] font-bold text-art-text/30 uppercase">Harga Utama</span>
+                           </div>
                         </div>
 
                         {b.opsionalItems && b.opsionalItems.length > 0 && (
                           <div className="space-y-2">
                              <p className="text-[9px] font-black text-art-text/30 uppercase tracking-[0.2em] mb-1">Layanan Tambahan:</p>
-                             {b.opsionalItems.map((item: any, idx: number) => (
-                               <div key={idx} className="flex justify-between items-center text-[10px] pl-3 border-l-2 border-art-orange/20">
-                                 <div>
-                                   <span className="font-bold text-art-text/80">{item.name}</span>
-                                   <span className="text-[9px] text-art-text/40 ml-1">({item.count}x • {item.days}h @ Rp {(item.price || 0).toLocaleString('id-ID')})</span>
+                             {b.opsionalItems.map((item: any, idx: number) => {
+                               const isPending = item.status === 'pending_price';
+                               return (
+                                 <div key={idx} className="flex justify-between items-start text-[10px] pl-3 border-l-2 border-art-orange/20 py-1">
+                                   <div>
+                                     <span className="font-black text-art-text/80 uppercase tracking-tight">{item.name}</span>
+                                     <p className="text-[9px] text-art-text/40 mt-0.5 font-medium">
+                                       {item.isRental ? (
+                                         `${item.count}x • ${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}`
+                                       ) : (
+                                         item.priceInfo || item.name
+                                       )}
+                                     </p>
+                                   </div>
+                                   <div className="text-right">
+                                     <span className={`font-black text-[11px] ${isPending ? 'text-art-orange italic' : 'text-art-text/80'}`}>
+                                       {isPending ? "Disesuaikan" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                                     </span>
+                                     {isPending && <p className="text-[8px] font-bold text-art-orange/50 uppercase leading-none mt-0.5 font-mono">Tunggu Admin</p>}
+                                   </div>
                                  </div>
-                                 <span className={`font-medium ${item.status === 'pending_price' ? 'text-art-orange italic' : 'text-art-text/80'}`}>
-                                   {item.status === 'pending_price' ? "Menunggu Konfirmasi" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
-                                 </span>
-                               </div>
-                             ))}
+                               );
+                             })}
                           </div>
                         )}
 
