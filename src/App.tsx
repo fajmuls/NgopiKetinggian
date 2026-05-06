@@ -203,13 +203,15 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
   Object.entries(subSelected).forEach(([key, qty]) => {
     const [parentName, subName] = key.split('|');
-    if (!selectedOpsional.includes(parentName)) return; // Only count if parent option is selected
+    // FIX: Only count if parent item is specifically checked in optional checkbox
+    if (!selectedOpsional.includes(parentName)) return;
+
     const parentOpt = config?.facilities?.opsi?.find((o: any) => o.name === parentName);
     const subItem = parentOpt?.subItems?.find((s: any) => s.name === subName);
     if (subItem) {
       const pricePerDay = subItem.price ? Number(subItem.price) * 1000 : 0;
       const numQty = Number(qty);
-      // Rental items (sub-items) always calculated: price * qty * days
+      // Formula: price * qty * days
       const totalItemPrice = pricePerDay * numQty * tripDays;
       
       opsionalItemsList.push({
@@ -229,21 +231,20 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   selectedOpsional.forEach(optName => {
     const opt = config?.facilities?.opsi?.find((o: any) => o.name === optName);
     if (opt && (!opt.subItems || opt.subItems.length === 0)) {
-      const basePrice = opt.price ? Number(opt.price) * 1000 : 0;
-      // Fixed items (standalone): no multiplication by days or pax
-      const isPending = basePrice === 0;
+      // Standalone items: price is not included according to user formula request
+      // "Then, for items without sub-items, they are slipped into the payment status. This means that if there's no sub-item, the price is not included."
       
       opsionalItemsList.push({
         name: optName,
         parentName: optName,
-        price: basePrice,
+        price: 0,
         count: 1,
         days: 1, 
-        subtotal: basePrice,
-        status: isPending ? 'pending_price' : 'confirmed',
+        subtotal: 0,
+        status: 'confirmed',
         isRental: false
       });
-      totalOpsionalPrice += basePrice;
+      // totalOpsionalPrice += 0;
     }
   });
 
@@ -426,9 +427,11 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                        )}
  
                        {isPromoValid && (
-                         <div className="flex justify-between items-center text-[10px] pt-1">
-                            <span className="font-black text-art-green uppercase">🎁 Promo: {promoCode}</span>
-                            <span className="font-black text-art-green">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                         <div className="flex justify-between items-center p-2.5 bg-art-green/10 border-2 border-art-green rounded-xl my-2 shadow-[4px_4px_0px_#48bb78]">
+                            <span className="font-black text-art-green uppercase flex items-center gap-2 text-[10px]">
+                              <TrendingUp size={14} /> PROMO AKTIF: {promoCode} 
+                            </span>
+                            <span className="font-black text-art-green text-xs animate-pulse">- Rp {discountAmount.toLocaleString('id-ID')}</span>
                          </div>
                        )}
                     </div>
@@ -784,14 +787,14 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       <span className="text-[10px] font-black text-white px-2 py-0.5 border border-white/10 rounded-md">x {currentPesertaCount}</span>
                    </div>
 
-                   {isPromoValid && (
-                     <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                        <span className="text-[10px] font-black text-art-green uppercase flex items-center gap-1.5">
-                          🎁 {promoCode} (-{activePromo.discount}%)
-                        </span>
-                        <span className="text-[10px] font-black text-art-green uppercase">- Rp {discountAmount.toLocaleString('id-ID')}</span>
-                     </div>
-                   )}
+                    {isPromoValid && (
+                      <div className="flex justify-between items-center p-3 bg-white/10 rounded-2xl border-2 border-dashed border-art-green/50 my-2 group transition-all hover:bg-white/20">
+                         <span className="text-xs font-black text-art-green uppercase flex items-center gap-2">
+                           <TrendingUp size={16} /> PROMO: {promoCode} (-{activePromo.discount}%)
+                         </span>
+                         <span className="text-sm font-black text-art-green uppercase">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                      </div>
+                    )}
                 </div>
 
                 <div className="flex items-end justify-between pt-2">
@@ -1932,18 +1935,12 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                    <div className="flex-1 space-y-4">
                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 flex items-center gap-1.5 ${
+                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
                              b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
                              b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
                              b.status === 'dp_partial' ? 'bg-yellow-50 text-yellow-600 border-yellow-600' :
                              'bg-art-orange/10 text-art-orange border-art-orange'
                            }`}>
-                          {b.status === 'pending' ? <Clock size={10} /> : 
-                           b.status === 'processing' ? <Send size={10} /> :
-                           b.status === 'dp_partial' ? <CreditCard size={10} /> :
-                           b.status === 'lunas' ? <CheckCircle2 size={10} /> :
-                           b.status === 'selesai' ? <CheckCircle2 size={10} /> : null
-                          }
                           {b.status === 'pending' ? 'Diproses' : 
                            b.status === 'processing' ? 'Admin Memproses' : 
                            b.status === 'dp_partial' ? 'DP Parsial' :

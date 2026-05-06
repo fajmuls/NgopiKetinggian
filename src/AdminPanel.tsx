@@ -593,9 +593,11 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                        )}
 
                        {booking.promoCode && (
-                         <div className="flex justify-between items-center text-[10px] bg-art-green/5 p-2 rounded-xl border border-art-green/10 mt-2">
-                           <span className="text-art-green font-black uppercase flex items-center gap-2">🎁 Promo: {booking.promoCode}</span>
-                           <span className="font-black text-art-green">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
+                         <div className="flex justify-between items-center p-3 bg-art-green/10 rounded-xl border-2 border-art-green mt-2 shadow-[4px_4px_0px_#48bb78]">
+                           <span className="text-art-green font-black uppercase flex items-center gap-2 text-[10px]">
+                              <TrendingUp size={14} /> PROMO: {booking.promoCode}
+                           </span>
+                           <span className="font-black text-art-green animate-pulse text-[10px]">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
                          </div>
                        )}
                     </div>
