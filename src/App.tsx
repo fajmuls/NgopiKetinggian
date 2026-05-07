@@ -601,18 +601,36 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                     })
                  )}
               </div>
+              <div className="mt-6 pt-4 border-t-2 border-dashed border-art-text/10">
+                 <p className="text-[10px] font-bold text-art-text/40 text-center mb-3">Tidak menemukan jadwal weekend yang cocok?</p>
+                 <Button 
+                   onClick={() => {
+                     playClick();
+                     setSelectedDestinasi('');
+                     setSelectedJadwal('');
+                     setSelectedJalur('');
+                     setSelectedDurasi('');
+                     setCurrentType('open_request');
+                     setViewType('form');
+                   }} 
+                   variant="secondary" 
+                   className="w-full text-[10px] uppercase font-bold border-2 border-art-text tracking-widest bg-white hover:bg-gray-50"
+                 >
+                   Request Jadwal Weekend
+                 </Button>
+              </div>
            </div>
         ) : (
           <form className="space-y-6 pt-2" onSubmit={handleSubmitPreview}>
              <div className="flex justify-between items-start pr-6">
                <div>
-                  <button type="button" onClick={() => { playBack(); setViewType(currentType === 'open' ? 'trip_list' : 'selection'); }} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Ganti Pilihan</button>
+                  <button type="button" onClick={() => { playBack(); setViewType((currentType === 'open' || currentType === 'open_request') ? 'trip_list' : 'selection'); }} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-2 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Ganti Pilihan</button>
                   <h3 className="text-2xl font-black uppercase text-art-text tracking-tight">Detail Booking</h3>
-                  <p className="text-[9px] font-bold text-art-text/30 uppercase tracking-[0.2em]">{currentType} Adventure</p>
+                  <p className="text-[9px] font-bold text-art-text/30 uppercase tracking-[0.2em]">{currentType === 'open_request' ? 'Request Open' : currentType} Adventure</p>
                </div>
                <div className="text-right">
                   <span className={`text-[8px] font-black px-3 py-1 rounded-full border-2 uppercase tracking-widest ${currentType === 'private' ? 'bg-art-orange/10 border-art-orange text-art-orange' : 'bg-art-green/10 border-art-green text-art-green'}`}>
-                     {currentType}
+                     {currentType === 'open_request' ? 'REQUEST' : currentType}
                   </span>
                </div>
              </div>
@@ -699,6 +717,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                            value={selectedJadwal}
                            onChange={e => setSelectedJadwal(e.target.value)}
                            readOnly={currentType === 'open'}
+                           placeholder={currentType === 'open_request' ? "Pilih tanggal mulai" : ""}
                            className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
                          />
                       </div>
@@ -719,6 +738,26 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                           )}
                        </div>
                    </div>
+
+                    {selectedDestinasi && selectedJalur && selectedDurasi && (() => {
+                      const durInfo = destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.find((dur: any) => dur.label === selectedDurasi);
+                      if (!durInfo || (!durInfo.rundownHtml && !durInfo.rundownPdf)) return null;
+                      return (
+                         <div className="bg-art-bg/50 border border-art-text/10 p-4 rounded-2xl relative shadow-sm">
+                            <h4 className="text-[10px] font-black uppercase text-art-text mb-2 flex items-center gap-1.5"><FileText size={12} className="text-art-orange" /> Itinerary / Rundown Kegiatan</h4>
+                            {durInfo.rundownHtml && (
+                               <div className="text-[9px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-32 overflow-y-auto pr-2 no-scrollbar border-l-2 border-art-orange/30 pl-3">
+                                 {durInfo.rundownHtml}
+                               </div>
+                            )}
+                            {durInfo.rundownPdf && (
+                               <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                                 PDF Rundown Lengkap <Download size={10} />
+                               </a>
+                            )}
+                         </div>
+                      );
+                    })()}
 
                    <div className="relative">
                       <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
@@ -1010,7 +1049,7 @@ const destinationsData = [
 
 // Removed hardcoded heroSlides
 
-const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any, allLeaders: any[] }> = ({ ot, onJoin, getSisaKuota, visibilities, allLeaders }) => {
+const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any, allLeaders: any[], config: any }> = ({ ot, onJoin, getSisaKuota, visibilities, allLeaders, config }) => {
   const [showDetails, setShowDetails] = useState(false);
   const { playClick, playHover } = useSound();
   
@@ -1024,6 +1063,8 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
   };
 
   const leaders = Array.isArray(ot.leaders) ? ot.leaders : (ot.leader ? [ot.leader] : []);
+  
+  const durInfo = config?.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.find((p: any) => p.name === ot.path)?.durations?.find((dur: any) => dur.label === ot.duration);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col">
@@ -1102,6 +1143,22 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                       </div>
                     )}
                  </div>
+                  
+                  {durInfo && (durInfo.rundownHtml || durInfo.rundownPdf) && (
+                     <div className="mt-4 p-3 bg-art-bg/30 rounded-xl border border-art-text/10">
+                        <h5 className="text-[9px] font-black uppercase text-art-text mb-2 flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
+                        {durInfo.rundownHtml && (
+                           <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
+                             {durInfo.rundownHtml}
+                           </div>
+                        )}
+                        {durInfo.rundownPdf && (
+                           <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                             PDF Rundown Lengkap <Download size={8} />
+                           </a>
+                        )}
+                     </div>
+                  )}
               </motion.div>
             )}
          </AnimatePresence>
@@ -1499,6 +1556,14 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     
     doc.setFillColor(250, 250, 250);
     doc.rect(0, 0, 210, 297, 'F');
+    
+    // Watermark
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(60);
+    doc.setTextColor(235, 235, 235);
+    doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
+    doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.rect(0, 0, 210, 50, 'F');
     doc.setTextColor(255, 255, 255);
@@ -1535,7 +1600,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
     doc.text(`DESTINASI: ${booking.destinasi.toUpperCase()} (VIA ${booking.jalur.toUpperCase()})`, 25, 115);
     doc.text(`JADWAL: ${booking.jadwal}`, 25, 122);
     doc.text(`PESERTA: ${booking.peserta} PAX`, 25, 129);
-    doc.text(`TIPE TRIP: ${booking.type === 'open' ? 'OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 136);
+    doc.text(`TIPE TRIP: ${booking.type === 'open' ? 'OPEN TRIP' : booking.type === 'open_request' ? 'REQUEST OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 136);
 
     drawHeader('RINCIAN BIAYA & FASILITAS', 150);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -2575,7 +2640,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredOpenTrips.length > 0 ? (
                   filteredOpenTrips.map((ot: any, i: number) => (
-                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} visibilities={config.visibilities} allLeaders={config.tripLeaders} />
+                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} visibilities={config.visibilities} allLeaders={config.tripLeaders} config={config} />
                   ))
                 ) : (
                   <div className="col-span-full py-24 border-4 border-dashed border-art-text/5 rounded-[3rem] flex flex-col items-center justify-center text-center bg-white/40">

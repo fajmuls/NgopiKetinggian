@@ -262,6 +262,13 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.setFillColor(250, 250, 250);
     doc.rect(0, 0, 210, 297, 'F');
     
+    // Watermark
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(60);
+    doc.setTextColor(235, 235, 235);
+    doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
+    doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+    
     // Header bar
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.rect(0, 0, 210, 50, 'F');
@@ -307,7 +314,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.text(`DESTINASI: ${booking.destinasi.toUpperCase()} (VIA ${booking.jalur.toUpperCase()})`, 25, 110);
     doc.text(`JADWAL: ${booking.jadwal} (${booking.durasi})`, 25, 115);
     doc.text(`JUMLAH PESERTA: ${booking.peserta} ORANG`, 25, 120);
-    doc.text(`TIPE TRIP: ${booking.type === 'open' ? 'OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 125);
+    doc.text(`TIPE TRIP: ${booking.type === 'open' ? 'OPEN TRIP' : booking.type === 'open_request' ? 'REQ. OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 125);
 
     // Items and Pricing
     drawSectionHeader('RINCIAN BIAYA', 140);
@@ -494,7 +501,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                           <User size={10} /> {booking.email || 'no-email'}
                        </span>
                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase mt-1">
-                          <span className="text-art-text/40">{booking.type === 'open' ? '🟢 Open Trip' : '🔵 Private Trip'}</span>
+                          <span className="text-art-text/40">{booking.type === 'open' ? '🟢 Open Trip' : booking.type === 'open_request' ? '🟡 Req. Open' : '🔵 Private Trip'}</span>
                           <span className="text-art-text/20">•</span>
                           <span className="text-art-text/40">{booking.wa}</span>
                           <span className="text-art-text/10">|</span>
@@ -563,7 +570,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                        </div>
                        <div className="flex justify-between items-start mb-2">
                           <span className="text-[9px] font-black text-art-text/40 uppercase tracking-[0.2em]">TRIP UTAMA</span>
-                          <span className="text-[8px] bg-art-text text-white px-2 py-0.5 rounded-md font-black uppercase tracking-widest">{booking.type === 'open' ? 'Open' : 'Private'}</span>
+                          <span className="text-[8px] bg-art-text text-white px-2 py-0.5 rounded-md font-black uppercase tracking-widest">{booking.type === 'open' ? 'Open' : booking.type === 'open_request' ? 'Req. Open' : 'Private'}</span>
                        </div>
                        
                        <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-dashed border-art-text/10">
@@ -1011,7 +1018,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 
                 <div className="pl-0 sm:pl-14 space-y-2">
                   {path.durations.map((dur: any, j: number) => (
-                    <div key={j} className="flex gap-2 items-center">
+                    <React.Fragment key={j}>
+                    <div className="flex gap-2 items-center">
                       <select className="border p-2 rounded text-xs flex-1" value={dur.label} onChange={e => {
                         const nd = [...data];
                         nd[i].paths[pIdx].durations[j].label = e.target.value;
@@ -1049,12 +1057,47 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                         }} 
                         placeholder="Final" 
                       />
-                        <button onClick={() => {
-                          const nd = [...data];
-                          nd[i].paths[pIdx].durations.splice(j, 1);
-                          setData(nd);
-                        }} className="text-red-500 p-2"><Trash2 size={16} /></button>
+                      <button onClick={(e) => {
+                        e.preventDefault();
+                        const nd = [...data];
+                        nd[i].paths[pIdx].durations[j].showRundown = !nd[i].paths[pIdx].durations[j].showRundown;
+                        setData(nd);
+                      }} className={`p-2 rounded ${dur.showRundown ? 'bg-art-orange text-white' : 'text-art-text hover:bg-gray-200'}`}>
+                        <FileText size={16} />
+                      </button>
+                      <button onClick={() => {
+                        const nd = [...data];
+                        nd[i].paths[pIdx].durations.splice(j, 1);
+                        setData(nd);
+                      }} className="text-red-500 p-2"><Trash2 size={16} /></button>
                     </div>
+                    {dur.showRundown && (
+                      <div className="bg-white border-2 border-art-text p-3 rounded-lg mt-2 mb-4 space-y-3 relative before:content-[''] before:absolute before:-top-2 before:left-6 before:w-3 before:h-3 before:bg-white before:border-l-2 before:border-t-2 before:border-art-text before:rotate-45">
+                         <div className="flex justify-between items-center bg-art-bg p-2 rounded-t-lg -mx-3 -mt-3 mb-3 border-b-2 border-art-text">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-art-text/60">Pengaturan Rundown / Itinerary</span>
+                         </div>
+                         <div className="space-y-1">
+                            <label className="text-[9px] font-bold text-art-text/40 uppercase">Rundown PDF (URL Link)</label>
+                            <InputWithPaste 
+                               value={dur.rundownPdf || ''} 
+                               onChange={(e: any) => { const nd = [...data]; nd[i].paths[pIdx].durations[j].rundownPdf = e.target.value; setData(nd); }}
+                               placeholder="https://drive.google.com/..."
+                               className="border p-2 rounded text-xs w-full bg-gray-50 focus:bg-white"
+                            />
+                            <p className="text-[8px] text-art-text/30 italic">Pioritas Utama: Jika ini diisi, user akan mengunduh PDF.</p>
+                         </div>
+                         <div className="space-y-1">
+                            <label className="text-[9px] font-bold text-art-text/40 uppercase">Atau, Ketik Manual (Rundown Detail)</label>
+                            <textarea 
+                               className="border border-art-text/20 p-2 text-xs rounded w-full min-h-[100px] outline-none focus:border-art-orange font-mono"
+                               value={dur.rundownHtml || ''}
+                               onChange={(e) => { const nd = [...data]; nd[i].paths[pIdx].durations[j].rundownHtml = e.target.value; setData(nd); }}
+                               placeholder="Hari 1:&#10;08:00 - Tiba di Basecamp&#10;09:00 - Mulai Pendakian..."
+                            />
+                         </div>
+                      </div>
+                    )}
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
