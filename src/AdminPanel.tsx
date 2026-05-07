@@ -319,9 +319,10 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     let currentY = 165;
     
     // Base Trip
-    doc.text(`PAKET TRIP ${booking.destinasi.toUpperCase()}`, 25, currentY);
-    doc.text(`${booking.peserta} PAX`, 130, currentY);
     const baseTotal = (booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0);
+    const pricePerPax = baseTotal / (Number(booking.peserta) || 1);
+    doc.text(`PAKET TRIP ${booking.destinasi.toUpperCase()}`, 25, currentY);
+    doc.text(`${booking.peserta} x Rp ${pricePerPax.toLocaleString('id-ID')}`, 110, currentY);
     doc.text(`Rp ${baseTotal.toLocaleString('id-ID')}`, 160, currentY);
     currentY += 6;
 
@@ -432,13 +433,17 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
           <span className="text-[10px] font-black uppercase px-4 py-2 bg-art-bg border-2 border-art-text text-art-text rounded-xl">{bookings.length} Total Pesanan</span>
           <button 
             onClick={async () => {
-              if (window.confirm("⚠️ PERINGATAN: Hapus SELURUH database booking? Tindakan ini tidak bisa dibatalkan.")) {
-                const bookingsToDelete = bookings.map(b => b.id);
-                for (const id of bookingsToDelete) {
-                  await deleteDoc(doc(db, 'bookings', id));
+              customConfirm("⚠️ PERINGATAN: Hapus SELURUH database booking? Tindakan ini tidak bisa dibatalkan.", async () => {
+                try {
+                  const bookingsToDelete = bookings.map((b: any) => b.id);
+                  for (const id of bookingsToDelete) {
+                    await deleteDoc(doc(db, 'bookings', id));
+                  }
+                  showToast("Database berhasil direset!", "success");
+                } catch (e) {
+                  showToast("Gagal reset database", "error");
                 }
-                showToast("Database berhasil direset!");
-              }
+              });
             }}
             className="px-6 py-2.5 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-[4px_4px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none"
           >

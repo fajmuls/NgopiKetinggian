@@ -431,7 +431,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                     </div>
                     <div>
                        <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
-                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax</p>
+                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax x Rp {basePricePerPax.toLocaleString('id-ID')}</p>
                     </div>
                  </div>
                </div>
@@ -1077,13 +1077,14 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                     <div className="flex items-center gap-2">
                        <Users size={12} className="text-blue-500 flex-shrink-0" />
                        <div className="flex flex-wrap gap-1 items-center">
-                          <span className="text-[10px] font-bold uppercase text-art-text/40">Lead:</span>
+                          <span className="text-[10px] font-bold uppercase text-art-text/40">Leader:</span>
                           {leaders.map((ln: string, idx: number) => {
                             const leaderObj = allLeaders?.find((l: any) => l.name === ln);
                             const isPrimary = leaderObj?.isPrimary;
                             return (
-                              <span key={idx} className={`text-[10px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded ${isPrimary ? 'bg-art-orange text-white' : 'text-art-text/60'}`}>
-                                {ln}{isPrimary ? ' ⭐' : ''}
+                              <span key={idx} className={`text-[10px] font-black uppercase tracking-tight px-2 py-0.5 rounded flex items-center gap-1 ${isPrimary ? 'bg-art-text text-white ring-2 ring-art-orange ring-offset-1' : 'bg-art-bg text-art-text/60 border border-art-text/5'}`}>
+                                {isPrimary && <span className="text-[8px] bg-art-orange text-white px-1 rounded-sm leading-tight font-black uppercase">Main</span>}
+                                {ln}
                               </span>
                             );
                           })}
@@ -1699,16 +1700,16 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                         <div className="flex items-center gap-2">
                            {(b.status === 'lunas' || b.status === 'selesai' || b.status === 'batal') ? (
                              <button 
-                               onClick={async () => {
-                                 if (window.confirm("Hapus riwayat pesanan ini?")) {
+                               onClick={() => {
+                                 customConfirm("Hapus riwayat pesanan ini?", async () => {
                                    try {
                                      await deleteDoc(doc(db, 'bookings', b.id));
                                      playPop();
-                                     showToast("Pesanan dihapus!");
+                                     showToast("Pesanan dihapus!", "success");
                                    } catch (error) {
                                      console.error("Error:", error);
                                    }
-                                 }
+                                 });
                                }}
                                className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
                              >
@@ -1717,11 +1718,16 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                            ) : (
                              <button 
                                onClick={() => {
-                                 if (window.confirm("Batalakan pesanan? Anda akan dialihkan ke WhatsApp Admin untuk konfirmasi pembatalan.")) {
-                                   const waUrl = `https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin membatalkan pesanan saya:\n\nDestinasi: ${b.destinasi}\nJadwal: ${b.jadwal}\nAtas Nama: ${b.nama || 'Tanpa Nama'}\n\nMohon konfirmasinya. Terima kasih.`)}`;
-                                   window.open(waUrl, '_blank');
-                                   playPop();
-                                 }
+                                 customConfirm("Batalkan pesanan ini?", async () => {
+                                   try {
+                                     await updateDoc(doc(db, 'bookings', b.id), { status: 'batal' });
+                                     playPop();
+                                     showToast("Pesanan dibatalkan!", "info");
+                                   } catch (error) {
+                                     console.error("Error:", error);
+                                     showToast("Gagal membatalkan pesanan", "error");
+                                   }
+                                 });
                                }}
                                className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
                              >
@@ -1732,11 +1738,11 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                      </div>
 
                      {b.status === 'pending' && activeTab === 'proses' && (
-                       <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10 mt-2">"Menunggu konfirmasi admin."</p>
+                       <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10">"Menunggu konfirmasi admin."</p>
                      )}
                       
-                     <div className="relative pt-6">
-                        <div className="flex flex-col md:flex-row gap-6 mt-4">
+                     <div className="relative pt-4">
+                        <div className="flex flex-col md:flex-row gap-6 mt-2">
                            <div className="flex-1 space-y-3">
                               {/* Trip Utama Box */}
                               <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
@@ -1762,7 +1768,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                                    </div>
                                    <div>
                                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
-                                      <p className="text-[10px] font-black text-art-text">{b.peserta} Pax</p>
+                                      <p className="text-[10px] font-black text-art-text">{b.peserta} Pax x Rp {((((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0))) / (Number(b.peserta) || 1)).toLocaleString('id-ID')}</p>
                                    </div>
                                 </div>
                               </div>
