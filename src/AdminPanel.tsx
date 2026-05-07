@@ -554,24 +554,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-art-orange/5 rounded-lg text-art-orange"><MapPin size={16} /></div>
-                      <div>
-                        <p className="text-[9px] font-black uppercase text-art-text/30 tracking-widest">Destinasi</p>
-                        <p className="text-xs font-black uppercase">{(booking.destinasi || 'N/A')} ({(booking.jalur || 'N/A')})</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-art-green/5 rounded-lg text-art-green"><Calendar size={16} /></div>
-                      <div>
-                        <p className="text-[9px] font-black uppercase text-art-text/30 tracking-widest">Jadwal</p>
-                        <p className="text-xs font-black uppercase">{(booking.jadwal || 'N/A')} ({(booking.durasi || 'N/A')})</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4 mt-4">
+                  <div className="space-y-4">
                     <p className="text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em] px-4 font-mono">Billing Details</p>
 
                     <div className="bg-white rounded-2xl border-2 border-art-text p-4 shadow-sm relative overflow-hidden group/box">
@@ -582,6 +565,24 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                           <span className="text-[9px] font-black text-art-text/40 uppercase tracking-[0.2em]">TRIP UTAMA</span>
                           <span className="text-[8px] bg-art-text text-white px-2 py-0.5 rounded-md font-black uppercase tracking-widest">{booking.type === 'open' ? 'Open' : 'Private'}</span>
                        </div>
+                       
+                       <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-dashed border-art-text/10">
+                          <div className="flex items-center gap-2">
+                             <div className="p-1.5 bg-art-orange/5 rounded-lg text-art-orange"><MapPin size={12} /></div>
+                             <div>
+                                <p className="text-[7px] font-black uppercase text-art-text/30">Destinasi</p>
+                                <p className="text-[9px] font-black uppercase">{booking.destinasi} ({booking.jalur})</p>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <div className="p-1.5 bg-art-green/5 rounded-lg text-art-green"><Calendar size={12} /></div>
+                             <div>
+                                <p className="text-[7px] font-black uppercase text-art-text/30">Jadwal</p>
+                                <p className="text-[9px] font-black uppercase">{booking.jadwal} ({booking.durasi})</p>
+                             </div>
+                          </div>
+                       </div>
+
                        <div className="flex justify-between items-end">
                           <div>
                              <h5 className="text-sm font-black text-art-text uppercase leading-none mb-1">{booking.destinasi}</h5>
@@ -935,7 +936,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                   </button>
                 </div>
                 <div className="flex gap-1">
-                  <input className="border p-2 rounded text-xs w-full" value={dest.mepoLink || ''} onChange={e => {
+                  <InputWithPaste className="border p-2 rounded text-xs w-full" value={dest.mepoLink || ''} onChange={(e: any) => {
                     const nd = [...data];
                     nd[i].mepoLink = e.target.value;
                     setData(nd);
@@ -1067,6 +1068,38 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
 };
 
 // Sub-components for Admin
+const InputWithPaste = ({ value, onChange, placeholder, className, ...props }: any) => {
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      onChange({ target: { value: text } } as any);
+    } catch (err) {
+      console.error('Failed to read clipboard', err);
+    }
+  };
+
+  return (
+    <div className="relative w-full flex items-center">
+      <input 
+        type="text" 
+        value={value} 
+        onChange={onChange} 
+        placeholder={placeholder} 
+        className={`${className} pr-8`}
+        {...props}
+      />
+      <button 
+        type="button"
+        onClick={handlePaste}
+        className="absolute right-1 p-1.5 text-art-text/40 hover:text-art-orange transition-colors"
+        title="Paste"
+      >
+        <Clipboard size={12} />
+      </button>
+    </div>
+  );
+};
+
 const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
   const [photos, setPhotos] = useState(config.teamPhotos || []);
 
@@ -1093,7 +1126,7 @@ const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border border-art-text/10">
               {url && <img src={url} className="w-full h-full object-cover" />}
             </div>
-            <input className="w-full border p-1 text-[10px] rounded" value={url} onChange={e => {
+            <InputWithPaste className="w-full border p-1 text-[10px] rounded" value={url} onChange={(e: any) => {
               const np = [...photos]; np[i] = e.target.value; setPhotos(np);
             }} placeholder="URL Image" />
           </div>
@@ -1184,10 +1217,10 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-art-text/40">Link Gambar (Eksplisit)</label>
-                  <input 
+                  <InputWithPaste 
                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-mono bg-gray-50 text-art-text/60" 
                     value={leader.avatar} 
-                    onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: e.target.value } : item))} 
+                    onChange={(e: any) => setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: e.target.value } : item))} 
                     placeholder="URL Image (Auto-update if uploaded above)" 
                   />
                 </div>
@@ -1227,10 +1260,10 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
 
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-art-text/60">Voice Audio URL</label>
-                  <input 
+                  <InputWithPaste 
                     className="w-full border-2 border-blue-100 p-3 rounded-xl text-[11px] font-medium outline-none focus:border-blue-400 bg-blue-50/20" 
                     value={leader.voiceLine || ''} 
-                    onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, voiceLine: e.target.value } : item))} 
+                    onChange={(e: any) => setData(prev => prev.map((item, idx) => idx === i ? { ...item, voiceLine: e.target.value } : item))} 
                     placeholder="https://firebasestorage... (URL Audio)" 
                   />
                 </div>
@@ -1285,7 +1318,7 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
               const nd = [...data]; nd.splice(i, 1); setData(nd);
             }} className="absolute top-2 right-2 text-red-500 bg-white p-1 rounded"><Trash2 size={16}/></button>
             {photo.src && <img src={photo.src} className="w-full h-32 object-cover rounded" />}
-            <input className="border p-1 text-xs w-full rounded" value={photo.src} onChange={e => {
+            <InputWithPaste className="border p-1 text-xs w-full rounded" value={photo.src} onChange={(e: any) => {
                   const nd = [...data]; nd[i].src = e.target.value; setData(nd);
             }} placeholder="URL Image" />
             <input className="border p-1 text-xs w-full rounded" value={photo.desc} onChange={e => {
@@ -1362,7 +1395,7 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-art-text/10">
           <div className="space-y-1.5">
             <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (Background)</p>
-            <input className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." />
+            <InputWithPaste className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={(e: any) => setUrl(e.target.value)} placeholder="https://..." />
             <p className="text-[9px] text-art-text/30 italic">Gunakan link embed YouTube atau file MP4.</p>
           </div>
           <div className="space-y-1.5">
@@ -1564,14 +1597,21 @@ const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value:
   return (
     <div className="space-y-1 p-2 rounded-lg bg-art-bg/30 border border-art-text/10">
       <div className="flex items-center gap-2">
-      	<input 
+      	<InputWithPaste 
           className="border border-art-text/20 p-2 rounded text-[10px] w-full text-art-text bg-white outline-none focus:border-art-orange transition-colors" 
           value={value || ''} 
-          onChange={e => onChange(e.target.value)} 
+          onChange={(e: any) => onChange(e.target.value)} 
           placeholder={placeholder || "Masukkan Link URL Foto"} 
         />
       </div>
-      {value && <p className="text-[8px] text-art-green font-bold uppercase truncate">Link Terdeteksi</p>}
+      {value ? (
+        <div className="mt-2">
+           <img src={value} className="w-full h-20 object-cover rounded border border-art-text/10" alt="Preview" onError={(e) => (e.currentTarget.style.display = 'none')} />
+           <p className="text-[8px] text-art-green font-bold uppercase truncate mt-1">Preview Tersedia</p>
+        </div>
+      ) : (
+        <p className="text-[8px] text-art-text/30 font-bold uppercase truncate">Belum ada gambar</p>
+      )}
     </div>
   );
 };
@@ -2036,11 +2076,11 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                       </button>
                     </div>
                     <div className="flex gap-1">
-                      <input 
+                      <InputWithPaste 
                         placeholder="https://maps.google.com/..." 
                         className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
                         value={ot.mepoLink || ""} 
-                        onChange={e => { const nd = [...data]; nd[i].mepoLink = e.target.value; setData(nd); }} 
+                        onChange={(e: any) => { const nd = [...data]; nd[i].mepoLink = e.target.value; setData(nd); }} 
                       />
                       <button 
                         onClick={() => {

@@ -565,9 +565,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
               
               <div className="space-y-3">
                  {config.openTrips?.filter((ot: any) => getSisaKuota(ot) > 0).length === 0 ? (
-                    <div className="text-center py-10 bg-art-bg rounded-3xl border-2 border-dashed border-art-text/10 px-4">
+                    <div className="text-center py-10 bg-art-bg rounded-3xl border-2 border-dashed border-art-text/10 px-4 flex flex-col items-center justify-center">
                        <p className="text-[10px] font-black text-art-text/40 uppercase tracking-widest mb-4 italic">Kami belum ada jadwal open trip.</p>
-                       <Button onClick={() => setViewType('selection')} variant="secondary" className="text-[9px] py-1.5 px-3 border-2 border-art-text">Lihat Private Trip</Button>
+                       <Button onClick={() => setViewType('selection')} variant="secondary" className="text-[9px] py-1.5 px-3 border-2 border-art-text mx-auto">Lihat Private Trip</Button>
                     </div>
                  ) : (
                     config.openTrips?.filter((ot: any) => getSisaKuota(ot) > 0).map((ot: any, idx: number) => {
@@ -736,7 +736,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                          </button>
                          <div id="addon-dropdown" className="hidden absolute z-30 left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-2xl p-4 max-h-64 overflow-y-auto">
                             <div className="grid grid-cols-1 gap-2">
-                              {config?.facilities?.opsi?.map((opt: any, i: number) => {
+                              {config?.facilities?.opsi
+                                 ?.slice()
+                                 .sort((a: any, b: any) => (a.subItems?.length || 0) - (b.subItems?.length || 0))
+                                 .map((opt: any, i: number) => {
                                  const isSelected = selectedOpsional.includes(opt.name);
                                  return (
                                     <div key={i} className="space-y-2 border-b border-art-text/5 last:border-0 pb-2">
@@ -748,9 +751,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                                             className="w-4 h-4 accent-art-orange"
                                           />
                                           <div className="flex flex-col">
-                                             <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name}</span>
-                                             {opt.price ? (
-                                               <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {(opt.price * 1000).toLocaleString('id-ID')} / Hari</span>
+                                             <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name === "Upgrade then private" ? "Upgrade Tenda Privat" : opt.name}</span>
+                                             {opt.price || opt.name === "Upgrade then private" ? (
+                                               <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {( (opt.name === "Upgrade then private" ? 100 : opt.price) * 1000).toLocaleString('id-ID')} / Hari</span>
                                              ) : opt.priceInfo && (
                                                <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>
                                              )}
@@ -821,7 +824,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    <div className="flex justify-between"><span>Destinasi:</span><span className="text-art-text font-black uppercase">{selectedDestinasi || '-'}</span></div>
                    <div className="flex justify-between"><span>Jalur & Durasi:</span><span className="text-art-text font-black uppercase">{selectedJalur || '-'} • {selectedDurasi || '-'}</span></div>
                    <div className="flex justify-between"><span>Jadwal:</span><span className="text-art-text font-black uppercase">{selectedJadwal ? (currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal) : '-'}</span></div>
-                   <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax <span className="text-art-text/40 lowercase">(@ Rp {basePricePerPax.toLocaleString('id-ID')})</span></span></div>
+                   <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax x RP {basePricePerPax.toLocaleString('id-ID')}</span></div>
                  </div>
                </div>
 
@@ -1198,57 +1201,6 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                 className="overflow-hidden space-y-6 pt-4 border-dashed border-art-text/10"
                >
                  <p className="text-[11px] font-medium text-art-text/60 italic leading-loose bg-art-bg/20 p-4 rounded-xl border border-art-text/5">{dest.desc}</p>
-                 <div className="bg-art-bg/30 rounded-xl border border-art-text/5 p-4 space-y-3">
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-art-orange/10 flex items-center justify-center text-art-orange animate-pulse"><MapPin size={14}/></div>
-                         <div>
-                           <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Meeting Point (PO)</p>
-                           <p className="text-xs font-black truncate max-w-[150px]">
-                             {dest.mepoLink ? (
-                               <a href={dest.mepoLink} target="_blank" rel="noopener noreferrer" className="text-art-text underline hover:text-art-orange">{dest.mepo || "Basecamp"}</a>
-                             ) : (
-                               dest.mepo || "Basecamp"
-                             )}
-                           </p>
-                         </div>
-                      </div>
-                      {dest.beans && (
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-art-bg flex items-center justify-center text-art-text/40"><Coffee size={14}/></div>
-                           <div>
-                             <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Beans Selection</p>
-                             <p className="text-xs font-black uppercase">{dest.beans}</p>
-                           </div>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"><Users size={14}/></div>
-                         <div>
-                           <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Minimum Quota</p>
-                           <p className="text-xs font-black uppercase">{dest.kuota || "2 Pax"}</p>
-                         </div>
-                      </div>
-                      {dest.schedule && (
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-art-green/10 flex items-center justify-center text-art-green"><Calendar size={14}/></div>
-                           <div>
-                             <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Jadwal / Schedule</p>
-                             <p className="text-xs font-black uppercase">{dest.schedule}</p>
-                           </div>
-                        </div>
-                      )}
-                   </div>
-
-                   <div className="bg-art-orange/5 p-4 rounded-xl border border-dashed border-art-orange/20">
-                      <div className="flex justify-between items-center mb-1">
-                         <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
-                         <div className="flex items-center gap-2">
-                            {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
-                            <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
-                         </div>
-                      </div>
-                      <p className="text-[8px] font-bold text-art-text/40 uppercase font-mono">IDR Per Orang (Min. 2 Pax)</p>
-                   </div>
 
                   <div className="space-y-4">
                     <div>
@@ -1281,26 +1233,55 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-art-text/5">
-                       <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-art-green/10 flex items-center justify-center text-art-green"><Users size={14}/></div>
-                          <div><p className="text-[8px] font-black uppercase text-art-text/40">Min Kuota</p><p className="text-xs font-black">2 Orang</p></div>
-                       </div>
-                       <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-art-orange/10 flex items-center justify-center text-art-orange"><MapPin size={14}/></div>
-                          <div><p className="text-[8px] font-black uppercase text-art-text/40">MePo</p><p className="text-xs font-black truncate max-w-[80px]">{dest.mepo || 'Basecamp'}</p></div>
-                       </div>
-                    </div>
-
-                    <div className="bg-art-orange/5 p-4 rounded-xl border border-dashed border-art-orange/20">
-                       <div className="flex justify-between items-center mb-1">
-                          <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
-                          <div className="flex items-center gap-2">
-                             {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
-                             <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
+                    <div className="bg-art-bg/50 rounded-2xl border-2 border-art-text/5 p-5 space-y-4">
+                       <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center gap-3">
+                             <div className="w-8 h-8 rounded-full bg-art-orange/10 flex items-center justify-center text-art-orange animate-pulse"><MapPin size={14}/></div>
+                             <div className="overflow-hidden">
+                               <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Meeting Point (PO)</p>
+                               <p className="text-xs font-black truncate">
+                                 {dest.mepoLink ? (
+                                   <a href={dest.mepoLink} target="_blank" rel="noopener noreferrer" className="text-art-text underline hover:text-art-orange">{dest.mepo || "Basecamp"}</a>
+                                 ) : (
+                                   dest.mepo || "Basecamp"
+                                 )}
+                               </p>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                             <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"><Users size={14}/></div>
+                             <div className="overflow-hidden">
+                               <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Min Quota</p>
+                               <p className="text-xs font-black uppercase truncate">{dest.kuota || "2 Pax"}</p>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                             <div className="w-8 h-8 rounded-full bg-art-bg flex items-center justify-center text-art-text/40"><Coffee size={14}/></div>
+                             <div className="overflow-hidden">
+                               <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Beans Selection</p>
+                               <p className="text-xs font-black uppercase truncate">{dest.beans || "Premium Blend"}</p>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                             <div className="w-8 h-8 rounded-full bg-art-green/10 flex items-center justify-center text-art-green"><Calendar size={14}/></div>
+                             <div className="overflow-hidden">
+                               <p className="text-[8px] font-black uppercase text-art-text/40 tracking-tighter leading-none mb-0.5">Jadwal / Schedule</p>
+                               <p className="text-xs font-black uppercase truncate">{dest.schedule || "Bebas / Request"}</p>
+                             </div>
                           </div>
                        </div>
-                       <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Per Orang (Min. 2 Pax)</p>
+
+
+                       <div className="bg-art-orange/10 p-4 rounded-xl border border-dashed border-art-orange/30">
+                          <div className="flex justify-between items-center mb-1">
+                             <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
+                             <div className="flex items-center gap-2">
+                                {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
+                                <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
+                             </div>
+                          </div>
+                          <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Per Orang (Min. 2 Pax)</p>
+                       </div>
                     </div>
 
                     <Button 
