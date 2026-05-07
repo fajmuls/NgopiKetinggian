@@ -1358,35 +1358,10 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
 
         <div className="flex gap-2 w-fit mt-6">
           <button onClick={() => {
-            customConfirm("Beneran mau reset seluruh konten cerita ke default?", () => {
+            customConfirm("Beneran mau reset cerita ke default?", () => {
               setUrl(defaultVideo);
-              // Also reset all related text fields to default matching getDefaultWebsiteData
-              const def = {
-                ceritaTitle: "Secangkir Cerita",
-                ceritaSub: "di Atas Awan",
-                ceritaParagraph1: "Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman.",
-                ceritaParagraph2: "Berbekal pengalaman panjang ini, meracik kopi di alam terbuka tak lagi sekadar ritual bagi kami, ia menjelma jadi perayaan kebersamaan. Lupakan sejenak semrawutnya ibukota. Kami siapkan ritme perjalanan yang santai, aman, penuh cerita, dan tentu saja... kopi rindu tebal yang diseduh di waktu yang paling tepat. Sesuatu yang tak akan pernah Anda temukan walau di coffee shop semewah apa pun di tengah kota.",
-                ceritaFeatures: [
-                  { title: "Manual Brew Experience", desc: "Nikmati V60, Chemex, atau Aeropress dari barista kami." },
-                  { title: "Grup Eksklusif", desc: "Maksimal 12 orang per perjalanan untuk keintiman." },
-                  { title: "Peralatan Premium", desc: "Tenda The North Face dll untuk kenyamanan istirahat." }
-                ]
-              };
-              
-              setCeritaTitle(def.ceritaTitle);
-              setCeritaSub(def.ceritaSub);
-              setCeritaParagraph1(def.ceritaParagraph1);
-              setCeritaParagraph2(def.ceritaParagraph2);
-              setCeritaFeatures(def.ceritaFeatures);
-              
-              updateConfig({ 
-                ceritaVideoUrl: defaultVideo,
-                homepage: {
-                  ...config.homepage,
-                  ...def
-                }
-              });
-              showToast('Konten Cerita Direset!');
+              updateConfig({ ceritaVideoUrl: defaultVideo });
+              showToast('Direset ke Default!');
             });
           }} className="bg-red-100 text-red-600 px-4 py-3 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
