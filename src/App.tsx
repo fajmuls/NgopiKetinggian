@@ -1716,29 +1716,45 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                                <Trash2 size={12} /> Hapus
                              </button>
                            ) : (
-                             <button 
-                               onClick={() => {
-                                 customConfirm("Batalkan pesanan ini?", async () => {
-                                   try {
-                                     await updateDoc(doc(db, 'bookings', b.id), { status: 'batal' });
-                                     playPop();
-                                     showToast("Pesanan dibatalkan!", "info");
-                                   } catch (error) {
-                                     console.error("Error:", error);
-                                     showToast("Gagal membatalkan pesanan", "error");
-                                   }
-                                 });
-                               }}
-                               className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
-                             >
-                               <X size={12} /> Batalkan
-                             </button>
+                             !b.requestCancel && (
+                               <button 
+                                 onClick={() => {
+                                   const isPending = b.status === 'pending';
+                                   const confirmMsg = isPending 
+                                     ? "Batalkan pesanan ini? Pesanan belum diproses sehingga akan langsung dihapus."
+                                     : "Ajukan pembatalan pesanan ini? Admin akan meninjau permintaan pembatalan Anda.";
+                                   
+                                   customConfirm(confirmMsg, async () => {
+                                     try {
+                                       if (isPending) {
+                                         await deleteDoc(doc(db, 'bookings', b.id));
+                                         showToast("Pesanan berhasil dibatalkan!", "success");
+                                       } else {
+                                         await updateDoc(doc(db, 'bookings', b.id), { requestCancel: true });
+                                         showToast("Permintaan pembatalan terkirim!", "info");
+                                       }
+                                       playPop();
+                                     } catch (error) {
+                                       console.error("Error:", error);
+                                       showToast("Gagal memproses pembatalan", "error");
+                                     }
+                                   });
+                                 }}
+                                 className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
+                               >
+                                 <X size={12} /> {b.status === 'pending' ? 'Batalkan' : 'Request Batal'}
+                               </button>
+                             )
                            )}
                         </div>
-                     </div>
+                      </div>
 
-                     {b.status === 'pending' && activeTab === 'proses' && (
+                      {b.status === 'pending' && activeTab === 'proses' && (
                        <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10">"Menunggu konfirmasi admin."</p>
+                     )}
+                     
+                     {b.requestCancel && (
+                       <p className="text-[10px] font-bold text-red-500 italic bg-red-50 p-2 rounded-lg border border-red-100 mt-2">"Permintaan pembatalan sedang diproses oleh admin."</p>
                      )}
                       
                      <div className="relative pt-4">

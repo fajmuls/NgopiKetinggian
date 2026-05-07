@@ -200,7 +200,10 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
     try {
-      await updateDoc(doc(db, 'bookings', id), { status: newStatus });
+      await updateDoc(doc(db, 'bookings', id), { 
+        status: newStatus,
+        requestCancel: false 
+      });
       await syncOpenTripQuota(bookings, id, newStatus);
       showToast(`Status booking berhasil diupdate ke ${newStatus}!`);
       if (newStatus === 'lunas') {
@@ -460,7 +463,25 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
           </div>
         ) : (
           bookings.map((booking: any) => (
-            <div key={booking.id} className={`bg-white rounded-2xl border-2 transition-all p-5 flex flex-col gap-4 ${booking.status === 'confirmed' ? 'border-art-green' : booking.status === 'cancelled' ? 'border-red-400' : 'border-art-text'}`}>
+            <div key={booking.id} className={`bg-white rounded-2xl border-2 transition-all p-5 flex flex-col gap-4 ${booking.status === 'confirmed' ? 'border-art-green' : booking.status === 'cancelled' ? 'border-red-400' : booking.requestCancel ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-art-text'}`}>
+              {booking.requestCancel && (
+                <div className="bg-red-500 text-white text-[10px] font-black uppercase py-2 px-4 -mt-5 -mx-5 rounded-t-xl mb-2 flex items-center justify-between">
+                  <span>⚠️ USER MEMINTA PEMBATALAN PESANAN</span>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        await updateDoc(doc(db, 'bookings', booking.id), { requestCancel: false });
+                        showToast("Permintaan pembatalan ditolak/dihapus", "info");
+                      } catch (e) {
+                         showToast("Gagal update", "error");
+                      }
+                    }}
+                    className="bg-white/20 hover:bg-white/40 px-2 py-0.5 rounded text-[8px]"
+                  >
+                    Hapus Notif
+                  </button>
+                </div>
+              )}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-art-text/5 pb-4">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl border-2 ${booking.status === 'confirmed' ? 'bg-art-green/10 border-art-green text-art-green' : booking.status === 'cancelled' ? 'bg-red-50 border-red-400 text-red-400' : 'bg-art-bg border-art-text text-art-text'}`}>
