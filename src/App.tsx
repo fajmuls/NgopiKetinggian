@@ -84,7 +84,8 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
         if (data.jadwal) setSelectedJadwal(data.jadwal);
         if (data.pesertaCount) setPesertaCount(data.pesertaCount);
         if (data.type) setCurrentType(data.type);
-        if (data.viewType && data.viewType !== 'selection') setViewType(data.viewType);
+        // Force viewType to selection as per user request
+        setViewType('selection');
       } catch (e) {
         console.error("Failed to load draft", e);
       }
@@ -324,6 +325,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
             opsionalItems: opsionalItemsList,
             opsionalPrice: totalOpsionalPrice,
             discountAmount: discountAmount,
+            discountPercentage: activePromo?.discount || 0,
             promoCode: isPromoValid ? promoCode : '',
             deskripsi: deskripsi || 'Tidak ada catatan khusus',
             type: currentType || 'private',
@@ -459,7 +461,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                {isPromoValid && (
                  <div className="bg-art-green/10 p-5 rounded-2xl border-2 border-art-green/20">
                    <div className="flex justify-between items-center">
-                     <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area</h5>
+                     <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area <span className="bg-art-green text-white px-2 py-0.5 rounded-full text-[8px] ml-1">-{activePromo.discount}%</span></h5>
                      <div className="text-right">
                        <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
                        <span className="text-[12px] font-black text-art-green">- Rp {discountAmount.toLocaleString('id-ID')}</span>
@@ -846,7 +848,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                {isPromoValid && (
                  <div className="bg-art-green/10 p-5 rounded-2xl border-2 border-art-green/20">
                    <div className="flex justify-between items-center">
-                     <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area</h5>
+                     <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area <span className="bg-art-green text-white px-2 py-0.5 rounded-full text-[8px] ml-1">-{activePromo.discount}%</span></h5>
                      <div className="text-right">
                        <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
                        <span className="text-[12px] font-black text-art-green">- Rp {discountAmount.toLocaleString('id-ID')}</span>
@@ -1694,7 +1696,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                            </div>
                            <span className="text-[10px] font-bold text-art-text/30 border-l border-art-text/10 pl-2">🕒 {b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '...'}</span>
                         </div>
-                         <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                            {(b.status === 'lunas' || b.status === 'selesai' || b.status === 'batal') ? (
                              <button 
                                onClick={async () => {
@@ -1726,13 +1728,14 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                                <X size={12} /> Batalkan
                              </button>
                            )}
-                         </div>
+                        </div>
+                     </div>
 
-                      {b.status === 'pending' && activeTab === 'proses' && (
-                        <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10 mt-2">"Menunggu konfirmasi admin."</p>
-                      )}
+                     {b.status === 'pending' && activeTab === 'proses' && (
+                       <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10 mt-2">"Menunggu konfirmasi admin."</p>
+                     )}
                       
-                      <div className="relative pt-6">
+                     <div className="relative pt-6">
                         <div className="flex flex-col md:flex-row gap-6 mt-4">
                            <div className="flex-1 space-y-3">
                               {/* Trip Utama Box */}
@@ -1792,7 +1795,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                               {b.promoCode && (
                                 <div className="bg-art-green/10 p-5 rounded-2xl border-2 border-art-green/20">
                                   <div className="flex justify-between items-center">
-                                    <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area</h5>
+                                    <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area {b.discountPercentage && <span className="bg-art-green text-white px-2 py-0.5 rounded-full text-[8px] ml-1">-{b.discountPercentage}%</span>}</h5>
                                     <div className="text-right">
                                       <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
                                       <span className="text-[12px] font-black text-art-green">- Rp {b.discountAmount?.toLocaleString('id-ID')}</span>
@@ -1806,40 +1809,38 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                            </div>
 
                            <div className="md:w-56 shrink-0 flex flex-col md:border-l border-art-text/10 md:pl-6 justify-between gap-6">
-                      <div>
-                        <span className="text-[10px] font-black text-art-text/30 uppercase block mb-1">Total Biaya</span>
-                        <p className="text-2xl font-black text-art-orange tracking-tighter">Rp {b.totalPrice?.toLocaleString('id-ID')}</p>
-                      </div>
+                              <div>
+                                <span className="text-[10px] font-black text-art-text/30 uppercase block mb-1">Total Biaya</span>
+                                <p className="text-2xl font-black text-art-orange tracking-tighter">Rp {b.totalPrice?.toLocaleString('id-ID')}</p>
+                              </div>
 
-                      <div className="flex flex-col gap-2">
-                        {(b.status === 'lunas' || b.status === 'selesai') ? (
-                          <button 
-                            onClick={() => { playClick(); generateInvoice(b); }}
-                            className="w-full flex items-center justify-center gap-2 bg-art-green text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 transition-colors shadow-sm"
-                          >
-                            <Download size={14} /> Download Kuitansi
-                          </button>
-                        ) : (
-                          <div className="bg-art-bg border border-art-text/10 p-3 rounded-xl flex items-start gap-2">
-                            <Info size={12} className="text-art-text/30 mt-0.5" />
-                            <p className="text-[9px] font-bold text-art-text/40 leading-relaxed italic uppercase tracking-tighter">Kuitansi dapat diunduh jika status sudah "Lunas".</p>
-                          </div>
-                        )}
-                        
-                        <button 
-                          onClick={() => window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin menanyakan status booking ID: ${(b.id || '').substring(0,8)}`)}`, '_blank')}
-                          className="w-full flex items-center justify-center gap-2 border-2 border-art-text py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-text hover:text-white transition-colors"
-                        >
-                          <Send size={14} /> Chat Admin
-                        </button>
-
-                      </div>
+                              <div className="flex flex-col gap-2">
+                                {(b.status === 'lunas' || b.status === 'selesai') ? (
+                                  <button 
+                                    onClick={() => { playClick(); generateInvoice(b); }}
+                                    className="w-full flex items-center justify-center gap-2 bg-art-green text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 transition-colors shadow-sm"
+                                  >
+                                    <Download size={14} /> Download Kuitansi
+                                  </button>
+                                ) : (
+                                  <div className="bg-art-bg border border-art-text/10 p-3 rounded-xl flex items-start gap-2">
+                                    <Info size={12} className="text-art-text/30 mt-0.5" />
+                                    <p className="text-[9px] font-bold text-art-text/40 leading-relaxed italic uppercase tracking-tighter">Kuitansi dapat diunduh jika status sudah "Lunas".</p>
+                                  </div>
+                                )}
+                                
+                                <button 
+                                  onClick={() => window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin menanyakan status booking ID: ${(b.id || '').substring(0,8)}`)}`, '_blank')}
+                                  className="w-full flex items-center justify-center gap-2 border-2 border-art-text py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-text hover:text-white transition-colors"
+                                >
+                                  <Send size={14} /> Chat Admin
+                                </button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                    </div>
-                 </div>
-               </div>
-              </div>
-              </div>
-              </div>
+                </div>
               </div>
             ))
           )}
