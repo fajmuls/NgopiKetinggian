@@ -3,7 +3,7 @@ import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
@@ -381,71 +381,105 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">Pastikan data di bawah sudah benar sebelum kirim.</p>
              </div>
 
-             <div className="bg-art-bg rounded-2xl border-2 border-art-text p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                   <div>
-                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Pemesan</p>
-                      <p className="text-xs font-black text-art-text truncate">{formState.nama}</p>
-                   </div>
-                   <div>
-                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">WhatsApp & Email</p>
-                      <p className="text-[10px] font-bold text-art-text truncate">{formState.wa} • {formState.email || user?.email}</p>
-                   </div>
-                   <div>
-                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Destinasi</p>
-                      <p className="text-xs font-black text-art-text truncate">{selectedDestinasi}</p>
-                   </div>
-                   <div>
-                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Jalur / Durasi</p>
-                      <p className="text-xs font-black text-art-text">{selectedJalur} • {selectedDurasi}</p>
-                   </div>
-                   <div>
-                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Jadwal</p>
-                      <p className="text-xs font-black text-art-text truncate">{currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal}</p>
-                   </div>
-                   <div>
-                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
-                      <p className="text-xs font-black text-art-text">{pesertaCount} Pax</p>
-                   </div>
-                </div>
- 
-                    <div className="pt-3 border-t border-art-text/10 space-y-2">
-                       <div className="flex justify-between items-center text-xs">
-                          <span className="font-bold text-art-text/50 uppercase tracking-widest">Trip Pax ({pesertaCount}x)</span>
-                          <span className="font-black text-art-text">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
-                       </div>
-                       
-                       {opsionalItemsList.length > 0 && (
-                         <div className="space-y-1.5 pt-1">
-                            <p className="text-[9px] font-black text-art-orange uppercase tracking-widest mb-1 italic">Opsi Tambahan Terpilih:</p>
-                            {opsionalItemsList.map((item, idx) => (
-                               <div key={idx} className="flex justify-between items-center text-[10px] bg-art-text/5 p-2 rounded-lg border border-art-text/10">
-                                 <div className="flex flex-col">
-                                   <span className="font-black text-art-text uppercase text-[9px]">{item.name}</span>
-                                   <span className="text-[8px] text-art-text/40">{item.count}x • {item.days} Hari</span>
-                                 </div>
-                                 <span className={`font-black text-[10px] ${item.status === 'pending_price' ? 'text-art-orange animate-pulse italic' : 'text-art-text'}`}>
-                                   {item.status === 'pending_price' ? 'Menunggu Konf. Admin' : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
-                                 </span>
-                               </div>
-                            ))}
-                         </div>
-                       )}
- 
-                       {isPromoValid && (
-                         <div className="flex justify-between items-center text-[10px] pt-1 bg-art-green/10 p-2 rounded-xl border border-art-green/30 mt-2">
-                            <span className="font-black text-art-green uppercase flex items-center gap-1.5 drop-shadow-sm">🎁 Promo: {promoCode}</span>
-                            <span className="font-extrabold text-art-green bg-white/80 px-2 py-0.5 rounded-lg border border-art-green/20">- Rp {discountAmount.toLocaleString('id-ID')}</span>
-                         </div>
-                       )}
+             <div className="space-y-3">
+               {/* Pemesan Box */}
+               <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
+                 <div className="flex justify-between items-center mb-3 pb-2 border-b border-art-text/5">
+                   <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><User size={14} className="text-art-text/40"/> Data Pemesan</h5>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Pemesan</p>
+                       <p className="text-xs font-black text-art-text truncate">{formState.nama}</p>
                     </div>
- 
-                    <div className="pt-4 border-t-2 border-dashed border-art-text/10 flex justify-between items-end">
-                       <div>
-                          <p className="text-[9px] font-black text-art-text/30 uppercase tracking-widest mb-1">Total Estimasi:</p>
-                          <p className="text-3xl font-black text-art-text tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</p>
-                       </div>
+                    <div>
+                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">WhatsApp & Email</p>
+                       <p className="text-[10px] font-bold text-art-text truncate">{formState.wa} • {formState.email || user?.email}</p>
                     </div>
+                 </div>
+                 {formState.deskripsi && (
+                   <div className="mt-3 pt-3 border-t border-art-text/5">
+                     <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Catatan Khusus</p>
+                     <p className="text-[10px] font-bold text-art-text">{formState.deskripsi}</p>
+                   </div>
+                 )}
+               </div>
+
+               {/* Trip Utama Box */}
+               <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
+                 <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
+                   <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Map size={14} className="text-art-text/40"/> Trip Utama</h5>
+                   <div className="text-right">
+                     <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
+                     <span className="text-[12px] font-black text-art-text">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
+                   </div>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Destinasi</p>
+                       <p className="text-xs font-black text-art-text truncate">{selectedDestinasi}</p>
+                    </div>
+                    <div>
+                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Jalur / Durasi</p>
+                       <p className="text-[10px] font-black text-art-text">{selectedJalur} • {selectedDurasi}</p>
+                    </div>
+                    <div>
+                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Jadwal</p>
+                       <p className="text-[10px] font-black text-art-text truncate">{currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal}</p>
+                    </div>
+                    <div>
+                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
+                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax</p>
+                    </div>
+                 </div>
+               </div>
+
+               {/* Layanan Tambahan Box */}
+               {opsionalItemsList.length > 0 && (
+                 <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
+                   <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
+                     <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
+                     <div className="text-right">
+                       <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Layanan</p>
+                       <span className="text-[12px] font-black text-art-orange">Rp {totalOpsionalPrice.toLocaleString('id-ID')}</span>
+                     </div>
+                   </div>
+                   <div className="space-y-2 text-[10px] font-bold text-art-text/60">
+                     {opsionalItemsList.map((item: any, idx: number) => (
+                       <div key={idx} className="flex justify-between items-start">
+                         <span className="uppercase">{item.name} {item.isRental ? `(${item.count}x • ${item.days} Hari)` : ''}</span>
+                         <span className="text-art-text font-black ml-2 text-right">{item.status === 'pending_price' ? 'Biaya Menyusul' : `Rp ${item.subtotal.toLocaleString('id-ID')}`}</span>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               )}
+
+               {/* Promosi Area Box */}
+               {isPromoValid && (
+                 <div className="bg-art-green/10 p-5 rounded-2xl border-2 border-art-green/20">
+                   <div className="flex justify-between items-center">
+                     <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area</h5>
+                     <div className="text-right">
+                       <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
+                       <span className="text-[12px] font-black text-art-green">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                     </div>
+                   </div>
+                   <div className="mt-2 pt-2 border-t border-art-green/10">
+                     <p className="text-[9px] font-bold text-art-green/80 uppercase">KODE AKTIF: <span className="font-black">{promoCode}</span></p>
+                   </div>
+                 </div>
+               )}
+
+               {/* Total Area Box */}
+               <div className="bg-art-text p-6 rounded-2xl border-2 border-art-text text-white shadow-[6px_6px_0px_0px_rgba(255,107,0,0.3)]">
+                  <div className="flex justify-between items-end">
+                     <div>
+                        <p className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1">Total Estimasi Keseluruhan</p>
+                        <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</h4>
+                     </div>
+                  </div>
+               </div>
              </div>
 
              <div className="flex gap-3">
@@ -772,71 +806,66 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                 </div>
              </div>
 
-             <div className="bg-art-text p-6 rounded-[2.5rem] border-2 border-art-text overflow-hidden shadow-[8px_8px_0px_0px_rgba(255,107,0,0.2)]">
-                <div className="flex justify-between items-center mb-5 border-b border-white/10 pb-3">
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 italic">Rincian Estimasi Biaya</span>
-                   <div className="flex items-center gap-1.5 bg-art-orange/20 px-2 py-0.5 rounded-full border border-art-orange/30">
-                      <ShoppingBag size={10} className="text-art-orange" />
-                      <span className="text-[8px] font-black text-art-orange uppercase tracking-widest">Premium</span>
-                   </div>
-                </div>
-                
-                <div className="space-y-2.5 mb-6">
-                   <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Harga Dasar /Pax</span>
-                      <span className="text-[10px] font-black text-white uppercase tracking-tighter">Rp {basePricePerPax.toLocaleString('id-ID')}</span>
-                   </div>
-                   <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Total {currentType === 'private' ? 'Orang' : 'Peserta'}</span>
-                      <span className="text-[10px] font-black text-white px-2 py-0.5 border border-white/10 rounded-md">x {currentPesertaCount}</span>
-                   </div>
-
-                   {opsionalItemsList.length > 0 && (
-                     <div className="pt-3 mt-1 border-t border-white/10 space-y-2">
-                        <span className="text-[9px] font-black uppercase text-art-orange tracking-widest block mb-1">Layanan Tambahan:</span>
-                        {opsionalItemsList.map((item: any, idx: number) => (
-                           <div key={idx} className="flex justify-between items-start">
-                             <div className="flex flex-col">
-                               <span className="text-[10px] font-bold text-white/80">{item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
-                               <span className="text-[8px] text-white/40">{item.isRental ? `${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}/Hari` : (item.priceInfo || '')}</span>
-                             </div>
-                             <span className="text-[10px] font-black text-white">
-                                {item.status === 'pending_price' ? <span className="text-art-orange text-[8px] italic">Dihitung Admin</span> : `+ Rp ${item.subtotal.toLocaleString('id-ID')}`}
-                             </span>
-                           </div>
-                        ))}
-                     </div>
-                   )}
-
-                   {isPromoValid && (
-                     <div className="flex justify-between items-center pt-2 border-t border-white/5 bg-art-green/20 -mx-6 px-6 py-2">
-                        <span className="text-[11px] font-black text-white uppercase flex items-center gap-1.5 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
-                          🎁 PROMO: {promoCode} (-{activePromo.discount}%)
-                        </span>
-                        <span className="text-[11px] font-black text-white bg-art-green px-2 py-0.5 rounded border border-white/20 shadow-sm">- Rp {discountAmount.toLocaleString('id-ID')}</span>
-                     </div>
-                   )}
-                </div>
-
-                <div className="flex items-end justify-between pt-2">
-                   <div>
-                      <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">TOTAL ESTIMASI AKHIR:</p>
-                      <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</h4>
-                      {currentPesertaCount > 1 && (
-                         <div className="flex items-center gap-2 mt-1">
-                            <div className="w-1 h-1 rounded-full bg-art-orange"></div>
-                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
-                              Rp {Math.round((grossPrice - discountAmount) / currentPesertaCount).toLocaleString('id-ID')} / orang <span className="lowercase normal-case italic opacity-70">(exclude opsional)</span>
-                            </p>
-                         </div>
-                      )}
-                   </div>
+             <div className="space-y-3">
+               <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
+                 <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
+                   <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Map size={14} className="text-art-text/40"/> Trip Utama</h5>
                    <div className="text-right">
-                      <p className="text-[7px] font-bold text-white/20 uppercase italic leading-tight max-w-[100px]">
-                        Terhitung otomatis secara real-time.
-                      </p>
+                     <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
+                     <span className="text-[12px] font-black text-art-text">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
                    </div>
-                </div>
+                 </div>
+                 <div className="space-y-2 text-[10px] font-bold text-art-text/60">
+                   <div className="flex justify-between"><span>Destinasi:</span><span className="text-art-text font-black uppercase">{selectedDestinasi || '-'}</span></div>
+                   <div className="flex justify-between"><span>Jalur & Durasi:</span><span className="text-art-text font-black uppercase">{selectedJalur || '-'} • {selectedDurasi || '-'}</span></div>
+                   <div className="flex justify-between"><span>Jadwal:</span><span className="text-art-text font-black uppercase">{selectedJadwal ? (currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal) : '-'}</span></div>
+                   <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax <span className="text-art-text/40 lowercase">(@ Rp {basePricePerPax.toLocaleString('id-ID')})</span></span></div>
+                 </div>
+               </div>
+
+               {opsionalItemsList.length > 0 && (
+                 <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
+                   <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
+                     <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
+                     <div className="text-right">
+                       <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Layanan</p>
+                       <span className="text-[12px] font-black text-art-orange">Rp {totalOpsionalPrice.toLocaleString('id-ID')}</span>
+                     </div>
+                   </div>
+                   <div className="space-y-2 text-[10px] font-bold text-art-text/60">
+                     {opsionalItemsList.map((item: any, idx: number) => (
+                       <div key={idx} className="flex justify-between items-start">
+                         <span className="uppercase">{item.name} {item.isRental ? `(${item.count}x • ${item.days} Hari)` : ''}</span>
+                         <span className="text-art-text font-black ml-2 text-right">{item.status === 'pending_price' ? 'Biaya Menyusul' : `Rp ${item.subtotal.toLocaleString('id-ID')}`}</span>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               )}
+
+               {isPromoValid && (
+                 <div className="bg-art-green/10 p-5 rounded-2xl border-2 border-art-green/20">
+                   <div className="flex justify-between items-center">
+                     <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area</h5>
+                     <div className="text-right">
+                       <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
+                       <span className="text-[12px] font-black text-art-green">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                     </div>
+                   </div>
+                   <div className="mt-2 pt-2 border-t border-art-green/10">
+                     <p className="text-[9px] font-bold text-art-green/80 uppercase">KODE AKTIF: <span className="font-black">{promoCode}</span></p>
+                   </div>
+                 </div>
+               )}
+               
+               <div className="bg-art-text p-6 rounded-2xl border-2 border-art-text text-white shadow-[6px_6px_0px_0px_rgba(255,107,0,0.3)]">
+                  <div className="flex justify-between items-end">
+                     <div>
+                        <p className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1">Total Estimasi Keseluruhan</p>
+                        <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</h4>
+                     </div>
+                  </div>
+               </div>
              </div>
 
              <Button type="submit" variant="primary" className="w-full py-5 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-3">
@@ -1665,105 +1694,118 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                            </div>
                            <span className="text-[10px] font-bold text-art-text/30 border-l border-art-text/10 pl-2">🕒 {b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '...'}</span>
                         </div>
-                         <button 
-                           onClick={async () => {
-                             if (window.confirm("Hapus riwayat pesanan ini?")) {
-                               try {
-                                 await deleteDoc(doc(db, 'bookings', b.id));
-                                 playPop();
-                                 showToast("Pesanan dihapus!");
-                               } catch (error) {
-                                 console.error("Error:", error);
-                               }
-                             }
-                           }}
-                           className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
-                         >
-                           <Trash2 size={12} /> Hapus
-                         </button>
-                      </div>
+                         <div className="flex items-center gap-2">
+                           {(b.status === 'lunas' || b.status === 'selesai' || b.status === 'batal') ? (
+                             <button 
+                               onClick={async () => {
+                                 if (window.confirm("Hapus riwayat pesanan ini?")) {
+                                   try {
+                                     await deleteDoc(doc(db, 'bookings', b.id));
+                                     playPop();
+                                     showToast("Pesanan dihapus!");
+                                   } catch (error) {
+                                     console.error("Error:", error);
+                                   }
+                                 }
+                               }}
+                               className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
+                             >
+                               <Trash2 size={12} /> Hapus
+                             </button>
+                           ) : (
+                             <button 
+                               onClick={() => {
+                                 if (window.confirm("Batalakan pesanan? Anda akan dialihkan ke WhatsApp Admin untuk konfirmasi pembatalan.")) {
+                                   const waUrl = `https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin membatalkan pesanan saya:\n\nDestinasi: ${b.destinasi}\nJadwal: ${b.jadwal}\nAtas Nama: ${b.nama || 'Tanpa Nama'}\n\nMohon konfirmasinya. Terima kasih.`)}`;
+                                   window.open(waUrl, '_blank');
+                                   playPop();
+                                 }
+                               }}
+                               className="p-1.5 px-3 text-red-500 hover:bg-red-50 transition-colors uppercase text-[9px] font-black flex items-center gap-1 border-2 border-red-50 rounded-xl"
+                             >
+                               <X size={12} /> Batalkan
+                             </button>
+                           )}
+                         </div>
 
                       {b.status === 'pending' && activeTab === 'proses' && (
                         <p className="text-[10px] font-bold text-art-orange italic bg-art-orange/5 p-2 rounded-lg border border-art-orange/10 mt-2">"Menunggu konfirmasi admin."</p>
                       )}
                       
                       <div className="relative pt-6">
-                        <div className="absolute -top-1 right-0">
-                           <span className={`text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ${
-                              b.status === 'lunas' || b.status === 'selesai' ? 'bg-green-100 text-green-700' : 
-                              b.status === 'processing' ? 'bg-blue-100 text-blue-700' :
-                              b.status === 'dp_partial' ? 'bg-art-orange/10 text-art-orange' :
-                              'bg-yellow-100 text-yellow-700'
-                           }`}>
-                              {b.status === 'pending' ? 'Pending' : 
-                               b.status === 'processing' ? 'Proses' :
-                               b.status === 'dp_partial' ? 'DP' :
-                               'Lunas'}
-                           </span>
-                        </div>
-                      
                         <div className="flex flex-col md:flex-row gap-6 mt-4">
-                           <div className="flex-1">
-                             <h4 className="text-2xl font-black uppercase tracking-tighter text-art-text leading-tight mb-1">{b.destinasi}</h4>
-                             
-                             <div className="flex flex-col gap-1 mb-4">
-                                <p className="text-[10px] font-bold text-art-text/30 lowercase tracking-tight flex items-center gap-1.5">
-                                  <User size={10} /> {b.email || 'no-email'}
-                                </p>
-                                <p className="text-[10px] font-bold text-art-orange uppercase tracking-widest flex items-center gap-1.5 bg-art-orange/5 w-fit px-2 py-0.5 rounded-md border border-art-orange/10">
-                                  <MapPin size={10} /> {b.jalur} • {b.durasi} • {b.peserta} Pax
-                                </p>
-                             </div>
-
-                             <div className="bg-art-bg/20 rounded-2xl border border-art-text/5 p-4 mt-2">
-                                <div className="flex justify-between items-center pb-3">
-                                   <div className="flex flex-col">
-                                      <span className="text-[10px] font-black text-art-text/40 uppercase mb-1 tracking-widest">📦 Trip Utama:</span>
-                                      <h5 className="text-sm font-black text-art-text uppercase leading-tight mb-1">{b.destinasi}</h5>
-                                      <span className="text-[9px] font-bold text-art-text/30 tracking-tight">{b.peserta} Pax • {b.jadwal}</span>
-                                   </div>
-                                   <span className="font-black text-art-text text-lg">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
-                                </div>
-
-                                {b.opsionalItems && b.opsionalItems.length > 0 && (
-                                  <div className="space-y-1 mt-3 pt-2 border-t border-dashed border-art-text/5">
-                                     <p className="text-[8px] font-black text-art-orange uppercase tracking-[0.2em] mb-1 opacity-60 italic">Layanan Tambahan:</p>
-                                     {b.opsionalItems.map((item: any, idx: number) => {
-                                       const isPending = item.status === 'pending_price';
-                                       return (
-                                         <div key={idx} className="flex justify-between items-start text-[9px] opacity-70">
-                                           <div className="flex flex-col">
-                                             <span className="font-bold text-art-text uppercase tracking-tight">+ {item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
-                                           </div>
-                                           <div className="text-right">
-                                             <span className={`font-black text-[9px] ${isPending ? 'text-art-orange italic' : 'text-art-text/60'}`}>
-                                               {isPending ? "Estimasi Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
-                                             </span>
-                                           </div>
-                                         </div>
-                                       );
-                                     })}
+                           <div className="flex-1 space-y-3">
+                              {/* Trip Utama Box */}
+                              <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
+                                <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
+                                  <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Map size={14} className="text-art-text/40"/> Trip Utama</h5>
+                                  <div className="text-right">
+                                    <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
+                                    <span className="text-[12px] font-black text-art-text">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
                                   </div>
-                                )}
-                             </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                   <div>
+                                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Destinasi</p>
+                                      <p className="text-xs font-black text-art-text truncate">{b.destinasi}</p>
+                                   </div>
+                                   <div>
+                                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Jalur / Durasi</p>
+                                      <p className="text-[10px] font-black text-art-text">{b.jalur} • {b.durasi}</p>
+                                   </div>
+                                   <div>
+                                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Jadwal</p>
+                                      <p className="text-[10px] font-black text-art-text truncate">{b.jadwal}</p>
+                                   </div>
+                                   <div>
+                                      <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
+                                      <p className="text-[10px] font-black text-art-text">{b.peserta} Pax</p>
+                                   </div>
+                                </div>
+                              </div>
+
+                              {/* Layanan Tambahan Box */}
+                              {b.opsionalItems && b.opsionalItems.length > 0 && (
+                                <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
+                                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
+                                    <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
+                                    <div className="text-right">
+                                      <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Layanan</p>
+                                      <span className="text-[12px] font-black text-art-orange">Rp {(b.opsionalPrice || 0).toLocaleString('id-ID')}</span>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-2 text-[10px] font-bold text-art-text/60">
+                                    {b.opsionalItems.map((item: any, idx: number) => {
+                                      const isPending = item.status === 'pending_price';
+                                      return (
+                                        <div key={idx} className="flex justify-between items-start">
+                                          <span className="uppercase">{item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
+                                          <span className="text-art-text font-black ml-2 text-right">{isPending ? 'Estimasi Admin' : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}</span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Promosi Area Box */}
+                              {b.promoCode && (
+                                <div className="bg-art-green/10 p-5 rounded-2xl border-2 border-art-green/20">
+                                  <div className="flex justify-between items-center">
+                                    <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area</h5>
+                                    <div className="text-right">
+                                      <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
+                                      <span className="text-[12px] font-black text-art-green">- Rp {b.discountAmount?.toLocaleString('id-ID')}</span>
+                                    </div>
+                                  </div>
+                                  <div className="mt-2 pt-2 border-t border-art-green/10">
+                                    <p className="text-[9px] font-bold text-art-green/80 uppercase">KODE AKTIF: <span className="font-black">{b.promoCode}</span></p>
+                                  </div>
+                                </div>
+                              )}
                            </div>
 
-                           <div className="hidden md:flex w-24 shrink-0 flex-col items-center justify-center border-2 border-art-text/5 rounded-3xl p-4 bg-art-bg/10 grayscale opacity-40">
-                              <Mountain size={32} className="text-art-text mb-2" />
-                              <p className="text-[8px] font-black text-art-text text-center uppercase tracking-tighter leading-tight">NGOPI DI<br/><span className="text-art-orange">KETINGGIAN</span></p>
-                           </div>
-                        </div>
-                      </div>
-
-                        {b.promoCode && (
-                          <div className="flex justify-between items-center text-[10px] bg-art-green/10 p-2.5 rounded-xl border-2 border-art-green/40 mt-3 shadow-sm ring-4 ring-art-green/5">
-                            <span className="text-art-green font-black uppercase flex items-center gap-2 drop-shadow-sm font-mono">🎁 PROMO AKTIF: {b.promoCode}</span>
-                            <span className="font-black text-white bg-art-green px-2 py-0.5 rounded-lg">- Rp {b.discountAmount?.toLocaleString('id-ID')}</span>
-                          </div>
-                        )}
-                     </div>
-
-                   <div className="md:w-56 shrink-0 flex flex-col md:border-l border-art-text/10 md:pl-6 justify-between gap-6">
+                           <div className="md:w-56 shrink-0 flex flex-col md:border-l border-art-text/10 md:pl-6 justify-between gap-6">
                       <div>
                         <span className="text-[10px] font-black text-art-text/30 uppercase block mb-1">Total Biaya</span>
                         <p className="text-2xl font-black text-art-orange tracking-tighter">Rp {b.totalPrice?.toLocaleString('id-ID')}</p>
@@ -1791,28 +1833,13 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                           <Send size={14} /> Chat Admin
                         </button>
 
-                        {b.status === 'pending' && (
-                          <button 
-                            onClick={() => {
-                              customConfirm("Apakah Anda yakin ingin membatalkan pesanan ini?", async () => {
-                                try {
-                                  const { doc, deleteDoc } = await import('firebase/firestore');
-                                  await deleteDoc(doc(db, 'bookings', b.id));
-                                  showToast("Booking berhasil dibatalkan.", "info");
-                                } catch (e) {
-                                  console.error(e);
-                                  showToast("Gagal membatalkan booking.", "error");
-                                }
-                              });
-                            }}
-                            className="w-full text-red-500 text-[9px] font-bold uppercase tracking-widest hover:underline mt-2"
-                          >
-                            Batalkan Pesanan
-                          </button>
-                        )}
                       </div>
                    </div>
-                </div>
+                 </div>
+               </div>
+              </div>
+              </div>
+              </div>
               </div>
             ))
           )}
@@ -2326,13 +2353,15 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               {config.ceritaVideoUrl.includes('youtube.com') || config.ceritaVideoUrl.includes('youtu.be') ? (
                 <iframe 
                   src={config.ceritaVideoUrl}
-                  className="relative z-10 rounded-3xl shadow-2xl w-full aspect-video grayscale-[10%] border-8 border-white"
+                  style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
+                  className={`relative z-10 rounded-3xl shadow-2xl w-full ${!config.ceritaVideoRatio || config.ceritaVideoRatio === 'auto' ? 'aspect-video' : ''} grayscale-[10%] border-8 border-white`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
               ) : (
                 <video 
                   autoPlay loop muted playsInline controls
+                  style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
                   src={config.ceritaVideoUrl} 
                   poster="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop"
                   className="relative z-10 rounded-3xl shadow-2xl w-full h-auto max-h-[75vh] grayscale-[10%] border-8 border-white shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -553,7 +553,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                           <Mountain size={32} />
                        </div>
                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-[9px] font-black text-art-text/40 uppercase tracking-[0.2em]">BOX 1: TRIP UTAMA</span>
+                          <span className="text-[9px] font-black text-art-text/40 uppercase tracking-[0.2em]">TRIP UTAMA</span>
                           <span className="text-[8px] bg-art-text text-white px-2 py-0.5 rounded-md font-black uppercase tracking-widest">{booking.type === 'open' ? 'Open' : 'Private'}</span>
                        </div>
                        <div className="flex justify-between items-end">
@@ -562,6 +562,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                              <p className="text-[9px] font-bold text-art-text/40">{booking.peserta} Pax • Rp {((((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0))) / (Number(booking.peserta) || 1)).toLocaleString('id-ID')} / Pax</p>
                           </div>
                           <div className="text-right">
+                             <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
                              <p className="font-black text-art-text text-sm">Rp {((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0)).toLocaleString('id-ID')}</p>
                           </div>
                        </div>
@@ -574,7 +575,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                             <Coffee size={32} />
                          </div>
                          <div className="flex justify-between items-start mb-3">
-                            <span className="text-[9px] font-black text-art-orange uppercase tracking-[0.2em]">BOX 2: LAYANAN TAMBAHAN</span>
+                            <span className="text-[9px] font-black text-art-orange uppercase tracking-[0.2em]">LAYANAN TAMBAHAN</span>
                          </div>
                          <div className="space-y-3">
                             {booking.opsionalItems.map((item: any, idx: number) => {
@@ -613,12 +614,6 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
                             <span className="text-[10px] font-black uppercase text-art-text/30">Subtotal Layanan</span>
                             <span className="text-sm font-black text-art-orange">Rp {(booking.opsionalPrice || 0).toLocaleString('id-ID')}</span>
                          </div>
-                      </div>
-                    )}
-
-                    {booking.opsionalText && booking.opsionalText !== 'Tidak ada' && (
-                      <div className="text-[10px] text-art-text/40 italic pt-3 px-4">
-                         Request: {booking.opsionalText}
                       </div>
                     )}
 
@@ -907,9 +902,10 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                         showToast("Gagal menempel link", "error");
                       }
                     }}
-                    className="text-[8px] bg-art-bg border border-art-text/20 px-1.5 rounded hover:bg-art-text/5 active:scale-95 transition-all"
+                    className="p-1 rounded text-art-text/60 hover:bg-art-text/5 hover:text-art-text active:scale-95 transition-all outline-none"
+                    title="Paste Link"
                   >
-                    Paste
+                    <Clipboard size={14} />
                   </button>
                 </div>
                 <div className="flex gap-1">
@@ -1337,10 +1333,27 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
           </div>
         </div>
 
-        <div className="space-y-1.5 pt-4 border-t border-art-text/10">
-          <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (Background)</p>
-          <input className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." />
-          <p className="text-[9px] text-art-text/30 italic">Gunakan link embed YouTube atau file MP4.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-art-text/10">
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (Background)</p>
+            <input className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." />
+            <p className="text-[9px] text-art-text/30 italic">Gunakan link embed YouTube atau file MP4.</p>
+          </div>
+          <div className="space-y-1.5">
+             <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">Rasio Video</p>
+             <select 
+                className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" 
+                value={config.ceritaVideoRatio || 'auto'}
+                onChange={e => updateConfig({ ceritaVideoRatio: e.target.value })}
+             >
+                <option value="auto">Auto (Sesuai Video)</option>
+                <option value="16/9">Landscape (16:9)</option>
+                <option value="9/16">Portrait / Shorts (9:16)</option>
+                <option value="3/4">Standard Portrait (3:4)</option>
+                <option value="1/1">Square (1:1)</option>
+             </select>
+             <p className="text-[9px] text-art-text/30 italic">Atur rasio untuk menyesuaikan iframe YouTube.</p>
+          </div>
         </div>
 
         <div className="flex gap-2 w-fit mt-6">
@@ -1361,15 +1374,17 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
             {url.includes('youtube.com') || url.includes('youtu.be') ? (
               <iframe 
                 src={url}
-                className="w-full aspect-[4/5] object-cover rounded shadow"
+                style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
+                className={`w-full ${!config.ceritaVideoRatio || config.ceritaVideoRatio === 'auto' ? 'aspect-[4/5]' : ''} object-cover rounded shadow`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             ) : (
               <video 
                 autoPlay loop muted playsInline controls
+                style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
                 src={url} 
-                className="w-full aspect-[4/5] object-cover rounded shadow bg-black"
+                className={`w-full ${!config.ceritaVideoRatio || config.ceritaVideoRatio === 'auto' ? 'aspect-[4/5]' : ''} object-cover rounded shadow bg-black`}
               />
             )}
           </div>
@@ -1611,7 +1626,8 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
         name: dest.name, 
         region: dest.region, 
         difficulty: dest.difficulty, 
-        mepo: dest.mepo, 
+        mepo: dest.mepo,
+        mepoLink: dest.mepoLink || "",
         beans: dest.beans, 
         image: dest.image,
         kuotaNum: 15,
@@ -1973,13 +1989,44 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-art-text/40">Link Google Maps</label>
-                    <input 
-                      placeholder="https://maps.google.com/..." 
-                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
-                      value={ot.mepoLink || ""} 
-                      onChange={e => { const nd = [...data]; nd[i].mepoLink = e.target.value; setData(nd); }} 
-                    />
+                    <div className="flex justify-between items-center">
+                      <label className="text-[9px] font-black uppercase text-art-text/40">Link Google Maps</label>
+                      <button 
+                        onClick={async () => {
+                          try {
+                            const text = await navigator.clipboard.readText();
+                            const nd = [...data];
+                            nd[i].mepoLink = text;
+                            setData(nd);
+                            showToast("Link ditempel!");
+                          } catch (err) {
+                            showToast("Gagal menempel link", "error");
+                          }
+                        }}
+                        className="p-1 rounded text-art-text/60 hover:bg-art-text/5 hover:text-art-text active:scale-95 transition-all outline-none"
+                        title="Paste Link"
+                      >
+                        <Clipboard size={14} />
+                      </button>
+                    </div>
+                    <div className="flex gap-1">
+                      <input 
+                        placeholder="https://maps.google.com/..." 
+                        className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
+                        value={ot.mepoLink || ""} 
+                        onChange={e => { const nd = [...data]; nd[i].mepoLink = e.target.value; setData(nd); }} 
+                      />
+                      <button 
+                        onClick={() => {
+                          const query = `Basecamp ${ot.name} ${ot.region || ''} ${ot.mepo || ''}`;
+                          window.open(`https://www.google.com/maps/search/${encodeURIComponent(query)}`, '_blank');
+                        }}
+                        className="p-2.5 bg-art-orange text-white rounded-xl hover:bg-orange-600 transition-colors"
+                        title="Cari di Google Maps"
+                      >
+                        <Map size={16} />
+                      </button>
+                    </div>
                   </div>
                </div>
 

@@ -73,6 +73,7 @@ export interface AppConfig {
   teamPhotos: string[];
   galleryPhotos: any[];
   ceritaVideoUrl: string;
+  ceritaVideoRatio?: string;
   promoCodes: { code: string, discount: number }[];
   homepage: {
     heroSub?: string;
