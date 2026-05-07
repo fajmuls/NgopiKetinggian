@@ -156,8 +156,7 @@ const getDefaultWebsiteData = () => ({
   ],
   ceritaVideoUrl: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4",
   promoCodes: [
-    { code: "Ari ganteng", discount: 50 },
-    { code: "Emikari", discount: 10 }
+    { code: "NGOPIYUK", discount: 10 }
   ],
   homepage: {
     heroSub: "Open Trip Eksklusif",
@@ -180,26 +179,8 @@ const getDefaultWebsiteData = () => ({
     leaderSub: "Trip Leader Kami",
     leaderParagraph: "Beberapa kawan daki yang akan memandu dan memastikan keamanan serta kenyamanan perjalananmu ke puncak.",
     heroSlides: [
-      {
-         name: "Gunung Gede Pangrango",
-         height: "2.958",
-         image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop"
-      },
-      {
-         name: "Gunung Salak",
-         height: "2.211",
-         image: "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop"
-      },
-      {
-         name: "Gunung Semeru",
-         height: "3.676",
-         image: "https://images.unsplash.com/photo-1543884487-7359df37db0d?q=80&w=2070&auto=format&fit=crop"
-      },
-      {
-         name: "Gunung Rinjani",
-         height: "3.726",
-         image: "https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2659&auto=format&fit=crop"
-      }
+       { name: "Gunung Sumbing", height: "3.371", image: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?q=80&w=2070&auto=format&fit=crop" },
+       { name: "Gunung Prau", height: "2.590", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" }
     ]
   }
 });
