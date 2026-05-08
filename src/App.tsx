@@ -738,7 +738,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       </select>
                    </div>
 
-                   {currentType !== 'open_request' && (
+                   {true && (
                    <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jalur</label>
@@ -890,7 +890,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       );
                     })()}
 
-                   {currentType !== 'open_request' && (
+                   {true && (
                      <>
                        <div className="relative">
                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
@@ -1480,6 +1480,32 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                           </div>
                           <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Per Orang (Min. 2 Pax)</p>
                        </div>
+
+                       {(() => {
+                          const durInfo = currentDur;
+                          if (!durInfo || (!durInfo.rundownHtml && !durInfo.rundownPdf)) return null;
+                          return (
+                            <div className="p-3 bg-white border border-art-text/10 rounded-xl space-y-2">
+                              <h5 className="text-[9px] font-black uppercase text-art-text flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
+                              {durInfo.rundownHtml && (
+                                <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
+                                  {durInfo.rundownHtml}
+                                </div>
+                              )}
+                              <div className="flex gap-2">
+                                {durInfo.rundownPdf ? (
+                                  <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors">
+                                    Download PDF <Download size={8} className="inline ml-1" />
+                                  </a>
+                                ) : durInfo.rundownHtml ? (
+                                  <button type="button" onClick={() => generateRundownPdf(durInfo, dest.name, currentPath.name, currentDur.label)} className="flex-1 py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors">
+                                    Lihat PDF <Download size={8} className="inline ml-1" />
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                       })()}
                     </div>
 
                     <Button 
@@ -2324,11 +2350,11 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       {/* Navigation */}
       <nav className="absolute w-full z-50">
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 md:h-24 flex items-end justify-between border-b border-art-text/10 pb-4">
-          <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} onMouseEnter={playHover}>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white overflow-hidden border border-art-text/20 shrink-0">
+          <div className="flex items-center gap-4 cursor-pointer shrink-0" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} onMouseEnter={playHover}>
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-white overflow-hidden border-2 border-art-text shadow-sm shrink-0">
               <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
             </div>
-            <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-art-text hidden sm:block">Ngopi<br/>Ketinggian</span>
+            <span className="text-sm tracking-[0.3em] font-black uppercase leading-tight text-art-text hidden sm:block">Ngopi<br/>Ketinggian</span>
           </div>
           
           <div className="flex-1 flex justify-center px-4 md:px-8 max-w-lg mx-auto">
@@ -2368,6 +2394,20 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0 border-l border-art-text/20 pl-4 items-center">
+            <button className="p-2 text-art-text hover:text-art-orange transition-colors" onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Ngopi di Ketinggian',
+                  text: 'Jelajahi keindahan gunung dengan fasilitas terbaik!',
+                  url: window.location.href,
+                });
+              } else {
+                navigator.clipboard.writeText(window.location.href);
+                customAlert("Link website berhasil disalin ke clipboard!");
+              }
+            }} title="Share Website">
+              <ExternalLink size={20} />
+            </button>
             <button className="p-2 text-art-text hover:text-art-orange transition-colors" onClick={(e) => { playClick(); setIsMobileMenuOpen(!isMobileMenuOpen); }} title="Menu">
               {isMobileMenuOpen ? <X size={24} /> : <MoreVertical size={24} />}
             </button>

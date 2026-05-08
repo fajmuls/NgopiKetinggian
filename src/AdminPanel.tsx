@@ -461,99 +461,104 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
 
   return (
     <div className="space-y-6">
-      {/* NOTIFICATIONS FOR OPEN TRIP REQUESTS */}
-      {pendingOpenRequests.length > 0 && (
-        <div className="mb-6 space-y-4">
-          <div className="flex items-center gap-2 mb-3">
-             <AlertCircle size={20} className="text-art-orange" />
-             <h3 className="text-xl font-black uppercase text-art-text tracking-tighter">Request Open Trip Masuk ({pendingOpenRequests.length})</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* NOTIFICATION PANEL */}
+        <div className="bg-white border-2 border-art-text rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+             <div className="flex items-center gap-2">
+                <AlertCircle size={20} className="text-art-orange" />
+                <h3 className="text-xl font-black uppercase text-art-text tracking-tighter">Notifikasi</h3>
+             </div>
+             <span className="bg-art-orange text-white text-[10px] font-black px-2 py-1 rounded-lg">{pendingOpenRequests.length} Request Baru</span>
           </div>
-          {pendingOpenRequests.map((req: any) => (
-             <div key={req.id} className="bg-art-orange/10 border-2 border-art-orange p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h4 className="font-black uppercase text-lg text-art-text">{req.nama} <span className="text-xs font-bold text-art-text/40 bg-white px-2 py-1 rounded-md ml-2">{req.peserta} Pax</span></h4>
-                  <p className="text-xs font-bold text-art-text/60">{req.wa}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                     <span className="text-[10px] font-black uppercase bg-white px-2 py-1 rounded border border-art-text/10 flex items-center gap-1"><MapPin size={10} className="text-art-orange" /> {req.destinasi}</span>
-                     <span className="text-[10px] font-black uppercase bg-white px-2 py-1 rounded border border-art-text/10 flex items-center gap-1"><Calendar size={10} className="text-art-orange" /> {req.jadwal} ({req.durasi})</span>
+          
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+            {pendingOpenRequests.length === 0 ? (
+              <div className="py-10 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
+                 <p className="text-[10px] font-bold text-art-text/30 uppercase">Tidak ada request baru</p>
+              </div>
+            ) : (
+              pendingOpenRequests.map((req: any) => (
+                <div key={req.id} className="bg-art-orange/5 border-2 border-art-orange/20 p-4 rounded-2xl space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-black uppercase text-sm text-art-text">{req.nama}</h4>
+                      <p className="text-[10px] font-bold text-art-text/40">{req.wa}</p>
+                    </div>
+                    <span className="text-[8px] font-black uppercase bg-white px-2 py-1 rounded border border-art-orange/20 text-art-orange">{req.destinasi}</span>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                   <button 
-                     onClick={async () => {
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={async () => {
                         try {
                            await updateDoc(doc(db, 'bookings', req.id), { status: 'processing' });
                            showToast("Masuk ke proses!");
-                           window.open(`https://wa.me/${req.wa.startsWith('0') ? '62' + req.wa.substring(1) : req.wa}?text=${encodeURIComponent(`Halo ${req.nama}, permintaan Open Trip Anda untuk destinasi ${req.destinasi} tanggal ${req.jadwal} telah diterima dan sedang diurus oleh tim Ngopi di Ketinggian.`)}`, '_blank');
                         } catch (e) {
                            showToast("Gagal update", "error");
                         }
-                     }}
-                     className="px-4 py-2 bg-white text-art-text border border-art-text/20 rounded-xl text-[10px] font-black uppercase hover:bg-gray-50 flex items-center gap-1"
-                   ><Clock size={12}/> Proses Saja</button>
-                   <button 
-                     onClick={() => {
-                        onNavigateToOpenTrip && onNavigateToOpenTrip(req);
-                     }}
-                     className="px-4 py-2 bg-art-orange text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-1"
-                   ><Plus size={12}/> Buat Open Trip</button>
+                      }}
+                      className="flex-1 py-2 bg-white text-art-text border border-art-text/20 rounded-xl text-[9px] font-black uppercase hover:bg-gray-50"
+                    >Proses</button>
+                    <button 
+                      onClick={() => onNavigateToOpenTrip && onNavigateToOpenTrip(req)}
+                      className="flex-1 py-2 bg-art-orange text-white rounded-xl text-[9px] font-black uppercase shadow-[3px_3px_0px_0px_#1a1a1a]"
+                    >Buat Trip</button>
+                  </div>
                 </div>
-             </div>
-          ))}
+              ))
+            )}
+          </div>
         </div>
-      )}
 
-      {/* DASHBOARD TOGGLE */}
-      {!showDashboard ? (
-        <div className="bg-art-bg/30 border-2 border-art-text/20 rounded-3xl p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
-           <Clipboard size={48} className="text-art-text/20 mb-4" />
-           <h3 className="text-2xl font-black uppercase tracking-tight text-art-text mb-2">Manajemen Booking</h3>
-           <p className="text-xs font-bold text-art-text/50 uppercase tracking-widest max-w-sm mb-6">Akses daftar seluruh pesanan, konfirmasi pembayaran, dan kelola invoice pelanggan.</p>
+        {/* QUICK STATS / RESET */}
+        <div className="bg-art-text text-white rounded-3xl p-6 flex flex-col justify-between">
+           <div>
+              <h3 className="text-xl font-black uppercase tracking-tighter mb-1">Database Booking</h3>
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-6">Kelola seluruh data reservasi</p>
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                    <p className="text-[8px] font-black text-white/30 uppercase mb-1">Total Booking</p>
+                    <p className="text-2xl font-black">{bookings.length}</p>
+                 </div>
+                 <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                    <p className="text-[8px] font-black text-white/30 uppercase mb-1">Selesai</p>
+                    <p className="text-2xl font-black text-art-green">{bookings.filter(b => b.status === 'selesai' || b.status === 'lunas').length}</p>
+                 </div>
+              </div>
+           </div>
            <button 
-             onClick={() => setShowDashboard(true)}
-             className="px-6 py-4 bg-art-text text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-[6px_6px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+              onClick={async () => {
+                customConfirm("⚠️ PERINGATAN: Hapus SELURUH database booking? Tindakan ini tidak bisa dibatalkan.", async () => {
+                  try {
+                    const bookingsToDelete = bookings.map((b: any) => b.id);
+                    for (const id of bookingsToDelete) {
+                      await deleteDoc(doc(db, 'bookings', id));
+                    }
+                    showToast("Database berhasil direset!", "success");
+                  } catch (e) {
+                    showToast("Gagal reset database", "error");
+                  }
+                });
+              }}
+              className="mt-6 w-full py-4 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-[4px_4px_0px_rgba(0,0,0,0.3)] active:translate-x-1 active:translate-y-1 active:shadow-none"
            >
-              Buka Booking Dashboard <ChevronDown size={14} />
+             Reset Seluruh Database
            </button>
         </div>
-      ) : (
-        <>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 bg-white p-6 rounded-3xl border-2 border-art-text shadow-sm">
-            <div>
-              <h2 className="text-3xl font-black text-art-text uppercase tracking-tighter">Booking Dashboard</h2>
-              <p className="text-xs font-bold text-art-text/40 uppercase tracking-widest">Manajemen reservasi dan rincian pembayaran</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-black uppercase px-4 py-2 bg-art-bg border-2 border-art-text text-art-text rounded-xl">{bookings.length} Total Pesanan</span>
-              <button 
-                onClick={async () => {
-                  customConfirm("⚠️ PERINGATAN: Hapus SELURUH database booking? Tindakan ini tidak bisa dibatalkan.", async () => {
-                    try {
-                      const bookingsToDelete = bookings.map((b: any) => b.id);
-                      for (const id of bookingsToDelete) {
-                        await deleteDoc(doc(db, 'bookings', id));
-                      }
-                      showToast("Database berhasil direset!", "success");
-                    } catch (e) {
-                      showToast("Gagal reset database", "error");
-                    }
-                  });
-                }}
-                className="px-6 py-2.5 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-[4px_4px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none"
-              >
-                Reset Database
-              </button>
-            </div>
-          </div>
+      </div>
 
-          <div className="space-y-4">
-            {bookings.length === 0 ? (
-              <div className="py-20 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
-                <Info className="mx-auto mb-2 text-art-text/20" size={32} />
-                <p className="font-bold text-art-text/40 uppercase text-xs">Belum ada booking masuk</p>
-              </div>
-            ) : (
-              bookings.map((booking: any) => (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 px-2">
+           <Clipboard size={18} className="text-art-text" />
+           <h3 className="text-xl font-black uppercase text-art-text tracking-tighter">Daftar Reservasi & Payment Slips</h3>
+        </div>
+        {bookings.length === 0 ? (
+          <div className="py-20 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
+            <Info className="mx-auto mb-2 text-art-text/20" size={32} />
+            <p className="font-bold text-art-text/40 uppercase text-xs">Belum ada booking masuk</p>
+          </div>
+        ) : (
+          bookings.map((booking: any) => (
             <div key={booking.id} className={`bg-white rounded-2xl border-2 transition-all p-5 flex flex-col gap-4 ${booking.status === 'confirmed' ? 'border-art-green' : booking.status === 'cancelled' ? 'border-red-400' : booking.requestCancel ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-art-text'}`}>
               {booking.requestCancel && (
                 <div className="bg-red-500 text-white text-[10px] font-black uppercase py-2 px-4 -mt-5 -mx-5 rounded-t-xl mb-2 flex items-center justify-between">
@@ -804,8 +809,6 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
           ))
         )}
       </div>
-     </>
-    )}
     </div>
   );
 };
@@ -831,6 +834,34 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
 
   const [visibilities, setVisibilities] = useState(config.visibilities || { map: true, quota: true, beans: true, routes: true });
+
+  const moveDestination = (index: number, direction: 'up' | 'down') => {
+    const list = [...data];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= list.length) return;
+    [list[index], list[newIndex]] = [list[newIndex], list[index]];
+    setData(list);
+  };
+
+  const movePath = (destIdx: number, pathIdx: number, direction: 'up' | 'down') => {
+    const nd = [...data];
+    const paths = [...nd[destIdx].paths];
+    const newIndex = direction === 'up' ? pathIdx - 1 : pathIdx + 1;
+    if (newIndex < 0 || newIndex >= paths.length) return;
+    [paths[pathIdx], paths[newIndex]] = [paths[newIndex], paths[pathIdx]];
+    nd[destIdx].paths = paths;
+    setData(nd);
+  };
+
+  const moveDuration = (destIdx: number, pathIdx: number, durIdx: number, direction: 'up' | 'down') => {
+    const nd = [...data];
+    const durations = [...nd[destIdx].paths[pathIdx].durations];
+    const newIndex = direction === 'up' ? durIdx - 1 : durIdx + 1;
+    if (newIndex < 0 || newIndex >= durations.length) return;
+    [durations[durIdx], durations[newIndex]] = [durations[newIndex], durations[durIdx]];
+    nd[destIdx].paths[pathIdx].durations = durations;
+    setData(nd);
+  };
 
   useEffect(() => {
     if (JSON.stringify(data) !== JSON.stringify(config.destinationsData || [])) {
@@ -919,7 +950,11 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
         return (
         <div key={i} className={`bg-white p-4 rounded-lg border-2 ${dest.isActive !== false ? 'border-art-text' : 'border-gray-300 opacity-70'} space-y-4 relative w-full overflow-hidden`}>
           <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 z-10 bg-white/80 backdrop-blur-sm p-1 rounded-md">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60 hidden sm:inline">Aktif di Homepage?</span>
+            <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
+                <button type="button" onClick={() => moveDestination(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
+                <button type="button" onClick={() => moveDestination(i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.length - 1}><ChevronDown size={14}/></button>
+            </div>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60 hidden sm:inline">Aktif?</span>
             <input 
               type="checkbox" 
               className="w-4 h-4 accent-art-orange"
@@ -1082,12 +1117,18 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
 
             {dest.paths?.map((path: any, pIdx: number) => (
               <div key={pIdx} className="border border-art-text/20 p-3 rounded-lg bg-gray-50 space-y-3 relative">
-                <button onClick={() => {
-                   const nd = [...data];
-                   nd[i].paths.splice(pIdx, 1);
-                   setData(nd);
-                }} className="absolute top-3 right-3 text-red-500"><Trash2 size={14}/></button>
-                <div className="flex items-center gap-2 pr-8">
+                <div className="absolute top-2 right-2 flex gap-1 z-10">
+                   <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
+                        <button type="button" onClick={() => movePath(i, pIdx, 'up')} className="p-1 hover:bg-gray-100 border-r border-art-text/10" disabled={pIdx === 0}><ChevronDown size={14} className="rotate-180"/></button>
+                        <button type="button" onClick={() => movePath(i, pIdx, 'down')} className="p-1 hover:bg-gray-100" disabled={pIdx === dest.paths.length - 1}><ChevronDown size={14}/></button>
+                    </div>
+                    <button onClick={() => {
+                       const nd = [...data];
+                       nd[i].paths.splice(pIdx, 1);
+                       setData(nd);
+                    }} className="bg-white border border-art-text/10 text-red-500 rounded p-1 hover:bg-red-50 shadow-sm"><Trash2 size={14}/></button>
+                </div>
+                <div className="flex items-center gap-2 pr-20">
                   <span className="text-[10px] font-bold uppercase w-12">Jalur:</span>
                   <input className="border p-1.5 rounded text-xs flex-1" value={path.name} onChange={e => {
                     const nd = [...data];
@@ -1106,6 +1147,10 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                   {path.durations.map((dur: any, j: number) => (
                     <React.Fragment key={j}>
                     <div className="flex gap-2 items-center">
+                      <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shrink-0">
+                          <button type="button" onClick={() => moveDuration(i, pIdx, j, 'up')} className="p-1 hover:bg-gray-100 border-r border-art-text/10" disabled={j === 0}><ChevronDown size={12} className="rotate-180"/></button>
+                          <button type="button" onClick={() => moveDuration(i, pIdx, j, 'down')} className="p-1 hover:bg-gray-100" disabled={j === path.durations.length - 1}><ChevronDown size={12}/></button>
+                      </div>
                       <select className="border p-2 rounded text-xs flex-1" value={dur.label} onChange={e => {
                         const nd = [...data];
                         nd[i].paths[pIdx].durations[j].label = e.target.value;
@@ -1271,6 +1316,14 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
   const [leaderSub, setLeaderSub] = useState(config.homepage?.leaderSub || '');
   const [leaderParagraph, setLeaderParagraph] = useState(config.homepage?.leaderParagraph || '');
 
+  const moveLeader = (index: number, direction: 'up' | 'down') => {
+    const list = [...data];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= list.length) return;
+    [list[index], list[newIndex]] = [list[newIndex], list[index]];
+    setData(list);
+  };
+
   useEffect(() => {
     if (JSON.stringify(data) !== JSON.stringify(config.tripLeaders || [])) {
       setData(JSON.parse(JSON.stringify(config.tripLeaders || [])));
@@ -1319,11 +1372,17 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
       <div className="space-y-4">
         {data.map((leader, i) => (
           <div key={i} className="bg-white p-6 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all group">
-            <button onClick={() => {
+            <div className="absolute top-4 right-4 flex gap-2">
+                <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
+                    <button type="button" onClick={() => moveLeader(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={20} className="rotate-180"/></button>
+                    <button type="button" onClick={() => moveLeader(i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.length - 1}><ChevronDown size={20}/></button>
+                </div>
+                <button onClick={() => {
               const nd = [...data];
               nd.splice(i, 1);
               setData(nd);
-            }} className="absolute top-4 right-4 text-red-500 hover:scale-110 transition-transform"><Trash2 size={20}/></button>
+            }} className="text-red-500 hover:scale-110 transition-transform"><Trash2 size={20}/></button>
+            </div>
             
             <div className="flex flex-col gap-6">
               {/* Leader Image Preview at Top */}
@@ -1416,6 +1475,14 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
 const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState([...(config.galleryPhotos || [])]);
   
+  const movePhoto = (index: number, direction: 'up' | 'down') => {
+    const list = [...data];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= list.length) return;
+    [list[index], list[newIndex]] = [list[newIndex], list[index]];
+    setData(list);
+  };
+
   const handleSave = () => {
     updateConfig({ galleryPhotos: data });
     showToast('Disimpan!');
@@ -1447,9 +1514,15 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {data.map((photo, i) => (
           <div key={i} className="bg-white p-3 rounded border border-art-text relative space-y-2 flex flex-col">
-            <button onClick={() => {
-              const nd = [...data]; nd.splice(i, 1); setData(nd);
-            }} className="absolute top-2 right-2 text-red-500 bg-white p-1 rounded"><Trash2 size={16}/></button>
+            <div className="absolute top-2 right-2 flex gap-1 z-10">
+                <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
+                    <button type="button" onClick={() => movePhoto(i, 'up')} className="p-1 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
+                    <button type="button" onClick={() => movePhoto(i, 'down')} className="p-1 hover:bg-gray-100" disabled={i === data.length - 1}><ChevronDown size={14}/></button>
+                </div>
+                <button onClick={() => {
+                  const nd = [...data]; nd.splice(i, 1); setData(nd);
+                }} className="bg-white border border-art-text/10 text-red-500 rounded p-1 hover:bg-red-50 shadow-sm"><Trash2 size={14}/></button>
+            </div>
             {photo.src && <img src={photo.src} className="w-full h-32 object-cover rounded" />}
             <InputWithPaste className="border p-1 text-xs w-full rounded" value={photo.src} onChange={(e: any) => {
                   const nd = [...data]; nd[i].src = e.target.value; setData(nd);
@@ -2326,6 +2399,16 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
 const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState(config.facilities || { include: [], exclude: [], opsi: [] });
 
+  const moveItem = (key: 'include' | 'exclude' | 'opsi', index: number, direction: 'up' | 'down') => {
+    const newData = { ...data };
+    const list = [...newData[key]];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= list.length) return;
+    [list[index], list[newIndex]] = [list[newIndex], list[index]];
+    newData[key] = list;
+    setData(newData);
+  };
+
   useEffect(() => {
     if (config.facilities) {
       setData(config.facilities);
@@ -2376,6 +2459,10 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
       </div>
       {data[key].map((item: string, i: number) => (
         <div key={i} className="flex gap-2">
+          <div className="flex flex-col gap-1">
+             <button type="button" onClick={() => moveItem(key, i, 'up')} className="p-1 hover:bg-gray-100 rounded" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
+             <button type="button" onClick={() => moveItem(key, i, 'down')} className="p-1 hover:bg-gray-100 rounded" disabled={i === data[key].length - 1}><ChevronDown size={14}/></button>
+          </div>
           <input className="border p-2 rounded text-sm flex-1" value={item} onChange={e => {
             const nd = { ...data }; nd[key][i] = e.target.value; setData(nd);
           }} />
@@ -2418,9 +2505,15 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
         <div className="grid grid-cols-1 gap-4">
           {data.opsi.map((opt: FacilityOption, i: number) => (
             <div key={i} className="border-2 border-art-text/10 p-4 rounded-xl space-y-3 relative bg-art-bg/20">
-               <button onClick={() => {
+               <div className="absolute top-4 right-4 flex gap-2">
+                  <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
+                    <button type="button" onClick={() => moveItem('opsi', i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={16} className="rotate-180"/></button>
+                    <button type="button" onClick={() => moveItem('opsi', i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.opsi.length - 1}><ChevronDown size={16}/></button>
+                  </div>
+                  <button onClick={() => {
                  const nd = { ...data }; nd.opsi.splice(i, 1); setData(nd);
-               }} className="absolute top-4 right-4 text-red-500"><Trash2 size={18} /></button>
+               }} className="bg-white border border-art-text/10 text-red-500 rounded p-1.5 shadow-sm hover:bg-red-50"><Trash2 size={18} /></button>
+                </div>
                
                <div className="mb-4 w-full sm:w-72">
                   <label className="text-[10px] font-black uppercase text-art-orange block mb-1 font-mono tracking-tighter">Format Penghargaan (Sistem)</label>
