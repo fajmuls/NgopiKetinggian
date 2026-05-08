@@ -30,6 +30,7 @@ export const AdminPanelModal = ({
 }) => {
   const [activeCategory, setActiveCategory] = useState<'booking' | 'trip' | 'website'>('booking');
   const [activeTab, setActiveTab] = useState<string>('bookings');
+  const [openTripPrefill, setOpenTripPrefill] = useState<any>(null);
   
   if (!isOpen || !config) return null;
 
@@ -133,8 +134,8 @@ export const AdminPanelModal = ({
           
           {/* Content */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-art-bg/50">
-            {activeTab === 'bookings' && <BookingsAdmin showToast={showToast} config={config} updateConfig={updateConfig} />}
-            {activeTab === 'openTrips' && <OpenTripsAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'bookings' && <BookingsAdmin showToast={showToast} config={config} updateConfig={updateConfig} onNavigateToOpenTrip={(prefillData: any) => { setOpenTripPrefill(prefillData); setActiveCategory('trip'); setActiveTab('openTrips'); }} />}
+            {activeTab === 'openTrips' && <OpenTripsAdmin config={config} updateConfig={updateConfig} showToast={showToast} prefillData={openTripPrefill} clearPrefill={() => setOpenTripPrefill(null)} />}
             {activeTab === 'destinations' && <DestinationsAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.destinations} />}
             {activeTab === 'leaders' && <LeadersAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.leaders} />}
             {activeTab === 'gallery' && <GalleryAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.gallery} />}
@@ -150,9 +151,10 @@ export const AdminPanelModal = ({
   );
 };
 
-const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
+const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }: any) => {
   const [bookings, setBookings] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [showDashboard, setShowDashboard] = React.useState(false);
 
   const [user] = useAuthState(auth);
   React.useEffect(() => {
@@ -173,6 +175,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
   }, [user]);
 
   const syncOpenTripQuota = async (currentBookings: any[], updatedBookingId?: string, newStatus?: string, deletedBookingId?: string) => {
+
     if (!config.openTrips) return;
     
     // Create a modified bookings array reflecting the hypothetical database state
@@ -252,7 +255,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     });
   };
 
-  const generateInvoice = (booking: any) => {
+  const generateInvoice = async (booking: any) => {
     const doc = new jsPDF();
     const primaryColor = [26, 26, 26]; // Art-text
     const accentColor = [255, 107, 0]; // Art-orange
@@ -263,17 +266,32 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.rect(0, 0, 210, 297, 'F');
     
     // Watermark
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(60);
-    doc.setTextColor(235, 235, 235);
-    doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
-    doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+    await new Promise<void>((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = () => {
+        doc.setGState(new (doc.GState as any)({ opacity: 0.05 }));
+        const aspectRatio = img.width / img.height;
+        doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
+        doc.setGState(new (doc.GState as any)({ opacity: 1 }));
+        resolve();
+      };
+      img.onerror = () => {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(60);
+        doc.setTextColor(235, 235, 235);
+        doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
+        doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+        resolve();
+      };
+      img.src = 'https://files.catbox.moe/lubzno.png';
+    });
     
     // Header bar
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.rect(0, 0, 210, 50, 'F');
     
-    // Logo text Replacement (since we can't easily embed images without URL fetching issues in PDF here)
+    // Logo text
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
@@ -288,9 +306,16 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
     doc.setFontSize(12);
     doc.text(`#${(booking.id || '').substring(0, 8).toUpperCase()}`, 140, 30);
     doc.setFontSize(8);
+    
     const bookingDate = booking.createdAt ? new Date(booking.createdAt.seconds * 1000) : new Date();
     const displayDate = isNaN(bookingDate.getTime()) ? new Date() : bookingDate;
-    doc.text(`TANGGAL: ${displayDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 140, 38);
+    
+    const paymentDateRaw = booking.updatedAt || booking.createdAt;
+    const paymentDate = paymentDateRaw ? new Date(paymentDateRaw.seconds * 1000) : displayDate;
+    const paymentDateStr = isNaN(paymentDate.getTime()) ? '-' : paymentDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    doc.text(`TGL PESAN: ${displayDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}`, 140, 38);
+    doc.text(`TGL BAYAR: ${paymentDateStr}`, 140, 44);
 
     // Section colors and borders
     const drawSectionHeader = (title: string, y: number) => {
@@ -432,44 +457,103 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
 
   if (loading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-art-orange"></div></div>;
 
+  const pendingOpenRequests = bookings.filter((b: any) => b.type === 'open_request' && b.status === 'pending');
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-3xl border-2 border-art-text shadow-sm">
-        <div>
-          <h2 className="text-3xl font-black text-art-text uppercase tracking-tighter">Booking Dashboard</h2>
-          <p className="text-xs font-bold text-art-text/40 uppercase tracking-widest">Manajemen reservasi dan rincian pembayaran</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] font-black uppercase px-4 py-2 bg-art-bg border-2 border-art-text text-art-text rounded-xl">{bookings.length} Total Pesanan</span>
-          <button 
-            onClick={async () => {
-              customConfirm("⚠️ PERINGATAN: Hapus SELURUH database booking? Tindakan ini tidak bisa dibatalkan.", async () => {
-                try {
-                  const bookingsToDelete = bookings.map((b: any) => b.id);
-                  for (const id of bookingsToDelete) {
-                    await deleteDoc(doc(db, 'bookings', id));
-                  }
-                  showToast("Database berhasil direset!", "success");
-                } catch (e) {
-                  showToast("Gagal reset database", "error");
-                }
-              });
-            }}
-            className="px-6 py-2.5 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-[4px_4px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none"
-          >
-            Reset Database
-          </button>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {bookings.length === 0 ? (
-          <div className="py-20 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
-            <Info className="mx-auto mb-2 text-art-text/20" size={32} />
-            <p className="font-bold text-art-text/40 uppercase text-xs">Belum ada booking masuk</p>
+      {/* NOTIFICATIONS FOR OPEN TRIP REQUESTS */}
+      {pendingOpenRequests.length > 0 && (
+        <div className="mb-6 space-y-4">
+          <div className="flex items-center gap-2 mb-3">
+             <AlertCircle size={20} className="text-art-orange" />
+             <h3 className="text-xl font-black uppercase text-art-text tracking-tighter">Request Open Trip Masuk ({pendingOpenRequests.length})</h3>
           </div>
-        ) : (
-          bookings.map((booking: any) => (
+          {pendingOpenRequests.map((req: any) => (
+             <div key={req.id} className="bg-art-orange/10 border-2 border-art-orange p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-black uppercase text-lg text-art-text">{req.nama} <span className="text-xs font-bold text-art-text/40 bg-white px-2 py-1 rounded-md ml-2">{req.peserta} Pax</span></h4>
+                  <p className="text-xs font-bold text-art-text/60">{req.wa}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                     <span className="text-[10px] font-black uppercase bg-white px-2 py-1 rounded border border-art-text/10 flex items-center gap-1"><MapPin size={10} className="text-art-orange" /> {req.destinasi}</span>
+                     <span className="text-[10px] font-black uppercase bg-white px-2 py-1 rounded border border-art-text/10 flex items-center gap-1"><Calendar size={10} className="text-art-orange" /> {req.jadwal} ({req.durasi})</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                   <button 
+                     onClick={async () => {
+                        try {
+                           await updateDoc(doc(db, 'bookings', req.id), { status: 'processing' });
+                           showToast("Masuk ke proses!");
+                           window.open(`https://wa.me/${req.wa.startsWith('0') ? '62' + req.wa.substring(1) : req.wa}?text=${encodeURIComponent(`Halo ${req.nama}, permintaan Open Trip Anda untuk destinasi ${req.destinasi} tanggal ${req.jadwal} telah diterima dan sedang diurus oleh tim Ngopi di Ketinggian.`)}`, '_blank');
+                        } catch (e) {
+                           showToast("Gagal update", "error");
+                        }
+                     }}
+                     className="px-4 py-2 bg-white text-art-text border border-art-text/20 rounded-xl text-[10px] font-black uppercase hover:bg-gray-50 flex items-center gap-1"
+                   ><Clock size={12}/> Proses Saja</button>
+                   <button 
+                     onClick={() => {
+                        onNavigateToOpenTrip && onNavigateToOpenTrip(req);
+                     }}
+                     className="px-4 py-2 bg-art-orange text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-1"
+                   ><Plus size={12}/> Buat Open Trip</button>
+                </div>
+             </div>
+          ))}
+        </div>
+      )}
+
+      {/* DASHBOARD TOGGLE */}
+      {!showDashboard ? (
+        <div className="bg-art-bg/30 border-2 border-art-text/20 rounded-3xl p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
+           <Clipboard size={48} className="text-art-text/20 mb-4" />
+           <h3 className="text-2xl font-black uppercase tracking-tight text-art-text mb-2">Manajemen Booking</h3>
+           <p className="text-xs font-bold text-art-text/50 uppercase tracking-widest max-w-sm mb-6">Akses daftar seluruh pesanan, konfirmasi pembayaran, dan kelola invoice pelanggan.</p>
+           <button 
+             onClick={() => setShowDashboard(true)}
+             className="px-6 py-4 bg-art-text text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-[6px_6px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+           >
+              Buka Booking Dashboard <ChevronDown size={14} />
+           </button>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 bg-white p-6 rounded-3xl border-2 border-art-text shadow-sm">
+            <div>
+              <h2 className="text-3xl font-black text-art-text uppercase tracking-tighter">Booking Dashboard</h2>
+              <p className="text-xs font-bold text-art-text/40 uppercase tracking-widest">Manajemen reservasi dan rincian pembayaran</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-black uppercase px-4 py-2 bg-art-bg border-2 border-art-text text-art-text rounded-xl">{bookings.length} Total Pesanan</span>
+              <button 
+                onClick={async () => {
+                  customConfirm("⚠️ PERINGATAN: Hapus SELURUH database booking? Tindakan ini tidak bisa dibatalkan.", async () => {
+                    try {
+                      const bookingsToDelete = bookings.map((b: any) => b.id);
+                      for (const id of bookingsToDelete) {
+                        await deleteDoc(doc(db, 'bookings', id));
+                      }
+                      showToast("Database berhasil direset!", "success");
+                    } catch (e) {
+                      showToast("Gagal reset database", "error");
+                    }
+                  });
+                }}
+                className="px-6 py-2.5 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-[4px_4px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none"
+              >
+                Reset Database
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {bookings.length === 0 ? (
+              <div className="py-20 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
+                <Info className="mx-auto mb-2 text-art-text/20" size={32} />
+                <p className="font-bold text-art-text/40 uppercase text-xs">Belum ada booking masuk</p>
+              </div>
+            ) : (
+              bookings.map((booking: any) => (
             <div key={booking.id} className={`bg-white rounded-2xl border-2 transition-all p-5 flex flex-col gap-4 ${booking.status === 'confirmed' ? 'border-art-green' : booking.status === 'cancelled' ? 'border-red-400' : booking.requestCancel ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-art-text'}`}>
               {booking.requestCancel && (
                 <div className="bg-red-500 text-white text-[10px] font-black uppercase py-2 px-4 -mt-5 -mx-5 rounded-t-xl mb-2 flex items-center justify-between">
@@ -720,6 +804,8 @@ const BookingsAdmin = ({ showToast, config, updateConfig }: any) => {
           ))
         )}
       </div>
+     </>
+    )}
     </div>
   );
 };
@@ -1664,7 +1750,7 @@ const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value:
 };
 
 
-const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
+const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPrefill }: any) => {
   const [data, setData] = useState<OpenTrip[]>(config.openTrips || []);
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -1684,10 +1770,43 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast }: any) => {
   }, [user]);
 
   useEffect(() => {
-    if (config.openTrips) {
+    if (config.openTrips && !prefillData) {
       setData(config.openTrips);
     }
   }, [config.openTrips]);
+
+  useEffect(() => {
+    if (prefillData) {
+      const matchSchedule = prefillData.jadwal || "";
+      let parsedDate = "";
+      // Request usually passes just month like "Juli 2026", "23-25 Agustus" -> we just leave status as draft and pre-fill text
+      
+      const nd = [{ 
+        id: Date.now().toString(), 
+        name: prefillData.destinasi || "", 
+        region: "", 
+        jadwal: matchSchedule, 
+        kuota: "", 
+        kuotaNum: 15,
+        mepo: "", 
+        difficulty: "", 
+        image: "", 
+        beans: "", 
+        path: "", 
+        duration: "2H 1M", 
+        price: 0, 
+        originalPrice: 0, 
+        leaders: [], 
+        startDate: "",
+        status: 'draft' 
+      }, ...data];
+      
+      setData(nd);
+      setExpandedIndexes([0]);
+      clearPrefill();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillData]);
 
   const getConsumedQuota = (name: string, jadwal: string) => {
     return bookings

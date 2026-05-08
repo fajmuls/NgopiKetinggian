@@ -13,16 +13,32 @@ import { DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, useAppConfig } from './us
 import { AdminPanelModal } from './AdminPanel';
 import { jsPDF } from 'jspdf';
 
-export const generateRundownPdf = (durInfo: any, destinasi: string, jalur: string, durasi: string) => {
+export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur: string, durasi: string) => {
   const doc = new jsPDF();
   const primaryColor = [26, 26, 26] as [number, number, number];
   
-  // Watermark
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(60);
-  doc.setTextColor(240, 240, 240);
-  doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
-  doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+  // Try adding Logo Watermark
+  await new Promise<void>((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      doc.setGState(new (doc.GState as any)({ opacity: 0.05 }));
+      const aspectRatio = img.width / img.height;
+      doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
+      doc.setGState(new (doc.GState as any)({ opacity: 1 }));
+      resolve();
+    };
+    img.onerror = () => {
+      // Fallback text
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(60);
+      doc.setTextColor(240, 240, 240);
+      doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
+      doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+      resolve();
+    };
+    img.src = 'https://files.catbox.moe/lubzno.png';
+  });
 
   // Header
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -695,10 +711,12 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                   </div>
                 </div>
 
+                {currentType !== 'open_request' && (
                 <div className="relative">
                    <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Email</label>
                    <input name="email" required type="email" value={formState.email} onChange={e => setFormState({...formState, email: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="ALAMAT@MAIL.COM" />
                 </div>
+                )}
 
                 <div className="space-y-4">
                    <div className="relative">
@@ -720,12 +738,13 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       </select>
                    </div>
 
+                   {currentType !== 'open_request' && (
                    <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jalur</label>
                         <select 
                           name="jalur" 
-                          required 
+                          required={currentType !== 'open_request'}
                           value={selectedJalur}
                           onChange={e => { setSelectedJalur(e.target.value); setSelectedDurasi(''); }}
                           className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
@@ -741,7 +760,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Durasi</label>
                         <select 
                           name="durasi" 
-                          required 
+                          required={currentType !== 'open_request'}
                           value={selectedDurasi}
                           onChange={e => setSelectedDurasi(e.target.value)}
                           className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
@@ -754,6 +773,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                         </select>
                       </div>
                    </div>
+                   )}
 
                    <div className="grid grid-cols-2 gap-4">
                       {currentType === 'open_request' ? (
@@ -870,94 +890,98 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       );
                     })()}
 
-                   <div className="relative">
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
-                      <div className="relative">
-                         <button 
-                           type="button" 
-                           onClick={() => {
-                             const el = document.getElementById('addon-dropdown');
-                             if (el) el.classList.toggle('hidden');
-                           }}
-                           className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black text-left text-[10px] flex justify-between items-center shadow-sm"
-                         >
-                           <span className="truncate">{selectedOpsional.length === 0 && Object.keys(subSelected).length === 0 ? 'PILIH LAYANAN TAMBAHAN...' : `${selectedOpsional.length + Object.keys(subSelected).length} LAYANAN DIPILIH`}</span>
-                           <ChevronDown size={14} className="text-art-text/40" />
-                         </button>
-                         <div id="addon-dropdown" className="hidden absolute z-30 left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-2xl p-4 max-h-64 overflow-y-auto">
-                            <div className="grid grid-cols-1 gap-2">
-                              {config?.facilities?.opsi
-                                 ?.slice()
-                                 .sort((a: any, b: any) => (a.subItems?.length || 0) - (b.subItems?.length || 0))
-                                 .map((opt: any, i: number) => {
-                                 const isSelected = selectedOpsional.includes(opt.name);
-                                 return (
-                                    <div key={i} className="space-y-2 border-b border-art-text/5 last:border-0 pb-2">
-                                       <label className="flex items-center gap-3 p-1 hover:bg-art-bg rounded-xl cursor-pointer transition-colors group">
-                                          <input 
-                                            type="checkbox" 
-                                            checked={isSelected}
-                                            onChange={() => handleToggleOption(opt.name)}
-                                            className="w-4 h-4 accent-art-orange"
-                                          />
-                                          <div className="flex flex-col">
-                                             <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name === "Upgrade then private" ? "Upgrade Tenda Privat" : opt.name}</span>
-                                             {opt.price || opt.name === "Upgrade then private" ? (
-                                               <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {( (opt.name === "Upgrade then private" ? 100 : opt.price) * 1000).toLocaleString('id-ID')} / Hari</span>
-                                             ) : opt.priceInfo && (
-                                               <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>
-                                             )}
-                                          </div>
-                                       </label>
-                                       
-                                       {isSelected && opt.subItems && (
-                                          <div className="ml-8 space-y-2 pt-1 border-l-2 border-art-orange/20 pl-4">
-                                             {opt.subItems.map((sub: any, sIdx: number) => {
-                                                const qty = subSelected[`${opt.name}|${sub.name}`] || 0;
-                                                return (
-                                                   <div key={sIdx} className="flex items-center justify-between gap-4">
-                                                      <div className="flex flex-col">
-                                                         <span className="text-[9px] font-bold text-art-text/60 uppercase">{sub.name}</span>
-                                                         {sub.price ? (
-                                                            <span className="text-[8px] font-black text-art-orange/70 italic uppercase tracking-tighter">Rp {(sub.price * 1000).toLocaleString('id-ID')} / Hari</span>
-                                                          ) : sub.priceInfo && (
-                                                            <span className="text-[8px] font-medium text-art-text/30 italic">{sub.priceInfo}</span>
-                                                          )}
-                                                      </div>
-                                                      <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
-                                                         <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, -1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
-                                                         <span className="w-5 text-center font-black text-[10px] text-art-text">{qty}</span>
-                                                         <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, 1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
-                                                      </div>
-                                                   </div>
-                                                );
-                                             })}
-                                          </div>
-                                       )}
-                                    </div>
-                                 );
-                              })}
-                            </div>
-                         </div>
-                      </div>
-                   </div>
+                   {currentType !== 'open_request' && (
+                     <>
+                       <div className="relative">
+                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
+                          <div className="relative">
+                             <button 
+                               type="button" 
+                               onClick={() => {
+                                 const el = document.getElementById('addon-dropdown');
+                                 if (el) el.classList.toggle('hidden');
+                               }}
+                               className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black text-left text-[10px] flex justify-between items-center shadow-sm"
+                             >
+                               <span className="truncate">{selectedOpsional.length === 0 && Object.keys(subSelected).length === 0 ? 'PILIH LAYANAN TAMBAHAN...' : `${selectedOpsional.length + Object.keys(subSelected).length} LAYANAN DIPILIH`}</span>
+                               <ChevronDown size={14} className="text-art-text/40" />
+                             </button>
+                             <div id="addon-dropdown" className="hidden absolute z-30 left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-2xl p-4 max-h-64 overflow-y-auto">
+                                <div className="grid grid-cols-1 gap-2">
+                                  {config?.facilities?.opsi
+                                     ?.slice()
+                                     .sort((a: any, b: any) => (a.subItems?.length || 0) - (b.subItems?.length || 0))
+                                     .map((opt: any, i: number) => {
+                                     const isSelected = selectedOpsional.includes(opt.name);
+                                     return (
+                                        <div key={i} className="space-y-2 border-b border-art-text/5 last:border-0 pb-2">
+                                           <label className="flex items-center gap-3 p-1 hover:bg-art-bg rounded-xl cursor-pointer transition-colors group">
+                                              <input 
+                                                type="checkbox" 
+                                                checked={isSelected}
+                                                onChange={() => handleToggleOption(opt.name)}
+                                                className="w-4 h-4 accent-art-orange"
+                                              />
+                                              <div className="flex flex-col">
+                                                 <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name === "Upgrade then private" ? "Upgrade Tenda Privat" : opt.name}</span>
+                                                 {opt.price || opt.name === "Upgrade then private" ? (
+                                                   <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {( (opt.name === "Upgrade then private" ? 100 : opt.price) * 1000).toLocaleString('id-ID')} / Hari</span>
+                                                 ) : opt.priceInfo && (
+                                                   <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>
+                                                 )}
+                                              </div>
+                                           </label>
+                                           
+                                           {isSelected && opt.subItems && (
+                                              <div className="ml-8 space-y-2 pt-1 border-l-2 border-art-orange/20 pl-4">
+                                                 {opt.subItems.map((sub: any, sIdx: number) => {
+                                                    const qty = subSelected[`${opt.name}|${sub.name}`] || 0;
+                                                    return (
+                                                       <div key={sIdx} className="flex items-center justify-between gap-4">
+                                                          <div className="flex flex-col">
+                                                             <span className="text-[9px] font-bold text-art-text/60 uppercase">{sub.name}</span>
+                                                             {sub.price ? (
+                                                                <span className="text-[8px] font-black text-art-orange/70 italic uppercase tracking-tighter">Rp {(sub.price * 1000).toLocaleString('id-ID')} / Hari</span>
+                                                              ) : sub.priceInfo && (
+                                                                <span className="text-[8px] font-medium text-art-text/30 italic">{sub.priceInfo}</span>
+                                                              )}
+                                                          </div>
+                                                          <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
+                                                             <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, -1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
+                                                             <span className="w-5 text-center font-black text-[10px] text-art-text">{qty}</span>
+                                                             <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, 1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
+                                                          </div>
+                                                       </div>
+                                                    );
+                                                 })}
+                                              </div>
+                                           )}
+                                        </div>
+                                     );
+                                  })}
+                                </div>
+                             </div>
+                          </div>
+                       </div>
 
-                   <div className="relative">
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Catatan Khusus / Kesehatan</label>
-                      <textarea name="deskripsi" value={formState.deskripsi} onChange={e => setFormState({...formState, deskripsi: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-bold outline-none focus:border-art-orange text-xs h-20 resize-none placeholder:text-art-text/20 shadow-sm" placeholder="Tuliskan jika ada request khusus..."></textarea>
-                   </div>
+                       <div className="relative">
+                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Catatan Khusus / Kesehatan</label>
+                          <textarea name="deskripsi" value={formState.deskripsi} onChange={e => setFormState({...formState, deskripsi: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-bold outline-none focus:border-art-orange text-xs h-20 resize-none placeholder:text-art-text/20 shadow-sm" placeholder="Tuliskan jika ada request khusus..."></textarea>
+                       </div>
 
-                   <div className="relative">
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Kode Promo</label>
-                      <input 
-                        name="promo" 
-                        type="text" 
-                        value={promoCode} 
-                        onChange={e => setPromoCode(e.target.value)} 
-                        className="w-full border-2 border-dashed border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-[10px] uppercase tracking-widest shadow-sm" 
-                        placeholder="MASUKKAN KODE DISINI"
-                      />
-                   </div>
+                       <div className="relative">
+                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Kode Promo</label>
+                          <input 
+                            name="promo" 
+                            type="text" 
+                            value={promoCode} 
+                            onChange={e => setPromoCode(e.target.value)} 
+                            className="w-full border-2 border-dashed border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-[10px] uppercase tracking-widest shadow-sm" 
+                            placeholder="MASUKKAN KODE DISINI"
+                          />
+                       </div>
+                     </>
+                   )}
                 </div>
              </div>
 
@@ -966,15 +990,15 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
                    <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Map size={14} className="text-art-text/40"/> Trip Utama</h5>
                    <div className="text-right">
-                     <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
-                     <span className="text-[12px] font-black text-art-text">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
+                     <p className="text-[8px] font-bold text-art-text/40 uppercase">{currentType === 'open_request' ? 'Status' : 'Subtotal Trip'}</p>
+                     <span className="text-[12px] font-black text-art-text">{currentType === 'open_request' ? 'ESTIMASI ADMIN' : `Rp ${(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}`}</span>
                    </div>
                  </div>
                  <div className="space-y-2 text-[10px] font-bold text-art-text/60">
                    <div className="flex justify-between"><span>Destinasi:</span><span className="text-art-text font-black uppercase">{selectedDestinasi || '-'}</span></div>
-                   <div className="flex justify-between"><span>Jalur & Durasi:</span><span className="text-art-text font-black uppercase">{selectedJalur || '-'} • {selectedDurasi || '-'}</span></div>
+                   {currentType !== 'open_request' && <div className="flex justify-between"><span>Jalur & Durasi:</span><span className="text-art-text font-black uppercase">{selectedJalur || '-'} • {selectedDurasi || '-'}</span></div>}
                    <div className="flex justify-between"><span>Jadwal:</span><span className="text-art-text font-black uppercase">{selectedJadwal ? (currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal.replace(/\|/g, ' ')) : '-'}</span></div>
-                   <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax x RP {basePricePerPax.toLocaleString('id-ID')}</span></div>
+                   <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax {currentType !== 'open_request' && `x RP ${basePricePerPax.toLocaleString('id-ID')}`}</span></div>
                  </div>
                </div>
 
@@ -1013,6 +1037,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                  </div>
                )}
                
+               {currentType !== 'open_request' && (
                <div className="bg-art-text p-6 rounded-2xl border-2 border-art-text text-white shadow-[6px_6px_0px_0px_rgba(255,107,0,0.3)]">
                   <div className="flex justify-between items-end">
                      <div>
@@ -1021,6 +1046,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                      </div>
                   </div>
                </div>
+               )}
              </div>
 
              <Button type="submit" variant="primary" className="w-full py-5 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-3">
