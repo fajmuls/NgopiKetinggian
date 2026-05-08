@@ -1241,11 +1241,15 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
             
             <div className="flex flex-col gap-6">
               {/* Leader Image Preview at Top */}
-              <div className="w-full h-48 sm:h-64 rounded-xl border-2 border-dashed border-art-text/10 overflow-hidden bg-art-bg flex items-center justify-center p-2">
-                <ImageUploader 
-                  value={leader.avatar} 
-                  onChange={url => setData(prev => prev.map((item, idx) => idx === i ? { ...item, avatar: url } : item))} 
-                />
+              <div className="w-full h-48 sm:h-64 rounded-xl border-2 border-dashed border-art-text/10 overflow-hidden bg-art-bg flex items-center justify-center p-2 relative">
+                {leader.avatar ? (
+                  <img src={leader.avatar} className="w-full h-full object-cover rounded-lg" alt="Preview" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                ) : (
+                  <div className="text-art-text/30 flex flex-col items-center">
+                    <User size={32} />
+                    <span className="text-[10px] font-bold uppercase mt-2">Belum Ada Foto</span>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

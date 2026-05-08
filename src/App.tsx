@@ -13,7 +13,50 @@ import { DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, useAppConfig } from './us
 import { AdminPanelModal } from './AdminPanel';
 import { jsPDF } from 'jspdf';
 
-function Button({ children, className = '', variant = 'primary', onClick, ...props }: any) {
+export const generateRundownPdf = (durInfo: any, destinasi: string, jalur: string, durasi: string) => {
+  const doc = new jsPDF();
+  const primaryColor = [26, 26, 26] as [number, number, number];
+  
+  // Watermark
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(60);
+  doc.setTextColor(240, 240, 240);
+  doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
+  doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+
+  // Header
+  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.rect(0, 0, 210, 40, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(24);
+  doc.text('ITINERARY / RUNDOWN', 20, 20);
+  doc.setFontSize(12);
+  doc.text(`${destinasi.toUpperCase()} VIA ${jalur.toUpperCase()}`, 20, 30);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Durasi: ${durasi}`, 150, 30);
+
+  // Content
+  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text('Rincian Kegiatan Perjalanan', 20, 55);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  const textLines = doc.splitTextToSize(durInfo.rundownHtml || 'Rundown tidak tersedia.', 170);
+  doc.text(textLines, 20, 65);
+
+  // Footer
+  doc.setFontSize(8);
+  doc.setTextColor(150, 150, 150);
+  doc.text('Dokumen ini dihasilkan secara otomatis oleh sistem Ngopi Di Ketinggian.', 105, 285, { align: 'center' });
+
+  doc.save(`Rundown_${destinasi.replace(/\s/g, '_')}_${durasi.replace(/\s/g, '_')}.pdf`);
+};
+
+export function Button({ children, className = '', variant = 'primary', onClick, ...props }: any) {
   const { playClick, playHover } = useSound();
   
   const baseStyle = "px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center justify-center gap-2 transform active:scale-95";
@@ -293,9 +336,14 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
     playClick();
   };
 
-    const handleBookingFinal = async () => {
-      const { nama, email, wa, deskripsi } = formState;
-      const finalJadwalLabel = currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal;
+  const handleBookingFinal = async () => {
+    const { nama, email, wa, deskripsi } = formState;
+    let finalJadwalLabel = selectedJadwal;
+    if (currentType === 'private') {
+      finalJadwalLabel = calculateEndDate(selectedJadwal, selectedDurasi);
+    } else if (currentType === 'open_request') {
+      finalJadwalLabel = selectedJadwal.replace(/\|/g, ' ');
+    }
   
       const subItemsFormatted = Object.entries(subSelected).map(([key, qty]) => {
         const [parent, item] = key.split('|');
@@ -708,19 +756,78 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    </div>
 
                    <div className="grid grid-cols-2 gap-4">
-                      <div className="relative">
-                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Rencana Tanggal</label>
-                         <input 
-                           name="jadwal" 
-                           required 
-                           type={currentType === 'open' ? 'text' : 'date'} 
-                           value={selectedJadwal}
-                           onChange={e => setSelectedJadwal(e.target.value)}
-                           readOnly={currentType === 'open'}
-                           placeholder={currentType === 'open_request' ? "Pilih tanggal mulai" : ""}
-                           className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
-                         />
-                      </div>
+                      {currentType === 'open_request' ? (
+                        <div className="col-span-2">
+                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jadwal Weekend (Bulan & Tanggal)</label>
+                           <div className="flex gap-2">
+                             <select 
+                               className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange"
+                               value={selectedJadwal.split('|')[0] || ''}
+                               onChange={e => setSelectedJadwal(`${e.target.value}|`)}
+                             >
+                                <option value="">-- Bulan --</option>
+                                {Array.from({ length: 6 }).map((_, i) => {
+                                  const d = new Date();
+                                  d.setMonth(d.getMonth() + i);
+                                  const monthStr = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                                  const monthVal = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}`;
+                                  return <option key={monthVal} value={monthVal}>{monthStr}</option>;
+                                })}
+                             </select>
+                             <select 
+                               className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-100"
+                               value={selectedJadwal.split('|')[1] || ''}
+                               onChange={e => setSelectedJadwal(`${selectedJadwal.split('|')[0]}|${e.target.value}`)}
+                               disabled={!selectedJadwal.split('|')[0] || !selectedDurasi}
+                             >
+                                <option value="">-- Tanggal --</option>
+                                {(() => {
+                                   const [monthVal] = selectedJadwal.split('|');
+                                   if (!monthVal || !selectedDurasi) return null;
+                                   const [year, month] = monthVal.split('-').map(Number);
+                                   const daysInMonth = new Date(year, month, 0).getDate();
+                                   
+                                   const weekends = [];
+                                   for (let i = 1; i <= daysInMonth; i++) {
+                                      const date = new Date(year, month - 1, i);
+                                      // If 3D2N, weekend might be Friday (5) to Sunday (0)
+                                      // If 2D1N, weekend might be Saturday (6) to Sunday (0)
+                                      const is3D2N = selectedDurasi.toLowerCase().includes('3 hari');
+                                      if (is3D2N && date.getDay() === 5) {
+                                         const endDate = new Date(date);
+                                         endDate.setDate(date.getDate() + 2);
+                                         if (endDate.getMonth() === date.getMonth() || endDate.getDate() < 5) {
+                                            weekends.push(`${i}-${endDate.getDate()} ${date.toLocaleString('id-ID', {month:'short'})}`);
+                                         }
+                                      } else if (!is3D2N && date.getDay() === 6) {
+                                         const endDate = new Date(date);
+                                         endDate.setDate(date.getDate() + 1);
+                                         if (endDate.getMonth() === date.getMonth() || endDate.getDate() < 5) {
+                                            weekends.push(`${i}-${endDate.getDate()} ${date.toLocaleString('id-ID', {month:'short'})}`);
+                                         }
+                                      }
+                                   }
+                                   return weekends.map((w, idx) => (
+                                      <option key={idx} value={w}>{w}</option>
+                                   ));
+                                })()}
+                             </select>
+                           </div>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Rencana Tanggal</label>
+                           <input 
+                             name="jadwal" 
+                             required 
+                             type={currentType === 'open' ? 'text' : 'date'} 
+                             value={selectedJadwal}
+                             onChange={e => setSelectedJadwal(e.target.value)}
+                             readOnly={currentType === 'open'}
+                             className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
+                           />
+                        </div>
+                      )}
                        <div className="relative">
                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Jumlah Peserta</label>
                           <div className="flex items-center gap-2 bg-white border-2 border-art-text rounded-xl px-2 h-[42px] shadow-sm">
@@ -750,11 +857,15 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                                  {durInfo.rundownHtml}
                                </div>
                             )}
-                            {durInfo.rundownPdf && (
+                            {durInfo.rundownPdf ? (
                                <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
                                  PDF Rundown Lengkap <Download size={10} />
                                </a>
-                            )}
+                            ) : durInfo.rundownHtml ? (
+                               <button type="button" onClick={() => generateRundownPdf(durInfo, selectedDestinasi, selectedJalur, selectedDurasi)} className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                                 Lihat PDF Rundown <Download size={10} />
+                               </button>
+                            ) : null}
                          </div>
                       );
                     })()}
@@ -862,7 +973,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                  <div className="space-y-2 text-[10px] font-bold text-art-text/60">
                    <div className="flex justify-between"><span>Destinasi:</span><span className="text-art-text font-black uppercase">{selectedDestinasi || '-'}</span></div>
                    <div className="flex justify-between"><span>Jalur & Durasi:</span><span className="text-art-text font-black uppercase">{selectedJalur || '-'} • {selectedDurasi || '-'}</span></div>
-                   <div className="flex justify-between"><span>Jadwal:</span><span className="text-art-text font-black uppercase">{selectedJadwal ? (currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal) : '-'}</span></div>
+                   <div className="flex justify-between"><span>Jadwal:</span><span className="text-art-text font-black uppercase">{selectedJadwal ? (currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal.replace(/\|/g, ' ')) : '-'}</span></div>
                    <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax x RP {basePricePerPax.toLocaleString('id-ID')}</span></div>
                  </div>
                </div>
@@ -1152,11 +1263,15 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                              {durInfo.rundownHtml}
                            </div>
                         )}
-                        {durInfo.rundownPdf && (
+                        {durInfo.rundownPdf ? (
                            <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
                              PDF Rundown Lengkap <Download size={8} />
                            </a>
-                        )}
+                        ) : durInfo.rundownHtml ? (
+                           <button type="button" onClick={(e) => { e.stopPropagation(); generateRundownPdf(durInfo, ot.name, ot.path, ot.duration); }} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                             Lihat PDF Rundown <Download size={8} />
+                           </button>
+                        ) : null}
                      </div>
                   )}
               </motion.div>
