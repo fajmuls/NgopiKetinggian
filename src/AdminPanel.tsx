@@ -1020,8 +1020,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 sm:items-start mb-2">
-              <div className="flex flex-col flex-1 min-w-[120px]">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-2">
+              <div className="flex flex-col">
                 <span className="text-[9px] font-bold uppercase mb-1">Region:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.region || 'Jawa'} onChange={e => {
                   const nd = [...data];
@@ -1030,7 +1030,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Cth: Jawa Tengah" />
               </div>
               
-              <div className="flex flex-col flex-1 min-w-[120px]">
+              <div className="flex flex-col">
                 <span className="text-[9px] font-bold uppercase mb-1">Kuota:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.kuota} onChange={e => {
                   const nd = [...data];
@@ -1039,7 +1039,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Cth: 2-12 Pax" />
               </div>
 
-              <div className="flex flex-col flex-1 min-w-[120px]">
+              <div className="flex flex-col">
                 <span className="text-[9px] font-bold uppercase mb-1">Mepo:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.mepo || ''} onChange={e => {
                   const nd = [...data];
@@ -1048,9 +1048,9 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Basecamp" />
               </div>
 
-              <div className="flex flex-col flex-1 min-w-[120px]">
+              <div className="flex flex-col">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-[9px] font-bold uppercase">Google Maps Link:</span>
+                  <span className="text-[9px] font-bold uppercase">G-Maps Link:</span>
                   <button 
                     onClick={async () => {
                       try {
@@ -1074,7 +1074,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                     const nd = [...data];
                     nd[i].mepoLink = e.target.value;
                     setData(nd);
-                  }} placeholder="https://maps.app.goo.gl/..." />
+                  }} placeholder="Maps Link" />
                   <button 
                     onClick={() => {
                       const query = `Basecamp ${dest.name} ${dest.region || ''} ${dest.mepo || ''}`;
@@ -1088,7 +1088,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 </div>
               </div>
               
-              <div className="flex flex-col flex-1 min-w-[120px]">
+              <div className="flex flex-col">
                 <span className="text-[9px] font-bold uppercase mb-1">Beans:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.beans || ''} onChange={e => {
                   const nd = [...data];
@@ -1097,7 +1097,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Kopi" />
               </div>
               
-              <div className="flex flex-col flex-1 min-w-[120px]">
+              <div className="flex flex-col">
                 <span className="text-[9px] font-bold uppercase mb-1">Level:</span>
                 <select className="border p-2 rounded text-[11px] w-full" value={dest.difficulty || ''} onChange={e => {
                   const nd = [...data];
@@ -1212,6 +1212,13 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                       <div className="bg-white border-2 border-art-text p-3 rounded-lg mt-2 mb-4 space-y-3 relative before:content-[''] before:absolute before:-top-2 before:left-6 before:w-3 before:h-3 before:bg-white before:border-l-2 before:border-t-2 before:border-art-text before:rotate-45">
                          <div className="flex justify-between items-center bg-art-bg p-2 rounded-t-lg -mx-3 -mt-3 mb-3 border-b-2 border-art-text">
                             <span className="text-[10px] font-black uppercase tracking-widest text-art-text/60">Pengaturan Rundown / Itinerary</span>
+                            <button 
+                              type="button" 
+                              onClick={() => generateRundownPdf(dur, dest.name, path.name, dur.label)}
+                              className="bg-art-text text-white px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors flex items-center gap-1"
+                            >
+                              <FileText size={10} /> Preview PDF
+                            </button>
                          </div>
                          <div className="space-y-1">
                             <label className="text-[9px] font-bold text-art-text/40 uppercase">Rundown PDF (URL Link)</label>
@@ -1518,7 +1525,15 @@ const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           <button onClick={() => {
-            setData([...data, { src: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=2070", desc: "Foto Baru" }]);
+            const bulkText = prompt("Masukkan URL foto (pisahkan dengan koma atau baris baru):");
+            if (bulkText) {
+              const urls = bulkText.split(/[\n,]/).map(u => u.trim()).filter(u => u);
+              const newPhotos = urls.map(u => ({ src: u, desc: "Gallery Photo" }));
+              setData([...data, ...newPhotos]);
+            }
+          }} className="bg-blue-100 text-blue-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Bulk Add</button>
+          <button onClick={() => {
+            setData([...data, { src: "", desc: "" }]);
           }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Foto</button>
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
         </div>
@@ -1612,9 +1627,9 @@ const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-art-text/10">
           <div className="space-y-1.5">
-            <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (Background)</p>
-            <InputWithPaste className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={(e: any) => setUrl(e.target.value)} placeholder="https://..." />
-            <p className="text-[9px] text-art-text/30 italic">Gunakan link embed YouTube atau file MP4.</p>
+            <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (YouTube Embed/MP4)</p>
+            <InputWithPaste className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={(e: any) => setUrl(e.target.value)} placeholder="https://www.youtube.com/embed/..." />
+            <p className="text-[9px] text-art-text/30 italic">Penting: Untuk YouTube, gunakan format <b>/embed/VIDEO_ID</b> agar bisa diputar di web.</p>
           </div>
           <div className="space-y-1.5">
              <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">Rasio Video</p>
@@ -2169,7 +2184,8 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Durasi</label>
                   <select 
-                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none transition-all" 
+                    disabled={ot.isWeekend}
+                    className={`w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none transition-all ${ot.isWeekend ? 'bg-gray-100 opacity-80 cursor-not-allowed' : ''}`} 
                     value={ot.duration ?? ""} 
                     onChange={e => { 
                       const dur = e.target.value;
@@ -2213,16 +2229,24 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                   <label className="text-[9px] font-black uppercase text-art-text/40">Keberangkatan</label>
                   <input 
                     type="date"
-                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                    className={`w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono ${ot.isWeekend ? 'border-blue-200' : ''}`} 
                     value={ot.startDate || ""} 
                     onChange={e => { 
                       const date = e.target.value;
+                      if (ot.isWeekend) {
+                        const d = new Date(date);
+                        if (d.getDay() !== 6) {
+                          showToast("Trip Weekend harus mulai di hari Sabtu!", "error");
+                          return;
+                        }
+                      }
                       const nd = [...data]; 
                       nd[i].startDate = date; 
                       nd[i].jadwal = calculateDateRange(date, ot.duration);
                       setData(nd); 
                     }} 
                   />
+                  {ot.isWeekend && <p className="text-[7px] font-black text-blue-500 uppercase mt-0.5 ml-1">Pilih Hari Sabtu</p>}
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Jadwal (Automatis)</label>

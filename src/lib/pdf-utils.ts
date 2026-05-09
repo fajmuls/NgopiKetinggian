@@ -9,7 +9,7 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
-      doc.setGState(new (doc.GState as any)({ opacity: 0.02 }));
+      doc.setGState(new (doc.GState as any)({ opacity: 0.1 }));
       const aspectRatio = img.width / img.height;
       doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
       doc.setGState(new (doc.GState as any)({ opacity: 1 }));
@@ -48,7 +48,8 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
   
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  const textLines = doc.splitTextToSize(durInfo.rundownHtml || 'Rundown tidak tersedia.', 170);
+  const rundownText = (durInfo && durInfo.rundownHtml) ? durInfo.rundownHtml : `Rencana Perjalanan ${destinasi} (${durasi}):\n\n1. Persiapan & Briefing\n2. Pendakian / Perjalanan ke Lokasi\n3. Kegiatan Utama\n4. Istirahat & Dokumentasi\n5. Perjalanan Kembali\n\nInformasi lebih lanjut hubungi admin.`;
+  const textLines = doc.splitTextToSize(rundownText, 170);
   doc.text(textLines, 20, 65);
 
   // Footer
@@ -67,12 +68,22 @@ export const generateInvoice = (booking: any) => {
   doc.setFillColor(250, 250, 250);
   doc.rect(0, 0, 210, 297, 'F');
   
-  // Watermark
+  // Watermark Text
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(60);
   doc.setTextColor(235, 235, 235);
   doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
   doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
+
+  // 4. Logo Watermark (Image)
+  const img = new Image();
+  img.crossOrigin = "Anonymous";
+  img.src = 'https://files.catbox.moe/lubzno.png';
+  img.onload = () => {
+    doc.setGState(new (doc as any).GState({ opacity: 0.05 }));
+    doc.addImage(img, 'PNG', 45, 100, 120, 120);
+    doc.setGState(new (doc as any).GState({ opacity: 1 }));
+  };
 
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.rect(0, 0, 210, 50, 'F');

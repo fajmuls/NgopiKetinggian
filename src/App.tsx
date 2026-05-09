@@ -1282,7 +1282,7 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
 
                  </div>
                   
-                  {durInfo && (durInfo.rundownHtml || durInfo.rundownPdf) && (
+                  {durInfo && (
                      <div className="mt-4 p-3 bg-art-bg/30 rounded-xl border border-art-text/10">
                         <h5 className="text-[9px] font-black uppercase text-art-text mb-2 flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
                         {durInfo.rundownHtml && (
@@ -1296,11 +1296,11 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                               <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
                                 PDF Rundown Lengkap <Download size={8} />
                               </a>
-                           ) : durInfo.rundownHtml ? (
+                           ) : (
                               <button type="button" onClick={(e) => { e.stopPropagation(); generateRundownPdf(durInfo, ot.name, ot.path, ot.duration); }} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
                                 Lihat PDF Rundown <Download size={8} />
                               </button>
-                           ) : null}
+                           )}
                           </div>
                         )}
                      </div>
@@ -1488,7 +1488,7 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
 
                        {(() => {
                           const durInfo = currentDur;
-                          if (!durInfo || (!durInfo.rundownHtml && !durInfo.rundownPdf)) return null;
+                          // Rundown always visible
                           return (
                             <div className="p-3 bg-white border border-art-text/10 rounded-xl space-y-2">
                               <h5 className="text-[9px] font-black uppercase text-art-text flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
@@ -1498,15 +1498,15 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                                 </div>
                               )}
                               <div className="flex gap-2">
-                                {durInfo.rundownPdf ? (
+                                {durInfo?.rundownPdf ? (
                                   <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors">
                                     Download PDF <Download size={8} className="inline ml-1" />
                                   </a>
-                                ) : durInfo.rundownHtml ? (
+                                ) : (
                                   <button type="button" onClick={() => generateRundownPdf(durInfo, dest.name, currentPath.name, currentDur.label)} className="flex-1 py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors">
-                                    Lihat PDF <Download size={8} className="inline ml-1" />
+                                    Lihat PDF Rundown <Download size={8} className="inline ml-1" />
                                   </button>
-                                ) : null}
+                                )}
                               </div>
                             </div>
                           );
