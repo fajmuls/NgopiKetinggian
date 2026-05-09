@@ -22,7 +22,7 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
-      doc.setGState(new (doc.GState as any)({ opacity: 0.05 }));
+      doc.setGState(new (doc.GState as any)({ opacity: 0.02 }));
       const aspectRatio = img.width / img.height;
       doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
       doc.setGState(new (doc.GState as any)({ opacity: 1 }));
@@ -725,7 +725,13 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                         name="destinasi" 
                         required 
                         value={selectedDestinasi} 
-                        onChange={e => { setSelectedDestinasi(e.target.value); setSelectedJalur(''); setSelectedDurasi(''); setSelectedJadwal(''); }} 
+                        onChange={e => { 
+                          setSelectedDestinasi(e.target.value); 
+                          setSelectedJalur(''); 
+                          if (currentType === 'open_request') setSelectedDurasi('2H 1M');
+                          else setSelectedDurasi(''); 
+                          setSelectedJadwal(''); 
+                        }} 
                         className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-xs disabled:bg-gray-200/50 shadow-sm"
                         disabled={currentType === 'open'}
                       >
@@ -778,7 +784,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    <div className="grid grid-cols-2 gap-4">
                       {currentType === 'open_request' ? (
                         <div className="col-span-2">
-                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jadwal Weekend (Bulan & Tanggal)</label>
+                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Request Jadwal Weekend (Bulan & Tanggal)</label>
                            <div className="flex gap-2">
                              <select 
                                className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange"
@@ -798,33 +804,22 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                                className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-100"
                                value={selectedJadwal.split('|')[1] || ''}
                                onChange={e => setSelectedJadwal(`${selectedJadwal.split('|')[0]}|${e.target.value}`)}
-                               disabled={!selectedJadwal.split('|')[0] || !selectedDurasi}
+                               disabled={!selectedJadwal.split('|')[0]}
                              >
                                 <option value="">-- Tanggal --</option>
                                 {(() => {
                                    const [monthVal] = selectedJadwal.split('|');
-                                   if (!monthVal || !selectedDurasi) return null;
+                                   if (!monthVal) return null;
                                    const [year, month] = monthVal.split('-').map(Number);
                                    const daysInMonth = new Date(year, month, 0).getDate();
                                    
                                    const weekends = [];
                                    for (let i = 1; i <= daysInMonth; i++) {
                                       const date = new Date(year, month - 1, i);
-                                      // If 3D2N, weekend might be Friday (5) to Sunday (0)
-                                      // If 2D1N, weekend might be Saturday (6) to Sunday (0)
-                                      const is3D2N = selectedDurasi.toLowerCase().includes('3 hari');
-                                      if (is3D2N && date.getDay() === 5) {
-                                         const endDate = new Date(date);
-                                         endDate.setDate(date.getDate() + 2);
-                                         if (endDate.getMonth() === date.getMonth() || endDate.getDate() < 5) {
-                                            weekends.push(`${i}-${endDate.getDate()} ${date.toLocaleString('id-ID', {month:'short'})}`);
-                                         }
-                                      } else if (!is3D2N && date.getDay() === 6) {
+                                      if (date.getDay() === 6) {
                                          const endDate = new Date(date);
                                          endDate.setDate(date.getDate() + 1);
-                                         if (endDate.getMonth() === date.getMonth() || endDate.getDate() < 5) {
-                                            weekends.push(`${i}-${endDate.getDate()} ${date.toLocaleString('id-ID', {month:'short'})}`);
-                                         }
+                                         weekends.push(`${i}-${endDate.getDate()} ${date.toLocaleString('id-ID', {month:'long'})}`);
                                       }
                                    }
                                    return weekends.map((w, idx) => (
@@ -890,10 +885,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       );
                     })()}
 
-                   {true && (
-                     <>
-                       <div className="relative">
-                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
+                    {currentType !== 'open_request' && (
+                      <>
+                        <div className="relative">
+                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
                           <div className="relative">
                              <button 
                                type="button" 
@@ -1279,6 +1274,7 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                          <span className="text-[10px] font-bold uppercase text-art-text/50">{ot.beans || "Premium Beans"}</span>
                       </div>
                     )}
+
                  </div>
                   
                   {durInfo && (durInfo.rundownHtml || durInfo.rundownPdf) && (
@@ -2357,7 +2353,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             <span className="text-sm tracking-[0.3em] font-black uppercase leading-tight text-art-text hidden sm:block">Ngopi<br/>Ketinggian</span>
           </div>
           
-          <div className="flex-1 flex justify-center px-4 md:px-8 max-w-lg mx-auto">
+          <div className="flex-1 flex justify-center px-4 md:px-8 max-w-2xl mx-auto">
             <div className="relative w-full">
               <input 
                 type="text" 
@@ -2394,20 +2390,6 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0 border-l border-art-text/20 pl-4 items-center">
-            <button className="p-2 text-art-text hover:text-art-orange transition-colors" onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: 'Ngopi di Ketinggian',
-                  text: 'Jelajahi keindahan gunung dengan fasilitas terbaik!',
-                  url: window.location.href,
-                });
-              } else {
-                navigator.clipboard.writeText(window.location.href);
-                customAlert("Link website berhasil disalin ke clipboard!");
-              }
-            }} title="Share Website">
-              <ExternalLink size={20} />
-            </button>
             <button className="p-2 text-art-text hover:text-art-orange transition-colors" onClick={(e) => { playClick(); setIsMobileMenuOpen(!isMobileMenuOpen); }} title="Menu">
               {isMobileMenuOpen ? <X size={24} /> : <MoreVertical size={24} />}
             </button>

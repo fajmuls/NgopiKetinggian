@@ -270,7 +270,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
       const img = new Image();
       img.crossOrigin = "Anonymous";
       img.onload = () => {
-        doc.setGState(new (doc.GState as any)({ opacity: 0.05 }));
+        doc.setGState(new (doc.GState as any)({ opacity: 0.01 }));
         const aspectRatio = img.width / img.height;
         doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
         doc.setGState(new (doc.GState as any)({ opacity: 1 }));
@@ -345,7 +345,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
     drawSectionHeader('RINCIAN BIAYA', 140);
     doc.setFont('helvetica', 'bold');
     doc.text('KETERANGAN', 25, 155);
-    doc.text('JUMLAH', 130, 155);
+    doc.text('QTY / PRICE', 120, 155);
     doc.text('SUBTOTAL', 160, 155);
     doc.setDrawColor(230, 230, 230);
     doc.line(20, 158, 190, 158);
@@ -357,19 +357,21 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
     const baseTotal = (booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0);
     const pricePerPax = baseTotal / (Number(booking.peserta) || 1);
     doc.text(`PAKET TRIP ${booking.destinasi.toUpperCase()}`, 25, currentY);
-    doc.text(`${booking.peserta} x Rp ${pricePerPax.toLocaleString('id-ID')}`, 110, currentY);
+    doc.text(`${booking.peserta} Pax @ Rp ${pricePerPax.toLocaleString('id-ID')}`, 110, currentY);
     doc.text(`Rp ${baseTotal.toLocaleString('id-ID')}`, 160, currentY);
-    currentY += 6;
+    currentY += 8;
 
     if (booking.opsionalItems && booking.opsionalItems.length > 0) {
       booking.opsionalItems.forEach((item: any) => {
         doc.setFontSize(7);
         doc.setTextColor(80, 80, 80);
-        const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari @ Rp ${item.price.toLocaleString('id-ID')})`;
-        const splitItem = doc.splitTextToSize(itemLine, 130);
-        doc.text(splitItem, 25, currentY);
-        doc.text(item.price === 0 ? 'Dikonfirmasi Admin' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
-        currentY += (splitItem.length * 5);
+        const itemDesc = `(+) ${item.name}`;
+        const itemQty = `${item.count || 1}x • ${item.days || 1}H @ Rp ${item.price.toLocaleString('id-ID')}`;
+        
+        doc.text(itemDesc, 25, currentY);
+        doc.text(itemQty, 110, currentY);
+        doc.text(item.price === 0 ? '-' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        currentY += 6;
       });
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setFontSize(8);
@@ -457,7 +459,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
 
   if (loading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-art-orange"></div></div>;
 
-  const pendingOpenRequests = bookings.filter((b: any) => b.type === 'open_request' && b.status === 'pending');
+  const pendingBookings = bookings.filter((b: any) => b.status === 'pending');
 
   return (
     <div className="space-y-6">
@@ -469,23 +471,27 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
                 <AlertCircle size={20} className="text-art-orange" />
                 <h3 className="text-xl font-black uppercase text-art-text tracking-tighter">Notifikasi</h3>
              </div>
-             <span className="bg-art-orange text-white text-[10px] font-black px-2 py-1 rounded-lg">{pendingOpenRequests.length} Request Baru</span>
+             <span className="bg-art-orange text-white text-[10px] font-black px-2 py-1 rounded-lg">{pendingBookings.length} Pesanan Baru</span>
           </div>
           
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
-            {pendingOpenRequests.length === 0 ? (
+            {pendingBookings.length === 0 ? (
               <div className="py-10 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
-                 <p className="text-[10px] font-bold text-art-text/30 uppercase">Tidak ada request baru</p>
+                 <p className="text-[10px] font-bold text-art-text/30 uppercase">Tidak ada pesanan baru</p>
               </div>
             ) : (
-              pendingOpenRequests.map((req: any) => (
-                <div key={req.id} className="bg-art-orange/5 border-2 border-art-orange/20 p-4 rounded-2xl space-y-3">
+              pendingBookings.map((req: any) => (
+                <div key={req.id} className={`${req.type === 'open_request' ? 'bg-blue-50 border-blue-200' : 'bg-art-orange/5 border-art-orange/20'} border-2 p-4 rounded-2xl space-y-3 relative`}>
+                  {req.type === 'open_request' && <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase shadow-sm">Request Open Trip</div>}
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-black uppercase text-sm text-art-text">{req.nama}</h4>
                       <p className="text-[10px] font-bold text-art-text/40">{req.wa}</p>
                     </div>
-                    <span className="text-[8px] font-black uppercase bg-white px-2 py-1 rounded border border-art-orange/20 text-art-orange">{req.destinasi}</span>
+                    <div className="text-right">
+                       <span className="text-[8px] font-black uppercase bg-white px-2 py-1 rounded border border-art-text/10 text-art-text block mb-1">{req.destinasi}</span>
+                       <span className="text-[7px] font-bold text-art-orange/60">{req.jadwal}</span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <button 
@@ -497,12 +503,14 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
                            showToast("Gagal update", "error");
                         }
                       }}
-                      className="flex-1 py-2 bg-white text-art-text border border-art-text/20 rounded-xl text-[9px] font-black uppercase hover:bg-gray-50"
+                      className="flex-1 py-2 bg-white text-art-text border border-art-text/20 rounded-xl text-[9px] font-black uppercase hover:bg-gray-50 transition-all shadow-sm"
                     >Proses</button>
-                    <button 
-                      onClick={() => onNavigateToOpenTrip && onNavigateToOpenTrip(req)}
-                      className="flex-1 py-2 bg-art-orange text-white rounded-xl text-[9px] font-black uppercase shadow-[3px_3px_0px_0px_#1a1a1a]"
-                    >Buat Trip</button>
+                    {req.type === 'open_request' && (
+                        <button 
+                          onClick={() => onNavigateToOpenTrip && onNavigateToOpenTrip(req)}
+                          className="flex-1 py-2 bg-art-orange text-white rounded-xl text-[9px] font-black uppercase shadow-[3px_3px_0px_0px_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                        >Buat Trip</button>
+                    )}
                   </div>
                 </div>
               ))
@@ -950,9 +958,12 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
         return (
         <div key={i} className={`bg-white p-4 rounded-lg border-2 ${dest.isActive !== false ? 'border-art-text' : 'border-gray-300 opacity-70'} space-y-4 relative w-full overflow-hidden`}>
           <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 z-10 bg-white/80 backdrop-blur-sm p-1 rounded-md">
-            <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
-                <button type="button" onClick={() => moveDestination(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
-                <button type="button" onClick={() => moveDestination(i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.length - 1}><ChevronDown size={14}/></button>
+            <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
+                <button type="button" onClick={() => moveDestination(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
+                <button type="button" onClick={() => moveDestination(i, 'down')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
+                <button onClick={() => {
+                   const nd = [...data]; nd.splice(i, 1); setData(nd);
+                }} className="p-1.5 text-red-500 hover:bg-red-50 shadow-sm" title="Hapus"><Trash2 size={16}/></button>
             </div>
             <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60 hidden sm:inline">Aktif?</span>
             <input 
@@ -965,9 +976,6 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 setData(nd);
               }}
             />
-            <button onClick={() => {
-               const nd = [...data]; nd.splice(i, 1); setData(nd);
-            }} className="text-red-500 hover:text-red-600 sm:hidden"><Trash2 size={16}/></button>
           </div>
           <div className="flex items-center gap-4 pr-16 sm:pr-32">
             <button
@@ -996,9 +1004,6 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
              setData(nd);
              if (!expandedIndexes.includes(i)) setExpandedIndexes([...expandedIndexes, i]);
           }} className="text-[10px] bg-art-text text-white px-3 py-1.5 rounded whitespace-nowrap hidden sm:block">+ Jalur</button>
-            <button onClick={() => {
-               const nd = [...data]; nd.splice(i, 1); setData(nd);
-            }} className="text-red-500 hover:text-red-600 hidden sm:block"><Trash2 size={16}/></button>
           </div>
 
           {expandedIndexes.includes(i) && (
@@ -1373,15 +1378,15 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
         {data.map((leader, i) => (
           <div key={i} className="bg-white p-6 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all group">
             <div className="absolute top-4 right-4 flex gap-2">
-                <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
-                    <button type="button" onClick={() => moveLeader(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={20} className="rotate-180"/></button>
-                    <button type="button" onClick={() => moveLeader(i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.length - 1}><ChevronDown size={20}/></button>
+                <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
+                    <button type="button" onClick={() => moveLeader(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={20} className="rotate-180"/></button>
+                    <button type="button" onClick={() => moveLeader(i, 'down')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={20}/></button>
+                    <button onClick={() => {
+                      const nd = [...data];
+                      nd.splice(i, 1);
+                      setData(nd);
+                    }} className="p-1.5 text-red-500 hover:bg-red-50 transition-all" title="Hapus"><Trash2 size={20}/></button>
                 </div>
-                <button onClick={() => {
-              const nd = [...data];
-              nd.splice(i, 1);
-              setData(nd);
-            }} className="text-red-500 hover:scale-110 transition-transform"><Trash2 size={20}/></button>
             </div>
             
             <div className="flex flex-col gap-6">
