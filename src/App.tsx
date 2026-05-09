@@ -416,7 +416,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
   
       const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Jalur: ${selectedJalur}\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${isPromoValid ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${finalOpsionalText ? finalOpsionalText.split(' | ').map(o => `• ${o}`).join('\n') : '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
       
-      window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(waMsg)}`, '_blank');
+      if (currentType !== 'open_request') {
+        window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(waMsg)}`, '_blank');
+      }
       
       playSuccess();
       setShowSuccess(true);
@@ -554,10 +556,19 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                   className="flex-1 py-4 border-2 border-art-text rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-art-bg"
                 >Revisi Data</button>
                 <button 
-                  onClick={() => { playPop(); handleBookingFinal(); }} 
+                  onClick={() => { 
+                    playPop(); 
+                    if (currentType === 'open_request') {
+                      customConfirm("Apakah Anda yakin ingin mengirimkan request jadwal ini?", () => {
+                        handleBookingFinal();
+                      });
+                    } else {
+                      handleBookingFinal(); 
+                    }
+                  }} 
                   disabled={isSubmittingBooking}
                   className="flex-[2] py-4 bg-art-text text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[6px_6px_0px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >{isSubmittingBooking ? 'Memproses...' : 'Konfirmasi & Kirim'} <Send size={14} /></button>
+                >{isSubmittingBooking ? 'Memproses...' : (currentType === 'open_request' ? 'Konfirmasi Request' : 'Konfirmasi & Kirim')} <Send size={14} /></button>
              </div>
           </div>
         ) : viewType === 'selection' ? (
@@ -764,19 +775,25 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                       </div>
                       <div className="relative">
                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Durasi</label>
-                        <select 
-                          name="durasi" 
-                          required={currentType !== 'open_request'}
-                          value={selectedDurasi}
-                          onChange={e => setSelectedDurasi(e.target.value)}
-                          className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
-                          disabled={!selectedJalur || currentType === 'open'}
-                        >
-                          <option value="">-- DURASI --</option>
-                          {selectedJalur && destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.map((dur: any, idx: number) => (
-                             <option key={idx} value={dur.label}>{dur.label}</option>
-                          ))}
-                        </select>
+                        {currentType === 'open_request' ? (
+                          <div className="w-full border-2 border-art-text bg-art-bg/30 px-3 py-3 rounded-xl text-[10px] font-black text-art-text/40 shadow-sm flex items-center gap-2">
+                            <Clock size={12} className="text-art-text/20" /> 2H 1M (Weekend Only)
+                          </div>
+                        ) : (
+                          <select 
+                            name="durasi" 
+                            required={currentType !== 'open_request'}
+                            value={selectedDurasi}
+                            onChange={e => setSelectedDurasi(e.target.value)}
+                            className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
+                            disabled={!selectedJalur || currentType === 'open'}
+                          >
+                            <option value="">-- DURASI --</option>
+                            {selectedJalur && destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.map((dur: any, idx: number) => (
+                               <option key={idx} value={dur.label}>{dur.label}</option>
+                            ))}
+                          </select>
+                        )}
                       </div>
                    </div>
                    )}
@@ -819,7 +836,12 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                                       if (date.getDay() === 6) {
                                          const endDate = new Date(date);
                                          endDate.setDate(date.getDate() + 1);
-                                         weekends.push(`${i}-${endDate.getDate()} ${date.toLocaleString('id-ID', {month:'long'})}`);
+                                         if (endDate.getMonth() === date.getMonth()) {
+                                            weekends.push(`${i}-${endDate.getDate()}`);
+                                         } else {
+                                            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                                            weekends.push(`${i} ${monthNames[date.getMonth()]} - ${endDate.getDate()} ${monthNames[endDate.getMonth()]}`);
+                                         }
                                       }
                                    }
                                    return weekends.map((w, idx) => (
@@ -1045,7 +1067,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
              </div>
 
              <Button type="submit" variant="primary" className="w-full py-5 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-3">
-                Review & Konfirmasi <ExternalLink size={14} />
+                {currentType === 'open_request' ? 'Request Jadwal' : 'Review & Konfirmasi'} <ExternalLink size={14} />
              </Button>
           </form>
         )}

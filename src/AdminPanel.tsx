@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -1376,16 +1376,16 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
       </div>
       <div className="space-y-4">
         {data.map((leader, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all group">
-            <div className="absolute top-4 right-4 flex gap-2">
-                <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
-                    <button type="button" onClick={() => moveLeader(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={20} className="rotate-180"/></button>
-                    <button type="button" onClick={() => moveLeader(i, 'down')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={20}/></button>
+          <div key={i} className="bg-white p-6 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all group overflow-hidden">
+            <div className="absolute top-4 right-4 flex gap-2 z-20">
+                <div className="flex bg-white rounded border-2 border-art-text overflow-hidden shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]">
+                    <button type="button" onClick={() => moveLeader(i, 'up')} className="p-2 hover:bg-gray-100 border-r-2 border-art-text disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={20} className="rotate-180"/></button>
+                    <button type="button" onClick={() => moveLeader(i, 'down')} className="p-2 hover:bg-gray-100 border-r-2 border-art-text disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={20}/></button>
                     <button onClick={() => {
                       const nd = [...data];
                       nd.splice(i, 1);
                       setData(nd);
-                    }} className="p-1.5 text-red-500 hover:bg-red-50 transition-all" title="Hapus"><Trash2 size={20}/></button>
+                    }} className="p-2 text-red-500 hover:bg-red-50 transition-all font-black" title="Hapus"><Trash2 size={20}/></button>
                 </div>
             </div>
             
@@ -1961,8 +1961,77 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
     setData(nd);
   };
 
+  const openTripReqs = bookings.filter(b => b.type === 'open_request' && b.status === 'pending');
+
   return (
     <div className="space-y-6">
+      {/* Custom Trip Notification */}
+      {openTripReqs.length > 0 && (
+        <div className="bg-blue-50 border-4 border-art-text rounded-3xl p-6 shadow-[12px_12px_0px_0px_#1a1a1a] mb-8">
+           <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_#1a1a1a]"><Globe size={28} /></div>
+              <div>
+                 <h3 className="text-xl font-black uppercase text-art-text tracking-tight">Request Custom Trip ({openTripReqs.length})</h3>
+                 <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">Pindahkan request ini ke Draft Open Trip untuk konfirmasi ke user</p>
+              </div>
+           </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {openTripReqs.map((req: any) => (
+                 <div key={req.id} className="bg-white border-2 border-art-text p-4 rounded-2xl shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all group overflow-hidden">
+                    <div className="flex justify-between items-start mb-3">
+                       <div>
+                          <h4 className="font-black uppercase text-[12px] text-art-text leading-tight">{req.nama}</h4>
+                          <p className="text-[9px] font-bold text-art-text/40 font-mono">{req.wa}</p>
+                       </div>
+                       <span className="text-[9px] font-black uppercase bg-art-text text-white px-2 py-1 rounded-lg shrink-0">{req.destinasi}</span>
+                    </div>
+                    <div className="space-y-2 mb-4">
+                       <div className="flex items-center gap-2 text-art-text/60">
+                          <MapPin size={12} />
+                          <span className="text-[10px] font-black uppercase tracking-tight">{req.jalur || 'Jalur Utama'}</span>
+                       </div>
+                       <div className="flex items-center gap-2 text-art-text/60">
+                          <Calendar size={12} />
+                          <span className="text-[10px] font-black uppercase tracking-tight text-blue-600 font-mono">{req.jadwal}</span>
+                       </div>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        const nd = [{ 
+                          id: Date.now().toString(), 
+                          name: req.destinasi, 
+                          region: "", 
+                          jadwal: req.jadwal, 
+                          kuota: "15 Pax Tersisa", 
+                          kuotaNum: 15,
+                          maxKuota: 15,
+                          mepo: "", 
+                          difficulty: "Menengah", 
+                          image: "", 
+                          beans: "", 
+                          path: req.jalur || "Jalur Utama", 
+                          duration: "2H 1M", 
+                          price: 0, 
+                          originalPrice: 0, 
+                          leaders: [], 
+                          startDate: "",
+                          status: 'draft' 
+                        }, ...data];
+                        setData(nd);
+                        setExpandedIndexes([0]);
+                        showToast("Request disalin ke Draft!");
+                        updateDoc(doc(db, 'bookings', req.id), { status: 'processed_to_draft' });
+                      }}
+                      className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2"
+                    >
+                       Tentukan Jadwal <ChevronRight size={16} />
+                    </button>
+                 </div>
+              ))}
+           </div>
+        </div>
+      )}
+
       <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
         <p className="text-xs font-bold uppercase text-art-text/60">Manajemen Open Trip</p>
         <div className="flex gap-2">
@@ -2510,7 +2579,7 @@ const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) 
         <div className="grid grid-cols-1 gap-4">
           {data.opsi.map((opt: FacilityOption, i: number) => (
             <div key={i} className="border-2 border-art-text/10 p-4 rounded-xl space-y-3 relative bg-art-bg/20">
-               <div className="absolute top-4 right-4 flex gap-2">
+               <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
                     <button type="button" onClick={() => moveItem('opsi', i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={16} className="rotate-180"/></button>
                     <button type="button" onClick={() => moveItem('opsi', i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.opsi.length - 1}><ChevronDown size={16}/></button>
