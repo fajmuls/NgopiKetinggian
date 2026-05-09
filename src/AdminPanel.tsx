@@ -2026,8 +2026,8 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                         }, ...data];
                         setData(nd);
                         setExpandedIndexes([0]);
-                        showToast("Request disalin ke Draft!");
-                        updateDoc(doc(db, 'bookings', req.id), { status: 'processed_to_draft' });
+                        showToast("Request disetujui & disalin ke Draft!", "success");
+                        updateDoc(doc(db, 'bookings', req.id), { status: 'approved_to_draft' });
                       }}
                       className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2"
                     >
