@@ -8,69 +8,10 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import { customAlert, customConfirm, GlobalDialogProvider } from './GlobalDialog';
+import { GlobalDialogProvider, customAlert, customConfirm } from './GlobalDialog';
 import { DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, useAppConfig } from './useAppConfig';
 import { AdminPanelModal } from './AdminPanel';
-import { jsPDF } from 'jspdf';
-
-export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur: string, durasi: string) => {
-  const doc = new jsPDF();
-  const primaryColor = [26, 26, 26] as [number, number, number];
-  
-  // Try adding Logo Watermark
-  await new Promise<void>((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.onload = () => {
-      doc.setGState(new (doc.GState as any)({ opacity: 0.02 }));
-      const aspectRatio = img.width / img.height;
-      doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
-      doc.setGState(new (doc.GState as any)({ opacity: 1 }));
-      resolve();
-    };
-    img.onerror = () => {
-      // Fallback text
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(60);
-      doc.setTextColor(240, 240, 240);
-      doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
-      doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
-      resolve();
-    };
-    img.src = 'https://files.catbox.moe/lubzno.png';
-  });
-
-  // Header
-  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.rect(0, 0, 210, 40, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(24);
-  doc.text('ITINERARY / RUNDOWN', 20, 20);
-  doc.setFontSize(12);
-  doc.text(`${destinasi.toUpperCase()} VIA ${jalur.toUpperCase()}`, 20, 30);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text(`Durasi: ${durasi}`, 150, 30);
-
-  // Content
-  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text('Rincian Kegiatan Perjalanan', 20, 55);
-  
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  const textLines = doc.splitTextToSize(durInfo.rundownHtml || 'Rundown tidak tersedia.', 170);
-  doc.text(textLines, 20, 65);
-
-  // Footer
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text('Dokumen ini dihasilkan secara otomatis oleh sistem Ngopi Di Ketinggian.', 105, 285, { align: 'center' });
-
-  doc.save(`Rundown_${destinasi.replace(/\s/g, '_')}_${durasi.replace(/\s/g, '_')}.pdf`);
-};
+import { generateRundownPdf } from './lib/pdf-utils';
 
 export function Button({ children, className = '', variant = 'primary', onClick, ...props }: any) {
   const { playClick, playHover } = useSound();
@@ -97,14 +38,14 @@ export function Button({ children, className = '', variant = 'primary', onClick,
   );
 }
 
-const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig, setIsHistoryOpen }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void, setIsHistoryOpen: (v: boolean) => void }) => {
+const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig, setIsHistoryOpen, userBookings }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void, setIsHistoryOpen: (v: boolean) => void, userBookings: any[] }) => {
   const { playClick, playHover, playSuccess, playBack, playPop } = useSound();
   const [showSuccess, setShowSuccess] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [viewType, setViewType] = useState<'selection' | 'trip_list' | 'form'>('selection');
   const [user] = useAuthState(auth);
 
-  const [currentType, setCurrentType] = useState<'private' | 'open'>('private');
+  const [currentType, setCurrentType] = useState<'private' | 'open' | 'open_request'>('private');
   const [selectedDestinasi, setSelectedDestinasi] = useState('');
   const [selectedJalur, setSelectedJalur] = useState('');
   const [selectedDurasi, setSelectedDurasi] = useState('');
@@ -322,9 +263,18 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
   const handleSubmitPreview = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formState.nama || !formState.wa || !selectedDestinasi || !selectedJalur || !selectedDurasi || !selectedJadwal || !pesertaCount) {
-      customAlert("Mohon lengkapi semua data wajib.");
-      return;
+    
+    // Validation logic tailored to type
+    if (currentType === 'open_request') {
+      if (!formState.nama || !formState.wa || !selectedDestinasi || !selectedJadwal || (selectedJadwal.includes('|') && !selectedJadwal.split('|')[1]) || !pesertaCount) {
+        customAlert("Mohon lengkapi semua data wajib (Nama, WA, Destinasi, dan Jadwal).");
+        return;
+      }
+    } else {
+      if (!formState.nama || !formState.wa || !selectedDestinasi || !selectedJalur || !selectedDurasi || !selectedJadwal || !pesertaCount) {
+        customAlert("Mohon lengkapi semua data wajib.");
+        return;
+      }
     }
 
     if (currentType === 'open') {
@@ -638,6 +588,33 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
               <button type="button" onClick={() => { playBack(); setViewType('selection'); }} className="text-[8px] font-black uppercase text-art-orange hover:underline mb-4 flex items-center gap-1 tracking-widest"><ChevronRight size={10} className="rotate-180" /> Kembali</button>
               <h3 className="text-2xl font-black uppercase text-art-text tracking-tight mb-6">Open Trip Tersedia</h3>
               
+              {/* User Custom Request Notifications */}
+              {user && userBookings.some(b => b.type === 'open_request' && (b.status === 'pending' || b.status === 'approved_to_draft')) && (
+                 <div className="mb-6 bg-white border-2 border-art-text rounded-2xl p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                       <Globe size={60} />
+                    </div>
+                    <h4 className="text-[10px] font-black uppercase text-art-text flex items-center gap-2 mb-3">
+                       <BellRing size={14} className="text-art-orange animate-bounce" /> Status Request Trip Kustom
+                    </h4>
+                    <div className="space-y-2">
+                       {userBookings.filter(b => b.type === 'open_request' && (b.status === 'pending' || b.status === 'approved_to_draft')).map(b => (
+                          <div key={b.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-art-text/5">
+                             <div>
+                                <p className="text-[10px] font-black uppercase text-art-text">{b.destinasi}</p>
+                                <p className="text-[8px] font-bold text-art-text/40 font-mono italic">{b.jadwal}</p>
+                             </div>
+                             <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-lg border-2 ${
+                                b.status === 'pending' ? 'bg-art-orange/10 border-art-orange text-art-orange' : 'bg-art-green/10 border-art-green text-art-green'
+                             }`}>
+                                {b.status === 'pending' ? 'DITINJAU' : 'DISETUJUI'}
+                             </span>
+                          </div>
+                       ))}
+                    </div>
+                 </div>
+              )}
+              
               <div className="space-y-3">
                  {config.openTrips?.filter((ot: any) => getSisaKuota(ot) > 0).length === 0 ? (
                     <div className="text-center py-10 bg-art-bg rounded-3xl border-2 border-dashed border-art-text/10 px-4 flex flex-col items-center justify-center">
@@ -684,7 +661,7 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                      setSelectedDestinasi('');
                      setSelectedJadwal('');
                      setSelectedJalur('');
-                     setSelectedDurasi('');
+                     setSelectedDurasi('2 Hari 1 Malam');
                      setCurrentType('open_request');
                      setViewType('form');
                    }} 
@@ -798,6 +775,38 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                    </div>
                    )}
 
+                   {selectedDestinasi && selectedJalur && selectedDurasi && (() => {
+                      const durInfo = destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.find((dur: any) => dur.label === selectedDurasi);
+                      if (!durInfo || (!durInfo.rundownHtml && !durInfo.rundownPdf)) return null;
+                      
+                      const currentOt = currentType === 'open' ? config.openTrips?.find((o: any) => o.name === selectedDestinasi) : null;
+                      const showPdf = currentOt ? currentOt.showRundownPdf !== false : true;
+
+                      return (
+                         <div className="bg-art-bg/50 border border-art-text/10 p-4 rounded-2xl relative shadow-sm">
+                            <h4 className="text-[10px] font-black uppercase text-art-text mb-2 flex items-center gap-1.5"><FileText size={12} className="text-art-orange" /> Itinerary / Rundown Kegiatan</h4>
+                            {durInfo.rundownHtml && (
+                               <div className="text-[9px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-32 overflow-y-auto pr-2 no-scrollbar border-l-2 border-art-orange/30 pl-3">
+                                 {durInfo.rundownHtml}
+                               </div>
+                            )}
+                            {showPdf && (
+                              <div className="flex gap-2">
+                                {durInfo.rundownPdf ? (
+                                  <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                                    PDF Rundown Lengkap <Download size={10} />
+                                  </a>
+                                ) : durInfo.rundownHtml ? (
+                                  <button type="button" onClick={() => generateRundownPdf(durInfo, selectedDestinasi, selectedJalur, selectedDurasi)} className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                                    Lihat PDF Rundown <Download size={10} />
+                                  </button>
+                                ) : null}
+                              </div>
+                            )}
+                         </div>
+                      );
+                    })()}
+
                    <div className="grid grid-cols-2 gap-4">
                       {currentType === 'open_request' ? (
                         <div className="col-span-2">
@@ -836,12 +845,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                                       if (date.getDay() === 6) {
                                          const endDate = new Date(date);
                                          endDate.setDate(date.getDate() + 1);
-                                         if (endDate.getMonth() === date.getMonth()) {
-                                            weekends.push(`${i}-${endDate.getDate()}`);
-                                         } else {
-                                            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-                                            weekends.push(`${i} ${monthNames[date.getMonth()]} - ${endDate.getDate()} ${monthNames[endDate.getMonth()]}`);
-                                         }
+                                         // User requested: Month should NOT be displayed, only the day.
+                                         // Spanning months should stay as days only.
+                                         weekends.push(`${i}-${endDate.getDate()}`);
                                       }
                                    }
                                    return weekends.map((w, idx) => (
@@ -883,29 +889,6 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
                        </div>
                    </div>
 
-                    {selectedDestinasi && selectedJalur && selectedDurasi && (() => {
-                      const durInfo = destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.find((dur: any) => dur.label === selectedDurasi);
-                      if (!durInfo || (!durInfo.rundownHtml && !durInfo.rundownPdf)) return null;
-                      return (
-                         <div className="bg-art-bg/50 border border-art-text/10 p-4 rounded-2xl relative shadow-sm">
-                            <h4 className="text-[10px] font-black uppercase text-art-text mb-2 flex items-center gap-1.5"><FileText size={12} className="text-art-orange" /> Itinerary / Rundown Kegiatan</h4>
-                            {durInfo.rundownHtml && (
-                               <div className="text-[9px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-32 overflow-y-auto pr-2 no-scrollbar border-l-2 border-art-orange/30 pl-3">
-                                 {durInfo.rundownHtml}
-                               </div>
-                            )}
-                            {durInfo.rundownPdf ? (
-                               <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                                 PDF Rundown Lengkap <Download size={10} />
-                               </a>
-                            ) : durInfo.rundownHtml ? (
-                               <button type="button" onClick={() => generateRundownPdf(durInfo, selectedDestinasi, selectedJalur, selectedDurasi)} className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                                 Lihat PDF Rundown <Download size={10} />
-                               </button>
-                            ) : null}
-                         </div>
-                      );
-                    })()}
 
                     {currentType !== 'open_request' && (
                       <>
@@ -1307,15 +1290,19 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                              {durInfo.rundownHtml}
                            </div>
                         )}
-                        {durInfo.rundownPdf ? (
-                           <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                             PDF Rundown Lengkap <Download size={8} />
-                           </a>
-                        ) : durInfo.rundownHtml ? (
-                           <button type="button" onClick={(e) => { e.stopPropagation(); generateRundownPdf(durInfo, ot.name, ot.path, ot.duration); }} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                             Lihat PDF Rundown <Download size={8} />
-                           </button>
-                        ) : null}
+                        {ot.showRundownPdf !== false && (
+                          <div className="flex gap-2">
+                           {durInfo.rundownPdf ? (
+                              <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                                PDF Rundown Lengkap <Download size={8} />
+                              </a>
+                           ) : durInfo.rundownHtml ? (
+                              <button type="button" onClick={(e) => { e.stopPropagation(); generateRundownPdf(durInfo, ot.name, ot.path, ot.duration); }} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                                Lihat PDF Rundown <Download size={8} />
+                              </button>
+                           ) : null}
+                          </div>
+                        )}
                      </div>
                   )}
               </motion.div>
@@ -1694,42 +1681,17 @@ const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: {
   );
 };
 
-const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, onClose: () => void, showToast: (m: string, t?: any) => void }) => {
+const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { isOpen: boolean, onClose: () => void, showToast: (m: string, t?: any) => void, bookings: any[] }) => {
   const { playClick, playHover, playBack, playPop } = useSound();
   const [user] = useAuthState(auth);
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'proses' | 'lunas'>('proses');
-
-  useEffect(() => {
-    if (!isOpen || !user) return;
-    setLoading(true);
-    const q = query(
-      collection(db, 'bookings'), 
-      where('userId', '==', user.uid)
-    );
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Sort in memory to avoid requiring composite index
-      const sorted = data.sort((a: any, b: any) => {
-        const dateA = a.createdAt?.seconds || 0;
-        const dateB = b.createdAt?.seconds || 0;
-        return dateB - dateA;
-      });
-      setBookings(sorted);
-      setLoading(false);
-    }, (error) => {
-      console.error("History fetch error:", error);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [isOpen, user]);
 
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'proses') {
-      return b.status === 'pending' || b.status === 'processing' || b.status === 'dp_partial';
+      return b.status === 'pending' || b.status === 'processing' || b.status === 'dp_partial' || b.status === 'approved_to_draft';
     } else {
-      return b.status === 'lunas' || b.status === 'selesai';
+      return b.status === 'lunas' || b.status === 'selesai' || b.status === 'rejected';
     }
   });
 
@@ -1911,19 +1873,25 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast }: { isOpen: boolean, 
                              b.status === 'lunas' || b.status === 'selesai' ? 'bg-art-green/10 text-art-green border-art-green' : 
                              b.status === 'processing' ? 'bg-blue-50 text-blue-600 border-blue-600' :
                              b.status === 'dp_partial' ? 'bg-yellow-50 text-yellow-600 border-yellow-600' :
+                             b.status === 'approved_to_draft' ? 'bg-green-50 text-green-600 border-green-600' :
+                             b.status === 'rejected' ? 'bg-red-50 text-red-600 border-red-600' :
                              'bg-art-orange/10 text-art-orange border-art-orange'
                            }`}>
                              {b.status === 'pending' && <Clock size={10} />}
                              {b.status === 'processing' && <TrendingUp size={10} />}
                              {b.status === 'dp_partial' && <CreditCard size={10} />}
+                             {b.status === 'approved_to_draft' && <CheckCircle2 size={10} />}
                              {b.status === 'lunas' && <CheckCircle2 size={10} />}
                              {b.status === 'selesai' && <MapPin size={10} />}
+                             {b.status === 'rejected' && <X size={10} />}
                              {b.status === 'batal' && <X size={10} />}
                              {b.status === 'pending' ? 'Pending' : 
                               b.status === 'processing' ? 'Diproses' : 
                               b.status === 'dp_partial' ? 'DP Parsial' :
+                              b.status === 'approved_to_draft' ? 'Disetujui' :
                               b.status === 'lunas' ? 'Lunas' : 
                               b.status === 'selesai' ? 'Trip Selesai' : 
+                              b.status === 'rejected' ? 'Ditolak' :
                               'Dibatalkan'}
                            </div>
                            <span className="text-[10px] font-bold text-art-text/30 border-l border-art-text/10 pl-2">🕒 {b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '...'}</span>
@@ -2211,7 +2179,25 @@ export default function App() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+  const [userBookings, setUserBookings] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!user) {
+      setUserBookings([]);
+      return;
+    }
+    const q = query(
+      collection(db, 'bookings'), 
+      where('userId', '==', user.uid)
+    );
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUserBookings(data);
+    }, (error) => {
+      console.error("App bookings fetch error:", error);
+    });
+    return () => unsubscribe();
+  }, [user]);
 
   const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   
@@ -2355,11 +2341,13 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         config={config}
         updateConfig={updateConfig}
         setIsHistoryOpen={setIsHistoryOpen}
+        userBookings={userBookings}
       />
       <BookingHistoryModal 
         isOpen={isHistoryOpen} 
         onClose={() => setIsHistoryOpen(false)} 
         showToast={showToastMsg}
+        bookings={userBookings}
       />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} setIsHistoryOpen={setIsHistoryOpen} />
       <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />

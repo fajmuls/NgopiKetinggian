@@ -8,6 +8,7 @@ import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setD
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, WEBSITE_VERSION } from './useAppConfig';
 import { jsPDF } from 'jspdf';
+import { generateRundownPdf } from './lib/pdf-utils';
 
 import { customConfirm, customAlert } from './GlobalDialog';
 
@@ -1376,21 +1377,27 @@ const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: any) => 
       </div>
       <div className="space-y-4">
         {data.map((leader, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all group overflow-hidden">
-            <div className="absolute top-4 right-4 flex gap-2 z-20">
-                <div className="flex bg-white rounded border-2 border-art-text overflow-hidden shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]">
-                    <button type="button" onClick={() => moveLeader(i, 'up')} className="p-2 hover:bg-gray-100 border-r-2 border-art-text disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={20} className="rotate-180"/></button>
-                    <button type="button" onClick={() => moveLeader(i, 'down')} className="p-2 hover:bg-gray-100 border-r-2 border-art-text disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={20}/></button>
-                    <button onClick={() => {
-                      const nd = [...data];
-                      nd.splice(i, 1);
-                      setData(nd);
-                    }} className="p-2 text-red-500 hover:bg-red-50 transition-all font-black" title="Hapus"><Trash2 size={20}/></button>
-                </div>
+          <div key={i} className="bg-white rounded-2xl border-2 border-art-text relative hover:border-art-orange transition-all group shadow-sm overflow-hidden">
+            {/* Header Bar for Controls - Prevents image obstruction */}
+            <div className="bg-gray-50 border-b-2 border-art-text px-6 py-3 flex justify-between items-center">
+               <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 bg-art-text text-white rounded-lg flex items-center justify-center text-[10px] font-black">#{i + 1}</span>
+                  <span className="text-[10px] font-black uppercase text-art-text/60 tracking-wider font-mono truncate max-w-[150px]">{leader.name || 'BARU'}</span>
+               </div>
+               <div className="flex bg-white rounded-lg border-2 border-art-text overflow-hidden shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]">
+                   <button type="button" onClick={(e) => { e.stopPropagation(); moveLeader(i, 'up'); }} className="p-2 hover:bg-art-bg border-r-2 border-art-text disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={18} className="rotate-180"/></button>
+                   <button type="button" onClick={(e) => { e.stopPropagation(); moveLeader(i, 'down'); }} className="p-2 hover:bg-art-bg border-r-2 border-art-text disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={18}/></button>
+                   <button onClick={(e) => {
+                     e.stopPropagation();
+                     customConfirm("Hapus leader ini?", () => {
+                       const nd = [...data]; nd.splice(i, 1); setData(nd);
+                     });
+                   }} className="p-2 text-red-500 hover:bg-red-50 transition-all font-black" title="Hapus"><Trash2 size={18}/></button>
+               </div>
             </div>
             
-            <div className="flex flex-col gap-6">
-              {/* Leader Image Preview at Top */}
+            <div className="p-6 flex flex-col gap-6">
+              {/* Leader Image Preview */}
               <div className="w-full h-48 sm:h-64 rounded-xl border-2 border-dashed border-art-text/10 overflow-hidden bg-art-bg flex items-center justify-center p-2 relative">
                 {leader.avatar ? (
                   <img src={leader.avatar} className="w-full h-full object-cover rounded-lg" alt="Preview" onError={(e) => (e.currentTarget.style.display = 'none')} />
@@ -2024,7 +2031,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                       }}
                       className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2"
                     >
-                       Tentukan Jadwal <ChevronRight size={16} />
+                       Approve <ChevronRight size={14} />
                     </button>
                  </div>
               ))}
@@ -2032,16 +2039,24 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
         </div>
       )}
 
-      <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
+      <div className="flex flex-col sm:flex-row justify-between bg-white p-4 rounded-lg border border-art-text/20 gap-4">
         <p className="text-xs font-bold uppercase text-art-text/60">Manajemen Open Trip</p>
-        <div className="flex gap-2">
-           <button type="button" onClick={(e) => {
-             e.preventDefault();
-             const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft' }, ...data];
-             setData(nd);
-             setExpandedIndexes([0]);
-           }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Custom Trip</button>
-           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest shadow-lg">Simpan Ke Database</button>
+        <div className="flex flex-wrap gap-2">
+           <div className="flex bg-white rounded-lg border-2 border-art-text overflow-hidden shadow-sm">
+             <button type="button" onClick={(e) => {
+               e.preventDefault();
+               const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft' }, ...data];
+               setData(nd);
+               setExpandedIndexes([0]);
+             }} className="hover:bg-art-bg px-4 py-2 text-[10px] font-black uppercase tracking-widest border-r-2 border-art-text">+ Custom Trip Manual</button>
+             <button type="button" onClick={(e) => {
+               e.preventDefault();
+               const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Sabtu - Minggu", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2H 1M", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true }, ...data];
+               setData(nd);
+               setExpandedIndexes([0]);
+             }} className="hover:bg-blue-50 text-blue-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest">+ Custom Trip Weekend</button>
+           </div>
+           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4">
@@ -2293,6 +2308,67 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                   </div>
                 </div>
               </div>
+
+               {/* Layer 6: Rundown & PDF Visibility */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                   <label className="text-[9px] font-black uppercase text-art-text/40">Rundown (Pilih dari Destinasi)</label>
+                   <div className="flex items-center gap-2 mt-1">
+                      <p className="text-[8px] text-art-text/40 italic flex-1">Itinerary otomatis ditarik dari template Jalur & Durasi destinasi.</p>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const dest = config.destinationsData?.find((d: any) => d.name === ot.name);
+                          const pathInfo = dest?.paths?.find((p: any) => p.name === ot.path);
+                          const durInfo = pathInfo?.durations?.find((d: any) => d.label === ot.duration);
+                          
+                          if (durInfo) {
+                            customAlert(
+                              <div className="text-left w-full space-y-4">
+                                <div className="border-b-2 border-art-text pb-2">
+                                  <h3 className="font-black uppercase text-xs">Preview Rundown: {ot.name}</h3>
+                                  <p className="text-[8px] font-bold text-art-text/40">{ot.path} | {ot.duration}</p>
+                                </div>
+                                <div className="max-h-64 overflow-y-auto no-scrollbar pr-2 text-[10px] font-medium leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 p-3 rounded-xl border border-art-text/5">
+                                  {durInfo.rundownHtml || "Belum ada teks rundown."}
+                                </div>
+                                {durInfo.rundownPdf && (
+                                  <div className="flex items-center gap-2 text-art-green font-black uppercase text-[8px]">
+                                    <CheckCircle size={10} /> PDF Tersedia di: <a href={durInfo.rundownPdf} target="_blank" rel="noreferrer" className="underline truncate max-w-[200px]">{durInfo.rundownPdf}</a>
+                                  </div>
+                                )}
+                              </div>,
+                              "Review Rundown"
+                            );
+                          } else {
+                            showToast("Lengkapi Gunung, Jalur, dan Durasi dulu!", "error");
+                          }
+                        }}
+                        className="bg-white border border-art-text/20 text-art-text px-3 py-1 rounded-lg text-[8px] font-black uppercase hover:bg-art-bg transition-all shadow-sm"
+                      >
+                        Review Rundown
+                      </button>
+                   </div>
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-art-text/40">Visibility PDF Rundown</label>
+                    <label className="flex items-center gap-2 cursor-pointer mt-1 group">
+                       <input 
+                         type="checkbox" 
+                         className="accent-art-orange w-4 h-4"
+                         checked={ot.showRundownPdf !== false} 
+                         onChange={e => {
+                           const nd = [...data];
+                           nd[i].showRundownPdf = e.target.checked;
+                           setData(nd);
+                         }}
+                       />
+                       <span className={`text-[10px] font-black uppercase transition-colors ${ot.showRundownPdf !== false ? 'text-art-green' : 'text-art-text/30'}`}>
+                         {ot.showRundownPdf !== false ? 'DITAMPILKAN KE USER' : 'DISEMBUNYIKAN DARI USER'}
+                       </span>
+                    </label>
+                 </div>
+               </div>
 
                {/* Layer 7: Leaders & Description */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
