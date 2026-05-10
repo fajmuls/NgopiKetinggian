@@ -60,7 +60,7 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
   doc.save(`Rundown_${destinasi.replace(/\s/g, '_')}_${durasi.replace(/\s/g, '_')}.pdf`);
 };
 
-export const generateInvoice = (booking: any) => {
+export const generateInvoice = async (booking: any) => {
   const doc = new jsPDF();
   const primaryColor = [26, 26, 26];
   const accentColor = [255, 107, 0];
@@ -68,25 +68,28 @@ export const generateInvoice = (booking: any) => {
   doc.setFillColor(250, 250, 250);
   doc.rect(0, 0, 210, 297, 'F');
   
-  // Watermark Text
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(60);
-  doc.setTextColor(235, 235, 235);
-  doc.text("NGOPI DI", 105, 140, { angle: 45, align: 'center' });
-  doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
-
-  // 4. Logo Watermark (Image)
-  const img = new Image();
-  img.crossOrigin = "Anonymous";
-  img.src = 'https://files.catbox.moe/lubzno.png';
-  img.onload = () => {
-    doc.setGState(new (doc as any).GState({ opacity: 0.05 }));
-    doc.addImage(img, 'PNG', 45, 100, 120, 120);
-    doc.setGState(new (doc as any).GState({ opacity: 1 }));
-  };
+  // Try adding Logo Watermark (Image)
+  await new Promise<void>((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      // Use 0.1 (10%) as requested (they said 10% or 5%, 0.1 is 10%)
+      doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
+      doc.addImage(img, 'PNG', 45, 80, 120, 120);
+      doc.setGState(new (doc as any).GState({ opacity: 1 }));
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = 'https://files.catbox.moe/lubzno.png';
+  });
 
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.rect(0, 0, 210, 50, 'F');
+  
+  // Mountain Accent (Simple Triangle)
+  doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.triangle(180, 50, 210, 50, 210, 20, 'F');
+  
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
@@ -103,38 +106,55 @@ export const generateInvoice = (booking: any) => {
   doc.text(`TANGGAL: ${displayDate.toLocaleDateString('id-ID')}`, 140, 38);
 
   const drawHeader = (title: string, y: number) => {
-    doc.setFillColor(240, 240, 240);
+    doc.setFillColor(245, 245, 245);
     doc.rect(20, y, 170, 8, 'F');
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, y + 8, 190, y + 8);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
     doc.text(title, 25, y + 5.5);
   };
 
   drawHeader('INFORMASI PELANGGAN', 60);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.text(`NAMA LENGKAP: ${(booking.nama || '').toUpperCase()}`, 25, 75);
-  doc.text(`WHATSAPP: ${booking.wa || ''}`, 25, 82);
-  doc.text(`EMAIL: ${booking.email || 'N/A'}`, 25, 89);
+  doc.text(`NAMA LENGKAP:`, 25, 75);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${(booking.nama || '').toUpperCase()}`, 65, 75);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`WHATSAPP:`, 25, 82);
+  doc.text(`${booking.wa || ''}`, 65, 82);
+  doc.text(`EMAIL:`, 25, 89);
+  doc.text(`${booking.email || 'N/A'}`, 65, 89);
   
   drawHeader('DETAIL PERJALANAN', 100);
-  doc.text(`DESTINASI: ${(booking.destinasi || '').toUpperCase()} (VIA ${(booking.jalur || '').toUpperCase()})`, 25, 115);
-  doc.text(`JADWAL: ${booking.jadwal || ''}`, 25, 122);
-  doc.text(`PESERTA: ${booking.peserta || 0} PAX`, 25, 129);
-  doc.text(`TIPE TRIP: ${booking.type === 'open' ? 'OPEN TRIP' : booking.type === 'open_request' ? 'REQUEST OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 136);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`DESTINASI:`, 25, 115);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${(booking.destinasi || '').toUpperCase()} (VIA ${(booking.jalur || '').toUpperCase()})`, 65, 115);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`JADWAL:`, 25, 122);
+  doc.text(`${booking.jadwal || ''}`, 65, 122);
+  doc.text(`PESERTA:`, 25, 129);
+  doc.text(`${booking.peserta || 0} PAX`, 65, 129);
+  doc.text(`TIPE TRIP:`, 25, 136);
+  doc.text(`${booking.type === 'open' ? 'OPEN TRIP' : booking.type === 'open_request' ? 'REQUEST OPEN TRIP' : 'PRIVATE TRIP'}`, 65, 136);
 
   drawHeader('RINCIAN BIAYA & FASILITAS', 150);
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
   doc.text('ITEM LAYANAN', 25, 165);
   doc.text('SUBTOTAL', 160, 165);
+  doc.setDrawColor(26, 26, 26);
   doc.line(20, 168, 190, 168);
   
   doc.setFont('helvetica', 'normal');
   let currentY = 175;
   
   // Base Trip Package Highlight
-  doc.setFillColor( accentColor[0], accentColor[1], accentColor[2], 0.1); 
+  doc.setFillColor(accentColor[0], accentColor[1], accentColor[2], 0.05); 
   doc.rect(20, currentY - 5, 170, 8, 'F');
   doc.setFont('helvetica', 'bold');
   doc.text(`PAKET TRIP ${(booking.destinasi || '').toUpperCase()}`, 25, currentY);
@@ -145,7 +165,7 @@ export const generateInvoice = (booking: any) => {
 
   if (booking.opsionalItems && booking.opsionalItems.length > 0) {
     doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
+    doc.setTextColor(120, 120, 120);
     doc.text('LAYANAN TAMBAHAN:', 25, currentY - 2);
     currentY += 5;
     
@@ -154,12 +174,18 @@ export const generateInvoice = (booking: any) => {
       doc.setTextColor(60, 60, 60);
       const isPending = item.status === 'pending_price' || (item.price === 0 && (booking.status === 'pending' || booking.status === 'processing'));
       const priceLabel = isPending ? '(Menunggu Konf. Admin)' : `@ Rp ${(item.price || 0).toLocaleString('id-ID')}`;
-      const itemLine = `(+) ${item.name} (${item.count || 1}x • ${item.days || 1} Hari ${priceLabel})`;
+      const itemLine = `• ${item.name} (${item.count || 1}x • ${item.days || 1} Hari ${priceLabel})`;
       
       const splitItem = doc.splitTextToSize(itemLine, 130);
       doc.text(splitItem, 25, currentY);
       doc.text(isPending ? 'Mnggu Konf.' : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`, 160, currentY);
       currentY += (splitItem.length * 6);
+
+      // Check for page overflow
+      if (currentY > 260) {
+        doc.addPage();
+        currentY = 20;
+      }
     });
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.setFontSize(10);
@@ -174,6 +200,7 @@ export const generateInvoice = (booking: any) => {
   }
 
   currentY += 4;
+  doc.setDrawColor(200, 200, 200);
   doc.line(140, currentY, 190, currentY);
   currentY += 10;
   doc.setFontSize(12);
@@ -182,5 +209,12 @@ export const generateInvoice = (booking: any) => {
   doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
   doc.text(`Rp ${booking.totalPrice?.toLocaleString('id-ID')}`, 160, currentY);
 
-  doc.save(`Invoice_${(booking.nama || 'User').replace(/\s/g, '_')}.pdf`);
+  // Footer / Greeting
+  doc.setFontSize(8);
+  doc.setTextColor(150, 150, 150);
+  doc.setFont('helvetica', 'italic');
+  doc.text('Terima kasih telah memilih Ngopi Di Ketinggian sebagai partner petualangan Anda!', 105, 280, { align: 'center' });
+  doc.text('Simpan kuitansi ini sebagai bukti pembayaran digital.', 105, 285, { align: 'center' });
+
+  doc.save(`Invoice_${(booking.nama || 'User').replace(/\s/g, '_')}_${(booking.id || '').substring(0, 5)}.pdf`);
 };

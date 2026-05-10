@@ -325,6 +325,10 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
 
       if (user) {
         try {
+          const destData = config.destinationsData?.find((d: any) => d.name === (selectedDestinasi || '-'));
+          const pathData = destData?.paths?.find((p: any) => p.name === (selectedJalur || '-'));
+          const durData = pathData?.durations?.find((dur: any) => dur.label === (selectedDurasi || '-'));
+
           await addDoc(collection(db, 'bookings'), {
             userId: user.uid,
             nama: nama || 'Tanpa Nama', 
@@ -345,7 +349,9 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
             type: currentType || 'private',
             totalPrice: netPrice || 0,
             createdAt: serverTimestamp(),
-            status: 'pending' // Displayed as "Menunggu Konfirmasi Admin"
+            status: 'pending', // Displayed as "Menunggu Konfirmasi Admin"
+            rundownText: durData?.rundownHtml || "",
+            rundownPdf: durData?.rundownPdf || ""
           });
   
           if (currentType === 'open' && config) {
@@ -1932,6 +1938,31 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { isOpen:
                                     <Info size={12} className="text-art-text/30 mt-0.5" />
                                     <p className="text-[9px] font-bold text-art-text/40 leading-relaxed italic uppercase tracking-tighter">Kuitansi dapat diunduh jika status sudah "Lunas".</p>
                                   </div>
+                                )}
+
+                                {(b.rundownPdf || b.rundownText) && (
+                                   <div className="flex flex-col gap-2">
+                                      {b.rundownPdf ? (
+                                         <a 
+                                            href={b.rundownPdf} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-sm"
+                                         >
+                                            <FileText size={14} /> Itinerary PDF
+                                         </a>
+                                      ) : (
+                                         <button 
+                                            onClick={() => {
+                                              playClick();
+                                              customAlert(<div className="text-xs whitespace-pre-wrap text-left p-4 leading-loose font-medium font-mono">{b.rundownText}</div>, "Itinerary / Rundown");
+                                            }}
+                                            className="w-full flex items-center justify-center gap-2 bg-art-text text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-orange transition-colors shadow-sm"
+                                         >
+                                            <FileText size={14} /> Lihat Itinerary
+                                         </button>
+                                      )}
+                                   </div>
                                 )}
                                 
                                 <button 

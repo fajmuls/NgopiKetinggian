@@ -271,7 +271,7 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
       const img = new Image();
       img.crossOrigin = "Anonymous";
       img.onload = () => {
-        doc.setGState(new (doc.GState as any)({ opacity: 0.01 }));
+        doc.setGState(new (doc.GState as any)({ opacity: 0.1 })); // Increased from 0.01 to 0.1 (10%)
         const aspectRatio = img.width / img.height;
         doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
         doc.setGState(new (doc.GState as any)({ opacity: 1 }));
@@ -769,6 +769,44 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
 
                 <div className="flex flex-col justify-between border-l border-art-text/5 pl-6">
                    <div className="space-y-4">
+                      {/* BOX: RUNDOWN MANAGEMENT (Private Only) */}
+                      {booking.type === 'private' && (
+                        <div className="bg-blue-50/50 rounded-2xl border-2 border-blue-200 p-4 shadow-sm relative group/box">
+                           <div className="flex justify-between items-center mb-3">
+                              <span className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] flex items-center gap-1">
+                                 <Clipboard size={10} /> Itinerary & Rundown (Private)
+                              </span>
+                           </div>
+                           <div className="space-y-3">
+                              <div className="space-y-1">
+                                 <label className="text-[8px] font-black uppercase text-art-text/40">Link PDF Rundown</label>
+                                 <ImageUploader 
+                                   value={booking.rundownPdf || ""} 
+                                   onChange={async (url) => {
+                                      await updateDoc(doc(db, 'bookings', booking.id), { rundownPdf: url });
+                                      showToast("PDF Rundown diupdate!");
+                                   }} 
+                                 />
+                              </div>
+                              <div className="space-y-1">
+                                 <label className="text-[8px] font-black uppercase text-art-text/40">Teks Rundown / Itinerary</label>
+                                 <textarea 
+                                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-medium outline-none focus:border-art-orange transition-all resize-none bg-white"
+                                    rows={4}
+                                    defaultValue={booking.rundownText || ""}
+                                    onBlur={async (e) => {
+                                      if (e.target.value !== booking.rundownText) {
+                                         await updateDoc(doc(db, 'bookings', booking.id), { rundownText: e.target.value });
+                                         showToast("Teks Itinerary diupdate!");
+                                      }
+                                    }}
+                                    placeholder="Input teks itinerary di sini..."
+                                 />
+                              </div>
+                           </div>
+                        </div>
+                      )}
+
                       <div>
                         <p className="text-[10px] font-black uppercase text-art-text/30 tracking-widest mb-2 font-mono">Status & Note</p>
                         <div className="flex items-center gap-2 mb-3">
@@ -1020,8 +1058,8 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               </div>
             </div>
             
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-2">
-              <div className="flex flex-col">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-2">
+              <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Region:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.region || 'Jawa'} onChange={e => {
                   const nd = [...data];
@@ -1030,7 +1068,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Cth: Jawa Tengah" />
               </div>
               
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Kuota:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.kuota} onChange={e => {
                   const nd = [...data];
@@ -1039,7 +1077,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Cth: 2-12 Pax" />
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Mepo:</span>
                 <input className="border p-2 rounded text-xs w-full" value={dest.mepo || ''} onChange={e => {
                   const nd = [...data];
@@ -1048,9 +1086,9 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 }} placeholder="Basecamp" />
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-[9px] font-bold uppercase">G-Maps Link:</span>
+                  <span className="text-[9px] font-bold uppercase">G-Maps:</span>
                   <button 
                     onClick={async () => {
                       try {
@@ -1069,10 +1107,10 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                     <Clipboard size={14} />
                   </button>
                 </div>
-                <div className="flex gap-1">
-                  <InputWithPaste className="border p-2 rounded text-xs w-full" value={dest.mepoLink || ''} onChange={(e: any) => {
+                <div className="flex gap-1 overflow-hidden">
+                  <input className="border p-2 rounded text-[10px] w-full min-w-0" value={dest.mepoLink || ''} onChange={e => {
                     const nd = [...data];
-                    nd[i].mepoLink = e.target.value;
+                    nd[i].mepoLink = (e.target as HTMLInputElement).value;
                     setData(nd);
                   }} placeholder="Maps Link" />
                   <button 
@@ -1080,7 +1118,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                       const query = `Basecamp ${dest.name} ${dest.region || ''} ${dest.mepo || ''}`;
                       window.open(`https://www.google.com/maps/search/${encodeURIComponent(query)}`, '_blank');
                     }}
-                    className="p-2 bg-art-orange text-white rounded hover:bg-orange-600 transition-colors"
+                    className="p-2 bg-art-orange text-white rounded hover:bg-orange-600 transition-colors shrink-0"
                     title="Cari di Google Maps"
                   >
                     <Map size={14} />
@@ -1088,16 +1126,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                 </div>
               </div>
               
-              <div className="flex flex-col">
-                <span className="text-[9px] font-bold uppercase mb-1">Beans:</span>
-                <input className="border p-2 rounded text-xs w-full" value={dest.beans || ''} onChange={e => {
-                  const nd = [...data];
-                  nd[i].beans = e.target.value;
-                  setData(nd);
-                }} placeholder="Kopi" />
-              </div>
-              
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Level:</span>
                 <select className="border p-2 rounded text-[11px] w-full" value={dest.difficulty || ''} onChange={e => {
                   const nd = [...data];
@@ -1105,7 +1134,7 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
                   setData(nd);
                 }}>
                   <option value="">Status</option>
-                  {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                  {difficultyLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
                 </select>
               </div>
             </div>
@@ -1983,29 +2012,37 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
     setData(nd);
   };
 
-  const openTripReqs = bookings.filter(b => b.type === 'open_request' && b.status === 'pending');
+  const openTripReqs = bookings.filter(b => b.type === 'open_request' && (b.status === 'pending' || b.status === 'approved_to_draft'));
 
   return (
-    <div className="space-y-6">
-      {/* Custom Trip Notification */}
+    <div className="space-y-6 text-left">
+      {/* Custom Trip Notification / Inbox */}
       {openTripReqs.length > 0 && (
-        <div className="bg-blue-50 border-4 border-art-text rounded-3xl p-6 shadow-[12px_12px_0px_0px_#1a1a1a] mb-8">
-           <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_#1a1a1a]"><Globe size={28} /></div>
-              <div>
-                 <h3 className="text-xl font-black uppercase text-art-text tracking-tight">Request Custom Trip ({openTripReqs.length})</h3>
-                 <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">Pindahkan request ini ke Draft Open Trip untuk konfirmasi ke user</p>
-              </div>
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-4 border-art-text rounded-3xl p-6 shadow-[12px_12px_0px_0px_#1a1a1a] mb-8">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+             <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_#1a1a1a] animate-pulse"><Globe size={28} /></div>
+                <div>
+                   <h3 className="text-xl font-black uppercase text-art-text tracking-tight">Trip Request Notification ({openTripReqs.length})</h3>
+                   <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">Request custom trip dari customer yang menunggu konfirmasi</p>
+                </div>
+             </div>
+             <div className="bg-white px-4 py-2 rounded-xl border-2 border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]">
+               <p className="text-[10px] font-black uppercase text-blue-600">Admin Action Required</p>
+             </div>
            </div>
+           
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {openTripReqs.map((req: any) => (
-                 <div key={req.id} className="bg-white border-2 border-art-text p-4 rounded-2xl shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all group overflow-hidden">
+                 <div key={req.id} className="bg-white border-2 border-art-text p-4 rounded-2xl shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all group">
                     <div className="flex justify-between items-start mb-3">
                        <div>
                           <h4 className="font-black uppercase text-[12px] text-art-text leading-tight">{req.nama}</h4>
                           <p className="text-[9px] font-bold text-art-text/40 font-mono">{req.wa}</p>
                        </div>
-                       <span className="text-[9px] font-black uppercase bg-art-text text-white px-2 py-1 rounded-lg shrink-0">{req.destinasi}</span>
+                       <div className="flex flex-col items-end gap-1">
+                          <span className="text-[9px] font-black uppercase bg-art-text text-white px-2 py-1 rounded-lg shrink-0">{req.destinasi}</span>
+                        </div>
                     </div>
                     <div className="space-y-2 mb-4">
                        <div className="flex items-center gap-2 text-art-text/60">
@@ -2017,61 +2054,75 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                           <span className="text-[10px] font-black uppercase tracking-tight text-blue-600 font-mono">{req.jadwal}</span>
                        </div>
                     </div>
-                    <button 
-                      onClick={() => {
-                        const nd = [{ 
-                          id: Date.now().toString(), 
-                          name: req.destinasi, 
-                          region: "", 
-                          jadwal: req.jadwal, 
-                          kuota: "15 Pax Tersisa", 
-                          kuotaNum: 15,
-                          maxKuota: 15,
-                          mepo: "", 
-                          difficulty: "Menengah", 
-                          image: "", 
-                          beans: "", 
-                          path: req.jalur || "Jalur Utama", 
-                          duration: "2H 1M", 
-                          price: 0, 
-                          originalPrice: 0, 
-                          leaders: [], 
-                          startDate: "",
-                          status: 'draft' 
-                        }, ...data];
-                        setData(nd);
-                        setExpandedIndexes([0]);
-                        showToast("Request disetujui & disalin ke Draft!", "success");
-                        updateDoc(doc(db, 'bookings', req.id), { status: 'approved_to_draft' });
-                      }}
-                      className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2"
-                    >
-                       Approve <ChevronRight size={14} />
-                    </button>
+                    {req.status === 'pending' ? (
+                      <button 
+                        onClick={() => {
+                          const nd = [{ 
+                            id: Date.now().toString(), 
+                            name: req.destinasi, 
+                            region: "", 
+                            jadwal: req.jadwal, 
+                            kuota: "15 Pax Tersisa", 
+                            kuotaNum: 15,
+                            maxKuota: 15,
+                            consumedKuota: 0,
+                            mepo: "", 
+                            difficulty: "Menengah", 
+                            image: "", 
+                            beans: "", 
+                            path: req.jalur || "Jalur Utama", 
+                            duration: "2 Hari 1 Malam", 
+                            price: 0, 
+                            originalPrice: 0, 
+                            leaders: [], 
+                            startDate: "",
+                            status: 'draft' 
+                          }, ...data];
+                          setData(nd);
+                          setExpandedIndexes([0]);
+                          showToast("Request disetujui & disalin ke Draft!", "success");
+                          updateDoc(doc(db, 'bookings', req.id), { status: 'approved_to_draft' });
+                        }}
+                        className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2"
+                      >
+                         Approve Request <ChevronRight size={14} />
+                      </button>
+                    ) : (
+                      <div className="w-full py-2 bg-gray-50 text-gray-400 rounded-xl text-[9px] font-black uppercase text-center border-2 border-dashed border-gray-200">
+                        Sudah Di-Aproval (Cek Draft)
+                      </div>
+                    )}
                  </div>
               ))}
            </div>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-between bg-white p-4 rounded-lg border border-art-text/20 gap-4">
-        <p className="text-xs font-bold uppercase text-art-text/60">Manajemen Open Trip</p>
-        <div className="flex flex-wrap gap-2">
-           <div className="flex bg-white rounded-lg border-2 border-art-text overflow-hidden shadow-sm">
+      {/* Management Toolbar */}
+      <div className="flex flex-col sm:flex-row justify-between bg-white p-6 rounded-3xl border-4 border-art-text gap-4 shadow-[8px_8px_0px_0px_#1a1a1a] mb-6">
+        <div className="flex items-center gap-3">
+           <div className="w-10 h-10 bg-art-text text-white rounded-xl flex items-center justify-center shadow-[4px_4px_0px_0px_#1a1a1a]"><Calendar size={22} /></div>
+           <div>
+              <h3 className="text-md font-black uppercase text-art-text leading-tight">Manajemen Open Trip</h3>
+              <p className="text-[9px] font-bold text-art-text/40 uppercase">Kelola jadwal keberangkatan open trip</p>
+           </div>
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
+           <div className="flex bg-white rounded-xl border-2 border-art-text overflow-hidden shadow-sm">
              <button type="button" onClick={(e) => {
                e.preventDefault();
                const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft' }, ...data];
                setData(nd);
                setExpandedIndexes([0]);
-             }} className="hover:bg-art-bg px-4 py-2 text-[10px] font-black uppercase tracking-widest border-r-2 border-art-text">+ Custom Trip Manual</button>
+             }} className="hover:bg-art-bg px-4 py-2 text-[10px] font-black uppercase tracking-widest border-r-2 border-art-text">+ Trip Manual</button>
              <button type="button" onClick={(e) => {
                e.preventDefault();
-               const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Sabtu - Minggu", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2H 1M", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true }, ...data];
+               const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Sabtu - Minggu", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2 Hari 1 Malam", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true }, ...data];
                setData(nd);
                setExpandedIndexes([0]);
-             }} className="hover:bg-blue-50 text-blue-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest">+ Custom Trip Weekend</button>
+             }} className="hover:bg-blue-50 text-blue-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest">+ Trip Weekend</button>
            </div>
-           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
+           <button onClick={handleSave} className="bg-art-orange text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4">
