@@ -45,6 +45,8 @@ export interface OpenTrip {
   leaders?: string[];
   status?: 'draft' | 'published';
   desc?: string;
+  rundownText?: string;
+  rundownPdf?: string;
   visibility?: {
     mepo: boolean;
     difficulty: boolean;

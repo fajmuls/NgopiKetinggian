@@ -32,6 +32,20 @@ export const AdminPanelModal = ({
   const [activeCategory, setActiveCategory] = useState<'booking' | 'trip' | 'website'>('booking');
   const [activeTab, setActiveTab] = useState<string>('bookings');
   const [openTripPrefill, setOpenTripPrefill] = useState<any>(null);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [user] = useAuthState(auth);
+
+  useEffect(() => {
+    if (!isOpen || !user || !((user as any).email === 'mrachmanfm@gmail.com' || (user as any).email === 'mrahmanfm@gmail.com')) return;
+    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const unsub = onSnapshot(q, (snap) => {
+      setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, [isOpen, user]);
+
+  const pendingCount = bookings.filter(b => b.status === 'pending').length;
+  const requestCount = bookings.filter(b => b.type === 'open_request' && b.status === 'pending').length;
   
   if (!isOpen || !config) return null;
 
@@ -100,13 +114,36 @@ export const AdminPanelModal = ({
             <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
           </div>
           <div className="flex gap-2 px-4 pb-2 border-t border-art-text/10 pt-2">
-            <button onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'booking' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Booking</button>
-            <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'trip' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Trip</button>
-            <button onClick={() => { setActiveCategory('website'); setActiveTab('cerita'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'website' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Website</button>
+            <button onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'booking' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Manajemen Booking</button>
+            <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'trip' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Menu Trip</button>
+            <button onClick={() => { setActiveCategory('website'); setActiveTab('cerita'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'website' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Konten Website</button>
           </div>
         </div>
         
+        {/* GLOBAL NOTIFICATION BAR (Visible if pending bookings exist) */}
+        <div className="bg-art-orange/10 border-b border-art-text/10 px-6 py-2 flex items-center justify-between">
+           <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-art-orange animate-ping" />
+              <p className="text-[10px] font-black uppercase tracking-tighter text-art-text">Admin Alert System</p>
+           </div>
+           <div className="flex gap-4">
+              <div className="flex items-center gap-1.5 cursor-pointer hover:bg-white/40 px-2 py-0.5 rounded transition-colors" onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }}>
+                 <span className="text-[9px] font-extrabold text-art-text/60 uppercase">Daftar Booking:</span>
+                 <span className={`${pendingCount > 0 ? 'bg-art-orange animate-pulse' : 'bg-gray-400'} text-white text-[8px] font-black px-1.5 py-0.5 rounded-md min-w-[18px] text-center`}>
+                    {pendingCount} 
+                 </span>
+              </div>
+              <div className="flex items-center gap-1.5 cursor-pointer hover:bg-white/40 px-2 py-0.5 rounded transition-colors" onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }}>
+                 <span className="text-[9px] font-extrabold text-art-text/60 uppercase">Requests:</span>
+                 <span className={`${requestCount > 0 ? 'bg-blue-600' : 'bg-gray-400'} text-white text-[8px] font-black px-1.5 py-0.5 rounded-md min-w-[18px] text-center`}>
+                    {requestCount} 
+                 </span>
+              </div>
+           </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
+
           {/* Sub Sidebar Tabs */}
           <div className="flex sm:flex-col gap-1.5 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
             {activeCategory === 'booking' && (
@@ -135,7 +172,8 @@ export const AdminPanelModal = ({
           
           {/* Content */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-art-bg/50">
-            {activeTab === 'bookings' && <BookingsAdmin showToast={showToast} config={config} updateConfig={updateConfig} onNavigateToOpenTrip={(prefillData: any) => { setOpenTripPrefill(prefillData); setActiveCategory('trip'); setActiveTab('openTrips'); }} />}
+            {activeTab === 'bookings' && <BookingsAdmin bookings={bookings} showToast={showToast} config={config} updateConfig={updateConfig} onNavigateToOpenTrip={(prefillData: any) => { setOpenTripPrefill(prefillData); setActiveCategory('trip'); setActiveTab('openTrips'); }} />}
+
             {activeTab === 'openTrips' && <OpenTripsAdmin config={config} updateConfig={updateConfig} showToast={showToast} prefillData={openTripPrefill} clearPrefill={() => setOpenTripPrefill(null)} />}
             {activeTab === 'destinations' && <DestinationsAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.destinations} />}
             {activeTab === 'leaders' && <LeadersAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultList={defaultLists.leaders} />}
@@ -152,28 +190,10 @@ export const AdminPanelModal = ({
   );
 };
 
-const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }: any) => {
-  const [bookings, setBookings] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
+const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNavigateToOpenTrip }: any) => {
+  const [loading, setLoading] = React.useState(false);
   const [showDashboard, setShowDashboard] = React.useState(false);
-
-  const [user] = useAuthState(auth);
-  React.useEffect(() => {
-    if (!user || (user.email !== 'mrachmanfm@gmail.com' && user.email !== 'mrahmanfm@gmail.com') || !config) {
-      if (user) setLoading(false);
-      return;
-    }
-    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setLoading(false);
-    }, (error) => {
-      console.error("Firestore onSnapshot error:", error);
-      setLoading(false);
-      showToast('Gagal memuat booking. Silahkan lapor admin.', 'error');
-    });
-    return () => unsubscribe();
-  }, [user]);
+  // Remove local useEffect and state for bookings
 
   const syncOpenTripQuota = async (currentBookings: any[], updatedBookingId?: string, newStatus?: string, deletedBookingId?: string) => {
 
@@ -466,32 +486,37 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* NOTIFICATION PANEL */}
-        <div className="bg-white border-2 border-art-text rounded-3xl p-6 shadow-sm">
+        <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
           <div className="flex items-center justify-between mb-6">
-             <div className="flex items-center gap-2">
-                <AlertCircle size={20} className="text-art-orange" />
-                <h3 className="text-xl font-black uppercase text-art-text tracking-tighter">Notifikasi</h3>
+             <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a] animate-pulse">
+                   <AlertCircle size={22} />
+                </div>
+                <div>
+                   <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Notification Box</h3>
+                   <p className="text-[10px] font-bold text-art-text/40 uppercase">Aksi yang diperlukan oleh admin</p>
+                </div>
              </div>
-             <span className="bg-art-orange text-white text-[10px] font-black px-2 py-1 rounded-lg">{pendingBookings.length} Pesanan Baru</span>
+             <span className="bg-art-orange text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-sm">{pendingBookings.length} Pesanan</span>
           </div>
           
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
             {pendingBookings.length === 0 ? (
-              <div className="py-10 text-center border-2 border-dashed border-art-text/10 rounded-2xl">
-                 <p className="text-[10px] font-bold text-art-text/30 uppercase">Tidak ada pesanan baru</p>
+              <div className="py-12 text-center border-2 border-dashed border-art-text/10 rounded-2xl bg-gray-50/50">
+                 <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest">Tidak ada notifikasi baru</p>
               </div>
             ) : (
               pendingBookings.map((req: any) => (
-                <div key={req.id} className={`${req.type === 'open_request' ? 'bg-blue-50 border-blue-200' : 'bg-art-orange/5 border-art-orange/20'} border-2 p-4 rounded-2xl space-y-3 relative`}>
-                  {req.type === 'open_request' && <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase shadow-sm">Request Open Trip</div>}
+                <div key={req.id} className={`${req.type === 'open_request' ? 'bg-blue-50 border-blue-200' : 'bg-white border-art-text'} border-2 p-4 rounded-2xl space-y-3 relative shadow-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all`}>
+                  {req.type === 'open_request' && <div className="absolute -top-2 left-4 bg-blue-600 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase shadow-sm">Request Open Trip</div>}
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="font-black uppercase text-sm text-art-text">{req.nama}</h4>
-                      <p className="text-[10px] font-bold text-art-text/40">{req.wa}</p>
+                      <h4 className="font-black uppercase text-[12px] text-art-text leading-tight">{req.nama}</h4>
+                      <p className="text-[10px] font-bold text-art-text/40 font-mono tracking-tighter">{req.wa}</p>
                     </div>
                     <div className="text-right">
-                       <span className="text-[8px] font-black uppercase bg-white px-2 py-1 rounded border border-art-text/10 text-art-text block mb-1">{req.destinasi}</span>
-                       <span className="text-[7px] font-bold text-art-orange/60">{req.jadwal}</span>
+                       <span className="text-[9px] font-black uppercase bg-art-text text-white px-2 py-0.5 rounded-md mb-1 block shadow-sm">{req.destinasi}</span>
+                       <span className="text-[8px] font-bold text-art-text/40 font-mono">{req.jadwal}</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -504,12 +529,12 @@ const BookingsAdmin = ({ showToast, config, updateConfig, onNavigateToOpenTrip }
                            showToast("Gagal update", "error");
                         }
                       }}
-                      className="flex-1 py-2 bg-white text-art-text border border-art-text/20 rounded-xl text-[9px] font-black uppercase hover:bg-gray-50 transition-all shadow-sm"
+                      className="flex-1 py-2.5 bg-white text-art-text border-2 border-art-text rounded-xl text-[9px] font-black uppercase hover:bg-art-bg transition-all shadow-[2px_2px_0px_0px_#1a1a1a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
                     >Proses</button>
                     {req.type === 'open_request' && (
                         <button 
                           onClick={() => onNavigateToOpenTrip && onNavigateToOpenTrip(req)}
-                          className="flex-1 py-2 bg-art-orange text-white rounded-xl text-[9px] font-black uppercase shadow-[3px_3px_0px_0px_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                          className="flex-1 py-2.5 bg-blue-600 text-white border-2 border-art-text rounded-xl text-[9px] font-black uppercase shadow-[2px_2px_0px_0px_#1a1a1a] hover:bg-blue-700 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all"
                         >Buat Trip</button>
                     )}
                   </div>
@@ -1981,6 +2006,8 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
       const defaultDuration = dest.paths?.[0]?.durations?.[0]?.label || "2H 1M";
       const basePrice = dest.paths?.[0]?.durations?.[0]?.price || 0;
       const originalPrice = dest.paths?.[0]?.durations?.[0]?.originalPrice || 0;
+      const rundownPdf = dest.paths?.[0]?.durations?.[0]?.rundownPdf || "";
+      const rundownText = dest.paths?.[0]?.durations?.[0]?.rundownHtml || "";
 
       nd[i] = { 
         ...nd[i], 
@@ -1999,6 +2026,8 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
         duration: defaultDuration,
         price: basePrice,
         originalPrice: originalPrice,
+        rundownPdf: rundownPdf,
+        rundownText: rundownText,
         leaders: [],
         status: 'draft'
       };
@@ -2108,20 +2137,21 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
            </div>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-           <div className="flex bg-white rounded-xl border-2 border-art-text overflow-hidden shadow-sm">
-             <button type="button" onClick={(e) => {
-               e.preventDefault();
-               const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft' }, ...data];
-               setData(nd);
-               setExpandedIndexes([0]);
-             }} className="hover:bg-art-bg px-4 py-2 text-[10px] font-black uppercase tracking-widest border-r-2 border-art-text">+ Trip Manual</button>
-             <button type="button" onClick={(e) => {
-               e.preventDefault();
-               const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Sabtu - Minggu", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2 Hari 1 Malam", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true }, ...data];
-               setData(nd);
-               setExpandedIndexes([0]);
-             }} className="hover:bg-blue-50 text-blue-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest">+ Trip Weekend</button>
-           </div>
+              <div className="flex bg-white rounded-xl border-2 border-art-text overflow-hidden shadow-sm">
+                 <button type="button" onClick={(e) => {
+                   e.preventDefault();
+                   const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft', rundownText: '', rundownPdf: '' }, ...data];
+                   setData(nd);
+                   setExpandedIndexes([0]);
+                 }} className="hover:bg-art-bg px-4 py-2 text-[10px] font-black uppercase tracking-widest border-r-2 border-art-text">+ Trip Manual</button>
+                 <button type="button" onClick={(e) => {
+                   e.preventDefault();
+                   const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Pilih Tanggal Weekend", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2 Hari 1 Malam", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true, rundownText: '', rundownPdf: '' }, ...data];
+                   setData(nd);
+                   setExpandedIndexes([0]);
+                 }} className="hover:bg-blue-50 text-blue-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest">+ Trip Weekend</button>
+              </div>
+
            <button onClick={handleSave} className="bg-art-orange text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
         </div>
       </div>
@@ -2278,26 +2308,57 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Keberangkatan</label>
-                  <input 
-                    type="date"
-                    className={`w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono ${ot.isWeekend ? 'border-blue-200' : ''}`} 
-                    value={ot.startDate || ""} 
-                    onChange={e => { 
-                      const date = e.target.value;
-                      if (ot.isWeekend) {
-                        const d = new Date(date);
-                        if (d.getDay() !== 6) {
-                          showToast("Trip Weekend harus mulai di hari Sabtu!", "error");
-                          return;
-                        }
-                      }
-                      const nd = [...data]; 
-                      nd[i].startDate = date; 
-                      nd[i].jadwal = calculateDateRange(date, ot.duration);
-                      setData(nd); 
-                    }} 
-                  />
-                  {ot.isWeekend && <p className="text-[7px] font-black text-blue-500 uppercase mt-0.5 ml-1">Pilih Hari Sabtu</p>}
+                  {ot.isWeekend ? (
+                    <div className="flex gap-1">
+                       <select 
+                         className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all"
+                         value={ot.startDate ? new Date(ot.startDate).getMonth() : ""}
+                         onChange={(e) => {
+                            const month = parseInt(e.target.value);
+                            const year = new Date().getFullYear();
+                            // Reset date when month changes
+                            const nd = [...data];
+                            nd[i].startDate = ""; 
+                            nd[i].jadwal = "Pilih Tanggal...";
+                            setData(nd);
+                         }}
+                       >
+                         <option value="">Bulan</option>
+                         {["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"].map((m, idx) => <option key={m} value={idx}>{m}</option>)}
+                       </select>
+                       <input 
+                         type="date"
+                         className="flex-[2] border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                         value={ot.startDate || ""} 
+                         onChange={e => { 
+                           const date = e.target.value;
+                           const d = new Date(date);
+                           if (d.getDay() !== 6) {
+                             showToast("Trip Weekend harus mulai di hari Sabtu!", "error");
+                             return;
+                           }
+                           const nd = [...data]; 
+                           nd[i].startDate = date; 
+                           nd[i].jadwal = calculateDateRange(date, ot.duration || "2H 1M");
+                           setData(nd); 
+                         }} 
+                       />
+                    </div>
+                  ) : (
+                    <input 
+                      type="date"
+                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                      value={ot.startDate || ""} 
+                      onChange={e => { 
+                        const date = e.target.value;
+                        const nd = [...data]; 
+                        nd[i].startDate = date; 
+                        nd[i].jadwal = calculateDateRange(date, ot.duration);
+                        setData(nd); 
+                      }} 
+                    />
+                  )}
+                  {ot.isWeekend && <p className="text-[7px] font-black text-blue-500 uppercase mt-0.5 ml-1">Harus Hari Sabtu</p>}
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Jadwal (Automatis)</label>
@@ -2307,6 +2368,38 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                     value={ot.jadwal || "Otomatis..."} 
                   />
                 </div>
+              </div>
+
+              {/* Rundown Section for Open Trip */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-2xl border-2 border-art-text shadow-sm">
+                 <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                       <label className="text-[9px] font-black uppercase text-art-text/40">Itinerary / Rundown PDF</label>
+                       {ot.rundownPdf && <a href={ot.rundownPdf} target="_blank" rel="noreferrer" className="text-[8px] text-blue-500 font-bold underline">Lihat PDF</a>}
+                    </div>
+                    <ImageUploader 
+                      value={ot.rundownPdf || ""} 
+                      onChange={url => {
+                         const nd = [...data];
+                         nd[i].rundownPdf = url;
+                         setData(nd);
+                      }} 
+                      placeholder="URL Google Drive / Unggah"
+                    />
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-art-text/40">Itinerary Teks (Manual)</label>
+                    <textarea 
+                       className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] h-24 outline-none focus:border-art-orange resize-none font-mono"
+                       value={ot.rundownText || ""}
+                       onChange={e => {
+                          const nd = [...data];
+                          nd[i].rundownText = e.target.value;
+                          setData(nd);
+                       }}
+                       placeholder="Contoh:&#10;H1: Perjalanan ke Pos 4&#10;H2: Summit & Turun..."
+                    />
+                 </div>
               </div>
 
               {/* Layer 4: Capacity + Availability */}

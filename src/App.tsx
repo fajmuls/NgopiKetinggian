@@ -328,6 +328,17 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
           const destData = config.destinationsData?.find((d: any) => d.name === (selectedDestinasi || '-'));
           const pathData = destData?.paths?.find((p: any) => p.name === (selectedJalur || '-'));
           const durData = pathData?.durations?.find((dur: any) => dur.label === (selectedDurasi || '-'));
+          
+          let finalRundownText = durData?.rundownHtml || "";
+          let finalRundownPdf = durData?.rundownPdf || "";
+
+          if (currentType === 'open') {
+             const ot = config.openTrips?.find((t: any) => t.name === selectedDestinasi && t.jadwal === selectedJadwal);
+             if (ot) {
+                if (ot.rundownText) finalRundownText = ot.rundownText;
+                if (ot.rundownPdf) finalRundownPdf = ot.rundownPdf;
+             }
+          }
 
           await addDoc(collection(db, 'bookings'), {
             userId: user.uid,
@@ -350,8 +361,8 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
             totalPrice: netPrice || 0,
             createdAt: serverTimestamp(),
             status: 'pending', // Displayed as "Menunggu Konfirmasi Admin"
-            rundownText: durData?.rundownHtml || "",
-            rundownPdf: durData?.rundownPdf || ""
+            rundownText: finalRundownText,
+            rundownPdf: finalRundownPdf
           });
   
           if (currentType === 'open' && config) {
@@ -1419,12 +1430,13 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                           <button 
                             key={idx}
                             onClick={() => { playClick(); setSelectedPath(idx); }}
-                            className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border-2 transition-all ${selectedPath === idx ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/10 hover:border-art-text/30'}`}
+                            className={`text-[9px] font-black uppercase px-4 py-2.5 rounded-xl border-2 transition-all ${selectedPath === idx ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]' : 'bg-white text-art-text border-blue-100 hover:border-art-orange shadow-sm'}`}
                           >
                             {p.name}
                           </button>
                         ))}
                       </div>
+
                     </div>
 
                     <div>
@@ -1434,12 +1446,13 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
                           <button 
                             key={idx}
                             onClick={() => { playClick(); setSelectedDuration(idx); }}
-                            className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border-2 transition-all ${selectedDuration === idx ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/10 hover:border-art-text/30'}`}
+                            className={`text-[9px] font-black uppercase px-4 py-2.5 rounded-xl border-2 transition-all ${selectedDuration === idx ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]' : 'bg-white text-art-text border-blue-100 hover:border-art-orange shadow-sm'}`}
                           >
                             {dur.label}
                           </button>
                         ))}
                       </div>
+
                     </div>
 
                     <div className="bg-art-bg/50 rounded-2xl border-2 border-art-text/5 p-5 space-y-4">
@@ -1943,19 +1956,28 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { isOpen:
                                 {(b.rundownPdf || b.rundownText) && (
                                    <div className="flex flex-col gap-2">
                                       {b.rundownPdf ? (
-                                         <a 
-                                            href={b.rundownPdf} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-sm"
-                                         >
-                                            <FileText size={14} /> Itinerary PDF
-                                         </a>
+                                         <div className="grid grid-cols-2 gap-2">
+                                           <a 
+                                              href={b.rundownPdf} 
+                                              target="_blank" 
+                                              rel="noopener noreferrer"
+                                              className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-sm"
+                                           >
+                                              <Globe size={14} /> View Itinerary
+                                           </a>
+                                           <a 
+                                              href={b.rundownPdf} 
+                                              download
+                                              className="flex items-center justify-center gap-2 bg-art-text text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-orange transition-colors shadow-sm"
+                                           >
+                                              <Download size={14} /> PDF
+                                           </a>
+                                         </div>
                                       ) : (
                                          <button 
                                             onClick={() => {
                                               playClick();
-                                              customAlert(<div className="text-xs whitespace-pre-wrap text-left p-4 leading-loose font-medium font-mono">{b.rundownText}</div>, "Itinerary / Rundown");
+                                              customAlert(<div className="text-xs whitespace-pre-wrap text-left p-4 leading-loose font-medium font-mono border-2 border-art-text/10 rounded-2xl bg-white">{b.rundownText}</div>, "Itinerary / Rundown");
                                             }}
                                             className="w-full flex items-center justify-center gap-2 bg-art-text text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-orange transition-colors shadow-sm"
                                          >
@@ -1964,6 +1986,7 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { isOpen:
                                       )}
                                    </div>
                                 )}
+
                                 
                                 <button 
                                   onClick={() => window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(`Halo Admin, saya ingin menanyakan status booking ID: ${(b.id || '').substring(0,8)}`)}`, '_blank')}
