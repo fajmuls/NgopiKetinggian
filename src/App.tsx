@@ -322,63 +322,62 @@ const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities
       ].filter(Boolean).join(' | ');
   
       setIsSubmittingBooking(true);
-
-      if (user) {
-        try {
-          const destData = config.destinationsData?.find((d: any) => d.name === (selectedDestinasi || '-'));
-          const pathData = destData?.paths?.find((p: any) => p.name === (selectedJalur || '-'));
-          const durData = pathData?.durations?.find((dur: any) => dur.label === (selectedDurasi || '-'));
-          
-          let finalRundownText = durData?.rundownHtml || "";
-          let finalRundownPdf = durData?.rundownPdf || "";
-
-          if (currentType === 'open') {
-             const ot = config.openTrips?.find((t: any) => t.name === selectedDestinasi && t.jadwal === selectedJadwal);
-             if (ot) {
-                if (ot.rundownText) finalRundownText = ot.rundownText;
-                if (ot.rundownPdf) finalRundownPdf = ot.rundownPdf;
-             }
-          }
-
-          await addDoc(collection(db, 'bookings'), {
-            userId: user.uid,
-            nama: nama || 'Tanpa Nama', 
-            email: email || user.email || 'tanpa@email.com', 
-            wa: wa || '08000000',
-            destinasi: selectedDestinasi || '-', 
-            jalur: selectedJalur || '-',
-            durasi: selectedDurasi || '-', 
-            jadwal: finalJadwalLabel || '-', 
-            peserta: pesertaCount || 1,
-            opsionalText: finalOpsionalText || 'Tidak ada',
-            opsionalItems: opsionalItemsList,
-            opsionalPrice: totalOpsionalPrice,
-            discountAmount: discountAmount,
-            discountPercentage: activePromo?.discount || 0,
-            promoCode: isPromoValid ? promoCode : '',
-            deskripsi: deskripsi || 'Tidak ada catatan khusus',
-            type: currentType || 'private',
-            totalPrice: netPrice || 0,
-            createdAt: serverTimestamp(),
-            status: 'pending', // Displayed as "Menunggu Konfirmasi Admin"
-            rundownText: finalRundownText,
-            rundownPdf: finalRundownPdf
-          });
   
-          if (currentType === 'open' && config) {
-             const updatedOpenTrips = (config.openTrips || []).map((ot: any) => {
-                if (ot.name === selectedDestinasi && ot.jadwal === selectedJadwal) {
-                   const currentConsumed = typeof ot.consumedKuota === 'number' ? ot.consumedKuota : 0;
-                   const newConsumed = currentConsumed + Number(pesertaCount);
-                   return { ...ot, consumedKuota: newConsumed };
-                }
-                return ot;
-             });
-             updateConfig({ openTrips: updatedOpenTrips });
-          }
-        } catch (error) {
-          console.error("Booking addDoc error: ", error);
+      try {
+        const destData = config.destinationsData?.find((d: any) => d.name === (selectedDestinasi || '-'));
+        const pathData = destData?.paths?.find((p: any) => p.name === (selectedJalur || '-'));
+        const durData = pathData?.durations?.find((dur: any) => dur.label === (selectedDurasi || '-'));
+        
+        let finalRundownText = durData?.rundownHtml || "";
+        let finalRundownPdf = durData?.rundownPdf || "";
+
+        if (currentType === 'open') {
+           const ot = config.openTrips?.find((t: any) => t.name === selectedDestinasi && t.jadwal === selectedJadwal);
+           if (ot) {
+              if (ot.rundownText) finalRundownText = ot.rundownText;
+              if (ot.rundownPdf) finalRundownPdf = ot.rundownPdf;
+           }
         }
+
+        await addDoc(collection(db, 'bookings'), {
+          userId: user?.uid || 'guest_id_' + Date.now(),
+          nama: nama || 'Tanpa Nama', 
+          email: email || user?.email || 'tanpa@email.com', 
+          wa: wa || '08000000',
+          destinasi: selectedDestinasi || '-', 
+          jalur: selectedJalur || '-',
+          durasi: selectedDurasi || '-', 
+          jadwal: finalJadwalLabel || '-', 
+          peserta: pesertaCount || 1,
+          opsionalText: finalOpsionalText || 'Tidak ada',
+          opsionalItems: opsionalItemsList,
+          opsionalPrice: totalOpsionalPrice,
+          discountAmount: discountAmount,
+          discountPercentage: activePromo?.discount || 0,
+          promoCode: isPromoValid ? promoCode : '',
+          deskripsi: deskripsi || 'Tidak ada catatan khusus',
+          type: currentType || 'private',
+          totalPrice: netPrice || 0,
+          createdAt: serverTimestamp(),
+          status: 'pending', // Displayed as "Menunggu Konfirmasi Admin"
+          rundownText: finalRundownText,
+          rundownPdf: finalRundownPdf
+        });
+
+        if (currentType === 'open' && config) {
+           const updatedOpenTrips = (config.openTrips || []).map((ot: any) => {
+              if (ot.name === selectedDestinasi && ot.jadwal === selectedJadwal) {
+                 const currentConsumed = typeof ot.consumedKuota === 'number' ? ot.consumedKuota : 0;
+                 const newConsumed = currentConsumed + Number(pesertaCount);
+                 return { ...ot, consumedKuota: newConsumed };
+              }
+              return ot;
+           });
+           updateConfig({ openTrips: updatedOpenTrips });
+        }
+      } catch (error) {
+        console.error("Booking addDoc error: ", error);
+        customAlert("Gagal menyimpan ke database, mohon hubungi admin", "Sedang ada gangguan sinkronisasi.");
       }
   
       const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Jalur: ${selectedJalur}\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${isPromoValid ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${finalOpsionalText ? finalOpsionalText.split(' | ').map(o => `• ${o}`).join('\n') : '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
@@ -2422,11 +2421,21 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-28 md:mt-48">
           <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-40 relative">
             
-              <motion.h1 
+              <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className={`text-4xl sm:text-5xl md:text-[52px] lg:text-[70px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-4 md:mb-6 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
+                className="mb-4 w-full text-center md:text-left"
+              >
+                <p className="text-art-orange font-serif italic text-lg md:text-xl font-bold">{config.homepage?.heroSub || "Open Trip Eksklusif"}</p>
+                <p className="text-[9px] md:text-[11px] font-sans font-bold uppercase tracking-widest text-art-text/40 mt-1 block">{config.homepage?.heroFeatures || "Fasilitas premium • Pemandu ahli • Keamanan terjamin"}</p>
+              </motion.div>
+
+              <motion.h1 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className={`text-5xl sm:text-6xl md:text-[52px] lg:text-[70px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-4 md:mb-6 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
               >
                 <sup className="text-art-orange text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
               </motion.h1>
@@ -2434,22 +2443,12 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               <motion.p 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
                 className={`text-[12px] md:text-base font-medium max-w-xs sm:max-w-md mb-6 md:mb-8 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto leading-relaxed ${theme === 'default' ? 'text-art-text/80' : 'text-art-text/75'}`}
               >
                 {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, and magisnya lautan awan dari puncak gunung."}
                 <br/><span className="mt-2 block font-serif italic font-bold text-xs md:text-sm text-art-orange">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
               </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className="mb-8 w-full text-center md:text-left"
-              >
-                <p className="text-art-text font-serif italic text-lg md:text-xl font-bold">Open Trip Exclusive</p>
-                <p className="text-[9px] md:text-[11px] font-sans font-bold uppercase tracking-widest text-art-text/60 mt-1 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
-              </motion.div>
             
             <motion.div 
               initial={{ opacity: 0, y: 30 }}

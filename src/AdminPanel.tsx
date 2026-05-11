@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -353,7 +353,9 @@ const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNavigateTo
     doc.text(`EMAIL: ${booking.email}`, 25, 85);
     
     drawSectionHeader('DETAIL PERJALANAN', 95);
-    doc.text(`DESTINASI: ${booking.destinasi.toUpperCase()} (VIA ${booking.jalur.toUpperCase()})`, 25, 110);
+    const pathLabel = (booking.jalur || "").toUpperCase();
+    const finalPath = pathLabel.startsWith("VIA") ? pathLabel : `VIA ${pathLabel}`;
+    doc.text(`DESTINASI: ${booking.destinasi.toUpperCase()} (${finalPath})`, 25, 110);
     doc.text(`JADWAL: ${booking.jadwal} (${booking.durasi})`, 25, 115);
     doc.text(`JUMLAH PESERTA: ${booking.peserta} ORANG`, 25, 120);
     doc.text(`TIPE TRIP: ${booking.type === 'open' ? 'OPEN TRIP' : booking.type === 'open_request' ? 'REQ. OPEN TRIP' : 'PRIVATE TRIP'}`, 25, 125);
@@ -1745,19 +1747,19 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <div>
-              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Slogan Atas</label>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">1. Slogan Atas</label>
               <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroSub || ''} onChange={e => setData({...data, heroSub: e.target.value})} placeholder="Open Trip Eksklusif" />
            </div>
            <div>
-              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Floating Features</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fasilitas Premium • Pemandu Ahli" />
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">2. Floating Features</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fasilitas premium • Pemandu ahli • Keamanan terjamin" />
            </div>
            <div>
-              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Prefix Judul</label>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">3. Prefix Judul</label>
               <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-black uppercase" value={data.heroTitlePrefix || ''} onChange={e => setData({...data, heroTitlePrefix: e.target.value})} placeholder="TRIP" />
            </div>
            <div>
-              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Tagline Bawah</label>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">4. Tagline Bawah</label>
               <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="JAYA / JAYA / JAYA" />
            </div>
         </div>
@@ -1771,16 +1773,11 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
               <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-medium h-20 resize-none" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Nikmati pengalaman trip tak terlupakan..."></textarea>
            </div>
         </div>
-        
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Foto Background Hero</label>
-          <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
-        </div>
       </div>
 
       <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
         <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-          <h3 className="font-bold text-sm uppercase">Edit Slide Gunung (Ketinggian MDPL)</h3>
+          <h3 className="font-bold text-sm uppercase">5. Edit Slide Gunung (Ketinggian MDPL)</h3>
           <button type="button" onClick={(e) => { e.preventDefault(); setData({ ...data, heroSlides: [...data.heroSlides, { name: "Gunung Contoh", height: "0.000", image: "" }] })}} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Slide</button>
         </div>
         
@@ -1836,6 +1833,13 @@ const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
                 </div>
              </div>
            ))}
+        </div>
+      </div>
+
+      <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">6. Foto Background Hero</label>
+          <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
         </div>
       </div>
 
@@ -2343,38 +2347,6 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                 </div>
               </div>
 
-              {/* Rundown Section for Open Trip */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-2xl border-2 border-art-text shadow-sm">
-                 <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                       <label className="text-[9px] font-black uppercase text-art-text/40">Itinerary / Rundown PDF</label>
-                       {ot.rundownPdf && <a href={ot.rundownPdf} target="_blank" rel="noreferrer" className="text-[8px] text-blue-500 font-bold underline">Lihat PDF</a>}
-                    </div>
-                    <ImageUploader 
-                      value={ot.rundownPdf || ""} 
-                      onChange={url => {
-                         const nd = [...data];
-                         nd[i].rundownPdf = url;
-                         setData(nd);
-                      }} 
-                      placeholder="URL Google Drive / Unggah"
-                    />
-                 </div>
-                 <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-art-text/40">Itinerary Teks (Manual)</label>
-                    <textarea 
-                       className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] h-24 outline-none focus:border-art-orange resize-none font-mono"
-                       value={ot.rundownText || ""}
-                       onChange={e => {
-                          const nd = [...data];
-                          nd[i].rundownText = e.target.value;
-                          setData(nd);
-                       }}
-                       placeholder="Contoh:&#10;H1: Perjalanan ke Pos 4&#10;H2: Summit & Turun..."
-                    />
-                 </div>
-              </div>
-
               {/* Layer 4: Capacity + Availability */}
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-1">
@@ -2450,7 +2422,90 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                 </div>
               </div>
 
-               {/* Layer 7: Group Management (NEW) */}
+              {/* Rundown Section for Open Trip - MOVED TO BOTTOM */}
+              <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10 space-y-4">
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-2">
+                      <FileText size={16} className="text-art-text" />
+                      <h4 className="text-[11px] font-black uppercase text-art-text tracking-widest">Rundown Box Settings</h4>
+                   </div>
+                   <button 
+                      onClick={() => {
+                        const dest = config.destinationsData?.find((d: any) => d.name === ot.name);
+                        const path = dest?.paths?.find((p: any) => p.name === ot.path);
+                        const dur = path?.durations?.find((dur: any) => dur.label === ot.duration);
+                        if (dur) {
+                          const nd = [...data];
+                          nd[i].rundownPdf = dur.rundownPdf || "";
+                          nd[i].rundownText = dur.rundownHtml || "";
+                          setData(nd);
+                          showToast("Rundown disinkronkan dari destinasi!");
+                        } else {
+                          showToast("Data destinasi tidak ditemukan", "info");
+                        }
+                      }}
+                      className="text-[8px] bg-art-text text-white px-2 py-1 rounded font-bold uppercase tracking-widest"
+                   >Sync dari Destinasi</button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                     <label className="text-[9px] font-black uppercase text-art-text/40">1. Initiate Rundown PDF</label>
+                     <ImageUploader 
+                       value={ot.rundownPdf || ""} 
+                       onChange={url => {
+                          const nd = [...data];
+                          nd[i].rundownPdf = url;
+                          setData(nd);
+                       }} 
+                       placeholder="URL Rundown PDF"
+                     />
+                  </div>
+                  <div className="space-y-1">
+                     <label className="text-[9px] font-black uppercase text-art-text/40">2. Edit Teks Itinerary</label>
+                     <textarea 
+                        className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] h-24 outline-none focus:border-art-orange resize-none font-mono"
+                        value={ot.rundownText || ""}
+                        onChange={e => {
+                           const nd = [...data];
+                           nd[i].rundownText = e.target.value;
+                           setData(nd);
+                        }}
+                        placeholder="Itinerary manual..."
+                     />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6">
+                   <div className="flex items-center gap-2">
+                     <input 
+                        type="checkbox" 
+                        id={`showPdf-${i}`}
+                        className="w-4 h-4 rounded border-art-text/20 text-art-orange focus:ring-art-orange"
+                        checked={ot.showRundownPdf !== false}
+                        onChange={e => {
+                           const nd = [...data];
+                           nd[i].showRundownPdf = e.target.checked;
+                           setData(nd);
+                        }}
+                     />
+                     <label htmlFor={`showPdf-${i}`} className="text-[10px] font-black uppercase text-art-text/60 cursor-pointer">3. Visibility PDF Rundown</label>
+                   </div>
+                   
+                   <button 
+                      className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 hover:underline"
+                      onClick={() => {
+                        const rundownHtml = ot.rundownText || "Itinerary belum tersedia.";
+                        const title = `${ot.name} - ${ot.duration}`;
+                        alert(`Review Rundown:\n\n${title}\n\n${rundownHtml.replace(/<[^>]*>/g, '')}`);
+                      }}
+                   >
+                      <Eye size={14} /> 4. Review Rundown
+                   </button>
+                </div>
+              </div>
+
+               {/* Layer 7: Group Management (MOVED TO BOTTOM) */}
                <div className="bg-art-green/5 p-5 rounded-2xl border-2 border-art-green/20 space-y-4">
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-2">
