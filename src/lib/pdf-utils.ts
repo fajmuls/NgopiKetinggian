@@ -48,7 +48,7 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
   
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  const rundownText = (durInfo && durInfo.rundownHtml) ? durInfo.rundownHtml : `Rencana Perjalanan ${destinasi} (${durasi}):\n\n1. Persiapan & Briefing\n2. Pendakian / Perjalanan ke Lokasi\n3. Kegiatan Utama\n4. Istirahat & Dokumentasi\n5. Perjalanan Kembali\n\nInformasi lebih lanjut hubungi admin.`;
+  const rundownText = (durInfo && (durInfo.rundownHtml || durInfo.rundownText)) ? (durInfo.rundownHtml || durInfo.rundownText) : `Rencana Perjalanan ${destinasi} (${durasi}):\n\n1. Persiapan & Briefing\n2. Pendakian / Perjalanan ke Lokasi\n3. Kegiatan Utama\n4. Istirahat & Dokumentasi\n5. Perjalanan Kembali\n\nInformasi lebih lanjut hubungi admin.`;
   const textLines = doc.splitTextToSize(rundownText, 170);
   doc.text(textLines, 20, 65);
 

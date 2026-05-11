@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2 } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
@@ -1203,8 +1203,31 @@ const destinationsData = [
 
 // Removed hardcoded heroSlides
 
+const RundownPreviewModal = ({ isOpen, onClose, rundownText, title }: { isOpen: boolean, onClose: () => void, rundownText: string, title: string }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[160] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 text-left">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white w-full max-w-xl rounded-3xl border-4 border-art-text overflow-hidden flex flex-col max-h-[85vh] shadow-[16px_16px_0px_0px_rgba(26,26,26,1)]">
+        <div className="p-6 bg-art-text text-white flex justify-between items-center">
+            <h3 className="text-sm font-black uppercase tracking-widest">Itinerary: {title}</h3>
+            <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={20} /></button>
+        </div>
+        <div className="p-8 overflow-y-auto flex-1 bg-[#FAFAFA]">
+            <div className="whitespace-pre-wrap text-[11px] font-medium text-art-text/80 leading-relaxed font-mono bg-white p-6 rounded-2xl border-2 border-art-text/5 shadow-inner">
+               {rundownText}
+            </div>
+            <div className="mt-8 text-center">
+               <p className="text-[10px] font-black uppercase text-art-text/20 tracking-[0.3em]">Ngopi Di Ketinggian • Adventure & Brew</p>
+            </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any, allLeaders: any[], config: any }> = ({ ot, onJoin, getSisaKuota, visibilities, allLeaders, config }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [showWebRundown, setShowWebRundown] = useState(false);
   const { playClick, playHover } = useSound();
   
   const v = ot.visibility || {
@@ -1221,7 +1244,8 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
   const durInfo = config?.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.find((p: any) => p.name === ot.path)?.durations?.find((dur: any) => dur.label === ot.duration);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col">
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative">
+      <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
       <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
         <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
          <div className="absolute top-3 left-3 bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1">
@@ -1309,13 +1333,16 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
                         )}
                         {ot.showRundownPdf !== false && (
                           <div className="flex gap-2">
+                           <button type="button" onClick={() => setShowWebRundown(true)} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
+                             Lihat Rundown Web <Eye size={8} />
+                           </button>
                            {durInfo.rundownPdf ? (
                               <a href={durInfo.rundownPdf} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                                PDF Rundown Lengkap <Download size={8} />
+                                PDF Rundown <Download size={8} />
                               </a>
                            ) : (
                               <button type="button" onClick={(e) => { e.stopPropagation(); generateRundownPdf(durInfo, ot.name, ot.path, ot.duration); }} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                                Lihat PDF Rundown <Download size={8} />
+                                PDF Rundown <Download size={8} />
                               </button>
                            )}
                           </div>
@@ -1360,6 +1387,7 @@ const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur
 };
 const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destinasi: string, jalur: string, durasi: string, type: 'private' | 'open') => void }> = ({ dest, visibilities, onBook }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [showWebRundown, setShowWebRundown] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
   
   const safePaths = useMemo(() => dest.paths && dest.paths.length > 0 ? dest.paths : [{ name: "Jalur Utama", durations: dest.durations || [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] }], [dest.paths, dest.durations]);
@@ -1383,23 +1411,24 @@ const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destina
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group bg-white border-2 border-art-text rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300"
+      className="group bg-white border-2 border-art-text rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 relative"
     >
+      <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={currentDur?.rundownHtml || currentDur?.rundownText || "Itinerary belum tersedia."} title={`${dest.name} - ${currentDur?.label}`} />
       <div className="relative h-64 overflow-hidden border-b-2 border-art-text">
         <img src={dest.image || undefined} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
         <div className="absolute top-4 right-4 bg-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
         <div className="absolute top-4 left-4 bg-art-orange text-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.difficulty}</div>
       </div>
 
-      <div className="p-6 md:p-8">
+      <div className="p-5 md:p-6">
         <div className="flex justify-between items-end mb-4">
            <div>
-              <h3 className="text-2xl font-black uppercase text-art-text tracking-tight mb-1">{dest.name}</h3>
-              <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">{String(dest.height).replace(/mdpl/i, '').trim()} MDPL</p>
+              <h3 className="text-lg md:text-xl font-black uppercase text-art-text tracking-tight mb-1">{dest.name}</h3>
+              <p className="text-[9px] font-bold text-art-text/40 uppercase tracking-widest">{String(dest.height).replace(/mdpl/i, '').trim()} MDPL</p>
            </div>
            <div className="text-right">
-              <p className="text-[10px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>
-              <p className="text-2xl font-black text-art-text">Rp {dest.paths?.[0]?.durations?.[0]?.price || '0'}k</p>
+              <p className="text-[9px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>
+              <p className="text-lg md:text-xl font-black text-art-text">Rp {dest.paths?.[0]?.durations?.[0]?.price || '0'}k</p>
            </div>
         </div>
 
@@ -1955,35 +1984,36 @@ const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { isOpen:
 
                                 {(b.rundownPdf || b.rundownText) && (
                                    <div className="flex flex-col gap-2">
-                                      {b.rundownPdf ? (
-                                         <div className="grid grid-cols-2 gap-2">
-                                           <a 
-                                              href={b.rundownPdf} 
-                                              target="_blank" 
-                                              rel="noopener noreferrer"
-                                              className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-sm"
-                                           >
-                                              <Globe size={14} /> View Itinerary
-                                           </a>
-                                           <a 
-                                              href={b.rundownPdf} 
-                                              download
-                                              className="flex items-center justify-center gap-2 bg-art-text text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-orange transition-colors shadow-sm"
-                                           >
-                                              <Download size={14} /> PDF
-                                           </a>
-                                         </div>
-                                      ) : (
+                                      <div className="grid grid-cols-2 gap-2">
                                          <button 
                                             onClick={() => {
                                               playClick();
-                                              customAlert(<div className="text-xs whitespace-pre-wrap text-left p-4 leading-loose font-medium font-mono border-2 border-art-text/10 rounded-2xl bg-white">{b.rundownText}</div>, "Itinerary / Rundown");
+                                              if (b.rundownPdf) {
+                                                customAlert(
+                                                  <div className="w-full h-[80vh]">
+                                                    <iframe src={b.rundownPdf} className="w-full h-full rounded-xl border-2 border-art-text/10" title="Rundown Viewer" />
+                                                  </div>, 
+                                                  "Lihat Itinerary"
+                                                );
+                                              } else {
+                                                customAlert(<div className="text-[11px] whitespace-pre-wrap text-left p-5 leading-relaxed font-medium font-mono border-2 border-art-text/10 rounded-2xl bg-white">{b.rundownText}</div>, "Itinerary / Rundown");
+                                              }
                                             }}
-                                            className="w-full flex items-center justify-center gap-2 bg-art-text text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-orange transition-colors shadow-sm"
+                                            className="flex items-center justify-center gap-2 bg-art-text text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-orange transition-colors shadow-sm"
                                          >
-                                            <FileText size={14} /> Lihat Itinerary
+                                            <Globe size={14} /> {b.rundownPdf ? 'View PDF' : 'View Text'}
                                          </button>
-                                      )}
+                                         
+                                         {b.rundownPdf && (
+                                           <a 
+                                              href={b.rundownPdf} 
+                                              download
+                                              className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-sm"
+                                           >
+                                              <Download size={14} /> PDF
+                                           </a>
+                                         )}
+                                      </div>
                                    </div>
                                 )}
 
@@ -2389,14 +2419,14 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           </div>
         </div>
 
-        <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-8 md:mt-0">
+        <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-28 md:mt-48">
           <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-40 relative">
             
               <motion.h1 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className={`text-4xl sm:text-5xl md:text-[60px] lg:text-[86px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-4 md:mb-6 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
+                className={`text-4xl sm:text-5xl md:text-[52px] lg:text-[70px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-4 md:mb-6 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
               >
                 <sup className="text-art-orange text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
               </motion.h1>
@@ -2405,20 +2435,20 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className={`text-[13px] md:text-lg font-medium max-w-xs sm:max-w-md mb-6 md:mb-8 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto ${theme === 'default' ? 'text-art-text/90' : 'text-art-text/80'}`}
+                className={`text-[12px] md:text-base font-medium max-w-xs sm:max-w-md mb-6 md:mb-8 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto leading-relaxed ${theme === 'default' ? 'text-art-text/80' : 'text-art-text/75'}`}
               >
                 {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, and magisnya lautan awan dari puncak gunung."}
-                <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-orange">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
+                <br/><span className="mt-2 block font-serif italic font-bold text-xs md:text-sm text-art-orange">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
               </motion.p>
 
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                className="mb-6 w-full text-center md:text-left"
+                className="mb-8 w-full text-center md:text-left"
               >
-                <p className="text-art-text font-serif italic text-xl md:text-2xl font-bold">Open Trip Exclusive</p>
-                <p className="text-[10px] md:text-xs font-sans font-bold uppercase tracking-widest text-art-text/70 mt-1 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
+                <p className="text-art-text font-serif italic text-lg md:text-xl font-bold">Open Trip Exclusive</p>
+                <p className="text-[9px] md:text-[11px] font-sans font-bold uppercase tracking-widest text-art-text/60 mt-1 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
               </motion.div>
             
             <motion.div 
@@ -2707,7 +2737,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             <div className="mb-32">
               <div className="text-center max-w-5xl mx-auto mb-16 px-4">
                 <span className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-art-orange mb-4 block">Fixed Schedule Adventure</span>
-                <h2 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Open Trip <span className="text-art-green">Ngopi</span></h2>
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Open Trip <span className="text-art-green">Ngopi</span></h2>
                 <div className="w-24 h-2 bg-art-green mx-auto mb-10"></div>
                 <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Gabung dengan pendaki lain di jadwal yang sudah ditentukan. Harga lebih hemat namun fasilitas tetap premium.</p>
                 
@@ -2770,7 +2800,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           {/* PRIVATE TRIP SECTION */}
           <div className="text-center max-w-5xl mx-auto mb-16 px-4">
             <span className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-art-orange mb-4 block">Exclusive Journey</span>
-            <h2 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Private <span className="text-art-orange">Trip</span></h2>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Private <span className="text-art-orange">Trip</span></h2>
             <div className="w-24 h-2 bg-art-text mx-auto mb-10"></div>
             <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Tentukan sendiri gunung tujuan, jalur pendakian, dan durasi sesuai keinginanmu. Cocok untuk solo traveler maupun rombongan tertutup.</p>
             

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -129,13 +129,17 @@ export const AdminPanelModal = ({
             <div className="flex sm:flex-col gap-1.5 w-full">
               {activeCategory === 'booking' && (
                 <>
-                  <button onClick={() => setActiveTab('bookings')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>Daftar Booking</button>
+                  <button onClick={() => setActiveTab('bookings')} className={`relative text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>
+                    Daftar Booking {pendingCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1.5 rounded-full animate-pulse">{pendingCount}</span>}
+                  </button>
                   <button onClick={() => setActiveTab('promoCodes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'promoCodes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Kode Promo</button>
                 </>
               )}
               {activeCategory === 'trip' && (
                 <>
-                  <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip & Request</button>
+                  <button onClick={() => setActiveTab('openTrips')} className={`relative text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>
+                    Open Trip & Req {requestCount > 0 && <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[8px] px-1.5 rounded-full animate-pulse">{requestCount}</span>}
+                  </button>
                   <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
                 </>
               )}
@@ -151,13 +155,13 @@ export const AdminPanelModal = ({
               )}
             </div>
 
-            {/* ART SYSTEM STATUS LOGO */}
+            {/* ADMIN ALERT SYSTEM */}
             <div className="hidden sm:flex flex-col gap-2 pt-6 mt-6 border-t border-art-text/5 items-center">
-              <div className="w-12 h-12 bg-white rounded-2xl border border-art-text/20 flex items-center justify-center p-2 group cursor-help relative" title="Ngopi di Ketinggian Art System">
-                 <img src="https://files.catbox.moe/lubzno.png" className="w-full h-full object-contain grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 transition-all" alt="logo" />
-                 {pendingCount > 0 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-art-orange rounded-full border-2 border-white animate-ping" />}
+              <div className="w-10 h-10 bg-white rounded-xl border border-art-text/20 flex items-center justify-center p-2 relative">
+                 <AlertCircle size={20} className="text-art-orange" />
+                 {(pendingCount > 0 || requestCount > 0) && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse" />}
               </div>
-              <p className="text-[8px] font-black uppercase tracking-widest text-art-text/20 text-center">Art System<br/>Dashboard</p>
+              <p className="text-[7px] font-black uppercase tracking-widest text-art-text/30 text-center">Admin Alert<br/>System</p>
             </div>
           </div>
 
@@ -473,24 +477,23 @@ const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNavigateTo
   if (loading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-art-orange"></div></div>;
 
   const pendingBookings = bookings.filter((b: any) => b.status === 'pending' && b.type !== 'open_request');
-  const tripRequests = bookings.filter((b: any) => b.status === 'pending' && b.type === 'open_request');
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* NOTIFICATION PANEL - NOW REGULAR BOOKING ONLY */}
+        {/* NOTIFICATION PANEL - BOOKING LIST ONLY */}
         <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
           <div className="flex items-center justify-between mb-6">
              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a] animate-pulse">
-                   <AlertCircle size={22} />
+                <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+                   <ShoppingBag size={22} />
                 </div>
                 <div>
-                   <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Notification Box</h3>
-                   <p className="text-[10px] font-bold text-art-text/40 uppercase">Daftar booking baru (Belum diproses)</p>
+                   <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Booking Notification</h3>
+                   <p className="text-[10px] font-bold text-art-text/40 uppercase">Pesanan masuk (Belum diproses)</p>
                 </div>
              </div>
-             <span className="bg-art-orange text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-sm">{pendingBookings.length} Baru</span>
+             <span className="bg-art-orange text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-sm">{pendingBookings.length} Pesanan</span>
           </div>
           
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
@@ -500,37 +503,30 @@ const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNavigateTo
               </div>
             ) : (
               pendingBookings.map((req: any) => (
-                <div key={req.id} className="bg-white border-art-text border-2 p-4 rounded-2xl space-y-3 relative shadow-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all">
-                  <div className="flex justify-between items-start">
+                <div key={req.id} className="bg-white border-art-text border-2 p-4 rounded-2xl shadow-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all">
+                  <div className="flex justify-between items-start mb-2">
                     <div>
                       <h4 className="font-black uppercase text-[12px] text-art-text leading-tight">{req.nama}</h4>
-                      <p className="text-[10px] font-bold text-art-text/40 font-mono tracking-tighter">{req.wa}</p>
+                      <p className="text-[9px] font-bold text-art-text/40 font-mono tracking-tighter">{req.wa}</p>
                     </div>
                     <div className="text-right">
                        <span className="text-[9px] font-black uppercase bg-art-text text-white px-2 py-0.5 rounded-md mb-1 block shadow-sm">{req.destinasi}</span>
                        <span className="text-[8px] font-bold text-art-text/40 font-mono">{req.jadwal}</span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={async () => {
-                        try {
-                           await updateDoc(doc(db, 'bookings', req.id), { status: 'processing' });
-                           showToast("Masuk ke proses!");
-                        } catch (e) {
-                           showToast("Gagal update", "error");
-                        }
-                      }}
-                      className="w-full py-2.5 bg-art-orange text-white border-2 border-art-text rounded-xl text-[10px] font-black uppercase hover:bg-art-text transition-all shadow-[2px_2px_0px_0px_#1a1a1a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
-                    >Mulai Proses</button>
-                  </div>
+                  <button 
+                    onClick={async () => {
+                      try {
+                         await updateDoc(doc(db, 'bookings', req.id), { status: 'processing' });
+                         showToast("Berhasil diproses!", "success");
+                      } catch (e) {
+                         showToast("Gagal update", "error");
+                      }
+                    }}
+                    className="w-full py-2 bg-art-orange text-white border-2 border-art-text rounded-xl text-[10px] font-black uppercase hover:bg-art-text transition-all shadow-[2px_2px_0px_0px_#1a1a1a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+                  >Konfirmasi & Proses</button>
                 </div>
               ))
-            )}
-            {tripRequests.length > 0 && (
-               <div className="pt-4 mt-4 border-t-2 border-dashed border-art-text/10">
-                  <p className="text-[9px] font-black text-art-text/30 uppercase text-center">Ada {tripRequests.length} request open trip di Menu Trip</p>
-               </div>
             )}
           </div>
         </div>
@@ -1293,12 +1289,13 @@ const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any
               </div>
             ))}
           </div>
-          )}
-        </div>
-      )})}
-    </div>
-  );
-};
+        )}
+      </div>
+    );
+  })}
+</div>
+    );
+  };
 
 // Sub-components for Admin
 const InputWithPaste = ({ value, onChange, placeholder, className, ...props }: any) => {
@@ -2033,87 +2030,84 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
     setData(nd);
   };
 
-  const openTripReqs = bookings.filter(b => b.type === 'open_request' && (b.status === 'pending' || b.status === 'approved_to_draft'));
+  const openTripReqs = bookings.filter(b => b.type === 'open_request' && b.status === 'pending');
 
   return (
     <div className="space-y-6 text-left">
       {/* Custom Trip Notification / Inbox */}
       {openTripReqs.length > 0 && (
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-4 border-art-text rounded-3xl p-6 shadow-[12px_12px_0px_0px_#1a1a1a] mb-8">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a] mb-8">
            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_#1a1a1a] animate-pulse"><Globe size={28} /></div>
+                <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]"><Globe size={28} /></div>
                 <div>
-                   <h3 className="text-xl font-black uppercase text-art-text tracking-tight">Trip Request Notification ({openTripReqs.length})</h3>
-                   <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest">Request custom trip dari customer yang menunggu konfirmasi</p>
+                   <h3 className="text-xl font-black uppercase text-art-text tracking-tight">Trip Request Notification</h3>
+                   <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest leading-tight">Request custom / open trip baru (Belum diproses)</p>
                 </div>
              </div>
              <div className="bg-white px-4 py-2 rounded-xl border-2 border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]">
-               <p className="text-[10px] font-black uppercase text-blue-600">Admin Action Required</p>
+                <span className="text-[10px] font-black uppercase text-blue-600">{openTripReqs.length} Masuk</span>
              </div>
            </div>
            
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto no-scrollbar pr-1">
               {openTripReqs.map((req: any) => (
-                 <div key={req.id} className="bg-white border-2 border-art-text p-4 rounded-2xl shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all group">
-                    <div className="flex justify-between items-start mb-3">
-                       <div>
-                          <h4 className="font-black uppercase text-[12px] text-art-text leading-tight">{req.nama}</h4>
-                          <p className="text-[9px] font-bold text-art-text/40 font-mono">{req.wa}</p>
-                       </div>
-                       <div className="flex flex-col items-end gap-1">
-                          <span className="text-[9px] font-black uppercase bg-art-text text-white px-2 py-1 rounded-lg shrink-0">{req.destinasi}</span>
-                        </div>
-                    </div>
-                    <div className="space-y-2 mb-4">
-                       <div className="flex items-center gap-2 text-art-text/60">
-                          <MapPin size={12} />
-                          <span className="text-[10px] font-black uppercase tracking-tight">{req.jalur || 'Jalur Utama'}</span>
-                       </div>
-                       <div className="flex items-center gap-2 text-art-text/60">
-                          <Calendar size={12} />
-                          <span className="text-[10px] font-black uppercase tracking-tight text-blue-600 font-mono">{req.jadwal}</span>
-                       </div>
-                    </div>
-                    {req.status === 'pending' ? (
-                      <button 
-                        onClick={() => {
-                          const nd = [{ 
-                            id: Date.now().toString(), 
-                            name: req.destinasi, 
-                            region: "", 
-                            jadwal: req.jadwal, 
-                            kuota: "15 Pax Tersisa", 
-                            kuotaNum: 15,
-                            maxKuota: 15,
-                            consumedKuota: 0,
-                            mepo: "", 
-                            difficulty: "Menengah", 
-                            image: "", 
-                            beans: "", 
-                            path: req.jalur || "Jalur Utama", 
-                            duration: "2 Hari 1 Malam", 
-                            price: 0, 
-                            originalPrice: 0, 
-                            leaders: [], 
-                            startDate: "",
-                            status: 'draft' 
-                          }, ...data];
-                          setData(nd);
-                          setExpandedIndexes([0]);
-                          showToast("Request disetujui & disalin ke Draft!", "success");
-                          updateDoc(doc(db, 'bookings', req.id), { status: 'approved_to_draft' });
-                        }}
-                        className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase shadow-[4px_4px_0px_0px_#1a1a1a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2"
-                      >
-                         Approve Request <ChevronRight size={14} />
-                      </button>
-                    ) : (
-                      <div className="w-full py-2 bg-gray-50 text-gray-400 rounded-xl text-[9px] font-black uppercase text-center border-2 border-dashed border-gray-200">
-                        Sudah Di-Aproval (Cek Draft)
+                <div key={req.id} className="bg-white border-2 border-art-text p-4 rounded-2xl shadow-sm space-y-3">
+                   <div className="flex justify-between items-start">
+                      <div>
+                         <h4 className="font-black uppercase text-[12px] leading-tight">{req.nama}</h4>
+                         <p className="text-[10px] font-bold text-art-text/40 font-mono">{req.wa}</p>
                       </div>
-                    )}
-                 </div>
+                      <div className="text-right">
+                         <span className="text-[9px] font-black uppercase bg-blue-100 text-blue-600 px-2 py-0.5 rounded-md mb-1 block">{req.destinasi}</span>
+                         <span className="text-[8px] font-bold text-art-text/40 font-mono">{req.jadwal}</span>
+                      </div>
+                   </div>
+                   <div className="bg-blue-50 p-2 rounded-xl border border-blue-100 text-[9px] font-medium text-blue-800 leading-relaxed italic">
+                      "{req.pesan || "No special request"}"
+                   </div>
+                   <div className="flex gap-2">
+                      <button 
+                         onClick={() => {
+                            const nd = [{ 
+                              id: Date.now().toString(), 
+                              name: req.destinasi, 
+                              region: "", 
+                              jadwal: req.jadwal, 
+                              kuota: "15 Pax Tersisa", 
+                              kuotaNum: 15,
+                              maxKuota: 15,
+                              consumedKuota: 0,
+                              mepo: "", 
+                              difficulty: "Menengah", 
+                              image: "", 
+                              beans: "", 
+                              path: req.jalur || "Jalur Utama", 
+                              duration: "2 Hari 1 Malam", 
+                              price: 0, 
+                              originalPrice: 0, 
+                              leaders: [], 
+                              startDate: "",
+                              status: 'draft' 
+                            }, ...data];
+                            setData(nd);
+                            setExpandedIndexes([0]);
+                            showToast("Request disetujui & disalin ke Draft!", "success");
+                            updateDoc(doc(db, 'bookings', req.id), { status: 'approved_to_draft' });
+                          }}
+                         className="flex-[2] py-2 bg-blue-600 text-white border-2 border-art-text rounded-xl text-[10px] font-black uppercase shadow-[2px_2px_0px_0px_#1a1a1a] active:shadow-none hover:bg-blue-700 transition-all"
+                      >Gunakan Data & Buat Draft</button>
+                      <button 
+                         onClick={async () => {
+                            if (confirm("Hapus request ini?")) {
+                               await deleteDoc(doc(db, 'bookings', req.id));
+                               showToast("Request dihapus", "success");
+                            }
+                         }}
+                         className="flex-1 py-2 bg-red-50 text-red-600 border-2 border-red-200 rounded-xl text-[10px] font-black uppercase"
+                      >Hapus</button>
+                   </div>
+                </div>
               ))}
            </div>
         </div>
@@ -2456,7 +2450,109 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                 </div>
               </div>
 
-               {/* Layer 6: Rundown & PDF Visibility */}
+               {/* Layer 7: Group Management (NEW) */}
+               <div className="bg-art-green/5 p-5 rounded-2xl border-2 border-art-green/20 space-y-4">
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                        <Users size={16} className="text-art-green" />
+                        <h4 className="text-[11px] font-black uppercase text-art-green tracking-widest">Group Management</h4>
+                     </div>
+                     <button 
+                        onClick={() => {
+                           const nd = [...data];
+                           if (!nd[i].groups) nd[i].groups = [];
+                           nd[i].groups.push({ id: Date.now().toString(), name: `Grup ${nd[i].groups.length + 1}`, leader: "", members: "" });
+                           setData(nd);
+                        }}
+                        className="bg-art-green text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase shadow-sm hover:scale-105 transition-all"
+                     >Tambah Grup</button>
+                  </div>
+
+                  <div className="space-y-3">
+                     {!ot.groups || ot.groups.length === 0 ? (
+                        <div className="py-8 text-center border-2 border-dashed border-art-green/10 rounded-2xl">
+                           <p className="text-[9px] font-bold text-art-green/30 uppercase tracking-widest">Belum ada grup yang dibentuk</p>
+                        </div>
+                     ) : (
+                        ot.groups.map((group: any, gIdx: number) => (
+                           <div key={group.id} className="bg-white border-2 border-art-green p-4 rounded-2xl space-y-3 relative group">
+                              <button 
+                                 onClick={() => {
+                                    const nd = [...data];
+                                    nd[i].groups.splice(gIdx, 1);
+                                    setData(nd);
+                                 }}
+                                 className="absolute top-2 right-2 text-red-200 hover:text-red-500 transition-colors"
+                              ><X size={14} /></button>
+                              
+                              <div className="grid grid-cols-2 gap-3">
+                                 <div className="space-y-1">
+                                    <label className="text-[8px] font-black uppercase text-art-green/40">Nama Grup</label>
+                                    <input 
+                                       className="w-full border-2 border-art-green/10 p-1.5 rounded-lg text-[10px] font-bold outline-none focus:border-art-green"
+                                       value={group.name}
+                                       onChange={(e) => {
+                                          const nd = [...data];
+                                          nd[i].groups[gIdx].name = e.target.value;
+                                          setData(nd);
+                                       }}
+                                    />
+                                 </div>
+                                 <div className="space-y-1">
+                                    <label className="text-[8px] font-black uppercase text-art-green/40">Leader / Guider</label>
+                                    <select 
+                                       className="w-full border-2 border-art-green/10 p-1.5 rounded-lg text-[10px] font-bold outline-none focus:border-art-green"
+                                       value={group.leader}
+                                       onChange={(e) => {
+                                          const nd = [...data];
+                                          nd[i].groups[gIdx].leader = e.target.value;
+                                          setData(nd);
+                                       }}
+                                    >
+                                       <option value="">Pilih Leader</option>
+                                       {config.tripLeaders?.map((l: any) => <option key={l.id} value={l.name}>{l.name}</option>)}
+                                    </select>
+                                 </div>
+                              </div>
+                              <div className="space-y-1">
+                                 <label className="text-[8px] font-black uppercase text-art-green/40">Daftar Anggota (Ketik per baris)</label>
+                                 <textarea 
+                                    className="w-full border-2 border-art-green/10 p-2 rounded-lg text-[10px] h-20 outline-none focus:border-art-green resize-none font-mono"
+                                    value={group.members}
+                                    placeholder="Contoh:&#10;1. Andi&#10;2. Budi&#10;3. Caca"
+                                    onChange={(e) => {
+                                       const nd = [...data];
+                                       nd[i].groups[gIdx].members = e.target.value;
+                                       setData(nd);
+                                    }}
+                                 />
+                              </div>
+
+                              <div className="flex gap-2">
+                                 <button 
+                                    onClick={() => {
+                                       const text = `*PEMBAGIAN GRUP TRIP ${ot.name.toUpperCase()}*\n*Jadwal:* ${ot.jadwal}\n\n*${group.name.toUpperCase()}*\nLeader: ${group.leader || "-"}\n\nAnggota:\n${group.members}\n\n_Silakan koordinasi lebih lanjut melalui leader masing-masing. Enjoy the trip!_`;
+                                       const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                                       window.open(waUrl, '_blank');
+                                    }}
+                                    className="flex-1 py-1.5 bg-art-green text-white rounded-xl text-[9px] font-black uppercase flex items-center justify-center gap-2"
+                                 ><MessageCircle size={12} /> Share to WhatsApp</button>
+                                 <button 
+                                    onClick={() => {
+                                       const text = `*PEMBAGIAN GRUP TRIP ${ot.name.toUpperCase()}*\n*Jadwal:* ${ot.jadwal}\n\n*${group.name.toUpperCase()}*\nLeader: ${group.leader || "-"}\n\nAnggota:\n${group.members}`;
+                                       navigator.clipboard.writeText(text);
+                                       showToast("Teks Grup disalin!");
+                                    }}
+                                    className="bg-gray-100 hover:bg-gray-200 text-art-text px-3 py-1.5 rounded-xl text-[9px] font-black uppercase transition-colors"
+                                 >Salin</button>
+                              </div>
+                           </div>
+                        ))
+                     )}
+                  </div>
+               </div>
+
+               {/* Layer 8: Rundown & PDF Visibility */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="space-y-1">
                    <label className="text-[9px] font-black uppercase text-art-text/40">Rundown (Pilih dari Destinasi)</label>
@@ -2684,13 +2780,14 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                   />
                 </div>
               </div>
-          </div>
+            </div>
           )}
         </div>
-      )})}
-      </div>
+      );
+    })}
     </div>
-  );
+  </div>
+);
 };
 
 const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
