@@ -2391,21 +2391,12 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
 
         <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-8 md:mt-0">
           <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-40 relative">
-              <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="mb-3 md:mb-4 w-full text-center md:text-left"
-            >
-              <p className="text-art-text font-serif italic text-2xl md:text-3xl lg:text-4xl font-bold">Open Trip Exclusive</p>
-              <p className="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-art-text/70 mt-2 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
-            </motion.div>
             
               <motion.h1 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className={`text-5xl sm:text-6xl md:text-[80px] lg:text-[110px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-6 md:mb-8 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className={`text-4xl sm:text-5xl md:text-[60px] lg:text-[86px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-4 md:mb-6 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
               >
                 <sup className="text-art-orange text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
               </motion.h1>
@@ -2413,19 +2404,30 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               <motion.p 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className={`text-sm md:text-xl font-medium max-w-xs sm:max-w-md mb-6 md:mb-10 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto ${theme === 'default' ? 'text-art-text/90' : 'text-art-text/80'}`}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className={`text-[13px] md:text-lg font-medium max-w-xs sm:max-w-md mb-6 md:mb-8 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto ${theme === 'default' ? 'text-art-text/90' : 'text-art-text/80'}`}
               >
                 {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, and magisnya lautan awan dari puncak gunung."}
                 <br/><span className="mt-2 block font-serif italic font-bold text-sm md:text-base text-art-orange">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
               </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="mb-6 w-full text-center md:text-left"
+              >
+                <p className="text-art-text font-serif italic text-xl md:text-2xl font-bold">Open Trip Exclusive</p>
+                <p className="text-[10px] md:text-xs font-sans font-bold uppercase tracking-widest text-art-text/70 mt-1 block">{config.homepage?.heroFeatures || "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin"}</p>
+              </motion.div>
             
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-3 w-full max-w-[240px] sm:max-w-none mx-auto md:mx-0 justify-center md:justify-start"
             >
+
               <Button onClick={() => handleOpenBooking()} variant="primary" className="text-[10px] md:text-xs uppercase font-bold tracking-widest py-3 px-5 rounded-lg w-full sm:w-auto">
                 Booking Trip
               </Button>

@@ -57,118 +57,110 @@ export const AdminPanelModal = ({
             <div className="flex items-center gap-4">
               <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
               <p className="text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => {
-                    customConfirm("Jadikan pengaturan saat ini sebagai default global? Tindakan ini tidak bisa dibatalkan.", async () => {
-                      try {
-                        const { writeBatch, doc } = await import('firebase/firestore');
-                        const batch = writeBatch(db);
-                        batch.set(doc(db, 'destinations', 'data'), { items: config.destinationsData });
-                        batch.set(doc(db, 'leaders', 'data'), { items: config.tripLeaders });
-                        batch.set(doc(db, 'gallery', 'data'), { items: config.galleryPhotos });
-                        batch.set(doc(db, 'openTrips', 'data'), { items: config.openTrips });
-                        
-                        const websiteData = { ...config };
-                        delete (websiteData as any).destinationsData;
-                        delete (websiteData as any).tripLeaders;
-                        delete (websiteData as any).galleryPhotos;
-                        delete (websiteData as any).openTrips;
-  
-                        batch.set(doc(db, 'website', 'data'), websiteData);
-
-                        // Save snapshot for "Reset Default" functionality
-                        batch.set(doc(db, 'defaults', 'data'), {
-                          destinations: config.destinationsData,
-                          leaders: config.tripLeaders,
-                          gallery: config.galleryPhotos,
-                          openTrips: config.openTrips,
-                          website: websiteData
-                        });
-
-                        await batch.commit();
-                        showToast("Berhasil di-set sebagai default!", "success");
-                      } catch (e) {
-                        console.error(e);
-                        showToast("Gagal menyimpan ke default", "error");
-                      }
-                    });
-                  }} 
-                  className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors shadow-sm"
-                >
-                  Set Default
-                </button>
-                <button 
-                  onClick={() => {
-                    customConfirm("Kembalikan ke pengaturan awal tersimpan?", async () => {
-                      await revertToDefault();
-                      showToast("Direset ke default!", "success");
-                    });
-                  }} 
-                  className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors shadow-sm"
-                >
-                  Reset Default
-                </button>
-              </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => {
+                  customConfirm("Jadikan pengaturan saat ini sebagai default global? Tindakan ini tidak bisa dibatalkan.", async () => {
+                    try {
+                      const { writeBatch, doc } = await import('firebase/firestore');
+                      const batch = writeBatch(db);
+                      batch.set(doc(db, 'destinations', 'data'), { items: config.destinationsData });
+                      batch.set(doc(db, 'leaders', 'data'), { items: config.tripLeaders });
+                      batch.set(doc(db, 'gallery', 'data'), { items: config.galleryPhotos });
+                      batch.set(doc(db, 'openTrips', 'data'), { items: config.openTrips });
+                      
+                      const websiteData = { ...config };
+                      delete (websiteData as any).destinationsData;
+                      delete (websiteData as any).tripLeaders;
+                      delete (websiteData as any).galleryPhotos;
+                      delete (websiteData as any).openTrips;
+ 
+                      batch.set(doc(db, 'website', 'data'), websiteData);
+
+                      // Save snapshot for "Reset Default" functionality
+                      batch.set(doc(db, 'defaults', 'data'), {
+                        destinations: config.destinationsData,
+                        leaders: config.tripLeaders,
+                        gallery: config.galleryPhotos,
+                        openTrips: config.openTrips,
+                        website: websiteData
+                      });
+
+                      await batch.commit();
+                      showToast("Berhasil di-set sebagai default!", "success");
+                    } catch (e) {
+                      console.error(e);
+                      showToast("Gagal menyimpan ke default", "error");
+                    }
+                  });
+                }} 
+                className="text-[10px] bg-art-green text-white px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-green-600 transition-colors shadow-sm"
+              >
+                Set Default
+              </button>
+              <button 
+                onClick={() => {
+                  customConfirm("Kembalikan ke pengaturan awal tersimpan?", async () => {
+                    await revertToDefault();
+                    showToast("Direset ke default!", "success");
+                  });
+                }} 
+                className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 font-bold uppercase rounded-md tracking-widest hover:bg-red-200 transition-colors shadow-sm"
+              >
+                Reset Default
+              </button>
+              <div className="w-[1px] h-6 bg-art-text/10 mx-1"></div>
+              <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
+            </div>
           </div>
           <div className="flex gap-2 px-4 pb-2 border-t border-art-text/10 pt-2">
-            <button onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'booking' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Manajemen Booking</button>
-            <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'trip' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Menu Trip</button>
-            <button onClick={() => { setActiveCategory('website'); setActiveTab('cerita'); }} className={`text-[10px] sm:text-xs font-black uppercase py-2 px-4 rounded-t-lg ${activeCategory === 'website' ? 'bg-art-text text-white' : 'bg-art-bg text-art-text/60'}`}>Konten Website</button>
+            <button onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }} className={`text-[10px] sm:text-xs font-black uppercase py-3 px-6 rounded-t-xl transition-all ${activeCategory === 'booking' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-art-bg text-art-text/40 hover:text-art-text'}`}>Booking Management</button>
+            <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className={`text-[10px] sm:text-xs font-black uppercase py-3 px-6 rounded-t-xl transition-all ${activeCategory === 'trip' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-art-bg text-art-text/40 hover:text-art-text'}`}>Trip Content</button>
+            <button onClick={() => { setActiveCategory('website'); setActiveTab('cerita'); }} className={`text-[10px] sm:text-xs font-black uppercase py-3 px-6 rounded-t-xl transition-all ${activeCategory === 'website' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-art-bg text-art-text/40 hover:text-art-text'}`}>Web Design</button>
           </div>
         </div>
-        
-        {/* GLOBAL NOTIFICATION BAR (Visible if pending bookings exist) */}
-        <div className="bg-art-orange/10 border-b border-art-text/10 px-6 py-2 flex items-center justify-between">
-           <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-art-orange animate-ping" />
-              <p className="text-[10px] font-black uppercase tracking-tighter text-art-text">Admin Alert System</p>
-           </div>
-           <div className="flex gap-4">
-              <div className="flex items-center gap-1.5 cursor-pointer hover:bg-white/40 px-2 py-0.5 rounded transition-colors" onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }}>
-                 <span className="text-[9px] font-extrabold text-art-text/60 uppercase">Daftar Booking:</span>
-                 <span className={`${pendingCount > 0 ? 'bg-art-orange animate-pulse' : 'bg-gray-400'} text-white text-[8px] font-black px-1.5 py-0.5 rounded-md min-w-[18px] text-center`}>
-                    {pendingCount} 
-                 </span>
-              </div>
-              <div className="flex items-center gap-1.5 cursor-pointer hover:bg-white/40 px-2 py-0.5 rounded transition-colors" onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }}>
-                 <span className="text-[9px] font-extrabold text-art-text/60 uppercase">Requests:</span>
-                 <span className={`${requestCount > 0 ? 'bg-blue-600' : 'bg-gray-400'} text-white text-[8px] font-black px-1.5 py-0.5 rounded-md min-w-[18px] text-center`}>
-                    {requestCount} 
-                 </span>
-              </div>
-           </div>
-        </div>
+
 
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
 
           {/* Sub Sidebar Tabs */}
-          <div className="flex sm:flex-col gap-1.5 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
-            {activeCategory === 'booking' && (
-              <>
-                <button onClick={() => setActiveTab('bookings')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>Daftar Booking</button>
-                <button onClick={() => setActiveTab('promoCodes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'promoCodes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Kode Promo</button>
-              </>
-            )}
-            {activeCategory === 'trip' && (
-              <>
-                <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip</button>
-                <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
-              </>
-            )}
-            {activeCategory === 'website' && (
-              <>
-                <button onClick={() => setActiveTab('homepage')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'homepage' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Homepage</button>
-                <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Cerita</button>
-                <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
-                <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
-                <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
-                <button onClick={() => setActiveTab('cleanupPhotos')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cleanupPhotos' ? 'bg-red-600 text-white' : 'hover:bg-red-50 text-red-600'}`}>Cleanup Foto</button>
-              </>
-            )}
+          <div className="flex sm:flex-col gap-1.5 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0 justify-between">
+            <div className="flex sm:flex-col gap-1.5 w-full">
+              {activeCategory === 'booking' && (
+                <>
+                  <button onClick={() => setActiveTab('bookings')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>Daftar Booking</button>
+                  <button onClick={() => setActiveTab('promoCodes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'promoCodes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Kode Promo</button>
+                </>
+              )}
+              {activeCategory === 'trip' && (
+                <>
+                  <button onClick={() => setActiveTab('openTrips')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'openTrips' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Open Trip & Request</button>
+                  <button onClick={() => setActiveTab('destinations')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'destinations' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Destinasi & Durasi</button>
+                </>
+              )}
+              {activeCategory === 'website' && (
+                <>
+                  <button onClick={() => setActiveTab('homepage')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'homepage' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Homepage</button>
+                  <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Cerita</button>
+                  <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
+                  <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
+                  <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
+                  <button onClick={() => setActiveTab('cleanupPhotos')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cleanupPhotos' ? 'bg-red-600 text-white' : 'hover:bg-red-50 text-red-600'}`}>Cleanup Foto</button>
+                </>
+              )}
+            </div>
+
+            {/* ART SYSTEM STATUS LOGO */}
+            <div className="hidden sm:flex flex-col gap-2 pt-6 mt-6 border-t border-art-text/5 items-center">
+              <div className="w-12 h-12 bg-white rounded-2xl border border-art-text/20 flex items-center justify-center p-2 group cursor-help relative" title="Ngopi di Ketinggian Art System">
+                 <img src="https://files.catbox.moe/lubzno.png" className="w-full h-full object-contain grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 transition-all" alt="logo" />
+                 {pendingCount > 0 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-art-orange rounded-full border-2 border-white animate-ping" />}
+              </div>
+              <p className="text-[8px] font-black uppercase tracking-widest text-art-text/20 text-center">Art System<br/>Dashboard</p>
+            </div>
           </div>
+
           
           {/* Content */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-art-bg/50">
@@ -480,12 +472,13 @@ const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNavigateTo
 
   if (loading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-art-orange"></div></div>;
 
-  const pendingBookings = bookings.filter((b: any) => b.status === 'pending');
+  const pendingBookings = bookings.filter((b: any) => b.status === 'pending' && b.type !== 'open_request');
+  const tripRequests = bookings.filter((b: any) => b.status === 'pending' && b.type === 'open_request');
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* NOTIFICATION PANEL */}
+        {/* NOTIFICATION PANEL - NOW REGULAR BOOKING ONLY */}
         <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
           <div className="flex items-center justify-between mb-6">
              <div className="flex items-center gap-3">
@@ -494,21 +487,20 @@ const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNavigateTo
                 </div>
                 <div>
                    <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Notification Box</h3>
-                   <p className="text-[10px] font-bold text-art-text/40 uppercase">Aksi yang diperlukan oleh admin</p>
+                   <p className="text-[10px] font-bold text-art-text/40 uppercase">Daftar booking baru (Belum diproses)</p>
                 </div>
              </div>
-             <span className="bg-art-orange text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-sm">{pendingBookings.length} Pesanan</span>
+             <span className="bg-art-orange text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-sm">{pendingBookings.length} Baru</span>
           </div>
           
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
             {pendingBookings.length === 0 ? (
               <div className="py-12 text-center border-2 border-dashed border-art-text/10 rounded-2xl bg-gray-50/50">
-                 <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest">Tidak ada notifikasi baru</p>
+                 <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest">Tidak ada booking baru</p>
               </div>
             ) : (
               pendingBookings.map((req: any) => (
-                <div key={req.id} className={`${req.type === 'open_request' ? 'bg-blue-50 border-blue-200' : 'bg-white border-art-text'} border-2 p-4 rounded-2xl space-y-3 relative shadow-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all`}>
-                  {req.type === 'open_request' && <div className="absolute -top-2 left-4 bg-blue-600 text-white text-[7px] px-2 py-0.5 rounded-full font-black uppercase shadow-sm">Request Open Trip</div>}
+                <div key={req.id} className="bg-white border-art-text border-2 p-4 rounded-2xl space-y-3 relative shadow-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all">
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-black uppercase text-[12px] text-art-text leading-tight">{req.nama}</h4>
@@ -529,20 +521,20 @@ const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNavigateTo
                            showToast("Gagal update", "error");
                         }
                       }}
-                      className="flex-1 py-2.5 bg-white text-art-text border-2 border-art-text rounded-xl text-[9px] font-black uppercase hover:bg-art-bg transition-all shadow-[2px_2px_0px_0px_#1a1a1a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
-                    >Proses</button>
-                    {req.type === 'open_request' && (
-                        <button 
-                          onClick={() => onNavigateToOpenTrip && onNavigateToOpenTrip(req)}
-                          className="flex-1 py-2.5 bg-blue-600 text-white border-2 border-art-text rounded-xl text-[9px] font-black uppercase shadow-[2px_2px_0px_0px_#1a1a1a] hover:bg-blue-700 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all"
-                        >Buat Trip</button>
-                    )}
+                      className="w-full py-2.5 bg-art-orange text-white border-2 border-art-text rounded-xl text-[10px] font-black uppercase hover:bg-art-text transition-all shadow-[2px_2px_0px_0px_#1a1a1a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+                    >Mulai Proses</button>
                   </div>
                 </div>
               ))
             )}
+            {tripRequests.length > 0 && (
+               <div className="pt-4 mt-4 border-t-2 border-dashed border-art-text/10">
+                  <p className="text-[9px] font-black text-art-text/30 uppercase text-center">Ada {tripRequests.length} request open trip di Menu Trip</p>
+               </div>
+            )}
           </div>
         </div>
+
 
         {/* QUICK STATS / RESET */}
         <div className="bg-art-text text-white rounded-3xl p-6 flex flex-col justify-between">
@@ -2310,39 +2302,26 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                   <label className="text-[9px] font-black uppercase text-art-text/40">Keberangkatan</label>
                   {ot.isWeekend ? (
                     <div className="flex gap-1">
-                       <select 
-                         className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all"
-                         value={ot.startDate ? new Date(ot.startDate).getMonth() : ""}
-                         onChange={(e) => {
-                            const month = parseInt(e.target.value);
-                            const year = new Date().getFullYear();
-                            // Reset date when month changes
-                            const nd = [...data];
-                            nd[i].startDate = ""; 
-                            nd[i].jadwal = "Pilih Tanggal...";
-                            setData(nd);
-                         }}
-                       >
-                         <option value="">Bulan</option>
-                         {["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"].map((m, idx) => <option key={m} value={idx}>{m}</option>)}
-                       </select>
-                       <input 
-                         type="date"
-                         className="flex-[2] border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
-                         value={ot.startDate || ""} 
-                         onChange={e => { 
-                           const date = e.target.value;
-                           const d = new Date(date);
-                           if (d.getDay() !== 6) {
-                             showToast("Trip Weekend harus mulai di hari Sabtu!", "error");
-                             return;
-                           }
-                           const nd = [...data]; 
-                           nd[i].startDate = date; 
-                           nd[i].jadwal = calculateDateRange(date, ot.duration || "2H 1M");
-                           setData(nd); 
-                         }} 
-                       />
+                       <div className="flex-[3]">
+                          <input 
+                            type="date"
+                            className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                            value={ot.startDate || ""} 
+                            onChange={e => { 
+                              const date = e.target.value;
+                              const d = new Date(date);
+                              if (d.getDay() !== 6) {
+                                showToast("Trip Weekend harus mulai di hari Sabtu!", "error");
+                                return;
+                              }
+                              const nd = [...data]; 
+                              nd[i].startDate = date; 
+                              nd[i].duration = "2H 1M"; // Force fixed duration
+                              nd[i].jadwal = calculateDateRange(date, "2H 1M");
+                              setData(nd); 
+                            }} 
+                          />
+                       </div>
                     </div>
                   ) : (
                     <input 
@@ -2358,7 +2337,7 @@ const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPre
                       }} 
                     />
                   )}
-                  {ot.isWeekend && <p className="text-[7px] font-black text-blue-500 uppercase mt-0.5 ml-1">Harus Hari Sabtu</p>}
+                  {ot.isWeekend && <p className="text-[7px] font-black text-blue-500 uppercase mt-0.5 ml-1">Wajib pilih Hari Sabtu • Durasi fixed 2H 1M</p>}
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Jadwal (Automatis)</label>
