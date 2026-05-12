@@ -59,8 +59,17 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </span>
               </div>
               
-              <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase mb-6 drop-shadow-2xl">
-                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-3xl md:text-5xl mb-2">{config.homepage.heroTitlePrefix}</span>}
+              <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase mb-8 drop-shadow-2xl">
+                {config?.homepage?.heroSlogan && (
+                  <motion.span 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="block text-art-orange text-xs md:text-sm font-black uppercase tracking-[0.5em] mb-6 drop-shadow-none bg-white/10 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-white/20"
+                  >
+                    {config.homepage.heroSlogan}
+                  </motion.span>
+                )}
+                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-3xl md:text-5xl mb-3">{config.homepage.heroTitlePrefix}</span>}
                 {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
               </h1>
               
@@ -98,14 +107,14 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   <Button 
                     onClick={onExplore}
                     variant="primary" 
-                    className="px-8 py-5 text-[10px] font-black uppercase tracking-widest shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+                    className="px-8 py-5 text-[10px] font-black uppercase tracking-widest bg-white text-art-text border-2 border-art-text shadow-[6px_6px_0px_0px_rgba(255,107,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
                   >
                     Explore Trips <ChevronRight size={18} />
                   </Button>
                   <Button 
                     onClick={onBooking}
-                    variant="secondary" 
-                    className="px-8 py-5 text-[10px] font-black uppercase tracking-widest border-2 border-white text-white hover:bg-white hover:text-art-text transition-all flex items-center gap-2 bg-transparent"
+                    variant="primary" 
+                    className="px-8 py-5 text-[10px] font-black uppercase tracking-widest bg-art-orange text-white border-2 border-art-text shadow-[6px_6px_0px_0px_rgba(255,255,255,0.1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
                   >
                     Booking Trip <Calendar size={16} />
                   </Button>
@@ -146,23 +155,27 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   />
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
-                <div className="absolute bottom-10 left-10 right-10 bg-white border-2 border-art-text p-6 rounded-3xl -rotate-6 transform translate-y-4 group-hover:translate-y-2 shadow-2xl transition-transform">
+                <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-sm border-2 border-art-text p-5 rounded-[2.5rem] -rotate-2 transform translate-y-2 group-hover:translate-y-0 shadow-2xl transition-transform border-b-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-art-text rounded-2xl flex items-center justify-center text-white shrink-0 animate-pulse">
-                      <Tent size={24} />
+                    <div className="w-12 h-12 bg-art-text rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg border-2 border-white/20">
+                      <img src="https://files.catbox.moe/lubzno.png" alt="Logo" className="w-8 h-8 object-contain" />
                     </div>
                     <div>
-                      <p className="text-lg font-black uppercase text-art-text mb-0.5 leading-none">{slides[currentSlide]?.name}</p>
-                      <p className="text-[10px] font-bold uppercase text-art-orange tracking-widest leading-none">{slides[currentSlide]?.height} MDPL</p>
+                      <p className="text-sm font-black uppercase text-art-text mb-0.5 leading-none tracking-tight">{slides[currentSlide]?.name}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-black uppercase text-art-orange tracking-widest leading-none px-2 py-0.5 bg-art-orange/10 rounded-full">{slides[currentSlide]?.height} MDPL</span>
+                        <span className="w-1 h-1 rounded-full bg-art-text/20"></span>
+                        <span className="text-[8px] font-bold text-art-text/40 uppercase">Elevation</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-art-green rounded-full border-4 border-white flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
-                <Mountain size={32} className="text-white mb-1" />
-                <p className="text-[10px] font-black text-white uppercase tracking-tighter">Premium</p>
-                <p className="text-[10px] font-black text-white uppercase tracking-tighter">Experience</p>
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-art-text rounded-full border-4 border-white flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
+                <p className="text-[14px] font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
+                <p className="text-[8px] font-black text-white/60 uppercase tracking-widest mt-1">MDPL</p>
+                <div className="w-8 h-1 bg-art-orange mt-2 rounded-full"></div>
               </div>
             </motion.div>
           </div>

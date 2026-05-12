@@ -8,37 +8,70 @@ export const DestinationSection = ({
   visibilities, 
   filterDifficulty, 
   setFilterDifficulty,
-  difficultyOptions 
+  difficultyOptions,
+  filterRegion,
+  setFilterRegion,
+  regionOptions = ["Semua", "Jawa", "Sumatera", "Lombok", "Bali", "Papua"]
 }: any) => {
+  const [isRegionOpen, setIsRegionOpen] = React.useState(false);
+  const [isDiffOpen, setIsDiffOpen] = React.useState(false);
+
+  const regions = React.useMemo(() => {
+    const list = destinations.map((d: any) => d.region).filter(Boolean);
+    return ["Semua", ...Array.from(new Set(list))];
+  }, [destinations]);
+
+  const difficulties = React.useMemo(() => {
+    const list = destinations.map((d: any) => d.difficulty).filter(Boolean);
+    return ["Semua", ...Array.from(new Set(list))];
+  }, [destinations]);
+
   return (
-    <section id="destinasi" className="py-24 bg-white">
+    <section id="destinasi-private" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="max-w-xl">
-              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-lg bg-art-text text-white flex items-center justify-center">
                   <Mountain size={18} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Our Destinations</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Private Trip</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-                Gunung & <span className="text-art-orange">Jalur Pilihan.</span>
+                 <span className="text-art-orange">Private</span> Trip.
               </h2>
             </div>
 
-            <div className="flex flex-col gap-4 w-full">
-               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Difficulty</p>
-               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                  {difficultyOptions.map((opt: string) => (
-                    <button 
-                      key={opt}
-                      onClick={() => setFilterDifficulty(opt)}
-                      className={`whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 transition-all ${filterDifficulty === opt ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_#ff6b00]' : 'bg-white text-art-text border-art-text/10 hover:border-art-orange'}`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
+            <div className="flex flex-col gap-6 w-full lg:w-auto">
+               <div className="flex flex-col gap-3">
+                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Difficulty</p>
+                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                    {difficulties.map((opt: any) => (
+                      <button 
+                        key={opt as string}
+                        onClick={() => setFilterDifficulty(opt)}
+                        className={`whitespace-nowrap px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border-2 transition-all ${filterDifficulty === opt ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/10'}`}
+                      >
+                        {opt as string}
+                      </button>
+                    ))}
+                 </div>
+               </div>
+
+               <div className="flex flex-col gap-3">
+                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Region</p>
+                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                    {regions.map((opt: any) => (
+                      <button 
+                        key={opt as string}
+                        onClick={() => typeof setFilterRegion === 'function' && setFilterRegion(opt)}
+                        className={`whitespace-nowrap px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border-2 transition-all ${filterRegion === opt ? 'bg-art-orange text-white border-art-orange font-black' : 'bg-white text-art-text border-art-text/10'}`}
+                      >
+                        {opt as string}
+                      </button>
+                    ))}
+                 </div>
                </div>
             </div>
           </div>

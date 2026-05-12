@@ -205,8 +205,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
     const matchesDifficulty = filterDifficulty === 'Semua' || 
                              dest.difficulty === filterDifficulty;
     const matchesRegion = filterRegion === 'Semua' || dest.region === filterRegion;
-    const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          dest.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = !searchQuery || 
+                          dest.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (dest.desc && dest.desc.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesDifficulty && matchesRegion && matchesSearch;
   });
 
@@ -326,6 +327,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         onLogout={logout}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
+        onOpenBooking={() => handleOpenBooking()}
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         searchResults={getSearchResults()}
@@ -567,10 +569,12 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           {/* PRIVATE TRIP SECTION */}
           <DestinationSection 
             destinations={filteredDestinations}
-            onBook={(dest, path, dur) => handleOpenBooking(dest, path, dur, 'private')}
+            onBook={(dest: any, path: any, dur: any) => handleOpenBooking(dest, path, dur, 'private')}
             visibilities={config.visibilities}
             filterDifficulty={filterDifficulty}
             setFilterDifficulty={setFilterDifficulty}
+            filterRegion={filterRegion}
+            setFilterRegion={setFilterRegion}
             difficultyOptions={difficultyOptions}
           />
         </div>

@@ -110,16 +110,65 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
           <Clock size={16} />
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">{title}</span>
         </div>
-        <button 
-          type="button"
-          onClick={() => {
-            const nextDay = Math.max(...items.map(i => i.day), 0) + 1;
-            addItem(nextDay);
-          }}
-          className="bg-art-orange text-white px-3 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-orange transition-all border border-transparent hover:border-art-orange shadow-sm"
-        >
-          + Tambah Hari
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            type="button"
+            onClick={() => {
+              const templates: Record<string, RundownItem[]> = {
+                '1H': [
+                  { id: 't1', time: '08:00', activity: 'Meet up at Meeting Point', day: 1 },
+                  { id: 't2', time: '09:00', activity: 'Registration & Trekking Start', day: 1 },
+                  { id: 't3', time: '12:00', activity: 'Reached Peak / Break & Coffee Time', day: 1 },
+                  { id: 't4', time: '14:00', activity: 'Descent Session', day: 1 },
+                  { id: 't5', time: '17:00', activity: 'Finish & Farewell', day: 1 }
+                ],
+                '2H': [
+                  { id: 't1', time: '08:00', activity: 'Meeting Point & Prep', day: 1 },
+                  { id: 't2', time: '10:00', activity: 'Start Trekking', day: 1 },
+                  { id: 't3', time: '15:00', activity: 'Arrived at Camp Area', day: 1 },
+                  { id: 't4', time: '19:00', activity: 'Dinner & Coffee Social', day: 1 },
+                  { id: 't5', time: '04:00', activity: 'Summit Attack', day: 2 },
+                  { id: 't6', time: '06:00', activity: 'Sunrise at Peak & Coffee', day: 2 },
+                  { id: 't7', time: '09:00', activity: 'Back to Camp & Pack up', day: 2 },
+                  { id: 't8', time: '14:00', activity: 'Finish at Basecamp', day: 2 }
+                ],
+                '3H': [
+                  { id: 't1', time: '08:00', activity: 'Prep & Start Trekking', day: 1 },
+                  { id: 't2', time: '15:00', activity: 'Camp Site 1', day: 1 },
+                  { id: 't3', time: '08:00', activity: 'Continue Trekking to Pos higher', day: 2 },
+                  { id: 't4', time: '14:00', activity: 'Arrived at High Camp', day: 2 },
+                  { id: 't5', time: '04:00', activity: 'Summit Session', day: 3 },
+                  { id: 't6', time: '10:00', activity: 'Descent to Basecamp', day: 3 }
+                ]
+              };
+              
+              customConfirm("Gunakan template rundown standar? (Ini akan REPLACEMENT semua data saat ini)", () => {
+                const choice = confirm("Pilih Template:\nOK = 2 Hari 1 Malam\nCancel = Tektok / 1 Hari\n\nUntuk 3 Hari, silakan pilih NO/CANCEL lalu gunakan tombol + Tambah Hari atau Generate Boilerplate.") ? templates['2H'] : templates['1H'];
+                // Since prompt/confirm is limited, I'll just use a more descriptive confirm for now or maybe better would be a small custom select
+                // Let's improve the customConfirm to handle multiple choices if possible but that's complex.
+                // I'll just add 3H if they click cancel on the second one? No.
+                // Better approach:
+                const type = prompt("Pilih Template (1, 2, atau 3 Hari):", "2");
+                if (type === "1") save(templates['1H'].map(it => ({ ...it, id: Math.random().toString(36).substr(2, 9) })));
+                else if (type === "2") save(templates['2H'].map(it => ({ ...it, id: Math.random().toString(36).substr(2, 9) })));
+                else if (type === "3") save(templates['3H'].map(it => ({ ...it, id: Math.random().toString(36).substr(2, 9) })));
+              });
+            }}
+            className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-text transition-all mr-2"
+          >
+            Auto Template
+          </button>
+          <button 
+            type="button"
+            onClick={() => {
+              const nextDay = Math.max(...items.map(i => i.day), 0) + 1;
+              addItem(nextDay);
+            }}
+            className="bg-art-orange text-white px-3 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-orange transition-all border border-transparent hover:border-art-orange shadow-sm"
+          >
+            + Tambah Hari
+          </button>
+        </div>
       </div>
 
       <div className="p-4 space-y-6 max-h-[400px] overflow-y-auto no-scrollbar">

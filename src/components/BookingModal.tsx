@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Map } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
@@ -112,7 +112,30 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
 
   const calculateEndDate = (startDateStr: string, durationLabel: string) => {
     if (!startDateStr || !durationLabel) return "";
+    
+    // Support weekend date format if applicable
+    if (startDateStr.includes('|')) {
+      const [monthVal, dayStr] = startDateStr.split('|');
+      if (!monthVal || !dayStr) return "";
+      const [year, month] = monthVal.split('-').map(Number);
+      const [startDay] = dayStr.split('-').map(Number);
+      const start = new Date(year, month - 1, startDay);
+      const hIndex = durationLabel.indexOf('H');
+      const days = hIndex !== -1 ? parseInt(durationLabel.substring(0, hIndex).trim()) : 1;
+      const end = new Date(start);
+      end.setDate(start.getDate() + (days - 1));
+      
+      const formatDate = (date: Date) => {
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+      };
+
+      if (days === 1) return formatDate(start);
+      return `${formatDate(start)} - ${formatDate(end)}`;
+    }
+
     const start = new Date(startDateStr);
+    if (isNaN(start.getTime())) return startDateStr;
     const hIndex = durationLabel.indexOf('H');
     const days = hIndex !== -1 ? parseInt(durationLabel.substring(0, hIndex).trim()) : 1;
     const end = new Date(start);
@@ -127,23 +150,22 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
     return `${formatDate(start)} - ${formatDate(end)}`;
   };
 
-  let basePricePerPax = 0;
-  if (selectedDestinasi && selectedJalur && selectedDurasi && destinationOptions) {
-     const dest = destinationOptions.find(d => d.name === selectedDestinasi);
-     if (dest) {
-       const path = dest.paths?.find((p: any) => p.name === selectedJalur);
-       if (path) {
-         const duration = path.durations?.find((d: any) => d.label === selectedDurasi);
-         if (duration) basePricePerPax = duration.price * 1000;
-       }
-     }
-  }
+  const getBasePrice = () => {
+    if (currentType === 'open') {
+      const ot = config.openTrips?.find((t: any) => t.name === selectedDestinasi && t.jadwal === selectedJadwal);
+      return (ot?.price || 0) * 1000;
+    }
+    
+    if (!selectedDestinasi || !selectedJalur || !selectedDurasi) return 0;
+    
+    const dest = destinationOptions?.find(d => d.name === selectedDestinasi);
+    const path = dest?.paths?.find((p: any) => p.name === selectedJalur);
+    const duration = path?.durations?.find((d: any) => d.label === selectedDurasi);
+    
+    return (duration?.price || 0) * 1000;
+  };
 
-  // Handle Open Trip Pricing if preselected from OpenTrip card
-  if (currentType === 'open' && prefill?.destinasi && config.openTrips) {
-     const ot = config.openTrips.find((t: any) => t.name === selectedDestinasi && t.jadwal === selectedJadwal);
-     if (ot) basePricePerPax = ot.price * 1000;
-  }
+  const basePricePerPax = getBasePrice();
 
   const getOpenTripStats = (otName: string, otJadwal: string) => {
     const ot = config.openTrips?.find((t: any) => t.name === otName && t.jadwal === otJadwal);
@@ -162,7 +184,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
   const activePromo = config?.promoCodes?.find((p: any) => p.code.toLowerCase() === promoCode.toLowerCase());
   const isPromoValid = !!activePromo;
   
-    const currentPesertaCount = typeof pesertaCount === 'number' && pesertaCount > 0 ? pesertaCount : 1;
+  const currentPesertaCount = Math.max(1, Number(pesertaCount) || 1);
   const grossPrice = basePricePerPax * currentPesertaCount;
 
   const getDaysFromLabel = (label: string) => {
@@ -239,7 +261,8 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
     
     // Validation logic tailored to type
     if (currentType === 'open_request') {
-      if (!formState.nama || !formState.wa || !selectedDestinasi || !selectedJadwal || (selectedJadwal.includes('|') && !selectedJadwal.split('|')[1]) || !pesertaCount) {
+      const [monthVal, dateVal] = (selectedJadwal || '').split('|');
+      if (!formState.nama || !formState.wa || !selectedDestinasi || !monthVal || !dateVal || !pesertaCount) {
         customAlert("Mohon lengkapi semua data wajib (Nama, WA, Destinasi, dan Jadwal).");
         return;
       }
@@ -252,8 +275,9 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
 
     if (currentType === 'open') {
       const stats = getOpenTripStats(selectedDestinasi, selectedJadwal);
-      if (Number(pesertaCount) > stats.sisa) {
-        customAlert(`Mohon kurangi jumlah peserta. Kuota tidak mencukupi, sisa slot tersedia: ${stats.sisa} Pax.`, "Kuota Terbatas");
+      const availableSlot = stats?.sisa ?? 0;
+      if (Number(pesertaCount) > availableSlot) {
+        customAlert(`Mohon kurangi jumlah peserta. Kuota tidak mencukupi, sisa slot tersedia: ${availableSlot} Pax.`, "Kuota Terbatas");
         return;
       }
     }

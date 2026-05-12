@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User } from 'lucide-react';
+import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User, ChevronRight, ShoppingBag, Mountain } from 'lucide-react';
 
 export const Header = ({ 
   user, 
@@ -8,6 +8,7 @@ export const Header = ({
   onLogout, 
   onOpenSettings, 
   onOpenHistory,
+  onOpenBooking,
   searchQuery,
   onSearchChange,
   searchResults,
@@ -30,40 +31,46 @@ export const Header = ({
             </div>
           </div>
 
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-8 relative">
-            <div className="w-full relative">
+          <div className="hidden md:flex items-center flex-1 max-w-sm mx-8 relative">
+            <div className="w-full relative group">
               <input 
                 type="text" 
-                placeholder="Cari gunung atau paket trip..."
-                className="w-full bg-art-bg/50 border-2 border-art-text/10 py-2 pl-4 pr-10 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all"
+                placeholder="Cari gunung impianmu..."
+                className="w-full bg-art-bg/30 border border-art-text/10 py-2.5 pl-4 pr-10 rounded-[1.25rem] text-[10px] font-black uppercase tracking-widest outline-none focus:border-art-orange focus:bg-white transition-all shadow-inner"
                 value={searchQuery}
                 onChange={onSearchChange}
                 onFocus={() => searchQuery && setShowSearchDropdown(true)}
               />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40" size={16} />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/20 group-focus-within:text-art-orange transition-colors" size={14} />
             </div>
             
             <AnimatePresence>
               {showSearchDropdown && searchResults.length > 0 && (
                 <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-2xl overflow-hidden"
+                  exit={{ opacity: 0, y: 5 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-[8px_8px_0px_0px_rgba(26,26,26,0.05)] overflow-hidden z-[110]"
                 >
-                  {searchResults.map((item: any, idx: number) => (
+                  <div className="p-2 border-b border-art-text/5 bg-art-bg/30">
+                    <p className="text-[8px] font-black uppercase text-art-text/40 tracking-[0.2em]">Hasil Pencarian Teratas</p>
+                  </div>
+                  {searchResults.slice(0, 1).map((item: any, idx: number) => (
                     <button 
                       key={idx}
                       onClick={() => onExecuteSearch(item)}
-                      className="w-full p-4 flex items-center gap-3 hover:bg-art-bg transition-colors border-b border-art-text/5 last:border-0"
+                      className="w-full p-3 px-4 flex items-center justify-between hover:bg-art-bg transition-colors group/item"
                     >
-                      <div className={`p-2 rounded-lg ${item.type === 'section' ? 'bg-art-orange text-white' : 'bg-art-text text-white'}`}>
-                        {item.type === 'section' ? <Search size={14} /> : <MapPin size={14} />}
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-art-text/10 ${item.type === 'section' ? 'bg-art-orange/10 text-art-orange' : 'bg-art-text/10 text-art-text'}`}>
+                          {item.type === 'section' ? <Search size={12} /> : <MapPin size={12} />}
+                        </div>
+                        <div className="text-left">
+                          <p className="text-[10px] font-black uppercase text-art-text tracking-widest group-hover/item:text-art-orange transition-colors">{item.name}</p>
+                          <p className="text-[8px] font-bold text-art-text/40 uppercase tracking-tighter">{item.type === 'section' ? 'Navigasi Cepat' : 'Gunung'}</p>
+                        </div>
                       </div>
-                      <div className="text-left">
-                        <p className="text-[10px] font-black uppercase text-art-text tracking-widest">{item.name}</p>
-                        <p className="text-[8px] font-bold text-art-text/40 uppercase">{item.type === 'section' ? 'Area Cepat' : 'Destinasi'}</p>
-                      </div>
+                      <ChevronRight size={10} className="text-art-text/20 group-hover/item:translate-x-1 transition-transform" />
                     </button>
                   ))}
                 </motion.div>
@@ -72,6 +79,9 @@ export const Header = ({
           </div>
 
           <div className="hidden md:flex items-center gap-4">
+            <button onClick={onOpenBooking} className="flex items-center gap-2 px-4 py-2 bg-art-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all mr-2">
+              <ShoppingBag size={16} /> Booking
+            </button>
             {user ? (
               <div className="flex items-center gap-3">
                 <button onClick={onOpenHistory} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-art-text/60 hover:text-art-text transition-colors">
@@ -97,37 +107,50 @@ export const Header = ({
 
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="md:hidden bg-white border-t-2 border-art-text overflow-hidden">
-             <div className="p-4 space-y-4">
-                <div className="relative">
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }} 
+            animate={{ height: 'auto', opacity: 1 }} 
+            exit={{ height: 0, opacity: 0 }} 
+            className="md:hidden bg-white border-t-2 border-art-text overflow-hidden shadow-2xl"
+          >
+             <div className="p-3 space-y-3 bg-art-bg/20">
+                <div className="relative group">
                   <input 
                     type="text" 
-                    placeholder="Cari gunung..."
-                    className="w-full bg-art-bg/50 border-2 border-art-text/10 py-3 pl-4 pr-10 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all"
+                    placeholder="Destination..."
+                    className="w-full bg-white border-2 border-art-text py-2 pl-4 pr-10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all shadow-sm"
                     value={searchQuery}
                     onChange={onSearchChange}
                   />
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40" size={18} />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40" size={12} />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  {user ? (
-                    <>
-                      <button onClick={() => { onOpenHistory(); setIsMenuOpen(false); }} className="w-full py-4 text-xs font-black uppercase tracking-widest text-art-text flex items-center justify-center gap-2 border-2 border-art-text rounded-2xl">
-                        <History size={16} /> History Booking
+                  <button onClick={() => { onOpenBooking(); setIsMenuOpen(false); }} className="w-full py-3 bg-art-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+                    <ShoppingBag size={14} /> Booking Trip
+                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    {user ? (
+                      <>
+                        <button onClick={() => { onOpenHistory(); setIsMenuOpen(false); }} className="py-2.5 text-[9px] font-black uppercase tracking-widest text-art-text flex items-center justify-center gap-2 border-2 border-art-text rounded-xl bg-white hover:bg-art-bg transition-colors">
+                          <History size={12} className="text-art-orange" /> History
+                        </button>
+                        <button onClick={() => { onOpenSettings(); setIsMenuOpen(false); }} className="py-2.5 text-[9px] font-black uppercase tracking-widest bg-art-text text-white rounded-xl flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(255,107,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+                          <User size={12} /> Profile
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => { onLogin(); setIsMenuOpen(false); }} className="col-span-2 py-3 text-[10px] font-black uppercase tracking-widest bg-art-text text-white rounded-xl flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(255,107,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+                        <LogIn size={14} /> Login
                       </button>
-                      <button onClick={() => { onOpenSettings(); setIsMenuOpen(false); }} className="w-full py-4 text-xs font-black uppercase tracking-widest bg-art-text text-white rounded-2xl flex items-center justify-center gap-2">
-                        <User size={16} /> Dashboard
-                      </button>
-                      <button onClick={() => { onLogout(); setIsMenuOpen(false); }} className="w-full py-4 text-xs font-black uppercase tracking-widest text-red-500 flex items-center justify-center gap-2">
-                        <LogOut size={16} /> Logout
-                      </button>
-                    </>
-                  ) : (
-                    <button onClick={() => { onLogin(); setIsMenuOpen(false); }} className="w-full py-4 text-xs font-black uppercase tracking-widest bg-art-text text-white rounded-2xl flex items-center justify-center gap-2">
-                      <LogIn size={16} /> Login with Google
-                    </button>
-                  )}
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex justify-center gap-4 py-2 opacity-30">
+                  <Coffee size={12} />
+                  <Mountain size={12} />
+                  <MapPin size={12} />
                 </div>
              </div>
           </motion.div>

@@ -14,10 +14,10 @@ export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tri
               <div className="w-8 h-8 rounded-lg bg-art-text text-white flex items-center justify-center">
                 <Calendar size={18} />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Open Trip Schedule</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Open Trip</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-              Petualangan Terdekat <span className="text-art-orange">& Open Trip.</span>
+              <span className="text-art-orange">Open</span> Trip.
             </h2>
           </div>
           <button className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-art-text hover:text-art-orange transition-colors">

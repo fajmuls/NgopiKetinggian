@@ -195,6 +195,32 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                 }} placeholder="URL Gambar / Unggah File" />
               </div>
             </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
+              <span className="text-xs font-bold w-16">Logo:</span>
+              <div className="w-full sm:flex-1">
+                <ImageUploader value={dest.logo || ''} onChange={url => {
+                  const nd = [...data];
+                  nd[i].logo = url;
+                  setData(nd);
+                }} placeholder="URL Logo (Transparan disarankan)" />
+              </div>
+            </div>
+
+            <div className="flex flex-col mb-2">
+              <span className="text-xs font-bold mb-1">Deskripsi & Info:</span>
+              <textarea 
+                className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium focus:border-art-orange outline-none transition-all resize-none"
+                rows={3}
+                value={dest.desc || ''}
+                onChange={e => {
+                  const nd = [...data];
+                  nd[i].desc = e.target.value;
+                  setData(nd);
+                }}
+                placeholder="Tuliskan deskripsi singkat gunung ini..."
+              />
+            </div>
             
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-2">
               <div className="flex flex-col min-w-0">

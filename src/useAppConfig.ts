@@ -81,6 +81,7 @@ export interface AppConfig {
   homepage: {
     heroSub?: string;
     heroFeatures?: string;
+    heroSlogan?: string;
     heroTitlePrefix?: string;
     heroTitle: string;
     heroDescription: string;
@@ -168,6 +169,7 @@ const getDefaultWebsiteData = () => ({
   homepage: {
     heroSub: "Open Trip Eksklusif",
     heroFeatures: "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin",
+    heroSlogan: "The Real Adventure",
     heroTitlePrefix: "Trip",
     heroTitle: "Ngopi Di\nKetinggian",
     heroDescription: "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.",
