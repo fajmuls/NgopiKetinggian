@@ -16,7 +16,19 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   const [showDetails, setShowDetails] = useState(false);
   const [showWebRundown, setShowWebRundown] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
+  const [highlighted, setHighlighted] = useState(false);
   
+  useEffect(() => {
+    const handler = (e: any) => {
+      if (e.detail === dest.id) {
+        setHighlighted(true);
+        setTimeout(() => setHighlighted(false), 3000);
+      }
+    };
+    window.addEventListener('highlight-dest', handler);
+    return () => window.removeEventListener('highlight-dest', handler);
+  }, [dest.id]);
+
   const safePaths = useMemo(() => dest.paths && dest.paths.length > 0 ? dest.paths : [{ name: "Jalur Utama", durations: dest.durations || [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] }], [dest.paths, dest.durations]);
   const currentPath = safePaths[selectedPath] || safePaths[0];
   
@@ -38,17 +50,15 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group bg-white border-2 border-art-text rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 relative"
+      id={`dest-card-${dest.id}`}
+      className={`group bg-white border-2 rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 relative ${highlighted ? 'border-art-orange shadow-[12px_12px_0px_0px_#ff6b00] ring-4 ring-art-orange/50 ring-offset-4' : 'border-art-text'}`}
     >
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={currentDur?.rundownHtml || currentDur?.rundownText || "Itinerary belum tersedia."} title={`${dest.name} - ${currentDur?.label}`} />
       <div className="relative h-64 overflow-hidden border-b-2 border-art-text">
         <img src={dest.image || undefined} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
         
-        {/* Mountain Custom Logo */}
+        {/* Mountain Custom Logo Removed */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
-          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] border-2 border-art-text overflow-hidden p-1.5">
-            <img src={dest.logo || "https://files.catbox.moe/lubzno.png"} alt="Mountain Logo" className="w-full h-full object-contain" />
-          </div>
           <div className="bg-art-orange text-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm w-fit">{dest.difficulty}</div>
         </div>
 

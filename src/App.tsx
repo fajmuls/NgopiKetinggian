@@ -108,8 +108,11 @@ export default function App() {
        setSearchQuery('');
        scrollToSection({ preventDefault: () => {} } as any, item.id);
     } else {
-       setSearchQuery(item.name);
-       scrollToSection({ preventDefault: () => {} } as any, 'destinasi');
+       setSearchQuery('');
+       setTimeout(() => {
+           scrollToSection({ preventDefault: () => {} } as any, `dest-card-${item.id}`);
+           window.dispatchEvent(new CustomEvent('highlight-dest', { detail: item.id }));
+       }, 300);
     }
   };
 

@@ -123,9 +123,6 @@ export const Header = ({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <button onClick={() => { onOpenBooking(); setIsMenuOpen(false); }} className="w-full py-3 bg-art-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
-                    <ShoppingBag size={14} /> Booking Trip
-                  </button>
                   <div className="grid grid-cols-2 gap-2">
                     {user ? (
                       <>

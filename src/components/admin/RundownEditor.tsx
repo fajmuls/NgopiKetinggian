@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Clock, MapPin, GripVertical, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { customConfirm } from '../../GlobalDialog';
 
 interface RundownItem {
   id: string;
@@ -100,7 +101,7 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
     save(newItems);
   };
 
-  const days = Array.from(new Set(items.map(i => i.day))).sort((a, b) => a - b);
+  const days: number[] = Array.from<number>(new Set(items.map(i => Number(i.day))) as any).sort((a: any, b: any) => a - b);
   if (days.length === 0) days.push(1);
 
   return (
@@ -161,7 +162,7 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
           <button 
             type="button"
             onClick={() => {
-              const nextDay = Math.max(...items.map(i => i.day), 0) + 1;
+              const nextDay = Math.max(...items.map(i => Number(i.day)), 0) + 1;
               addItem(nextDay);
             }}
             className="bg-art-orange text-white px-3 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-orange transition-all border border-transparent hover:border-art-orange shadow-sm"

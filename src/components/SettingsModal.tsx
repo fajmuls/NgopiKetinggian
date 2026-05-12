@@ -27,6 +27,16 @@ export const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOp
     window.dispatchEvent(new Event('volumeChange'));
   };
 
+  const [localLanguage, setLocalLanguage] = useState(() => {
+    return localStorage.getItem('appLanguage') || 'id';
+  });
+
+  const handleLanguageChange = (lang: string) => {
+    setLocalLanguage(lang);
+    localStorage.setItem('appLanguage', lang);
+    window.dispatchEvent(new Event('languageChange'));
+  };
+
   const themes = [
     { id: 'default', name: 'Rush (Default)', color: '#421404' },
     { id: 'matcha', name: 'Matcha (Hijau)', color: '#afa231' },
@@ -70,6 +80,24 @@ export const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOp
                 <span className="text-[10px] font-bold uppercase w-full text-center leading-tight mt-1">{t.name}</span>
               </button>
             ))}
+          </div>
+
+          <label className="block text-xs font-bold uppercase tracking-widest text-art-text/80 mb-3">Bahasa / Language</label>
+          <div className="grid grid-cols-2 gap-2 border-b border-art-text/10 pb-6 mb-6">
+            <button 
+              onClick={() => { playClick(); handleLanguageChange('id'); }} 
+              onMouseEnter={playHover}
+              className={`flex flex-col gap-1 items-center p-2 rounded border-2 transition-all ${localLanguage === 'id' ? 'border-art-orange bg-white/50 shadow-sm' : 'border-art-text/10 hover:border-art-text/30'}`}
+            >
+              <span className="text-[10px] font-bold uppercase w-full text-center leading-tight">Indonesian</span>
+            </button>
+            <button 
+              onClick={() => { playClick(); handleLanguageChange('en'); }} 
+              onMouseEnter={playHover}
+              className={`flex flex-col gap-1 items-center p-2 rounded border-2 transition-all ${localLanguage === 'en' ? 'border-art-orange bg-white/50 shadow-sm' : 'border-art-text/10 hover:border-art-text/30'}`}
+            >
+              <span className="text-[10px] font-bold uppercase w-full text-center leading-tight">English</span>
+            </button>
           </div>
 
           <label className="block text-xs font-bold uppercase tracking-widest text-art-text/80 mb-3">Akun</label>

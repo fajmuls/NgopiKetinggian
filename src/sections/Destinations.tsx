@@ -39,42 +39,38 @@ export const DestinationSection = ({
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Private Trip</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-                 <span className="text-art-orange">Private</span> Trip.
+                 <span className="text-art-orange">Trip</span> Privat.
               </h2>
               <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
-                Book your trip and mountain and schedule as you wish.
+                Pesan trip dan gunung serta jadwal sesuai keinginan Anda.
               </p>
             </div>
 
             <div className="flex flex-col gap-6 w-full lg:w-auto">
                <div className="flex flex-col gap-3">
                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Difficulty</p>
-                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                 <select 
+                   value={filterDifficulty}
+                   onChange={(e) => setFilterDifficulty(e.target.value)}
+                   className="w-full sm:w-48 bg-white border-2 border-art-text p-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-art-orange transition-colors cursor-pointer"
+                 >
                     {difficulties.map((opt: any) => (
-                      <button 
-                        key={opt as string}
-                        onClick={() => setFilterDifficulty(opt)}
-                        className={`whitespace-nowrap px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border-2 transition-all ${filterDifficulty === opt ? 'bg-art-text text-white border-art-text' : 'bg-white text-art-text border-art-text/10'}`}
-                      >
-                        {opt as string}
-                      </button>
+                      <option key={opt as string} value={opt as string}>{opt as string}</option>
                     ))}
-                 </div>
+                 </select>
                </div>
 
                <div className="flex flex-col gap-3">
                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Region</p>
-                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                 <select 
+                   value={filterRegion}
+                   onChange={(e) => typeof setFilterRegion === 'function' && setFilterRegion(e.target.value)}
+                   className="w-full sm:w-48 bg-white border-2 border-art-text p-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-art-orange transition-colors cursor-pointer"
+                 >
                     {regions.map((opt: any) => (
-                      <button 
-                        key={opt as string}
-                        onClick={() => typeof setFilterRegion === 'function' && setFilterRegion(opt)}
-                        className={`whitespace-nowrap px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border-2 transition-all ${filterRegion === opt ? 'bg-art-orange text-white border-art-orange font-black' : 'bg-white text-art-text border-art-text/10'}`}
-                      >
-                        {opt as string}
-                      </button>
+                      <option key={opt as string} value={opt as string}>{opt as string}</option>
                     ))}
-                 </div>
+                 </select>
                </div>
             </div>
           </div>
