@@ -22,8 +22,8 @@ export const Header = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-art-text rounded-xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_#ff6b00]">
-              <Coffee className="text-white" size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden">
+              <img src="https://files.catbox.moe/lubzno.png" alt="Logo" className="w-full h-full object-contain p-1" />
             </div>
             <div className="flex flex-col">
               <h1 className="text-sm sm:text-lg font-black leading-none tracking-tighter uppercase text-art-text">Ngopi Di<br/><span className="text-art-orange">Ketinggian</span></h1>

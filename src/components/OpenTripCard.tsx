@@ -35,14 +35,44 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
       <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
         <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-         <div className="absolute top-3 left-3 bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1">
-            <Calendar size={10}/> {ot.jadwal}
+         <div className="absolute top-3 left-3 flex flex-col gap-2">
+            <div className="bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1">
+               <Calendar size={10}/> {ot.jadwal}
+            </div>
+            {v.difficulty && (
+               <div className="bg-white text-art-text text-[8px] font-black px-2 py-1 rounded-lg border border-art-text/10 uppercase shadow-sm self-start">
+                  {ot.difficulty}
+               </div>
+            )}
          </div>
-         {v.difficulty && (
-           <div className="absolute top-3 right-3 bg-white text-art-text text-[8px] font-black px-2 py-1 rounded-lg border border-art-text/10 uppercase shadow-sm">
-              {ot.difficulty}
-           </div>
+
+         {/* Quick Action Rundown */}
+         {(durInfo?.rundownHtml || ot.rundownText || ot.rundownPdf) && (
+            <div className="absolute top-3 right-3 flex flex-col gap-2">
+               <button 
+                  onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); }}
+                  className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-md group/btn"
+                  title="Lihat Rundown (Web)"
+               >
+                  <Eye size={14} />
+               </button>
+               <button 
+                  onClick={(e) => { 
+                     e.stopPropagation(); 
+                     if (ot.rundownPdf) {
+                        window.open(ot.rundownPdf, '_blank');
+                     } else {
+                        generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
+                     }
+                  }}
+                  className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-md"
+                  title="Download Itinerary (PDF)"
+               >
+                  <Download size={14} />
+               </button>
+            </div>
          )}
+
          <div className={`absolute bottom-3 left-3 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
             {getSisaKuota(ot)} Pax Left
          </div>

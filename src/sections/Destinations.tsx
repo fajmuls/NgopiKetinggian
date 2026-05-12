@@ -27,21 +27,18 @@ export const DestinationSection = ({
               </h2>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-               <div className="relative group">
-                  <p className="absolute -top-2 left-3 bg-white px-1 text-[8px] font-black text-art-text uppercase z-10 transition-colors group-focus-within:text-art-orange">Filter Level</p>
-                  <div className="relative">
-                    <select 
-                      className="appearance-none bg-white border-2 border-art-text/10 px-4 py-3 pr-10 rounded-xl text-xs font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all cursor-pointer min-w-[180px]"
-                      value={filterDifficulty}
-                      onChange={(e) => setFilterDifficulty(e.target.value)}
+            <div className="flex flex-col gap-4 w-full">
+               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Difficulty</p>
+               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                  {difficultyOptions.map((opt: string) => (
+                    <button 
+                      key={opt}
+                      onClick={() => setFilterDifficulty(opt)}
+                      className={`whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 transition-all ${filterDifficulty === opt ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_#ff6b00]' : 'bg-white text-art-text border-art-text/10 hover:border-art-orange'}`}
                     >
-                      {difficultyOptions.map((opt: string) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-art-text/40" />
-                  </div>
+                      {opt}
+                    </button>
+                  ))}
                </div>
             </div>
           </div>

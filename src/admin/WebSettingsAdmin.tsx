@@ -305,6 +305,21 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
               <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="JAYA / JAYA / JAYA" />
            </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Stat: Happy Hikers</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.statHikers || ''} onChange={e => setData({...data, statHikers: e.target.value})} placeholder="100+" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Stat: Satisfaction Rate</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.statSatisfaction || ''} onChange={e => setData({...data, statSatisfaction: e.target.value})} placeholder="99%" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Stat: Trips Completed</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.statTrips || ''} onChange={e => setData({...data, statTrips: e.target.value})} placeholder="50+" />
+           </div>
+        </div>
       </div>
 
       <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">

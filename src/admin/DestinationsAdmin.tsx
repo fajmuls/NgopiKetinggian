@@ -366,8 +366,9 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                         const nd = [...data];
                         nd[i].paths[pIdx].durations[j].showRundown = !nd[i].paths[pIdx].durations[j].showRundown;
                         setData(nd);
-                      }} className={`p-2 rounded ${dur.showRundown ? 'bg-art-orange text-white' : 'text-art-text hover:bg-gray-200'}`}>
+                      }} className={`p-2 rounded flex items-center gap-2 ${dur.showRundown ? 'bg-art-orange text-white' : 'bg-white border-2 border-art-text text-art-text hover:bg-gray-100'}`}>
                         <FileText size={16} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{dur.showRundown ? 'Tutup Rundown' : 'Edit Rundown'}</span>
                       </button>
                       <button onClick={() => {
                         const nd = [...data];
@@ -398,11 +399,10 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                          </div>
                          <div className="space-y-1">
                             <label className="text-[9px] font-bold text-art-text/40 uppercase">Atau, Ketik Manual (Rundown Detail)</label>
-                            <textarea 
-                               className="border border-art-text/20 p-2 text-xs rounded w-full min-h-[100px] outline-none focus:border-art-orange font-mono"
+                            <RundownEditor 
                                value={dur.rundownHtml || ''}
-                               onChange={(e) => { const nd = [...data]; nd[i].paths[pIdx].durations[j].rundownHtml = e.target.value; setData(nd); }}
-                               placeholder="Hari 1:&#10;08:00 - Tiba di Basecamp&#10;09:00 - Mulai Pendakian..."
+                               onChange={(val) => { const nd = [...data]; nd[i].paths[pIdx].durations[j].rundownHtml = val; setData(nd); }}
+                               title={`Rundown ${dest.name} - ${path.name}`}
                             />
                          </div>
                       </div>

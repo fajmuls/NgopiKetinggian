@@ -45,6 +45,33 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
         <img src={dest.image || undefined} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
         <div className="absolute top-4 right-4 bg-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
         <div className="absolute top-4 left-4 bg-art-orange text-white border-2 border-art-text px-3 py-1 font-black text-[10px] tracking-widest uppercase rounded-lg shadow-sm">{dest.difficulty}</div>
+
+        {/* Quick Action Rundown */}
+        {(currentDur?.rundownHtml || currentDur?.rundownPdf) && (
+           <div className="absolute bottom-4 right-4 flex gap-2">
+              <button 
+                 onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); }}
+                 className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
+                 title="Lihat Rundown (Web)"
+              >
+                 <Eye size={18} />
+              </button>
+              <button 
+                 onClick={(e) => { 
+                    e.stopPropagation(); 
+                    if (currentDur.rundownPdf) {
+                       window.open(currentDur.rundownPdf, '_blank');
+                    } else {
+                       generateRundownPdf(currentDur, dest.name, currentPath.name, currentDur.label);
+                    }
+                 }}
+                 className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
+                 title="Download Itinerary (PDF)"
+              >
+                 <Download size={18} />
+              </button>
+           </div>
+        )}
       </div>
 
       <div className="p-5 md:p-6">

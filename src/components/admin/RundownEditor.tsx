@@ -146,11 +146,36 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
                   <div className="w-16 shrink-0 relative">
                     <input 
                       type="text"
+                      list="time-recommendations"
                       className="w-full border-2 border-art-text/10 p-1.5 rounded-lg text-[10px] font-bold outline-none focus:border-art-orange bg-art-bg/20 font-mono"
                       value={item.time}
                       placeholder="00:00"
                       onChange={(e) => updateItem(item.id, 'time', e.target.value)}
                     />
+                    <datalist id="time-recommendations">
+                      <option value="04:00" />
+                      <option value="05:00" />
+                      <option value="06:00" />
+                      <option value="07:00" />
+                      <option value="08:00" />
+                      <option value="09:00" />
+                      <option value="10:00" />
+                      <option value="11:00" />
+                      <option value="12:00" />
+                      <option value="13:00" />
+                      <option value="14:00" />
+                      <option value="15:00" />
+                      <option value="16:00" />
+                      <option value="17:00" />
+                      <option value="18:00" />
+                      <option value="19:00" />
+                      <option value="20:00" />
+                      <option value="06:00 - 09:00" />
+                      <option value="09:00 - 12:00" />
+                      <option value="12:00 - 15:00" />
+                      <option value="15:00 - 18:00" />
+                      <option value="18:00 - 21:00" />
+                    </datalist>
                   </div>
                   <div className="flex-1">
                     <input 

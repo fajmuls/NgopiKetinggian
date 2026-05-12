@@ -95,6 +95,9 @@ export interface AppConfig {
     leaderTitle?: string;
     leaderSub?: string;
     leaderParagraph?: string;
+    statHikers?: string;
+    statSatisfaction?: string;
+    statTrips?: string;
   };
 }
 
@@ -182,6 +185,9 @@ const getDefaultWebsiteData = () => ({
     leaderTitle: "Kenalan dengan",
     leaderSub: "Trip Leader Kami",
     leaderParagraph: "Beberapa kawan daki yang akan memandu dan memastikan keamanan serta kenyamanan perjalananmu ke puncak.",
+    statHikers: "100+",
+    statSatisfaction: "99%",
+    statTrips: "50+",
     heroSlides: [
       {
          name: "Gunung Gede Pangrango",

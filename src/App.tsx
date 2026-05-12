@@ -43,7 +43,8 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [bookingPrefill, setBookingPrefill] = useState({ destinasi: '', jalur: '', durasi: '', type: 'private' as 'private' | 'open', jadwal: '' });
+  const [bookingPrefill, setBookingPrefill] = useState<any>(undefined);
+  const [bookingType, setBookingType] = useState<'open' | 'private'>('open');
   const [filterDifficulty, setFilterDifficulty] = useState('Semua');
   const [filterRegion, setFilterRegion] = useState('Semua');
   const [openFilterRegion, setOpenFilterRegion] = useState('Semua');
@@ -112,11 +113,20 @@ export default function App() {
     }
   };
 
-  const handleOpenBooking = (destinasi = '', jalur = '', durasi = '', type: 'private' | 'open' = 'open', jadwal = '') => {
+  const handleOpenBooking = (dest: any = null, path: any = null, dur: any = null, type: 'open' | 'private' = 'private', jadwal: string = '') => {
     playClick();
-    setBookingPrefill({ destinasi, jalur, durasi, type, jadwal });
+    const prefill = dest ? { 
+      destinasi: typeof dest === 'string' ? dest : dest.name,
+      jalur: typeof path === 'string' ? path : path?.name || '',
+      durasi: typeof dur === 'string' ? dur : dur?.label || '',
+      type,
+      jadwal
+    } : undefined;
+    
+    setBookingPrefill(prefill);
+    setBookingType(type);
     setIsBookingOpen(true);
-    showToastMsg(`Membuka Booking: ${destinasi}`);
+    if (dest) showToastMsg(`Membuka Booking: ${typeof dest === 'string' ? dest : dest.name}`);
   };
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const { playHover, playClick, playPop } = useSound();
@@ -325,10 +335,14 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       />
 
       {/* Hero Section */}
-      <Hero onExplore={() => {
-        const el = document.getElementById('destinasi');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }} />
+      <Hero 
+        config={config}
+        onExplore={() => {
+          const el = document.getElementById('destinasi');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }} 
+        onBooking={() => handleOpenBooking()}
+      />
 
       {/* The Concept Section */}
       <section id="cerita" className="py-20 md:py-32 bg-art-section relative border-y border-art-text overflow-hidden">
@@ -346,18 +360,27 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-art-text mb-6 md:mb-8 leading-tight">{config.homepage?.ceritaTitle || "Secangkir Cerita"} <br/><span className="text-art-green font-serif italic normal-case font-normal text-3xl md:text-5xl">{config.homepage?.ceritaSub || "di Atas Awan"}</span></h2>
               <div className="w-12 h-1 bg-art-orange mb-8"></div>
               <p className="text-sm md:text-base font-medium text-art-text/80 mb-6 leading-relaxed">
-                {config.homepage?.ceritaParagraph1 || "Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman."}
-              </p>
-              <p className="text-sm md:text-base font-medium text-art-text/80 mb-10 leading-relaxed">
-                {config.homepage?.ceritaParagraph2 || "Berbekal pengalaman panjang ini, meracik kopi di alam terbuka tak lagi sekadar ritual bagi kami, ia menjelma jadi perayaan kebersamaan. Lupakan sejenak semrawutnya ibukota. Kami siapkan ritme perjalanan yang santai, aman, penuh cerita, dan tentu saja... kopi rindu tebal yang diseduh di waktu yang paling tepat. Sesuatu yang tak akan pernah Anda temukan walau di coffee shop semewah apa pun di tengah kota."}
+                {config.homepage?.ceritaParagraph1 || "Selama lebih dari 10 tahun..."}
               </p>
               
+              {/* Dynamic Stats Row */}
+              <div className="mt-12 grid grid-cols-3 gap-6 pt-10 border-t-2 border-art-text/10 bg-white/50 backdrop-blur-sm rounded-3xl p-6 shadow-sm mb-10">
+                <div className="text-center group hover:scale-105 transition-transform">
+                  <p className="text-2xl md:text-4xl font-black text-art-text tracking-tighter mb-1">{config.homepage?.statHikers || '100+'}</p>
+                  <p className="text-[8px] md:text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em]">Happy Hikers</p>
+                </div>
+                <div className="text-center border-x-2 border-art-text/10 group hover:scale-105 transition-transform">
+                  <p className="text-2xl md:text-4xl font-black text-art-text tracking-tighter mb-1">{config.homepage?.statSatisfaction || '99%'}</p>
+                  <p className="text-[8px] md:text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em]">Satisfaction</p>
+                </div>
+                <div className="text-center group hover:scale-105 transition-transform">
+                  <p className="text-2xl md:text-4xl font-black text-art-text tracking-tighter mb-1">{config.homepage?.statTrips || '50+'}</p>
+                  <p className="text-[8px] md:text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em]">Destinations</p>
+                </div>
+              </div>
+
               <div className="space-y-6 border-l-2 border-art-text/10 pl-6">
-                {(config.homepage?.ceritaFeatures || [
-                  { title: "Manual Brew Experience", desc: "Nikmati V60, Chemex, atau Aeropress dari barista kami." },
-                  { title: "Grup Eksklusif", desc: "Maksimal 12 orang per perjalanan untuk keintiman." },
-                  { title: "Peralatan Premium", desc: "Tenda The North Face dll untuk kenyamanan istirahat." }
-                ]).map((item: any, i: number) => (
+                {(config.homepage?.ceritaFeatures || []).map((item: any, i: number) => (
                   <div key={i} className="flex gap-4 items-start" onMouseEnter={playHover}>
                     <div>
                       <h4 className="font-bold text-art-text uppercase text-sm tracking-widest">{item.title}</h4>
@@ -389,23 +412,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                   autoPlay loop muted playsInline controls
                   style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
                   src={config.ceritaVideoUrl} 
-                  poster="https://images.unsplash.com/photo-1542459954-469b8bd51515?q=80&w=2070&auto=format&fit=crop"
                   className="relative z-10 rounded-3xl shadow-2xl w-full h-auto max-h-[75vh] grayscale-[10%] border-8 border-white shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]"
                 />
               )}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl z-20 border border-art-text/5"
-              >
-                <div className="flex items-center gap-4">
-                  <img src="https://images.unsplash.com/photo-1559525839-b184a4d698c7?w=100&h=100&fit=crop" alt="Kopi Premium" className="w-12 h-12 rounded-full object-cover border-2 border-art-text/10" />
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-art-orange">Kopi Premium</p>
-                    <p className="text-sm font-bold text-art-text mt-1 leading-tight">Diseduh Segar <br/>di Atas Gunung</p>
-                  </div>
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -548,7 +557,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           {/* OPEN TRIP SECTION */}
           <TripSection 
             openTrips={filteredOpenTrips}
-            onJoin={handleOpenBooking}
+            onJoin={(ot: any) => handleOpenBooking(ot.name, ot.path, ot.duration, 'open', ot.jadwal)}
             getSisaKuota={getSisaKuota}
             visibilities={config.visibilities}
             tripLeaders={config.tripLeaders}
@@ -558,7 +567,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           {/* PRIVATE TRIP SECTION */}
           <DestinationSection 
             destinations={filteredDestinations}
-            onBook={handleOpenBooking}
+            onBook={(dest, path, dur) => handleOpenBooking(dest, path, dur, 'private')}
             visibilities={config.visibilities}
             filterDifficulty={filterDifficulty}
             setFilterDifficulty={setFilterDifficulty}
