@@ -1,0 +1,759 @@
+export const destinationsData = [
+  {
+    "id": "gunung-prau",
+    "name": "Gunung Prau",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "2.590 mdpl",
+    "desc": "Petualangan premium di Gunung Prau.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Wates",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      },
+      {
+        "name": "Via Patakbanteng",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-kembang",
+    "name": "Gunung Kembang",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "2.340 mdpl",
+    "desc": "Petualangan premium di Gunung Kembang.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Lengkong",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-bismo",
+    "name": "Gunung Bismo",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "2.365 mdpl",
+    "desc": "Petualangan premium di Gunung Bismo.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Sikunang",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-kembang-+-bismo",
+    "name": "Gunung Kembang + Bismo",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "2.365 mdpl",
+    "desc": "Petualangan premium di Gunung Kembang + Bismo.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Lengkong & Sikunang",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-merbabu",
+    "name": "Gunung Merbabu",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "3.142 mdpl",
+    "desc": "Petualangan premium di Gunung Merbabu.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Selo",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      },
+      {
+        "name": "Via Thekelan",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      },
+      {
+        "name": "Via Swanting",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-slamet",
+    "name": "Gunung Slamet",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "3.432 mdpl",
+    "desc": "Petualangan premium di Gunung Slamet.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Bambangan",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      },
+      {
+        "name": "Via Guci",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-sindoro",
+    "name": "Gunung Sindoro",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "3.136 mdpl",
+    "desc": "Petualangan premium di Gunung Sindoro.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Kledung",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-sumbing",
+    "name": "Gunung Sumbing",
+    "isActive": true,
+    "region": "Jawa Tengah",
+    "height": "3.371 mdpl",
+    "desc": "Petualangan premium di Gunung Sumbing.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Garung",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      },
+      {
+        "name": "Via Gajahmungkur",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-lawu",
+    "name": "Gunung Lawu",
+    "isActive": true,
+    "region": "Jawa Timur",
+    "height": "3.265 mdpl",
+    "desc": "Petualangan premium di Gunung Lawu.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Candi Cetho",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      },
+      {
+        "name": "Via Cemoro Sewu",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-ciremai",
+    "name": "Gunung Ciremai",
+    "isActive": true,
+    "region": "Jawa Barat",
+    "height": "3.078 mdpl",
+    "desc": "Petualangan premium di Gunung Ciremai.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Apuy",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      },
+      {
+        "name": "Via Sadarehe",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-papandayan",
+    "name": "Gunung Papandayan",
+    "isActive": true,
+    "region": "Jawa Barat",
+    "height": "2.665 mdpl",
+    "desc": "Petualangan premium di Gunung Papandayan.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Camp David",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-gede",
+    "name": "Gunung Gede",
+    "isActive": true,
+    "region": "Jawa Barat",
+    "height": "2.958 mdpl",
+    "desc": "Petualangan premium di Gunung Gede.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Putri",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      },
+      {
+        "name": "Via Cibodas",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-pangrango",
+    "name": "Gunung Pangrango",
+    "isActive": true,
+    "region": "Jawa Barat",
+    "height": "3.019 mdpl",
+    "desc": "Petualangan premium di Gunung Pangrango.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Cibodas",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 700,
+            "originalPrice": 800
+          },
+          {
+            "label": "2H 1M",
+            "price": 900,
+            "originalPrice": 1050
+          },
+          {
+            "label": "3H 2M",
+            "price": 1200,
+            "originalPrice": 1350
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-salak",
+    "name": "Gunung Salak",
+    "isActive": true,
+    "region": "Jawa Barat",
+    "height": "2.211 mdpl",
+    "desc": "Petualangan premium di Gunung Salak.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Cidahu",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 500,
+            "originalPrice": 600
+          },
+          {
+            "label": "2H 1M",
+            "price": 700,
+            "originalPrice": 850
+          },
+          {
+            "label": "3H 2M",
+            "price": 1000,
+            "originalPrice": 1150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-semeru",
+    "name": "Gunung Semeru",
+    "isActive": true,
+    "region": "Jawa Timur",
+    "height": "3.676 mdpl",
+    "desc": "Petualangan premium di Gunung Semeru.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Ranu Pani",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 1600,
+            "originalPrice": 1700
+          },
+          {
+            "label": "2H 1M",
+            "price": 1800,
+            "originalPrice": 1950
+          },
+          {
+            "label": "3H 2M",
+            "price": 2100,
+            "originalPrice": 2250
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gunung-rinjani",
+    "name": "Gunung Rinjani",
+    "isActive": true,
+    "region": "NTB",
+    "height": "3.726 mdpl",
+    "desc": "Petualangan premium di Gunung Rinjani.",
+    "image": "https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=2070&auto=format&fit=crop",
+    "locationTag": "Basecamp",
+    "difficulty": "Menengah",
+    "mepo": "Basecamp",
+    "kuota": "Min 2 - Max 12 Pax",
+    "beans": "Arabica Blend",
+    "paths": [
+      {
+        "name": "Via Sembalun",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 1600,
+            "originalPrice": 1700
+          },
+          {
+            "label": "2H 1M",
+            "price": 1800,
+            "originalPrice": 1950
+          },
+          {
+            "label": "3H 2M",
+            "price": 2100,
+            "originalPrice": 2250
+          }
+        ]
+      },
+      {
+        "name": "Via Senaru",
+        "durations": [
+          {
+            "label": "1H (Tektok)",
+            "price": 1600,
+            "originalPrice": 1700
+          },
+          {
+            "label": "2H 1M",
+            "price": 1800,
+            "originalPrice": 1950
+          },
+          {
+            "label": "3H 2M",
+            "price": 2100,
+            "originalPrice": 2250
+          }
+        ]
+      }
+    ]
+  }
+];
+export const defaultTripLeaders = [{name: 'Admin', isPrimary: true}];
