@@ -19,6 +19,9 @@ export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tri
             <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
               <span className="text-art-orange">Open</span> Trip.
             </h2>
+            <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
+              Join an open trip with others.
+            </p>
           </div>
           <button className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-art-text hover:text-art-orange transition-colors">
             Lihat Semua Jadwal <ChevronRight size={16} />

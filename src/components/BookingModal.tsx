@@ -23,6 +23,9 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
   const [selectedJalur, setSelectedJalur] = useState('');
   const [selectedDurasi, setSelectedDurasi] = useState('');
   const [selectedJadwal, setSelectedJadwal] = useState(''); 
+  const [destSearch, setDestSearch] = useState('');
+  const [openDest, setOpenDest] = useState(false);
+  const destRef = useRef<HTMLDivElement>(null);
   const [pesertaCount, setPesertaCount] = useState<number | string>(currentType === 'private' ? 2 : 1);
   const [promoCode, setPromoCode] = useState('');
   
@@ -51,7 +54,11 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
           deskripsi: data.deskripsi || ''
         });
         setPromoCode(data.promoCode || '');
-        if (data.destinasi) setSelectedDestinasi(data.destinasi);
+        if (data.destinasi) {
+          setSelectedDestinasi(data.destinasi);
+          setDestSearch(data.destinasi);
+        }
+        if (data.destSearch) setDestSearch(data.destSearch);
         if (data.jalur) setSelectedJalur(data.jalur);
         if (data.durasi) setSelectedDurasi(data.durasi);
         if (data.jadwal) setSelectedJadwal(data.jadwal);
@@ -76,15 +83,28 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
       durasi: selectedDurasi,
       jadwal: selectedJadwal,
       pesertaCount,
+      destSearch,
       type: currentType,
       viewType
     };
     localStorage.setItem('ngopi_booking_draft', JSON.stringify(draft));
   }, [formState, promoCode, selectedDestinasi, selectedJalur, selectedDurasi, selectedJadwal, pesertaCount, currentType, viewType, isOpen]);
 
+  // Handle click outside for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (destRef.current && !destRef.current.contains(event.target as Node)) {
+        setOpenDest(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (prefill) {
       setSelectedDestinasi(prefill.destinasi || '');
+      setDestSearch(prefill.destinasi || '');
       setSelectedJalur(prefill.jalur || '');
       setSelectedDurasi(prefill.durasi || '');
       setSelectedJadwal(prefill.jadwal || '');
@@ -720,29 +740,82 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                 )}
 
                 <div className="space-y-4">
-                   <div className="relative">
+                   <div className="relative" ref={destRef}>
                       <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Destinasi</label>
-                      <select 
-                        name="destinasi" 
-                        required 
-                        value={selectedDestinasi} 
-                        onChange={e => { 
-                          setSelectedDestinasi(e.target.value); 
-                          setSelectedJalur(''); 
-                          if (currentType === 'open_request') setSelectedDurasi('2H 1M');
-                          else setSelectedDurasi(''); 
-                          setSelectedJadwal(''); 
-                        }} 
-                        className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-xs disabled:bg-gray-200/50 shadow-sm"
-                        disabled={currentType === 'open'}
-                      >
-                         <option value="">-- PILIH GUNUNG --</option>
-                         {currentType === 'open' ? (
-                            config.openTrips?.map((ot: any, idx: number) => <option key={idx} value={ot.name}>{ot.name} ({ot.jadwal})</option>)
-                         ) : (
-                            destinationOptions?.filter(e => e.isActive !== false).map((d, i) => <option key={i} value={d.name}>{d.name}</option>)
-                         )}
-                      </select>
+                      <div className="relative">
+                        <input 
+                          type="text"
+                          placeholder="CARI GUNUNG..."
+                          className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-xs disabled:bg-gray-200/50 shadow-sm"
+                          value={destSearch}
+                          onChange={(e) => {
+                            setDestSearch(e.target.value);
+                            setOpenDest(true);
+                          }}
+                          onFocus={() => setOpenDest(true)}
+                          disabled={currentType === 'open'}
+                        />
+                        <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 text-art-text/20 transition-transform ${openDest ? 'rotate-180' : ''}`} size={16} />
+                        <AnimatePresence>
+                          {openDest && (
+                            <motion.div 
+                              initial={{ opacity: 0, y: 5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 5 }}
+                              className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-xl z-[120] max-h-60 overflow-y-auto overflow-x-hidden"
+                            >
+                              {currentType === 'open' ? (
+                                config.openTrips?.filter((ot: any) => ot.name.toLowerCase().includes(destSearch.toLowerCase())).map((ot: any, idx: number) => (
+                                  <button 
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedDestinasi(ot.name);
+                                      setDestSearch(ot.name);
+                                      setOpenDest(false);
+                                      setSelectedJalur(ot.path || '');
+                                      setSelectedDurasi(ot.duration || '');
+                                      setSelectedJadwal(ot.jadwal || '');
+                                    }}
+                                    className="w-full p-4 hover:bg-art-bg text-left border-b border-art-text/5 last:border-none group"
+                                  >
+                                    <p className="text-[10px] font-black uppercase text-art-text group-hover:text-art-orange transition-colors">{ot.name}</p>
+                                    <p className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5">{ot.jadwal}</p>
+                                  </button>
+                                ))
+                              ) : (
+                                destinationOptions?.filter(d => d.isActive !== false && d.name.toLowerCase().includes(destSearch.toLowerCase())).map((d, i) => (
+                                  <button 
+                                    key={i}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedDestinasi(d.name);
+                                      setDestSearch(d.name);
+                                      setOpenDest(false);
+                                      setSelectedJalur(''); 
+                                      if (currentType === 'open_request') setSelectedDurasi('2H 1M');
+                                      else setSelectedDurasi(''); 
+                                      setSelectedJadwal(''); 
+                                    }}
+                                    className="w-full p-4 hover:bg-art-bg text-left border-b border-art-text/5 last:border-none group"
+                                  >
+                                    <p className="text-[10px] font-black uppercase text-art-text group-hover:text-art-orange transition-colors">{d.name}</p>
+                                    <p className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5">{d.region}</p>
+                                  </button>
+                                ))
+                              )}
+                              {(currentType === 'open' ? 
+                                config.openTrips?.filter((ot: any) => ot.name.toLowerCase().includes(destSearch.toLowerCase())).length === 0 :
+                                destinationOptions?.filter((d: any) => d.isActive !== false && d.name.toLowerCase().includes(destSearch.toLowerCase())).length === 0
+                              ) && (
+                                <div className="p-8 text-center bg-gray-50">
+                                  <p className="text-[10px] font-black uppercase text-art-text/20">Gunung tidak ditemukan</p>
+                                </div>
+                              )}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                    </div>
 
                    {true && (

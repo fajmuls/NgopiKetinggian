@@ -104,6 +104,12 @@ export const generateInvoice = async (booking: any) => {
   const bookingDate = booking.createdAt ? new Date(booking.createdAt.seconds * 1000) : new Date();
   const displayDate = isNaN(bookingDate.getTime()) ? new Date() : bookingDate;
   doc.text(`TANGGAL: ${displayDate.toLocaleDateString('id-ID')}`, 140, 38);
+  doc.setFont('helvetica', 'bold');
+  const statusLabel = booking.status === 'pending' ? 'MENUNGGU KONFIRMASI' :
+                      booking.status === 'processing' ? 'DIPROSES' :
+                      booking.status === 'lunas' ? 'LUNAS / SELESAI' :
+                      booking.status === 'rejected' ? 'DITOLAK' : (booking.status || '').toUpperCase();
+  doc.text(`STATUS: ${statusLabel}`, 140, 44);
 
   const drawHeader = (title: string, y: number) => {
     doc.setFillColor(245, 245, 245);

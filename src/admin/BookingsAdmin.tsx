@@ -673,6 +673,29 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                               <span className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] flex items-center gap-1">
                                  <Clipboard size={10} /> Itinerary & Rundown (Private)
                               </span>
+                              <button 
+                                onClick={async () => {
+                                  const dest = (config.destinationsData || []).find((d: any) => d.name === booking.destinasi);
+                                  const path = dest?.paths?.find((p: any) => p.name === booking.jalur);
+                                  const dur = path?.durations?.find((d: any) => d.label === booking.durasi);
+                                  if (dur) {
+                                    if (dur.rundownHtml || dur.rundownPdf) {
+                                       await updateDoc(doc(db, 'bookings', booking.id), { 
+                                         rundownText: dur.rundownHtml || "",
+                                         rundownPdf: dur.rundownPdf || ""
+                                       });
+                                       showToast("Template dimuat!");
+                                    } else {
+                                       showToast("Template kosong");
+                                    }
+                                  } else {
+                                    showToast("Data destinasi tidak ditemukan");
+                                  }
+                                }}
+                                className="text-[8px] font-black uppercase text-blue-600 bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded-md transition-colors border border-blue-200 flex items-center gap-1"
+                              >
+                                <Plus size={10} /> Pakai Template
+                              </button>
                            </div>
                            <div className="space-y-3">
                               <div className="space-y-1">

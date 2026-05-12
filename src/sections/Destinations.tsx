@@ -41,6 +41,9 @@ export const DestinationSection = ({
               <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
                  <span className="text-art-orange">Private</span> Trip.
               </h2>
+              <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
+                Book your trip and mountain and schedule as you wish.
+              </p>
             </div>
 
             <div className="flex flex-col gap-6 w-full lg:w-auto">

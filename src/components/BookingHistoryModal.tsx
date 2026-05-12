@@ -99,7 +99,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                              {b.status === 'selesai' && <MapPin size={10} />}
                              {b.status === 'rejected' && <X size={10} />}
                              {b.status === 'batal' && <X size={10} />}
-                             {b.status === 'pending' ? 'Pending' : 
+                             {b.status === 'pending' ? 'Menunggu' : 
                               b.status === 'processing' ? 'Diproses' : 
                               b.status === 'dp_partial' ? 'DP Parsial' :
                               b.status === 'approved_to_draft' ? 'Disetujui' :
@@ -108,7 +108,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                               b.status === 'rejected' ? 'Ditolak' :
                               'Dibatalkan'}
                            </div>
-                           <span className="text-[10px] font-bold text-art-text/30 border-l border-art-text/10 pl-2">🕒 {b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '...'}</span>
+                           <span className="text-[10px] font-bold text-art-text/30 border-l border-art-text/10 pl-2">🕒 {b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Menunggu...'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                            {(b.status === 'lunas' || b.status === 'selesai' || b.status === 'batal') ? (

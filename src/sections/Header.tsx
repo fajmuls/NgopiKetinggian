@@ -31,7 +31,7 @@ export const Header = ({
             </div>
           </div>
 
-          <div className="hidden md:flex items-center flex-1 max-w-sm mx-8 relative">
+          <div className="hidden md:flex items-center flex-1 max-w-lg mx-8 relative">
             <div className="w-full relative group">
               <input 
                 type="text" 
@@ -55,7 +55,7 @@ export const Header = ({
                   <div className="p-2 border-b border-art-text/5 bg-art-bg/30">
                     <p className="text-[8px] font-black uppercase text-art-text/40 tracking-[0.2em]">Hasil Pencarian Teratas</p>
                   </div>
-                  {searchResults.slice(0, 1).map((item: any, idx: number) => (
+                  {searchResults.map((item: any, idx: number) => (
                     <button 
                       key={idx}
                       onClick={() => onExecuteSearch(item)}
@@ -63,7 +63,7 @@ export const Header = ({
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-art-text/10 ${item.type === 'section' ? 'bg-art-orange/10 text-art-orange' : 'bg-art-text/10 text-art-text'}`}>
-                          {item.type === 'section' ? <Search size={12} /> : <MapPin size={12} />}
+                          {item.type === 'section' ? <Search size={12} /> : <Mountain size={12} />}
                         </div>
                         <div className="text-left">
                           <p className="text-[10px] font-black uppercase text-art-text tracking-widest group-hover/item:text-art-orange transition-colors">{item.name}</p>
@@ -78,10 +78,7 @@ export const Header = ({
             </AnimatePresence>
           </div>
 
-          <div className="hidden md:flex items-center gap-4">
-            <button onClick={onOpenBooking} className="flex items-center gap-2 px-4 py-2 bg-art-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all mr-2">
-              <ShoppingBag size={16} /> Booking
-            </button>
+          <div className="hidden md:flex items-center gap-6">
             {user ? (
               <div className="flex items-center gap-3">
                 <button onClick={onOpenHistory} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-art-text/60 hover:text-art-text transition-colors">
