@@ -110,28 +110,42 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
 
                  </div>
                   
-                  {durInfo && (
-                     <div className="mt-4 p-3 bg-art-bg/30 rounded-xl border border-art-text/10">
-                        <h5 className="text-[9px] font-black uppercase text-art-text mb-2 flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
-                        {durInfo.rundownHtml && (
-                           <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
-                             {durInfo.rundownHtml}
-                           </div>
-                        )}
-                        {ot.showRundownPdf !== false && (
-                          <div className="flex gap-2">
-                           <button type="button" onClick={() => setShowWebRundown(true)} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                             Lihat Rundown Web <Eye size={8} />
-                           </button>
-                           {durInfo.rundownHtml && (
-                              <button type="button" onClick={(e) => { e.stopPropagation(); generateRundownPdf(durInfo, ot.name, ot.path, ot.duration); }} className={`inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-2 py-1.5 bg-white rounded-lg border border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                                PDF Rundown <Download size={8} />
-                              </button>
+                   {(() => {
+                      const hasRundown = durInfo?.rundownHtml || ot.rundownText || ot.rundownPdf;
+                      return (
+                        <div className="mt-4 p-3 bg-art-bg/30 rounded-xl border border-art-text/10">
+                           <h5 className="text-[9px] font-black uppercase text-art-text mb-2 flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
+                           {(durInfo?.rundownHtml || ot.rundownText) && (
+                              <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
+                                {durInfo?.rundownHtml || ot.rundownText}
+                              </div>
                            )}
-                          </div>
-                        )}
-                     </div>
-                  )}
+                           
+                           {hasRundown ? (
+                             <div className="flex gap-2 mt-3">
+                              <button type="button" onClick={() => setShowWebRundown(true)} className="flex-1 py-1.5 border border-art-text text-art-text bg-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-bg transition-colors">
+                                Lihat Web <Eye size={8} className="inline ml-1" />
+                              </button>
+                              <button 
+                                type="button" 
+                                onClick={() => {
+                                  if (ot.rundownPdf) {
+                                    window.open(ot.rundownPdf, '_blank');
+                                  } else {
+                                    generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
+                                  }
+                                }} 
+                                className="flex-1 py-1.5 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors"
+                              >
+                                Download PDF <Download size={8} className="inline ml-1" />
+                              </button>
+                             </div>
+                           ) : (
+                             <p className="text-[8px] font-bold text-art-text/20 uppercase text-center py-2">Belum ada rincian rundown</p>
+                           )}
+                        </div>
+                      );
+                   })()}
               </motion.div>
             )}
          </AnimatePresence>

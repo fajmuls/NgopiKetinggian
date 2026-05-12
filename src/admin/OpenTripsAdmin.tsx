@@ -8,66 +8,10 @@ import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setD
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
+import { InputWithPaste, ImageUploader } from '../components/admin/SharedAdmin';
+import { RundownEditor } from '../components/admin/RundownEditor';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION, DIFFICULTY_LEVELS, DURATION_LEVELS } from '../useAppConfig';
 import { handleFirestoreError, OperationType } from '../lib/firestore-error';
-
-export const InputWithPaste = ({ value, onChange, placeholder, className, ...props }: any) => {
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      onChange({ target: { value: text } } as any);
-    } catch (err) {
-      console.error('Failed to read clipboard', err);
-    }
-  };
-
-  return (
-    <div className="relative w-full flex items-center">
-      <input 
-        type="text" 
-        value={value} 
-        onChange={onChange} 
-        placeholder={placeholder} 
-        className={`${className} pr-8`}
-        {...props}
-      />
-      <button 
-        type="button"
-        onClick={handlePaste}
-        className="absolute right-1 p-1.5 text-art-text/40 hover:text-art-orange transition-colors"
-        title="Paste"
-      >
-        <Clipboard size={12} />
-      </button>
-    </div>
-  );
-};
-
-
-export const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: { value: string, onChange: (url: string) => void, placeholder?: string }) => {
-  return (
-    <div className="space-y-1 p-2 rounded-lg bg-art-bg/30 border border-art-text/10">
-      <div className="flex items-center gap-2">
-      	<InputWithPaste 
-          className="border border-art-text/20 p-2 rounded text-[10px] w-full text-art-text bg-white outline-none focus:border-art-orange transition-colors" 
-          value={value || ''} 
-          onChange={(e: any) => onChange(e.target.value)} 
-          placeholder={placeholder || "Masukkan Link URL Foto"} 
-        />
-      </div>
-      {value ? (
-        <div className="mt-2">
-           <img src={value} className="w-full h-20 object-cover rounded border border-art-text/10" alt="Preview" onError={(e) => (e.currentTarget.style.display = 'none')} />
-           <p className="text-[8px] text-art-green font-bold uppercase truncate mt-1">Preview Tersedia</p>
-        </div>
-      ) : (
-        <p className="text-[8px] text-art-text/30 font-bold uppercase truncate">Belum ada gambar</p>
-      )}
-    </div>
-  );
-};
-
-
 
 export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPrefill }: any) => {
   const [data, setData] = useState<OpenTrip[]>(config.openTrips || []);
@@ -394,39 +338,69 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
 
           {expandedIndexes.includes(i) && (
           <div className="mt-4 pt-4 border-t-2 border-dashed border-art-text/10 space-y-4">
-              {/* Rundown Section for Open Trip - MOVED TO BOTTOM */}
+              {/* Rundown Section for Open Trip */}
               <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10 space-y-4">
                 <div className="flex items-center justify-between">
                    <div className="flex items-center gap-2">
                       <FileText size={16} className="text-art-text" />
-                      <h4 className="text-[11px] font-black uppercase text-art-text tracking-widest">Rundown Box Settings</h4>
+                      <h4 className="text-[11px] font-black uppercase text-art-text tracking-widest">Rundown / Itinerary Settings</h4>
                    </div>
-                   <button 
-                      type="button"
-                      className="bg-white border border-art-text/20 text-art-text px-3 py-1.5 rounded-lg text-[8px] font-black uppercase hover:bg-art-bg transition-all shadow-sm flex items-center gap-1.5"
-                      onClick={() => {
-                        const rundownHtml = ot.rundownText || "Belum ada teks rundown.";
-                        const title = ot.name ? `${ot.name} - ${ot.duration}` : "Trip Baru";
-                        customAlert(
-                          <div className="text-left w-full space-y-4">
-                            <div className="border-b-2 border-art-text pb-2">
-                              <h3 className="font-black uppercase text-xs">Preview Rundown: {title}</h3>
-                            </div>
-                            <div className="max-h-64 overflow-y-auto no-scrollbar pr-2 text-[10px] font-medium leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 p-3 rounded-xl border border-art-text/5">
-                              {rundownHtml}
-                            </div>
-                            {ot.rundownPdf && (
-                              <div className="flex items-center gap-2 text-art-green font-black uppercase text-[8px]">
-                                <CheckCircle size={10} /> PDF Tersedia
+                   <div className="flex gap-2">
+                     <button 
+                        type="button" 
+                        onClick={() => generateRundownPdf({ rundownText: ot.rundownText, rundownPdf: ot.rundownPdf }, ot.name, ot.path, ot.duration)}
+                        className="bg-art-text text-white px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors flex items-center gap-1"
+                      >
+                        <FileText size={10} /> Preview PDF
+                      </button>
+                     <button 
+                        type="button"
+                        className="bg-white border border-art-text/20 text-art-text px-3 py-1.5 rounded-lg text-[8px] font-black uppercase hover:bg-art-bg transition-all shadow-sm flex items-center gap-1.5"
+                        onClick={() => {
+                          const rundownHtml = ot.rundownText || "Belum ada teks rundown.";
+                          const title = ot.name ? `${ot.name} - ${ot.duration}` : "Trip Baru";
+                          customAlert(
+                            <div className="text-left w-full space-y-4">
+                              <div className="border-b-2 border-art-text pb-2">
+                                <h3 className="font-black uppercase text-xs">Preview Rundown: {title}</h3>
                               </div>
-                            )}
-                          </div>,
-                          "Review Rundown"
-                        );
-                      }}
-                   >
-                      <Eye size={12} /> Review Rundown
-                   </button>
+                              <div className="max-h-64 overflow-y-auto no-scrollbar pr-2 text-[10px] font-medium leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 p-3 rounded-xl border border-art-text/5">
+                                {rundownHtml}
+                              </div>
+                              {ot.rundownPdf && (
+                                <div className="flex items-center gap-2 text-art-green font-black uppercase text-[8px]">
+                                  <CheckCircle size={10} /> PDF Tersedia
+                                </div>
+                              )}
+                            </div>,
+                            "Review Rundown"
+                          );
+                        }}
+                     >
+                        <Eye size={12} /> Review Rundown
+                     </button>
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-art-text/40 uppercase">Rundown PDF (URL Link)</label>
+                    <ImageUploader 
+                        value={ot.rundownPdf || ''} 
+                        onChange={(url) => { const nd = [...data]; nd[i].rundownPdf = url; setData(nd); }}
+                        placeholder="URL PDF / File PDF"
+                    />
+                    <p className="text-[8px] text-art-text/30 italic">Pioritas Utama: Jika ini diisi, user akan mengunduh PDF.</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-art-text/40 uppercase">Atau, Ketik Manual (Rundown Detail)</label>
+                    <RundownEditor 
+                      value={ot.rundownText || ''}
+                      onChange={(val) => { const nd = [...data]; nd[i].rundownText = val; setData(nd); }}
+                      title={`Rundown ${ot.name}`}
+                    />
+                  </div>
                 </div>
               </div>
 

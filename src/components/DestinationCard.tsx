@@ -163,7 +163,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
 
                        {(() => {
                           const durInfo = currentDur;
-                          // Rundown always visible
+                          const hasRundown = durInfo.rundownHtml || durInfo.rundownPdf;
                           return (
                             <div className="p-3 bg-white border border-art-text/10 rounded-xl space-y-2">
                               <h5 className="text-[9px] font-black uppercase text-art-text flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
@@ -172,18 +172,28 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                                   {durInfo.rundownHtml}
                                 </div>
                               )}
-                              <div className="flex gap-2">
-                                {durInfo?.rundownHtml ? (
-                                   <>
-                                   <button type="button" onClick={() => setShowWebRundown(true)} className="flex-1 py-2 border border-art-text text-art-text bg-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-bg transition-colors">
-                                     Rundown Web <Eye size={8} className="inline ml-1" />
-                                   </button>
-                                   <button type="button" onClick={() => generateRundownPdf(durInfo, dest.name, currentPath.name, currentDur.label)} className="flex-1 py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors">
-                                     PDF Rundown <Download size={8} className="inline ml-1" />
-                                   </button>
-                                   </>
-                                ) : null}
-                              </div>
+                              {hasRundown ? (
+                                <div className="flex gap-2">
+                                  <button type="button" onClick={() => setShowWebRundown(true)} className="flex-1 py-2 border border-art-text text-art-text bg-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-bg transition-colors">
+                                    Lihat Web <Eye size={8} className="inline ml-1" />
+                                  </button>
+                                  <button 
+                                    type="button" 
+                                    onClick={() => {
+                                      if (durInfo.rundownPdf) {
+                                        window.open(durInfo.rundownPdf, '_blank');
+                                      } else {
+                                        generateRundownPdf(durInfo, dest.name, currentPath.name, currentDur.label);
+                                      }
+                                    }} 
+                                    className="flex-1 py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors"
+                                  >
+                                    Download PDF <Download size={8} className="inline ml-1" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <p className="text-[8px] font-bold text-art-text/20 uppercase text-center py-2">Belum ada rincian rundown</p>
+                              )}
                             </div>
                           );
                        })()}

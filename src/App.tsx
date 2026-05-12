@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
@@ -21,6 +21,13 @@ import { DestinationCard } from './components/DestinationCard';
 import { SettingsModal } from './components/SettingsModal';
 import { BookingHistoryModal } from './components/BookingHistoryModal';
 import { destinationsData, defaultTripLeaders } from './data';
+
+// Import New Sections
+import { Header } from './sections/Header';
+import { Hero } from './sections/Hero';
+import { TripSection } from './sections/Trips';
+import { DestinationSection } from './sections/Destinations';
+import { Footer } from './sections/Footer';
 
 
 const defaultGalleryPhotos = [
@@ -303,199 +310,25 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}
-      <nav className="absolute w-full z-50">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 md:h-24 flex items-end justify-between border-b border-art-text/10 pb-4">
-          <div className="flex items-center gap-4 cursor-pointer shrink-0" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} onMouseEnter={playHover}>
-            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-white overflow-hidden border-2 border-art-text shadow-sm shrink-0">
-              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
-            </div>
-            <span className="text-sm tracking-[0.3em] font-black uppercase leading-tight text-art-text hidden sm:block">Ngopi<br/>Ketinggian</span>
-          </div>
-          
-          <div className="flex-1 flex justify-center px-4 md:px-8 max-w-2xl mx-auto">
-            <div className="relative w-full">
-              <input 
-                type="text" 
-                placeholder="Cari gunung..." 
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="w-full bg-transparent border-b border-art-text/30 px-3 py-1.5 focus:outline-none focus:border-art-orange text-xs font-bold tracking-wider uppercase text-art-text placeholder:text-art-text/40 transition-colors" 
-              />
-              <Search className="absolute right-0 top-1/2 -translate-y-1/2 text-art-text/40 w-4 h-4 pointer-events-none" />
-              <AnimatePresence>
-                {showSearchDropdown && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 w-full mt-2 bg-white border-2 border-art-text rounded-xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] overflow-y-auto max-h-[50vh] z-50 origin-top"
-                  >
-                    {getSearchResults().length > 0 ? (
-                      <div className="py-2">
-                         {getSearchResults().map(res => (
-                           <button key={res.id + res.name} onClick={() => { playClick(); executeSearch(res); }} className="w-full text-left px-4 py-3 border-b border-art-text/5 last:border-b-0 hover:bg-art-bg hover:text-art-orange transition-colors flex flex-col md:flex-row md:items-center justify-between text-[11px] font-bold text-art-text uppercase tracking-widest gap-1">
-                              <span>{res.name}</span>
-                              <span className="text-[9px] text-art-text/50">{res.type === 'section' ? 'Kategori / Menu' : 'Destinasi Gunung'}</span>
-                           </button>
-                         ))}
-                      </div>
-                    ) : (
-                      <div className="p-4 text-center text-xs text-art-text/50 font-medium italic">Tidak ada hasil ditemukan</div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 md:gap-4 shrink-0 border-l border-art-text/20 pl-4 items-center">
-            <button className="p-2 text-art-text hover:text-art-orange transition-colors" onClick={(e) => { playClick(); setIsMobileMenuOpen(!isMobileMenuOpen); }} title="Menu">
-              {isMobileMenuOpen ? <X size={24} /> : <MoreVertical size={24} />}
-            </button>
-            <button onClick={() => { playPop(); setIsSettingsOpen(true); }} className="p-2 text-art-text hover:text-art-orange transition-colors" onMouseEnter={playHover} aria-label="Settings" title="Pengaturan & Akun">
-              <Settings size={20} />
-            </button>
-          </div>
-        </div>
-        
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="absolute top-[80px] md:top-[96px] right-6 md:right-12 w-64 bg-white border-2 border-art-text shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] overflow-hidden z-40 rounded-xl"
-            >
-              <div className="absolute inset-0 z-0 opacity-5 pointer-events-none flex items-center justify-center">
-                <img src="https://files.catbox.moe/lubzno.png" className="w-3/4 object-contain" alt="Background Menu" />
-              </div>
-              <div className="flex flex-col gap-0 p-2 text-[12px] font-bold uppercase tracking-widest text-art-text items-stretch relative z-10">
-                <button onClick={(e) => { playClick(); scrollToSection(e, 'cerita'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Cerita Kami</button>
-                <button onClick={(e) => { playClick(); scrollToSection(e, 'leader'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Trip Leader</button>
-                <button onClick={(e) => { playClick(); scrollToSection(e, 'fasilitas'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Fasilitas</button>
-                <button onClick={(e) => { playClick(); scrollToSection(e, 'destinasi'); }} className="text-left px-4 py-3 border-b border-art-text/10 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Destinasi</button>
-                <button onClick={(e) => { playClick(); scrollToSection(e, 'galeri'); }} className="text-left px-4 py-3 hover:bg-art-orange/10 hover:text-art-orange transition-colors">Galeri</button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+      <Header 
+        user={user}
+        onLogin={loginWithGoogle}
+        onLogout={logout}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        searchResults={getSearchResults()}
+        onExecuteSearch={executeSearch}
+        showSearchDropdown={showSearchDropdown}
+        setShowSearchDropdown={setShowSearchDropdown}
+      />
 
       {/* Hero Section */}
-      <section className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden bg-art-bg pt-32 pb-20 md:py-0">
-        {/* Parallax Background using Grid layout pattern */}
-          <div className="absolute inset-0 z-0 pointer-events-none mix-blend-multiply flex">
-            {config.homepage?.heroPhotoUrl ? (
-               <img src={config.homepage.heroPhotoUrl} className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Cover bg" />
-            ) : (
-               <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Cover bg" />
-            )}
-          </div>
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-[1] hidden md:block">
-          <div className="grid grid-cols-12 h-full w-full opacity-[0.03]">
-            <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div>
-            <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div>
-            <div className="border-r border-black"></div><div className="border-r border-black"></div><div className="border-r border-black"></div><div></div>
-          </div>
-        </div>
-
-        <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 px-6 md:px-12 z-10 gap-12 md:gap-8 items-center mt-28 md:mt-48">
-          <div className="flex flex-col justify-center text-center md:text-left items-center md:items-start z-40 relative">
-            
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="mb-4 w-full text-center md:text-left"
-              >
-                <p className="text-art-orange font-serif italic text-lg md:text-xl font-bold">{config.homepage?.heroSub || "Open Trip Eksklusif"}</p>
-                <p className="text-[9px] md:text-[11px] font-sans font-bold uppercase tracking-widest text-art-text/40 mt-1 block">{config.homepage?.heroFeatures || "Fasilitas premium • Pemandu ahli • Keamanan terjamin"}</p>
-              </motion.div>
-
-              <motion.h1 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className={`text-5xl sm:text-6xl md:text-[52px] lg:text-[70px] leading-[1.0] md:leading-[0.85] font-black uppercase tracking-tight mb-4 md:mb-6 w-full text-center md:text-left z-50 relative pointer-events-none whitespace-pre-wrap ${theme === 'default' ? 'text-art-title' : 'text-art-title'}`}
-              >
-                <sup className="text-art-orange text-[0.4em] top-[-0.8em] relative inline-block">{config.homepage?.heroTitlePrefix || "Trip"}</sup> {config.homepage?.heroTitle || "Ngopi Di\nKetinggian"}
-              </motion.h1>
-              
-              <motion.p 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className={`text-[12px] md:text-base font-medium max-w-xs sm:max-w-md mb-6 md:mb-8 w-full mx-auto md:mx-0 text-center md:text-left pointer-events-auto leading-relaxed ${theme === 'default' ? 'text-art-text/80' : 'text-art-text/75'}`}
-              >
-                {config.homepage?.heroDescription || "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, and magisnya lautan awan dari puncak gunung."}
-                <br/><span className="mt-2 block font-serif italic font-bold text-xs md:text-sm text-art-orange">{config.homepage?.heroTagline || "Jaya / Jaya / Jaya"}</span>
-              </motion.p>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-3 w-full max-w-[240px] sm:max-w-none mx-auto md:mx-0 justify-center md:justify-start"
-            >
-
-              <Button onClick={() => handleOpenBooking()} variant="primary" className="text-[10px] md:text-xs uppercase font-bold tracking-widest py-3 px-5 rounded-lg w-full sm:w-auto">
-                Booking Trip
-              </Button>
-              <Button onClick={() => window.location.href='#destinasi'} variant="secondary" className="text-[10px] md:text-xs uppercase font-bold tracking-widest py-3 px-5 rounded-lg w-full sm:w-auto">
-                Lihat Destinasi
-              </Button>
-            </motion.div>
-          </div>
-
-          <div className="flex justify-center items-center relative z-20 pointer-events-none md:pointer-events-auto">
-             <div className="relative w-full max-w-[260px] sm:max-w-[300px] md:max-w-[320px] aspect-[4/5] md:aspect-[3/4] isolate mx-auto">
-               <div className="absolute inset-0 bg-gray-300 rounded-[32px] md:rounded-[40px] overflow-hidden border-[6px] md:border-[12px] border-white shadow-2xl rotate-2 md:rotate-3">
-                 <motion.img 
-                   key={currentSlideIndex}
-                   initial={{ opacity: 0, scale: 1.05 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   transition={{ duration: 1 }}
-                   src={heroSlidesConfig[currentSlideIndex]?.image || undefined} 
-                   alt={heroSlidesConfig[currentSlideIndex]?.name} 
-                   className="w-full h-full object-cover grayscale-[15%] absolute inset-0 z-0"
-                 />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
-                 
-                 <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 text-white z-20">
-                   <p className="text-[10px] uppercase tracking-widest opacity-80 mb-1">Lokasi Utama</p>
-                   <motion.h3 
-                     key={`title-${currentSlideIndex}`}
-                     initial={{ y: 20, opacity: 0 }}
-                     animate={{ y: 0, opacity: 1 }}
-                     transition={{ duration: 0.5, delay: 0.3 }}
-                     className="text-2xl md:text-3xl font-serif italic drop-shadow-md"
-                   >
-                     {heroSlidesConfig[currentSlideIndex]?.name}
-                   </motion.h3>
-                 </div>
-               </div>
-               
-               {/* Fixed DEM Ketinggian Widget - positioned at top left */}
-               <motion.div 
-                 key={`badge-${currentSlideIndex}`}
-                 initial={{ scale: 0, rotate: -45 }}
-                 animate={{ scale: 1, rotate: -12 }}
-                 transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-                 className="absolute -top-4 -left-4 md:-top-8 md:-left-8 w-20 h-20 md:w-24 md:h-24 bg-art-orange rounded-full flex flex-col items-center justify-center text-white -rotate-[12deg] border-4 border-white shadow-2xl z-[100]"
-               >
-                 <span className="text-[6px] md:text-[8px] uppercase font-bold tracking-tighter">Ketinggian</span>
-                 <span className="text-xl md:text-2xl font-black leading-none my-0.5">{heroSlidesConfig[currentSlideIndex]?.height}</span>
-                 <span className="text-[6px] md:text-[8px] opacity-80 uppercase">MDPL</span>
-               </motion.div>
-             </div>
-          </div>
-        </div>
-
-        {/* Floating Vertical Text */}
-        <div className="absolute top-[40%] left-4 rotate-180 hidden xl:block" style={{ writingMode: 'vertical-rl' }}>
-          <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-black/20">EST. 2026 • ADVENTURE & BREW</span>
-        </div>
-      </section>
+      <Hero onExplore={() => {
+        const el = document.getElementById('destinasi');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }} />
 
       {/* The Concept Section */}
       <section id="cerita" className="py-20 md:py-32 bg-art-section relative border-y border-art-text overflow-hidden">
@@ -713,135 +546,24 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           
           {/* OPEN TRIP SECTION */}
-          {config.openTrips && config.openTrips.length > 0 && (
-            <div className="mb-32">
-              <div className="text-center max-w-5xl mx-auto mb-16 px-4">
-                <span className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-art-orange mb-4 block">Fixed Schedule Adventure</span>
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Open Trip <span className="text-art-green">Ngopi</span></h2>
-                <div className="w-24 h-2 bg-art-green mx-auto mb-10"></div>
-                <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Gabung dengan pendaki lain di jadwal yang sudah ditentukan. Harga lebih hemat namun fasilitas tetap premium.</p>
-                
-                {/* FILTERS */}
-                <div className="mt-12 flex flex-col items-center justify-center gap-6 w-full max-w-2xl mx-auto border-t border-art-text/5 pt-10">
-                   <div className="grid grid-cols-2 gap-4 w-full">
-                     {/* Wilayah Filter (Left) */}
-                     <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
-                           <MapPin size={10} className="text-art-green" /> Wilayah
-                        </label>
-                        <select 
-                          value={openFilterRegion}
-                          onChange={(e) => setOpenFilterRegion(e.target.value)}
-                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-green shadow-sm cursor-pointer"
-                        >
-                          {['Semua', ...Array.from(new Set(config.openTrips.map((ot: any) => ot.region))).filter(Boolean)].sort().map((reg: any) => (
-                            <option key={reg} value={reg}>{reg}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
-                     </div>
-
-                     {/* Kesulitan Filter (Right) */}
-                     <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
-                           <AlertCircle size={10} className="text-art-orange" /> Kesulitan
-                        </label>
-                        <select 
-                          value={openFilterDifficulty}
-                          onChange={(e) => setOpenFilterDifficulty(e.target.value)}
-                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-green shadow-sm cursor-pointer"
-                        >
-                          {['Semua', ...DIFFICULTY_LEVELS].map((lvl: any) => (
-                            <option key={lvl} value={lvl}>{lvl}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
-                     </div>
-                   </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredOpenTrips.length > 0 ? (
-                  filteredOpenTrips.map((ot: any, i: number) => (
-                    <OpenTripCard key={i} ot={ot} onJoin={handleOpenBooking} getSisaKuota={getSisaKuota} visibilities={config.visibilities} allLeaders={config.tripLeaders} config={config} />
-                  ))
-                ) : (
-                  <div className="col-span-full py-24 border-4 border-dashed border-art-text/5 rounded-[3rem] flex flex-col items-center justify-center text-center bg-white/40">
-                    <Search size={64} className="mb-6 text-art-text/5" />
-                    <p className="font-black uppercase tracking-[0.2em] text-sm text-art-text/30">Belum ada jadwal untuk kriteria ini</p>
-                    <button onClick={() => { setOpenFilterRegion('Semua'); setOpenFilterDifficulty('Semua'); }} className="mt-6 px-6 py-2 bg-art-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">Reset Filter</button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          <TripSection 
+            openTrips={filteredOpenTrips}
+            onJoin={handleOpenBooking}
+            getSisaKuota={getSisaKuota}
+            visibilities={config.visibilities}
+            tripLeaders={config.tripLeaders}
+            config={config}
+          />
 
           {/* PRIVATE TRIP SECTION */}
-          <div className="text-center max-w-5xl mx-auto mb-16 px-4">
-            <span className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-art-orange mb-4 block">Exclusive Journey</span>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-art-text mb-8 leading-none">Private <span className="text-art-orange">Trip</span></h2>
-            <div className="w-24 h-2 bg-art-text mx-auto mb-10"></div>
-            <p className="font-bold text-art-text/60 text-sm md:text-base uppercase tracking-widest leading-relaxed italic max-w-2xl mx-auto">Tentukan sendiri gunung tujuan, jalur pendakian, dan durasi sesuai keinginanmu. Cocok untuk solo traveler maupun rombongan tertutup.</p>
-            
-                {/* FILTERS */}
-                <div className="mt-12 flex flex-col items-center justify-center gap-6 w-full max-w-2xl mx-auto border-t border-art-text/5 pt-10">
-                   <div className="grid grid-cols-2 gap-4 w-full">
-                     {/* Wilayah Filter (Left) */}
-                     <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
-                           <MapPin size={10} className="text-art-green" /> Wilayah
-                        </label>
-                        <select 
-                          value={filterRegion}
-                          onChange={(e) => setFilterRegion(e.target.value)}
-                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
-                        >
-                          {['Semua', ...Array.from(new Set(currentDestinations.map(d => d.region))).filter(Boolean)].sort().map((r: any) => (
-                            <option key={r} value={r}>{r}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
-                     </div>
-
-                     {/* Kesulitan Filter (Right) */}
-                     <div className="flex flex-col relative group">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-art-text/50 mb-2 ml-2 flex items-center gap-1.5">
-                           <AlertCircle size={10} className="text-art-orange" /> Kesulitan
-                        </label>
-                        <select 
-                          value={filterDifficulty}
-                          onChange={(e) => setFilterDifficulty(e.target.value)}
-                          className="w-full appearance-none bg-white border-2 border-art-text px-4 py-3 rounded-2xl text-[11px] font-black tracking-widest uppercase text-art-text outline-none focus:border-art-orange shadow-sm cursor-pointer"
-                        >
-                          {difficultyOptions.map((opt: any) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 bottom-3.5 pointer-events-none text-art-text"><ChevronDown size={14} /></div>
-                     </div>
-                   </div>
-                </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {filteredDestinations.length > 0 ? (
-              filteredDestinations.map((dest: any, idx: number) => (
-                <DestinationCard 
-                  key={dest.id} 
-                  dest={dest} 
-                  visibilities={{}} 
-                  onBook={(d, j, dur, t) => handleOpenBooking(d, j, dur, t)} 
-                />
-              ))
-            ) : (
-              <div className="col-span-full py-20 border-2 border-dashed border-art-text/20 rounded-2xl bg-white/50 flex flex-col items-center justify-center text-center px-4">
-                <Mountain size={48} className="text-art-text/20 mb-4" />
-                <h4 className="font-bold text-xl uppercase tracking-tighter text-art-text">Destinasi Belum Tersedia</h4>
-                <p className="text-sm font-medium text-art-text/60 mt-2 max-w-xs">Gunakan filter wilayah atau kesulitan yang berbeda untuk menemukan trip impianmu.</p>
-              </div>
-            )}
-          </div>
+          <DestinationSection 
+            destinations={filteredDestinations}
+            onBook={handleOpenBooking}
+            visibilities={config.visibilities}
+            filterDifficulty={filterDifficulty}
+            setFilterDifficulty={setFilterDifficulty}
+            difficultyOptions={difficultyOptions}
+          />
         </div>
       </section>
 
@@ -889,44 +611,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       </section>
 
       {/* Footer */}
-      <footer className="bg-art-text py-16 text-white border-t border-art-text">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 border-b border-white/10 pb-16 mb-8 grid md:grid-cols-4 gap-12">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border border-white/20">
-                <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain bg-white" />
-              </div>
-              <span className="text-xs tracking-[0.3em] font-black uppercase leading-none text-white opacity-80">Ngopi<br/>Ketinggian</span>
-            </div>
-            <p className="text-white/60 font-medium max-w-sm mb-6 leading-relaxed">
-              Pengalaman pendakian gunung yang dipadukan dengan budaya kopi nusantara. Aman, nyaman, dan berkesan.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6 text-[10px] uppercase tracking-widest text-art-orange">Penjelajahan</h4>
-            <ul className="space-y-4 text-white/60 font-medium text-sm">
-              <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Gede Pangrango</a></li>
-              <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Salak</a></li>
-              <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Semeru</a></li>
-              <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Rinjani</a></li>
-              <li><a href="#destinasi" className="hover:text-white transition-colors flex items-center gap-2" onMouseEnter={playHover}><span className="w-4 h-[1px] bg-white/20"></span>Gunung Sumbing</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6 text-[10px] uppercase tracking-widest text-art-orange">Hubungi Kami</h4>
-            <ul className="space-y-4 text-white/60 font-medium text-sm">
-              <li><a href="https://wa.me/6282127533268" className="hover:text-white transition-colors" onMouseEnter={playHover}>WA: 0821 2753 3268</a></li>
-              <li><a href="https://www.instagram.com/ngopi.dketinggian?igsh=Y3JtN3Y2eXIya29y" target="_blank" rel="noreferrer" className="hover:text-white transition-colors" onMouseEnter={playHover}>IG: @ngopi.dketinggian</a></li>
-              <li><a href="https://tiktok.com/@ngopidiketinggian" className="hover:text-white transition-colors" onMouseEnter={playHover}>TikTok: @ngopidiketinggian</a></li>
-              <li>Email: siliwangiputra1510@gmail.com</li>
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center text-white/40 text-[10px] font-bold uppercase tracking-widest gap-4 md:gap-0">
-          <p>&copy; {new Date().getFullYear()} Trip Ngopi di Ketinggian.</p>
-          <p>EST. 2026 • ADVENTURE & BREW</p>
-        </div>
-      </footer>
+      <Footer />
 
       <AnimatePresence>
         {toast && (
