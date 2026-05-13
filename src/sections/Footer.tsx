@@ -16,7 +16,7 @@ export const Footer = ({ config }: any) => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden">
-                <img src={hp?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo" className="w-full h-full object-contain p-1" />
+                <img src={hp?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo" className="w-full h-full object-cover" />
               </div>
               <h2 className="text-lg font-black leading-none tracking-tighter uppercase">Ngopi Di<br/><span className="text-art-orange">Ketinggian</span></h2>
             </div>

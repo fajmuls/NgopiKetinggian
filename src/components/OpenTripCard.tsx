@@ -38,8 +38,8 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
          
          {/* Mountain Custom Logo */}
          <div className="absolute top-3 left-3 flex flex-row items-center gap-2 z-10">
-            <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[3px_3px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden p-1 shrink-0">
-              <img src={ot.logo || config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Mountain Logo" className="w-full h-full object-contain" />
+            <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[3px_3px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden shrink-0">
+              <img src={ot.logo || config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Mountain Logo" className="w-full h-full object-cover" />
             </div>
             <div className="bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1 shrink-0">
                <Calendar size={10}/> {ot.jadwal}

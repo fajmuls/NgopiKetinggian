@@ -67,7 +67,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   </motion.div>
                 );
               case 'features':
-                return config?.homepage?.heroFeatures ? (
+                return config?.homepage?.hideHeroFeatures ? null : (config?.homepage?.heroFeatures ? (
                   <motion.span 
                     key={block}
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -76,9 +76,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
-                ) : null;
+                ) : null);
               case 'title':
-                return (
+                return config?.homepage?.hideHeroTitle ? null : (
                   <h1 key={block} className="text-7xl sm:text-8xl md:text-[11rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center text-center max-w-[95vw] mx-auto break-words z-30">
                     {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-6xl md:text-8xl mb-3 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)] font-serif italic normal-case">{config.homepage.heroTitlePrefix}</span>}
                     <span className="relative drop-shadow-[0_10px_20px_rgba(0,0,0,1)] inline-block">
@@ -88,7 +88,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   </h1>
                 );
               case 'tagline':
-                return config?.homepage?.heroTagline ? (
+                return config?.homepage?.hideHeroTagline ? null : (config?.homepage?.heroTagline ? (
                   <motion.div
                     key={block}
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -121,9 +121,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                       </span> <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span>
                     </p>
                   </motion.div>
-                ) : null;
+                ) : null);
               case 'description':
-                return (
+                return config?.homepage?.hideHeroDescription ? null : (
                   <motion.div key={block} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-4 z-30">
                     <p className="text-[10px] md:text-[12px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto text-center px-4">
                       {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
@@ -131,7 +131,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   </motion.div>
                 );
               case 'buttons':
-                return (
+                return config?.homepage?.hideHeroButtons ? null : (
                   <div key={block} className="grid grid-cols-2 gap-3 md:gap-5 w-full max-w-md mx-auto z-30 px-4">
                     <Button 
                       onClick={() => { playClick(); onExplore(); }}
@@ -148,7 +148,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   </div>
                 );
               case 'stats':
-                return (
+                return config?.homepage?.hideHeroStats ? null : (
                   <div key={block} className="flex items-center justify-center gap-4 md:gap-6 z-30 pt-4">
                     <div className="flex -space-x-4">
                       {[1, 2, 3, 4].map(i => (
@@ -167,7 +167,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   </div>
                 );
               case 'slider':
-                return (
+                return config?.homepage?.hideHeroSlider ? null : (
                   <div key={block} className="block relative mt-8 z-30 mb-8 w-full">
                     <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[300px] md:max-w-md mx-auto">
                       <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] md:aspect-video relative group scale-105 md:scale-110 object-cover">
@@ -193,7 +193,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                         <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
                         
                         {/* Mountain Name - Transparent Background */}
-                        <div className="absolute bottom-4 md:bottom-8 left-4 md:left-6 right-4 md:right-6 pointer-events-none drop-shadow-2xl text-left bg-black/60 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl">
+                        <div className="absolute bottom-4 md:bottom-8 left-4 md:left-6 right-4 md:right-6 pointer-events-none drop-shadow-2xl text-left flex flex-col gap-1 items-start">
                           {(() => {
                             const nameObj = slides[currentSlide]?.name || "";
                             let prefix = "";
@@ -209,12 +209,26 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                               theRest = nameObj.substring(6);
                             }
                             return (
-                              <div className="flex flex-col">
+                              <>
                                 {prefix && (
-                                  <p className="text-3xl md:text-5xl font-serif italic normal-case text-art-orange opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] -mb-2 md:-mb-4 ml-1 relative z-10 tracking-widest">{prefix}</p>
+                                  <motion.div 
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    key={`prefix-${currentSlide}`}
+                                    className="bg-black/30 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/10"
+                                  >
+                                    <p className="text-2xl md:text-3xl font-serif italic normal-case text-art-orange tracking-[0.2em]">{prefix}</p>
+                                  </motion.div>
                                 )}
-                                <p className="text-3xl md:text-5xl font-black uppercase text-white leading-[0.9] tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] relative z-20 break-words">{theRest}</p>
-                              </div>
+                                <motion.div 
+                                  initial={{ opacity: 0, x: 20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  key={`name-${currentSlide}`}
+                                  className="bg-black/30 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/10 mt-1"
+                                >
+                                  <p className="text-3xl md:text-5xl font-black uppercase text-white leading-tight tracking-[0.1em]">{theRest}</p>
+                                </motion.div>
+                              </>
                             );
                           })()}
                         </div>
