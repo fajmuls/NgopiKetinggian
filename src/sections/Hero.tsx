@@ -53,9 +53,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               className="w-full flex flex-col items-center"
             >
               <div className="flex justify-center w-full">
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-2xl mb-8 transform -rotate-1 shadow-xl mx-auto">
-                  <Coffee size={18} className="text-art-orange animate-bounce" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl mb-6 md:mb-8 transform -rotate-1 shadow-xl mx-auto">
+                  <Coffee size={14} className="text-art-orange animate-bounce md:size-[18px]" />
+                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white">
                     {config?.homepage?.heroSub || "Open Trip Eksklusif"}
                   </span>
                 </div>
@@ -66,7 +66,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   <motion.span 
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="block text-[#fff7ed] text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-art-orange/20"
+                    className="block text-[#fff7ed] text-[9px] md:text-xs font-black uppercase tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-art-orange/20"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
@@ -79,9 +79,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mt-4 p-3 px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-xl"
+                  className="mt-4 p-2 px-6 md:p-3 md:px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-xl"
                 >
-                  <p className="text-[10px] md:text-xs font-black text-art-orange italic tracking-[0.4em] uppercase">
+                  <p className="text-[8px] md:text-xs font-black text-art-orange italic tracking-[0.4em] uppercase">
                     {config.homepage.heroTagline}
                   </p>
                 </motion.div>
@@ -93,35 +93,35 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-8 items-center justify-center w-full">
-                <div className="flex flex-wrap gap-5 justify-center w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-4 md:gap-8 items-center justify-center w-full">
+                <div className="flex flex-wrap gap-3 md:gap-5 justify-center w-full sm:w-auto">
                   <Button 
                     onClick={onExplore}
-                    className="px-10 py-5 text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_15px_30px_-10px_rgba(255,107,0,0.5)] hover:translate-y-[-4px] hover:shadow-[0_20px_40px_-15px_rgba(255,107,0,0.6)] hover:bg-[#ff8c33] hover:border-white transition-all flex items-center gap-2 group ring-offset-2 ring-art-orange"
+                    className="px-6 py-4 md:px-10 md:py-5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_15px_30px_-10px_rgba(255,107,0,0.5)] hover:translate-y-[-4px] hover:shadow-[0_20px_40px_-15px_rgba(255,107,0,0.6)] hover:bg-[#ff8c33] hover:border-white transition-all flex items-center gap-2 group ring-offset-2 ring-art-orange"
                   >
-                    View Destinations <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    View Destinations <ChevronRight size={16} className="md:size-[18px] group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button 
                     onClick={onBooking}
-                    className="px-10 py-5 text-[11px] font-black uppercase tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.4)] hover:bg-black hover:border-white transition-all flex items-center gap-2 group ring-offset-2"
+                    className="px-6 py-4 md:px-10 md:py-5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.4)] hover:bg-black hover:border-white transition-all flex items-center gap-2 group ring-offset-2"
                   >
-                    Explore Trips <Calendar size={18} className="group-hover:rotate-12 transition-transform" />
+                    Explore Trips <Calendar size={16} className="md:size-[18px] group-hover:rotate-12 transition-transform" />
                   </Button>
                 </div>
                 
-                <div className="flex items-center gap-6 pt-4 sm:pt-0">
+                <div className="flex items-center gap-4 md:gap-6 pt-4 sm:pt-0">
                   <div className="flex -space-x-4">
                     {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="w-12 h-12 rounded-full border-2 border-white bg-art-bg overflow-hidden shadow-lg">
+                      <div key={i} className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white bg-art-bg overflow-hidden shadow-lg">
                         <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="User" />
                       </div>
                     ))}
                   </div>
                   <div className="text-left">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
+                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
                     <div className="flex items-center gap-1">
                       <TrendingUp size={10} className="text-art-green" />
-                      <p className="text-[10px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
+                      <p className="text-[8px] md:text-[10px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
                     </div>
                   </div>
                 </div>

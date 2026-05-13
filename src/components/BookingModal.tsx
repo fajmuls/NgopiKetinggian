@@ -992,6 +992,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                 <div className="grid grid-cols-1 gap-2">
                                   {config?.facilities?.opsi
                                      ?.slice()
+                                     .filter((opt: any) => opt.isHidden !== true)
                                      .sort((a: any, b: any) => (a.subItems?.length || 0) - (b.subItems?.length || 0))
                                      .map((opt: any, i: number) => {
                                      const isSelected = selectedOpsional.includes(opt.name);
@@ -1005,9 +1006,9 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                                 className="w-4 h-4 accent-art-orange"
                                               />
                                               <div className="flex flex-col">
-                                                 <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name === "Upgrade then private" ? "Upgrade Tenda Privat" : opt.name}</span>
-                                                 {opt.price || opt.name === "Upgrade then private" ? (
-                                                   <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {( (opt.name === "Upgrade then private" ? 100 : opt.price) * 1000).toLocaleString('id-ID')} / Hari</span>
+                                                 <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name}</span>
+                                                 {opt.price && opt.pricingFormat === 'calculated' ? (
+                                                   <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {(opt.price * 1000).toLocaleString('id-ID')} / Per Trip</span>
                                                  ) : opt.priceInfo && (
                                                    <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>
                                                  )}
