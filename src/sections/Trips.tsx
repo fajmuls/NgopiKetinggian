@@ -1,8 +1,10 @@
 import React from 'react';
 import { OpenTripCard } from '../components/OpenTripCard';
 import { Calendar, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../hooks/useLanguage';
 
 export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tripLeaders, config }: any) => {
+  const { t, lang } = useLanguage();
   if (openTrips.length === 0) return null;
 
   return (
@@ -14,17 +16,17 @@ export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tri
               <div className="w-8 h-8 rounded-lg bg-art-text text-white flex items-center justify-center">
                 <Calendar size={18} />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Open Trip</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">{t('nav.trips')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-              <span className="text-art-orange">Trip</span> Terbuka.
+              {lang === 'id' ? <><span className="text-art-orange">Trip</span> Terbuka.</> : <><span className="text-art-orange">Open</span> Trips.</>}
             </h2>
             <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
-              Bergabung dengan trip terbuka bersama yang lain.
+              {t('trip.openDesc')}
             </p>
           </div>
           <button className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-art-text hover:text-art-orange transition-colors">
-            Lihat Semua Jadwal <ChevronRight size={16} />
+            {t('trip.viewAll')} <ChevronRight size={16} />
           </button>
         </div>
 

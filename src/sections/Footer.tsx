@@ -1,7 +1,7 @@
 import React from 'react';
 import { Coffee, MapPin, MessageCircle, Instagram, Send, Globe, ChevronRight } from 'lucide-react';
 
-export const Footer = () => {
+export const Footer = ({ config }: any) => {
   return (
     <footer className="bg-art-text text-white pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -9,7 +9,7 @@ export const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden">
-                <img src="https://files.catbox.moe/lubzno.png" alt="Logo" className="w-full h-full object-contain p-1" />
+                <img src={config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo" className="w-full h-full object-contain p-1" />
               </div>
               <h2 className="text-lg font-black leading-none tracking-tighter uppercase">Ngopi Di<br/><span className="text-art-orange">Ketinggian</span></h2>
             </div>
@@ -17,15 +17,17 @@ export const Footer = () => {
               Penyedia layanan pendakian premium yang mengutamakan kenyamanan, keamanan, dan pengalaman seduhan kopi original di puncak gunung.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center hover:bg-art-orange hover:border-art-orange transition-all">
-                <Instagram size={20} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center hover:bg-art-orange hover:border-art-orange transition-all">
-                <MessageCircle size={20} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center hover:bg-art-orange hover:border-art-orange transition-all">
-                <Send size={20} />
-              </a>
+              {(config?.homepage?.socialLinks || [
+                { icon: 'instagram', url: '#' },
+                { icon: 'whatsapp', url: '#' },
+                { icon: 'telegram', url: '#' }
+              ]).map((social: any, idx: number) => (
+                <a key={idx} href={social.url} target={social.url !== '#' ? '_blank' : '_self'} rel="noopener noreferrer" className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center hover:bg-art-orange hover:border-art-orange transition-all">
+                  {social.icon === 'instagram' && <Instagram size={20} />}
+                  {social.icon === 'whatsapp' && <MessageCircle size={20} />}
+                  {social.icon === 'telegram' && <Send size={20} />}
+                </a>
+              ))}
             </div>
           </div>
 

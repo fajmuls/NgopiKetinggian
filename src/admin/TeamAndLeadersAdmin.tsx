@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '../lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -176,6 +176,12 @@ export const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: a
                <div className="flex bg-white rounded-lg border-2 border-art-text overflow-hidden shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]">
                    <button type="button" onClick={(e) => { e.stopPropagation(); moveLeader(i, 'up'); }} className="p-2 hover:bg-art-bg border-r-2 border-art-text disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={18} className="rotate-180"/></button>
                    <button type="button" onClick={(e) => { e.stopPropagation(); moveLeader(i, 'down'); }} className="p-2 hover:bg-art-bg border-r-2 border-art-text disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={18}/></button>
+                   <button type="button" onClick={(e) => {
+                     e.stopPropagation();
+                     const nd = [...data]; nd[i] = { ...nd[i], isHidden: !nd[i].isHidden }; setData(nd);
+                   }} className={`p-2 transition-all border-r-2 border-art-text font-black ${leader.isHidden ? 'bg-gray-200 text-gray-500' : 'hover:bg-art-bg text-art-text'}`} title="Sembunyikan">
+                     {leader.isHidden ? <EyeOff size={18} /> : <Eye size={18} />}
+                   </button>
                    <button onClick={(e) => {
                      e.stopPropagation();
                      customConfirm("Hapus leader ini?", () => {

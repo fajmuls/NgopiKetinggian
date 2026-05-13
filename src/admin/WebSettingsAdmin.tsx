@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '../lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -246,6 +246,11 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
                     <button type="button" onClick={() => movePhoto(i, 'up')} className="p-1 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
                     <button type="button" onClick={() => movePhoto(i, 'down')} className="p-1 hover:bg-gray-100" disabled={i === data.length - 1}><ChevronDown size={14}/></button>
                 </div>
+                <button type="button" onClick={() => {
+                  const nd = [...data]; nd[i].isHidden = !nd[i].isHidden; setData(nd);
+                }} className={`p-1 rounded shadow-sm border ${photo.isHidden ? 'bg-gray-100 text-gray-500 border-art-text/20' : 'bg-white text-art-text border-art-text/10'} hover:bg-gray-50`}>
+                  {photo.isHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
                 <button onClick={() => {
                   const nd = [...data]; nd.splice(i, 1); setData(nd);
                 }} className="bg-white border border-art-text/10 text-red-500 rounded p-1 hover:bg-red-50 shadow-sm"><Trash2 size={14}/></button>
@@ -385,10 +390,42 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
 
       <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
         <div className="space-y-1.5">
-          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Foto Background Hero</label>
+          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Logo Aplikasi (Header & Footer)</label>
+          <ImageUploader value={data.logo || ''} onChange={(url) => setData({...data, logo: url})} placeholder="URL Logo Transparan" />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Foto Background Hero Utama</label>
           <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
         </div>
       </div>
+
+        <div className="space-y-4 pt-4 border-t-2 border-dashed border-art-text/20">
+           <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+             <h3 className="font-bold text-sm uppercase">Sosial Media Links (Footer)</h3>
+           </div>
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             {['instagram', 'whatsapp', 'telegram'].map((platform, idx) => {
+               const links = data.socialLinks || [
+                 { icon: 'instagram', url: '#' },
+                 { icon: 'whatsapp', url: '#' },
+                 { icon: 'telegram', url: '#' }
+               ];
+               const currentLink = links.find((l: any) => l.icon === platform)?.url || '#';
+               return (
+                 <div key={platform}>
+                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">URL {platform}</label>
+                   <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={currentLink} onChange={e => {
+                     const newLinks = [...links];
+                     const fIndex = newLinks.findIndex((l: any) => l.icon === platform);
+                     if(fIndex >= 0) newLinks[fIndex].url = e.target.value;
+                     else newLinks.push({ icon: platform, url: e.target.value });
+                     setData({...data, socialLinks: newLinks});
+                   }} placeholder="https://..." />
+                 </div>
+               );
+             })}
+           </div>
+        </div>
 
       <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase w-full">Simpan Homepage</button>
     </div>
@@ -483,20 +520,32 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
             setData({ ...data, [key]: [...data[key], "Item Baru"] });
           }} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Tambah</button>
       </div>
-      {data[key].map((item: string, i: number) => (
+      {data[key].map((item: any, i: number) => {
+        const isHidden = typeof item === 'object' ? item.isHidden : false;
+        const itemName = typeof item === 'object' ? item.name : item;
+        return (
         <div key={i} className="flex gap-2">
           <div className="flex flex-col gap-1">
-             <button type="button" onClick={() => moveItem(key, i, 'up')} className="p-1 hover:bg-gray-100 rounded" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
-             <button type="button" onClick={() => moveItem(key, i, 'down')} className="p-1 hover:bg-gray-100 rounded" disabled={i === data[key].length - 1}><ChevronDown size={14}/></button>
+             <button type="button" onClick={() => moveItem(key, i, 'up')} className="p-1 hover:bg-gray-100 rounded border border-transparent" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
+             <button type="button" onClick={() => moveItem(key, i, 'down')} className="p-1 hover:bg-gray-100 rounded border border-transparent" disabled={i === data[key].length - 1}><ChevronDown size={14}/></button>
           </div>
-          <input className="border p-2 rounded text-sm flex-1" value={item} onChange={e => {
-            const nd = { ...data }; nd[key][i] = e.target.value; setData(nd);
+          <input className="border p-2 rounded text-sm flex-1" value={itemName} onChange={e => {
+            const nd = { ...data }; 
+            nd[key][i] = { name: e.target.value, isHidden }; 
+            setData(nd);
           }} />
-          <button onClick={() => {
+          <button type="button" onClick={() => {
+            const nd = { ...data };
+            nd[key][i] = { name: itemName, isHidden: !isHidden };
+            setData(nd);
+          }} className={`p-2 border rounded shadow-sm ${isHidden ? 'bg-gray-100 text-gray-500' : 'bg-white text-art-text hover:bg-gray-50'}`}>
+            {isHidden ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+          <button type="button" onClick={() => {
             const nd = { ...data }; nd[key].splice(i, 1); setData(nd);
-          }} className="text-red-500 p-2 border rounded hover:bg-red-50"><Trash2 size={16} /></button>
+          }} className="text-red-500 p-2 border rounded hover:bg-red-50 shadow-sm"><Trash2 size={16} /></button>
         </div>
-      ))}
+      )})}
     </div>
   );
 
@@ -536,7 +585,12 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
                     <button type="button" onClick={() => moveItem('opsi', i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={16} className="rotate-180"/></button>
                     <button type="button" onClick={() => moveItem('opsi', i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.opsi.length - 1}><ChevronDown size={16}/></button>
                   </div>
-                  <button onClick={() => {
+                  <button type="button" onClick={() => {
+                    const nd = { ...data }; nd.opsi[i].isHidden = !nd.opsi[i].isHidden; setData(nd);
+                  }} className={`p-1.5 rounded shadow-sm border ${opt.isHidden ? 'bg-gray-100 text-gray-500 border-art-text/20' : 'bg-white text-art-text border-art-text/10'} hover:bg-gray-50`}>
+                    {opt.isHidden ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  <button type="button" onClick={() => {
                  const nd = { ...data }; nd.opsi.splice(i, 1); setData(nd);
                }} className="bg-white border border-art-text/10 text-red-500 rounded p-1.5 shadow-sm hover:bg-red-50"><Trash2 size={18} /></button>
                 </div>

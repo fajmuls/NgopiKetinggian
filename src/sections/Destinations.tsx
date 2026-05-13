@@ -2,6 +2,9 @@ import React from 'react';
 import { DestinationCard } from '../components/DestinationCard';
 import { Mountain, Search, ChevronDown } from 'lucide-react';
 
+import { DIFFICULTY_LEVELS } from '../useAppConfig';
+import { useLanguage } from '../hooks/useLanguage';
+
 export const DestinationSection = ({ 
   destinations, 
   onBook, 
@@ -13,6 +16,7 @@ export const DestinationSection = ({
   setFilterRegion,
   regionOptions = ["Semua", "Jawa", "Sumatera", "Lombok", "Bali", "Papua"]
 }: any) => {
+  const { t } = useLanguage();
   const [isRegionOpen, setIsRegionOpen] = React.useState(false);
   const [isDiffOpen, setIsDiffOpen] = React.useState(false);
 
@@ -23,7 +27,17 @@ export const DestinationSection = ({
 
   const difficulties = React.useMemo(() => {
     const list = destinations.map((d: any) => d.difficulty).filter(Boolean);
-    return ["Semua", ...Array.from(new Set(list))];
+    const uniqueList = Array.from(new Set(list));
+    return ["Semua", ...uniqueList].sort((a: any, b: any) => {
+       if (a === "Semua") return -1;
+       if (b === "Semua") return 1;
+       const idxA = DIFFICULTY_LEVELS.indexOf(a);
+       const idxB = DIFFICULTY_LEVELS.indexOf(b);
+       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+       if (idxA !== -1) return -1;
+       if (idxB !== -1) return 1;
+       return a.localeCompare(b);
+    });
   }, [destinations]);
 
   return (
@@ -36,13 +50,13 @@ export const DestinationSection = ({
                 <div className="w-8 h-8 rounded-lg bg-art-text text-white flex items-center justify-center">
                   <Mountain size={18} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Private Trip</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">{t('nav.destinations') || 'Private Trip'}</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-                 <span className="text-art-orange">Trip</span> Privat.
+                 {t('dest.privateTitle')}
               </h2>
               <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
-                Pesan trip dan gunung serta jadwal sesuai keinginan Anda.
+                {t('dest.privateDesc')}
               </p>
             </div>
 

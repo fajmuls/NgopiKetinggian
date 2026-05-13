@@ -10,6 +10,7 @@ export interface FacilityOption {
   price?: number; // Added numeric price
   pricingFormat?: 'manual' | 'calculated';
   subItems?: { name: string, priceInfo?: string, price?: number }[];
+  isHidden?: boolean;
 }
 
 export const DIFFICULTY_LEVELS = [

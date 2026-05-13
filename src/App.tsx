@@ -172,7 +172,7 @@ export default function App() {
   
   const currentDestinations = config.destinationsData;
   const currentTripLeaders = config.tripLeaders;
-  const galleryPhotos = config.galleryPhotos;
+  const galleryPhotos = (config.galleryPhotos || []).filter((p: any) => !p.isHidden);
 
   const filteredOpenTrips = (config.openTrips || []).filter((ot: any) => {
     const matchesRegion = openFilterRegion === 'Semua' || ot.region === openFilterRegion;
@@ -325,6 +325,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       
       {/* Navigation */}
       <Header 
+        config={config}
         user={user}
         onLogin={loginWithGoogle}
         onLogout={logout}
@@ -500,18 +501,26 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             <div className="bg-white/10 p-8 rounded-2xl border-2 border-white/20">
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><CheckCircle2 /> Include</h3>
               <ul className="space-y-4 text-sm font-medium">
-                {config.facilities?.include?.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>{item}</span></li>
-                ))}
+                {(config.facilities?.include || []).map((item: any, i: number) => {
+                  const isHidden = typeof item === 'object' ? item.isHidden : false;
+                  const name = typeof item === 'object' ? item.name : item;
+                  if (isHidden) return null;
+                  return (
+                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>{name}</span></li>
+                )})}
               </ul>
             </div>
             
             <div className="bg-art-bg text-art-text p-8 rounded-2xl border-2 border-art-text">
               <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><X /> Exclude</h3>
               <ul className="space-y-4 text-sm font-medium">
-                {config.facilities?.exclude?.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-text flex-shrink-0"></div><span>{item}</span></li>
-                ))}
+                {(config.facilities?.exclude || []).map((item: any, i: number) => {
+                  const isHidden = typeof item === 'object' ? item.isHidden : false;
+                  const name = typeof item === 'object' ? item.name : item;
+                  if (isHidden) return null;
+                  return (
+                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-text flex-shrink-0"></div><span>{name}</span></li>
+                )})}
               </ul>
             </div>
 
@@ -522,7 +531,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                  <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><PlusCircle /> Optional (Tambahan)</h3>
                  <p className="text-sm font-medium text-white/70 mb-4">Pilih fasilitas tambahan jika Anda membutuhkannya. <br/><span className="text-art-orange">Catatan: Tambahan opsional ini dikenakan biaya dan tidak termasuk harga tertera.</span></p>
                  <ul className="space-y-4 text-sm font-medium">
-                  {config.facilities?.opsi?.map((opt: any, i: number) => (
+                  {(config.facilities?.opsi || []).map((opt: any, i: number) => {
+                    if (opt.isHidden) return null;
+                    return (
                     <li key={i} className="flex flex-col gap-1 items-start">
                       <div className="flex items-start gap-3">
                         <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
@@ -539,7 +550,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                         </ul>
                       )}
                     </li>
-                  ))}
+                  )})}
                  </ul>
                </div>
             </div>
@@ -627,7 +638,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       </section>
 
       {/* Footer */}
-      <Footer />
+      <Footer config={config} />
 
       <AnimatePresence>
         {toast && (

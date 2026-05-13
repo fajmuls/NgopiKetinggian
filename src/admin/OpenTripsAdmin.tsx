@@ -465,7 +465,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                                        }}
                                     >
                                        <option value="">Pilih Leader</option>
-                                       {config.tripLeaders?.map((l: any) => <option key={l.id} value={l.name}>{l.name}</option>)}
+                                       {config.tripLeaders?.filter((l: any) => !l.isHidden).map((l: any) => <option key={l.id || l.name} value={l.name}>{l.name}</option>)}
                                     </select>
                                  </div>
                               </div>
@@ -713,7 +713,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                  <div className="space-y-1">
                    <label className="text-[9px] font-black uppercase text-art-text/40">Leaders (Pilih beberapa)</label>
                    <div className="flex flex-wrap gap-2 p-2 border-2 border-art-text/10 rounded-xl bg-white max-h-32 overflow-y-auto">
-                     {config.tripLeaders?.map((leader: any) => (
+                     {config.tripLeaders?.filter((l: any) => !l.isHidden).map((leader: any) => (
                        <label key={leader.id} className="flex items-center gap-1.5 px-2 py-1 bg-art-bg/30 rounded-lg cursor-pointer hover:bg-art-bg transition-colors">
                          <input 
                            type="checkbox" 
