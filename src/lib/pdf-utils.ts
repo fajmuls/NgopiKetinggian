@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
 
-export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur: string, durasi: string) => {
+export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur: string, durasi: string, logoUrl: string = 'https://files.catbox.moe/lubzno.png') => {
   const doc = new jsPDF();
   const primaryColor = [26, 26, 26] as [number, number, number];
   
@@ -40,7 +40,7 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
       doc.text("KETINGGIAN", 105, 170, { angle: 45, align: 'center' });
       resolve();
     };
-    img.src = 'https://files.catbox.moe/lubzno.png';
+    img.src = logoUrl;
   });
 
   // Header

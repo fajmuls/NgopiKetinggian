@@ -390,6 +390,15 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
 
       {/* The Concept Section */}
       <section id="cerita" className="py-20 md:py-32 bg-art-section relative border-y border-art-text overflow-hidden">
+        {/* Scroll Indicator Moved Here */}
+        <motion.div 
+          animate={{ y: [0, 12, 0] }} 
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="absolute top-8 left-1/2 -translate-x-1/2 text-art-text/40 flex flex-col items-center gap-3 z-[60]"
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.6em] text-art-orange drop-shadow-sm">Discover More</span>
+          <div className="w-[3px] h-10 md:h-16 bg-gradient-to-b from-art-orange via-art-orange/50 to-transparent rounded-full shadow-[0_0_20px_rgba(255,107,0,0.4)]" />
+        </motion.div>
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
           <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Mountain bg" />
         </div>

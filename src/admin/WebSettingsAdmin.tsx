@@ -482,6 +482,43 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
               <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.statTrips || ''} onChange={e => setData({...data, statTrips: e.target.value})} placeholder="50+" />
            </div>
         </div>
+
+        <div className="mt-6 border-2 border-dashed border-art-text/20 p-4 rounded-2xl">
+          <label className="text-[10px] font-black uppercase text-art-text/40 mb-3 block">Urutan Elemen Hero (Atas ke Bawah)</label>
+          <div className="flex flex-col gap-2">
+            {(data.heroOrder || ['slogan', 'features', 'title', 'tagline', 'description', 'buttons', 'stats', 'slider']).map((item: string, idx: number, arr: string[]) => (
+              <div key={item} className="flex items-center justify-between bg-white border border-art-text/10 p-2 px-3 rounded-lg shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-art-text">{item}</span>
+                <div className="flex gap-1">
+                  <button 
+                    type="button" 
+                    className="p-1 bg-art-bg rounded hover:bg-art-text hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-art-bg disabled:hover:text-current"
+                    disabled={idx === 0}
+                    onClick={() => {
+                      const newOrder = [...arr];
+                      [newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
+                      setData({...data, heroOrder: newOrder});
+                    }}
+                  >
+                    <ChevronUp size={12} />
+                  </button>
+                  <button 
+                    type="button" 
+                    className="p-1 bg-art-bg rounded hover:bg-art-text hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-art-bg disabled:hover:text-current"
+                    disabled={idx === arr.length - 1}
+                    onClick={() => {
+                      const newOrder = [...arr];
+                      [newOrder[idx + 1], newOrder[idx]] = [newOrder[idx], newOrder[idx + 1]];
+                      setData({...data, heroOrder: newOrder});
+                    }}
+                  >
+                    <ChevronDown size={12} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">

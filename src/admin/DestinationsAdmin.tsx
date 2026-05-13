@@ -176,45 +176,41 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
         return (
          <div key={i} className={`bg-white p-4 rounded-xl border-2 transition-all ${dest.isActive !== false ? 'border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]' : 'border-gray-200 opacity-70'} relative w-full overflow-hidden`}>
           {/* Action Row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 bg-gray-50/50 p-2 rounded-lg border border-dashed border-art-text/10">
-            <div className="flex items-center gap-2">
-               <div className="flex bg-white rounded-lg border border-art-text/20 overflow-hidden shadow-sm">
-                   <button type="button" onClick={() => moveDestination(i, 'up')} className="p-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
-                   <button type="button" onClick={() => moveDestination(i, 'down')} className="p-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
-                   <button onClick={() => {
-                      customConfirm(`Hapus ${dest.name}?`, () => {
-                        const nd = [...data]; nd.splice(i, 1); setData(nd);
-                      });
-                   }} className="p-2 text-red-500 hover:bg-red-50" title="Hapus"><Trash2 size={16}/></button>
-               </div>
-            </div>
+          <div className="flex flex-wrap justify-end items-center gap-1.5 mb-4 bg-gray-50/50 p-2 rounded-lg border border-dashed border-art-text/10">
+            <button 
+              type="button"
+              onClick={() => {
+                const nd = [...data];
+                nd[i].enablePrivateTrip = !(dest.enablePrivateTrip !== false);
+                setData(nd);
+              }}
+              className={`p-1.5 px-2 rounded flex items-center justify-center gap-1 transition-all border ${dest.enablePrivateTrip !== false ? 'bg-indigo-600 border-indigo-700 text-white shadow-sm' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
+              title="Toggle Privat"
+            >
+              {dest.enablePrivateTrip !== false ? <Lock size={12} fill="white" /> : <Unlock size={12} />}
+            </button>
             
-            <div className="flex items-center gap-1.5 w-full sm:w-auto">
-              <button 
-                type="button"
-                onClick={() => {
-                  const nd = [...data];
-                  nd[i].enablePrivateTrip = !(dest.enablePrivateTrip !== false);
-                  setData(nd);
-                }}
-                className={`p-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all border-2 ${dest.enablePrivateTrip !== false ? 'bg-indigo-600 border-indigo-700 text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
-              >
-                {dest.enablePrivateTrip !== false ? <Lock size={12} fill="white" /> : <Unlock size={12} />}
-                <span className="text-[8px] font-black uppercase">Privat</span>
-              </button>
-              
-              <button 
-                type="button"
-                onClick={() => {
-                  const nd = [...data];
-                  nd[i].isActive = !(dest.isActive !== false);
-                  setData(nd);
-                }}
-                className={`p-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all border-2 ${dest.isActive !== false ? 'bg-art-green border-art-green text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
-              >
-                {dest.isActive !== false ? <Eye size={12} /> : <EyeOff size={12} />}
-                <span className="text-[8px] font-black uppercase">Status</span>
-              </button>
+            <button 
+              type="button"
+              onClick={() => {
+                const nd = [...data];
+                nd[i].isActive = !(dest.isActive !== false);
+                setData(nd);
+              }}
+              className={`p-1.5 px-2 rounded flex items-center justify-center gap-1 transition-all border mr-1 ${dest.isActive !== false ? 'bg-art-green border-art-green text-white shadow-sm' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
+              title="Toggle Status Aktif"
+            >
+              {dest.isActive !== false ? <Eye size={12} /> : <EyeOff size={12} />}
+            </button>
+
+            <div className="flex bg-white rounded border border-art-text/20 overflow-hidden shadow-sm h-[28px]">
+               <button type="button" onClick={() => moveDestination(i, 'up')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
+               <button type="button" onClick={() => moveDestination(i, 'down')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
+               <button onClick={() => {
+                  customConfirm(`Hapus ${dest.name}?`, () => {
+                    const nd = [...data]; nd.splice(i, 1); setData(nd);
+                  });
+               }} className="px-2 text-red-500 hover:bg-red-50" title="Hapus"><Trash2 size={14}/></button>
             </div>
           </div>
 

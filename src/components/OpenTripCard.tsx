@@ -32,14 +32,14 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative">
-      <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
+      <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={ot.rundownHtml || ot.rundownText || durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
       <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
         <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
          
          {/* Mountain Custom Logo */}
          <div className="absolute top-3 left-3 flex flex-row items-center gap-2 z-10">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center -rotate-6 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] border border-art-text overflow-hidden p-1 shrink-0">
-              <img src={ot.logo || "https://files.catbox.moe/lubzno.png"} alt="Mountain Logo" className="w-full h-full object-contain" />
+              <img src={ot.logo || config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Mountain Logo" className="w-full h-full object-contain" />
             </div>
             <div className="bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1 shrink-0">
                <Calendar size={10}/> {ot.jadwal}

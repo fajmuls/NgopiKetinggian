@@ -46,137 +46,139 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pt-0 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-8 flex flex-col items-center text-center">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8 }}
-              className="w-full flex flex-col items-center"
-            >
-              <div className="flex justify-center w-full">
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl mb-6 md:mb-8 transform -rotate-1 shadow-[0_10px_20px_rgba(0,0,0,0.4)] mx-auto flex-nowrap">
-                  <Coffee size={12} className="text-art-orange animate-bounce md:size-[16px] shrink-0" />
-                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] text-white whitespace-nowrap">
-                    {config?.homepage?.heroSub || "Open Trip Eksklusif"}
-                  </span>
-                </div>
-              </div>
-              
-              <h1 className="text-6xl sm:text-7xl md:text-9xl font-black text-white leading-[0.85] tracking-tighter uppercase mb-6 drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center">
-                {config?.homepage?.heroFeatures && (
+        <div className="flex flex-col items-center gap-8 md:gap-10 w-full z-30 relative">
+          {(config?.homepage?.heroOrder || ['slogan', 'features', 'title', 'tagline', 'description', 'buttons', 'stats', 'slider']).map((block: string) => {
+            switch (block) {
+              case 'slogan':
+                return (
+                  <motion.div key={block} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center w-full z-30">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl transform -rotate-1 shadow-[0_10px_20px_rgba(0,0,0,0.4)] flex-nowrap">
+                      <Coffee size={12} className="text-art-orange animate-bounce md:size-[16px] shrink-0" />
+                      <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] text-white whitespace-nowrap">
+                        {config?.homepage?.heroSub || "Open Trip Eksklusif"}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              case 'features':
+                return config?.homepage?.heroFeatures ? (
                   <motion.span 
+                    key={block}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="block text-[#fff7ed] text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] mb-6 drop-shadow-none bg-art-orange/95 backdrop-blur-sm w-fit px-4 py-1.5 md:px-6 md:py-2 rounded-full border-2 border-white/20 whitespace-nowrap shadow-[0_10px_30px_rgba(255,107,0,0.5)] italic"
+                    className="flex text-[#fff7ed] text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] drop-shadow-none bg-art-orange/95 backdrop-blur-sm px-4 py-1.5 md:px-6 md:py-2 rounded-[2rem] border-2 border-white/20 whitespace-normal text-center max-w-[90vw] leading-relaxed shadow-[0_10px_30px_rgba(255,107,0,0.5)] italic z-30"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
-                )}
-                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-6xl md:text-8xl mb-3 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)] font-serif italic normal-case">{config.homepage.heroTitlePrefix}</span>}
-                <span className="relative drop-shadow-[0_10px_20px_rgba(0,0,0,1)]">
-                  {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
-                  <div className="absolute -bottom-2 left-0 w-full h-1 bg-art-orange shadow-[0_0_15px_#ff6b00]"></div>
-                </span>
-              </h1>
-
-               {config?.homepage?.heroTagline && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mt-4 p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)]"
-                >
-                  <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.2em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center gap-2">
-                    <span className="text-art-orange">★</span> {config.homepage.heroTagline} <span className="text-art-orange">★</span>
-                  </p>
-                </motion.div>
-              )}
-
-              <div className="flex flex-col items-center gap-4 mt-6 mb-6">
-                <p className="text-[10px] md:text-[12px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
-                  {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center gap-4 mt-8 mb-8 w-full">
-                <div className="grid grid-cols-2 gap-3 md:gap-5 w-full max-w-md mx-auto">
-                  <Button 
-                    onClick={() => { playClick(); onExplore(); }}
-                    className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(255,107,0,0.4)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
+                ) : null;
+              case 'title':
+                return (
+                  <h1 key={block} className="text-6xl sm:text-7xl md:text-9xl font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center text-center max-w-[95vw] mx-auto break-words z-30">
+                    {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-6xl md:text-8xl mb-3 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)] font-serif italic normal-case">{config.homepage.heroTitlePrefix}</span>}
+                    <span className="relative drop-shadow-[0_10px_20px_rgba(0,0,0,1)] inline-block">
+                      {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
+                      <div className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-1 md:h-2 bg-art-orange shadow-[0_0_15px_#ff6b00] rounded-full"></div>
+                    </span>
+                  </h1>
+                );
+              case 'tagline':
+                return config?.homepage?.heroTagline ? (
+                  <motion.div
+                    key={block}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)] z-30"
                   >
-                    Destinations <ChevronRight size={14} className="md:size-[18px] group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                  <Button 
-                    onClick={() => { playClick(); onBooking(); }}
-                    className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
-                  >
-                    Explore Trips <Calendar size={14} className="md:size-[18px] group-hover:rotate-12 transition-transform" />
-                  </Button>
-                </div>
-                
-                <div className="flex items-center gap-4 md:gap-6 pt-2">
-                  <div className="flex -space-x-4">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white bg-art-bg overflow-hidden shadow-lg">
-                        <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="User" />
-                      </div>
-                    ))}
+                    <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.2em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center gap-2">
+                      <span className="text-art-orange">★</span> {config.homepage.heroTagline} <span className="text-art-orange">★</span>
+                    </p>
+                  </motion.div>
+                ) : null;
+              case 'description':
+                return (
+                  <motion.div key={block} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-4 z-30">
+                    <p className="text-[10px] md:text-[12px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto text-center px-4">
+                      {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
+                    </p>
+                  </motion.div>
+                );
+              case 'buttons':
+                return (
+                  <div key={block} className="grid grid-cols-2 gap-3 md:gap-5 w-full max-w-md mx-auto z-30 px-4">
+                    <Button 
+                      onClick={() => { playClick(); onExplore(); }}
+                      className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(255,107,0,0.4)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
+                    >
+                      Destinations <ChevronRight size={14} className="md:size-[18px] group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                    <Button 
+                      onClick={() => { playClick(); onBooking(); }}
+                      className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
+                    >
+                      Explore Trips <Calendar size={14} className="md:size-[18px] group-hover:rotate-12 transition-transform" />
+                    </Button>
                   </div>
-                  <div className="text-left">
-                    <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp size={8} className="text-art-green" />
-                      <p className="text-[9px] md:text-[10px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
+                );
+              case 'stats':
+                return (
+                  <div key={block} className="flex items-center justify-center gap-4 md:gap-6 z-30 pt-4">
+                    <div className="flex -space-x-4">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white bg-art-bg overflow-hidden shadow-lg">
+                          <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="User" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp size={8} className="text-art-green" />
+                        <p className="text-[9px] md:text-[10px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-          
-          <div className="lg:col-span-4 block relative mt-6 lg:mt-[-40px] z-20">
-            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[300px] md:max-w-none mx-auto lg:mx-0">
-              <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-105 md:scale-110">
-                <AnimatePresence mode="wait">
-                  <motion.img 
-                    key={currentSlide}
-                    src={slides[currentSlide]?.image} 
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    alt="Mountain" 
-                    className="w-full h-full object-cover rounded-[2.5rem] transition-all duration-700" 
-                  />
-                </AnimatePresence>
-                <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
-                
-                {/* Mountain Name - Transparent Background */}
-                <div className="absolute bottom-6 md:bottom-10 left-4 md:left-8 right-4 md:right-8 pointer-events-none drop-shadow-2xl text-center px-4">
-                  <p className="text-2xl md:text-4xl font-black uppercase text-white leading-none tracking-tighter drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">{slides[currentSlide]?.name}</p>
-                </div>
-              </div>
-              
-              {/* Larger MDPL Circle */}
-              <div className="absolute -top-10 -right-10 md:-top-16 md:-right-16 w-28 h-28 md:w-44 md:h-44 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-tr from-art-orange/10 to-transparent"></div>
-                <p className="text-2xl md:text-6xl font-black text-white leading-none tracking-tighter relative z-10">{slides[currentSlide]?.height}</p>
-                <p className="text-[10px] md:text-[16px] font-black text-art-orange uppercase tracking-[0.4em] mt-0.5 md:mt-1 relative z-10">MDPL</p>
-                <div className="w-8 md:w-20 h-1 md:h-1.5 bg-white/20 mt-1 md:mt-2 rounded-full relative z-10"></div>
-              </div>
-            </motion.div>
-          </div>
+                );
+              case 'slider':
+                return (
+                  <div key={block} className="block relative mt-8 z-30 mb-8 w-full">
+                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[300px] md:max-w-md mx-auto">
+                      <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] md:aspect-video relative group scale-105 md:scale-110 object-cover">
+                        <AnimatePresence mode="wait">
+                          <motion.img 
+                            key={currentSlide}
+                            src={slides[currentSlide]?.image} 
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            alt="Mountain" 
+                            className="w-full h-full object-cover rounded-[2.5rem] transition-all duration-700" 
+                          />
+                        </AnimatePresence>
+                        <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
+                        
+                        {/* Mountain Name - Transparent Background */}
+                        <div className="absolute bottom-6 md:bottom-10 left-4 md:left-8 right-4 md:right-8 pointer-events-none drop-shadow-2xl text-center px-4">
+                          <p className="text-2xl md:text-4xl font-black uppercase text-white leading-none tracking-tighter drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">{slides[currentSlide]?.name}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Larger MDPL Circle */}
+                      <div className="absolute -top-10 -right-10 md:-top-16 md:-right-16 w-28 h-28 md:w-36 md:h-36 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-art-orange/10 to-transparent"></div>
+                        <p className="text-2xl md:text-5xl font-black text-white leading-none tracking-tighter relative z-10">{slides[currentSlide]?.height}</p>
+                        <p className="text-[10px] md:text-[14px] font-black text-art-orange uppercase tracking-[0.4em] mt-0.5 md:mt-1 relative z-10">MDPL</p>
+                        <div className="w-8 md:w-16 h-1 md:h-1.5 bg-white/20 mt-1 md:mt-2 rounded-full relative z-10"></div>
+                      </div>
+                    </motion.div>
+                  </div>
+                );
+              default:
+                return null;
+            }
+          })}
         </div>
       </div>
       
-      {/* Scroll Indicator */}
-      <motion.div 
-        animate={{ y: [0, 12, 0] }} 
-        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        className="absolute bottom-8 md:bottom-16 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-3 z-[60]"
-      >
-        <span className="text-[10px] font-black uppercase tracking-[0.6em] text-art-orange drop-shadow-lg">Discover More</span>
-        <div className="w-[3px] h-10 md:h-16 bg-gradient-to-b from-art-orange via-art-orange/50 to-transparent rounded-full shadow-[0_0_20px_rgba(255,107,0,0.6)]" />
-      </motion.div>
     </section>
   );
 };
