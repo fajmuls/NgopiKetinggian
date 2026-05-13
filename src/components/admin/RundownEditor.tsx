@@ -112,18 +112,20 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">{title}</span>
         </div>
         <div className="flex items-center gap-2">
-          <button 
-            type="button"
-            onClick={() => {
+          <select
+            value=""
+            onChange={(e) => {
+              if(!e.target.value) return;
+              const type = e.target.value;
               const templates: Record<string, RundownItem[]> = {
-                '1H': [
+                '1': [
                   { id: 't1', time: '08:00', activity: 'Meet up at Meeting Point', day: 1 },
                   { id: 't2', time: '09:00', activity: 'Registration & Trekking Start', day: 1 },
                   { id: 't3', time: '12:00', activity: 'Reached Peak / Break & Coffee Time', day: 1 },
                   { id: 't4', time: '14:00', activity: 'Descent Session', day: 1 },
                   { id: 't5', time: '17:00', activity: 'Finish & Farewell', day: 1 }
                 ],
-                '2H': [
+                '2': [
                   { id: 't1', time: '08:00', activity: 'Meeting Point & Prep', day: 1 },
                   { id: 't2', time: '10:00', activity: 'Start Trekking', day: 1 },
                   { id: 't3', time: '15:00', activity: 'Arrived at Camp Area', day: 1 },
@@ -133,32 +135,50 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
                   { id: 't7', time: '09:00', activity: 'Back to Camp & Pack up', day: 2 },
                   { id: 't8', time: '14:00', activity: 'Finish at Basecamp', day: 2 }
                 ],
-                '3H': [
+                '3': [
                   { id: 't1', time: '08:00', activity: 'Prep & Start Trekking', day: 1 },
                   { id: 't2', time: '15:00', activity: 'Camp Site 1', day: 1 },
                   { id: 't3', time: '08:00', activity: 'Continue Trekking to Pos higher', day: 2 },
                   { id: 't4', time: '14:00', activity: 'Arrived at High Camp', day: 2 },
                   { id: 't5', time: '04:00', activity: 'Summit Session', day: 3 },
                   { id: 't6', time: '10:00', activity: 'Descent to Basecamp', day: 3 }
+                ],
+                '4': [
+                  { id: 't1', time: '08:00', activity: 'Meeting Point & Prep', day: 1 },
+                  { id: 't2', time: '10:00', activity: 'Trek to Camp 1', day: 1 },
+                  { id: 't3', time: '08:00', activity: 'Trek to Camp 2', day: 2 },
+                  { id: 't4', time: '15:00', activity: 'Acclimatization at Camp 2', day: 2 },
+                  { id: 't5', time: '08:00', activity: 'Trek to High Camp', day: 3 },
+                  { id: 't6', time: '02:00', activity: 'Summit Attack', day: 4 },
+                  { id: 't7', time: '10:00', activity: 'Descent to Basecamp', day: 4 }
+                ],
+                '5': [
+                  { id: 't1', time: '08:00', activity: 'Meeting Point & Briefing', day: 1 },
+                  { id: 't2', time: '10:00', activity: 'Trek to Camp 1', day: 1 },
+                  { id: 't3', time: '08:00', activity: 'Trek to Camp 2', day: 2 },
+                  { id: 't4', time: '08:00', activity: 'Trek to Camp 3', day: 3 },
+                  { id: 't5', time: '08:00', activity: 'Trek to High Camp', day: 4 },
+                  { id: 't6', time: '01:00', activity: 'Summit Attack', day: 5 },
+                  { id: 't7', time: '09:00', activity: 'Descent to Basecamp', day: 5 }
                 ]
               };
               
-              customConfirm("Gunakan template rundown standar? (Ini akan REPLACEMENT semua data saat ini)", () => {
-                const choice = confirm("Pilih Template:\nOK = 2 Hari 1 Malam\nCancel = Tektok / 1 Hari\n\nUntuk 3 Hari, silakan pilih NO/CANCEL lalu gunakan tombol + Tambah Hari atau Generate Boilerplate.") ? templates['2H'] : templates['1H'];
-                // Since prompt/confirm is limited, I'll just use a more descriptive confirm for now or maybe better would be a small custom select
-                // Let's improve the customConfirm to handle multiple choices if possible but that's complex.
-                // I'll just add 3H if they click cancel on the second one? No.
-                // Better approach:
-                const type = prompt("Pilih Template (1, 2, atau 3 Hari):", "2");
-                if (type === "1") save(templates['1H'].map(it => ({ ...it, id: Math.random().toString(36).substr(2, 9) })));
-                else if (type === "2") save(templates['2H'].map(it => ({ ...it, id: Math.random().toString(36).substr(2, 9) })));
-                else if (type === "3") save(templates['3H'].map(it => ({ ...it, id: Math.random().toString(36).substr(2, 9) })));
-              });
+              if (templates[type]) {
+                customConfirm(`Gunakan template ${type} Hari? (Me-replace data saat ini)`, () => {
+                  save(templates[type].map(it => ({ ...it, id: Math.random().toString(36).substr(2, 9) })));
+                });
+              }
+              e.target.value = ""; // reset
             }}
-            className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-text transition-all mr-2"
+            className="bg-white/10 text-white border border-white/20 px-2 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-text transition-all mr-2 outline-none cursor-pointer"
           >
-            Auto Template
-          </button>
+            <option value="" className="text-art-text">Terapkan Template...</option>
+            <option value="1" className="text-art-text">Template 1 Hari (Tektok)</option>
+            <option value="2" className="text-art-text">Template 2 Hari</option>
+            <option value="3" className="text-art-text">Template 3 Hari</option>
+            <option value="4" className="text-art-text">Template 4 Hari</option>
+            <option value="5" className="text-art-text">Template 5 Hari</option>
+          </select>
           <button 
             type="button"
             onClick={() => {
@@ -182,6 +202,21 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
               <div className="h-[2px] flex-1 bg-art-text/5"></div>
               <button 
                 type="button"
+                onClick={() => {
+                  if (confirm(`Yakin hapus HARI ${day} beserta kegiatannya?`)) {
+                    const newItems = items.filter(i => i.day !== day);
+                    // Re-number days
+                    const renumbered = newItems.map(i => i.day > day ? { ...i, day: i.day - 1 } : i);
+                    save(renumbered);
+                  }
+                }}
+                className="text-red-400 hover:text-red-600 p-1 transition-colors"
+                title="Hapus Hari"
+              >
+                <Trash2 size={16} />
+              </button>
+              <button 
+                type="button"
                 onClick={() => addItem(day)}
                 className="text-art-orange hover:text-orange-600 p-1 transition-colors"
                 title="Tambah Kegiatan"
@@ -193,39 +228,13 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
             <div className="space-y-2 pl-2">
               {items.filter(i => i.day === day).map((item) => (
                 <div key={item.id} className="flex gap-2 items-center group">
-                  <div className="w-16 shrink-0 relative">
+                  <div className="w-20 shrink-0 relative">
                     <input 
-                      type="text"
-                      list="time-recommendations"
-                      className="w-full border-2 border-art-text/10 p-1.5 rounded-lg text-[10px] font-bold outline-none focus:border-art-orange bg-art-bg/20 font-mono"
-                      value={item.time}
-                      placeholder="00:00"
+                      type="time"
+                      className="w-full border-2 border-art-text/10 p-1 rounded-lg text-[10px] font-bold outline-none focus:border-art-orange bg-art-bg/20 font-mono"
+                      value={item.time.substring(0, 5)} // in case we had "08:00 - 09:00", we just take first 5
                       onChange={(e) => updateItem(item.id, 'time', e.target.value)}
                     />
-                    <datalist id="time-recommendations">
-                      <option value="04:00" />
-                      <option value="05:00" />
-                      <option value="06:00" />
-                      <option value="07:00" />
-                      <option value="08:00" />
-                      <option value="09:00" />
-                      <option value="10:00" />
-                      <option value="11:00" />
-                      <option value="12:00" />
-                      <option value="13:00" />
-                      <option value="14:00" />
-                      <option value="15:00" />
-                      <option value="16:00" />
-                      <option value="17:00" />
-                      <option value="18:00" />
-                      <option value="19:00" />
-                      <option value="20:00" />
-                      <option value="06:00 - 09:00" />
-                      <option value="09:00 - 12:00" />
-                      <option value="12:00 - 15:00" />
-                      <option value="15:00 - 18:00" />
-                      <option value="18:00 - 21:00" />
-                    </datalist>
                   </div>
                   <div className="flex-1">
                     <input 

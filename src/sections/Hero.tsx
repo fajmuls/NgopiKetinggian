@@ -45,49 +45,51 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pt-10 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-8 flex flex-col items-center lg:items-start text-center lg:text-left">
+          <div className="lg:col-span-8 flex flex-col items-center text-center">
             <motion.div 
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.8 }}
-              className="w-full"
+              className="w-full flex flex-col items-center"
             >
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-2xl mb-8 transform -rotate-1 shadow-xl">
-                <Coffee size={18} className="text-art-orange animate-bounce" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                  {config?.homepage?.heroSub || "Open Trip Eksklusif"}
-                </span>
+              <div className="flex justify-center w-full">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-2xl mb-8 transform -rotate-1 shadow-xl mx-auto">
+                  <Coffee size={18} className="text-art-orange animate-bounce" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                    {config?.homepage?.heroSub || "Open Trip Eksklusif"}
+                  </span>
+                </div>
               </div>
               
-              <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase mb-8 drop-shadow-2xl">
+              <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase mb-8 drop-shadow-2xl flex flex-col items-center">
                 {config?.homepage?.heroFeatures && (
                   <motion.span 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="block text-art-orange text-xs md:text-sm font-black uppercase tracking-[0.5em] mb-6 drop-shadow-none bg-white/10 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-white/20"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="block text-[#fff7ed] text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mb-6 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-art-orange/20"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
                 )}
-                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-3xl md:text-5xl mb-3 tracking-normal">{config.homepage.heroTitlePrefix}</span>}
+                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-3xl md:text-5xl mb-3 tracking-[0.2em]">{config.homepage.heroTitlePrefix}</span>}
                 {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
               </h1>
               
-              <p className="text-lg md:text-base font-bold text-white/70 leading-relaxed max-w-2xl mb-10 uppercase italic">
+              <p className="text-sm md:text-base font-bold text-white/70 leading-relaxed max-w-2xl mb-10 uppercase italic mx-auto">
                 {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-6 items-center lg:items-start mt-6">
-                <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-6 items-center justify-center mt-6 w-full">
+                <div className="flex flex-wrap gap-4 justify-center w-full sm:w-auto">
                   <Button 
                     onClick={onExplore}
-                    className="px-10 py-5 text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-art-orange shadow-[6px_6px_0px_0px_rgba(255,255,255,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+                    className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-art-orange shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
                   >
                     View Destinations <ChevronRight size={18} />
                   </Button>
                   <Button 
                     onClick={onBooking}
-                    className="px-10 py-5 text-[11px] font-black uppercase tracking-[0.2em] bg-transparent text-white border-2 border-white shadow-[6px_6px_0px_0px_rgba(255,255,255,0.3)] hover:bg-white hover:text-art-text hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+                    className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-amber-500 text-white border-2 border-amber-500 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] hover:bg-amber-600 hover:border-amber-600 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
                   >
                     Explore Trips <Calendar size={18} />
                   </Button>
@@ -136,10 +138,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               </div>
               
               {/* Enlarged MDPL Circle */}
-              <div className="absolute -top-8 -right-8 w-32 h-32 bg-art-text rounded-full border-4 border-white flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
-                <p className="text-3xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
-                <p className="text-sm font-black text-white/80 uppercase tracking-[0.3em] mt-1.5">MDPL</p>
-                <div className="w-10 h-1.5 bg-art-orange mt-2 rounded-full"></div>
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-art-text rounded-full border-4 border-white flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
+                <p className="text-xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
+                <p className="text-[10px] font-black text-white/80 uppercase tracking-[0.3em] mt-1">MDPL</p>
+                <div className="w-8 h-1 bg-art-orange mt-1.5 rounded-full"></div>
               </div>
             </motion.div>
           </div>

@@ -490,10 +490,10 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4">Fasilitas Open Trip</h2>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4">Fasilitas Trip</h2>
             <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
             <p className="font-medium text-white/80 leading-relaxed">
-              Berikut ini adalah berbagai fasilitas premium dan pelayanan maksimal yang akan Anda dapatkan jika memilih jasa open trip kami. Kami memastikan setiap perjalanan Anda aman, nyaman, dan tentu saja ditemani pengalaman menyeduh kopi terbaik di alam bebas.
+              Berikut ini adalah berbagai fasilitas premium dan pelayanan maksimal yang akan Anda dapatkan jika memilih jasa trip kami. Kami memastikan setiap perjalanan Anda aman, nyaman, dan tentu saja ditemani pengalaman menyeduh kopi terbaik di alam bebas.
             </p>
           </div>
           

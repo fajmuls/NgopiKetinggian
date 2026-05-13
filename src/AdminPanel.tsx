@@ -128,7 +128,7 @@ export const AdminPanelModal = ({
         </div>
 
 
-        <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
+        <div className="flex flex-col sm:flex-row flex-1 overflow-y-auto">
 
           {/* Sub Sidebar Tabs */}
           <div className="flex sm:flex-col gap-1.5 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0 justify-between">
