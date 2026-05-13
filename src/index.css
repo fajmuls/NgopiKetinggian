@@ -54,6 +54,16 @@
   --color-art-burnt: #903500;
 }
 
+@layer utilities {
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+}
+
 html {
   font-size: 11.5px; /* Mobile root font-size scaled down by more */
   scroll-behavior: smooth;

@@ -23,7 +23,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
   }, [slides.length]);
 
   return (
-    <section className="relative min-h-screen flex items-center pt-6 bg-art-text">
+    <section className="relative min-h-[110vh] flex items-center pt-20 bg-art-text overflow-hidden">
       {/* Background Slider */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <AnimatePresence mode="wait">
@@ -63,18 +63,21 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </div>
               </div>
               
-              <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter uppercase mb-4 drop-shadow-[0_20px_50px_rgba(0,0,0,1)] flex flex-col items-center">
+              <h1 className="text-6xl sm:text-7xl md:text-9xl font-black text-white leading-[0.85] tracking-tighter uppercase mb-6 drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center">
                 {config?.homepage?.heroFeatures && (
                   <motion.span 
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="block text-[#fff7ed] text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.3em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-art-orange/20 whitespace-nowrap shadow-[0_5px_15px_rgba(255,107,0,0.4)]"
+                    className="block text-[#fff7ed] text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] mb-6 drop-shadow-none bg-art-orange/95 backdrop-blur-sm w-fit px-4 py-1.5 md:px-6 md:py-2 rounded-full border-2 border-white/20 whitespace-nowrap shadow-[0_10px_30px_rgba(255,107,0,0.5)] italic"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
                 )}
-                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-5xl md:text-6xl mb-2 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)]">{config.homepage.heroTitlePrefix}</span>}
-                {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
+                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-6xl md:text-8xl mb-3 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)] font-serif italic normal-case">{config.homepage.heroTitlePrefix}</span>}
+                <span className="relative drop-shadow-[0_10px_20px_rgba(0,0,0,1)]">
+                  {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
+                  <div className="absolute -bottom-2 left-0 w-full h-1 bg-art-orange shadow-[0_0_15px_#ff6b00]"></div>
+                </span>
               </h1>
 
                {config?.homepage?.heroTagline && (
@@ -131,9 +134,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
             </motion.div>
           </div>
           
-          <div className="lg:col-span-4 block relative mt-2 lg:mt-0 z-20">
-            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[280px] md:max-w-none mx-auto lg:mx-0">
-              <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-100 md:scale-110">
+          <div className="lg:col-span-4 block relative mt-6 lg:mt-[-40px] z-20">
+            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[300px] md:max-w-none mx-auto lg:mx-0">
+              <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-105 md:scale-110">
                 <AnimatePresence mode="wait">
                   <motion.img 
                     key={currentSlide}
@@ -148,16 +151,17 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
                 
                 {/* Mountain Name - Transparent Background */}
-                <div className="absolute bottom-6 md:bottom-10 left-4 md:left-8 right-4 md:right-8 pointer-events-none drop-shadow-2xl text-center">
-                  <p className="text-xl md:text-3xl font-black uppercase text-white leading-none tracking-tighter drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">{slides[currentSlide]?.name}</p>
+                <div className="absolute bottom-6 md:bottom-10 left-4 md:left-8 right-4 md:right-8 pointer-events-none drop-shadow-2xl text-center px-4">
+                  <p className="text-2xl md:text-4xl font-black uppercase text-white leading-none tracking-tighter drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">{slides[currentSlide]?.name}</p>
                 </div>
               </div>
               
               {/* Larger MDPL Circle */}
-              <div className="absolute -top-6 -right-6 md:-top-10 md:-right-10 w-24 h-24 md:w-36 md:h-36 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
-                <p className="text-2xl md:text-5xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
-                <p className="text-[10px] md:text-[14px] font-black text-art-orange uppercase tracking-[0.4em] mt-0.5 md:mt-1">MDPL</p>
-                <div className="w-8 md:w-16 h-1 md:h-1.5 bg-white/20 mt-1 md:mt-2 rounded-full"></div>
+              <div className="absolute -top-10 -right-10 md:-top-16 md:-right-16 w-28 h-28 md:w-44 md:h-44 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-art-orange/10 to-transparent"></div>
+                <p className="text-2xl md:text-6xl font-black text-white leading-none tracking-tighter relative z-10">{slides[currentSlide]?.height}</p>
+                <p className="text-[10px] md:text-[16px] font-black text-art-orange uppercase tracking-[0.4em] mt-0.5 md:mt-1 relative z-10">MDPL</p>
+                <div className="w-8 md:w-20 h-1 md:h-1.5 bg-white/20 mt-1 md:mt-2 rounded-full relative z-10"></div>
               </div>
             </motion.div>
           </div>
@@ -166,12 +170,12 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
       
       {/* Scroll Indicator */}
       <motion.div 
-        animate={{ y: [0, 8, 0] }} 
+        animate={{ y: [0, 12, 0] }} 
         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-2 z-[60]"
+        className="absolute bottom-8 md:bottom-16 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-3 z-[60]"
       >
-        <span className="text-[9px] font-black uppercase tracking-[0.5em] text-art-orange drop-shadow-sm">Scroll</span>
-        <div className="w-[2px] h-6 md:h-10 bg-gradient-to-b from-art-orange to-transparent rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)]" />
+        <span className="text-[10px] font-black uppercase tracking-[0.6em] text-art-orange drop-shadow-lg">Discover More</span>
+        <div className="w-[3px] h-10 md:h-16 bg-gradient-to-b from-art-orange via-art-orange/50 to-transparent rounded-full shadow-[0_0_20px_rgba(255,107,0,0.6)]" />
       </motion.div>
     </section>
   );

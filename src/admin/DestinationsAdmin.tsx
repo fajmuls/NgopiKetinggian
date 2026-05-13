@@ -86,19 +86,33 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           
-          <button onClick={() => {
-            const nd = data.map((d: any) => ({ ...d, isActive: true }));
-            setData(nd);
-            showToast('Semua Destinasi Diaktifkan!');
-          }} className="bg-art-green/10 text-art-green border border-art-green/30 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1">
+          <button 
+            type="button"
+            onClick={() => {
+              const nd = data.map((d: any) => {
+                const newD = { ...d, isActive: true };
+                if (newD.paths) {
+                  newD.paths = newD.paths.map((p: any) => ({ ...p, isActive: true }));
+                }
+                return newD;
+              });
+              setData(nd);
+              showToast('Semua Destinasi Diaktifkan!');
+            }} 
+            className="bg-art-green/10 text-art-green border border-art-green/30 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 active:bg-art-green/20"
+          >
             <Eye size={14} /> <span className="hidden sm:inline">Aktif Semua</span>
           </button>
           
-          <button onClick={() => {
-            const nd = data.map((d: any) => ({ ...d, enablePrivateTrip: true }));
-            setData(nd);
-            showToast('Semua Private Trip Diaktifkan!');
-          }} className="bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1">
+          <button 
+            type="button"
+            onClick={() => {
+              const nd = data.map((d: any) => ({ ...d, enablePrivateTrip: true }));
+              setData(nd);
+              showToast('Semua Private Trip Diaktifkan!');
+            }} 
+            className="bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 active:bg-indigo-100"
+          >
             <Lock size={14} /> <span className="hidden sm:inline">Privat Semua</span>
           </button>
 
@@ -175,7 +189,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                </div>
             </div>
             
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
               <button 
                 type="button"
                 onClick={() => {
@@ -183,10 +197,10 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                   nd[i].enablePrivateTrip = !(dest.enablePrivateTrip !== false);
                   setData(nd);
                 }}
-                className={`flex-1 sm:flex-none p-2 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${dest.enablePrivateTrip !== false ? 'bg-indigo-600 border-indigo-700 text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
+                className={`p-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all border-2 ${dest.enablePrivateTrip !== false ? 'bg-indigo-600 border-indigo-700 text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
               >
-                {dest.enablePrivateTrip !== false ? <Lock size={14} fill="white" /> : <Unlock size={14} />}
-                <span className="text-[10px] font-black uppercase">Private</span>
+                {dest.enablePrivateTrip !== false ? <Lock size={12} fill="white" /> : <Unlock size={12} />}
+                <span className="text-[8px] font-black uppercase">Privat</span>
               </button>
               
               <button 
@@ -196,10 +210,10 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                   nd[i].isActive = !(dest.isActive !== false);
                   setData(nd);
                 }}
-                className={`flex-1 sm:flex-none p-2 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${dest.isActive !== false ? 'bg-art-green border-art-green text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
+                className={`p-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all border-2 ${dest.isActive !== false ? 'bg-art-green border-art-green text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
               >
-                {dest.isActive !== false ? <Eye size={14} /> : <EyeOff size={14} />}
-                <span className="text-[10px] font-black uppercase">Status</span>
+                {dest.isActive !== false ? <Eye size={12} /> : <EyeOff size={12} />}
+                <span className="text-[8px] font-black uppercase">Status</span>
               </button>
             </div>
           </div>
@@ -398,71 +412,90 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                 <div className="pl-0 sm:pl-14 space-y-2">
                   {path.durations.map((dur: any, j: number) => (
                     <React.Fragment key={j}>
-                    <div className="flex gap-2 items-center min-w-full flex-wrap xl:flex-nowrap">
-                      <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shrink-0">
-                          <button type="button" onClick={() => moveDuration(i, pIdx, j, 'up')} className="p-1 hover:bg-gray-100 border-r border-art-text/10" disabled={j === 0}><ChevronDown size={12} className="rotate-180"/></button>
-                          <button type="button" onClick={() => moveDuration(i, pIdx, j, 'down')} className="p-1 hover:bg-gray-100" disabled={j === path.durations.length - 1}><ChevronDown size={12}/></button>
-                      </div>
-                      <select className="border p-2 rounded text-xs flex-1" value={dur.label} onChange={e => {
+                    <div className="flex gap-2 items-center min-w-full flex-wrap xl:flex-nowrap bg-white/50 p-2 rounded-lg border border-art-text/5">
+                      <select className="border-2 border-art-text/10 p-2 rounded-lg text-[10px] font-black uppercase tracking-tight flex-1 outline-none focus:border-art-orange bg-white" value={dur.label} onChange={e => {
                         const nd = [...data];
                         nd[i].paths[pIdx].durations[j].label = e.target.value;
                         setData(nd);
                       }}>
                         {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
                       </select>
-                      <input 
-                        type="text"
-                        inputMode="numeric"
-                        className="border p-2 rounded text-xs w-20 font-mono" 
-                        value={dur.originalPrice ?? 0} 
-                        onChange={e => {
-                          let valStr = e.target.value.replace(/^0+/, '');
-                          if (valStr === '') valStr = '0';
-                          const val = parseInt(valStr) || 0;
+                      
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] font-bold text-art-text/30">Coret:</span>
+                        <input 
+                          type="text"
+                          inputMode="numeric"
+                          className="border-2 border-art-text/10 p-2 rounded-lg text-xs w-20 font-mono focus:border-art-orange outline-none bg-white" 
+                          value={dur.originalPrice ?? 0} 
+                          onChange={e => {
+                            let valStr = e.target.value.replace(/^0+/, '');
+                            if (valStr === '') valStr = '0';
+                            const val = parseInt(valStr) || 0;
+                            const nd = [...data];
+                            nd[i].paths[pIdx].durations[j].originalPrice = val;
+                            setData(nd);
+                          }} 
+                          placeholder="Coret" 
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] font-bold text-art-orange">Final:</span>
+                        <input 
+                          type="text"
+                          inputMode="numeric"
+                          className="border-2 border-art-orange/30 p-2 rounded-lg text-xs w-20 font-mono focus:border-art-orange outline-none bg-white" 
+                          value={dur.price ?? 0} 
+                          onChange={e => {
+                            let valStr = e.target.value.replace(/^0+/, '');
+                            if (valStr === '') valStr = '0';
+                            const val = parseInt(valStr) || 0;
+                            const nd = [...data];
+                            nd[i].paths[pIdx].durations[j].price = val;
+                            setData(nd);
+                          }} 
+                          placeholder="Final" 
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-1 h-full pl-2 border-l border-art-text/10 ml-auto">
+                        <button type="button" onClick={(e) => {
+                          e.preventDefault();
                           const nd = [...data];
-                          nd[i].paths[pIdx].durations[j].originalPrice = val;
+                          nd[i].paths[pIdx].durations[j].showTripContent = !nd[i].paths[pIdx].durations[j].showTripContent;
                           setData(nd);
-                        }} 
-                        placeholder="Coret" 
-                      />
-                      <input 
-                        type="text"
-                        inputMode="numeric"
-                        className="border p-2 rounded text-xs w-20 font-mono" 
-                        value={dur.price ?? 0} 
-                        onChange={e => {
-                          let valStr = e.target.value.replace(/^0+/, '');
-                          if (valStr === '') valStr = '0';
-                          const val = parseInt(valStr) || 0;
+                        }} className={`p-2 rounded-lg flex items-center justify-center transition-all ${dur.showTripContent ? 'bg-art-text text-white' : 'bg-gray-100 text-art-text hover:bg-gray-200'}`} title="Konten Tambahan">
+                          <Plus size={14} />
+                        </button>
+
+                        <button onClick={(e) => {
+                          e.preventDefault();
                           const nd = [...data];
-                          nd[i].paths[pIdx].durations[j].price = val;
+                          nd[i].paths[pIdx].durations[j].showRundown = !nd[i].paths[pIdx].durations[j].showRundown;
                           setData(nd);
-                        }} 
-                        placeholder="Final" 
-                      />
-                  <button type="button" onClick={(e) => {
-                    e.preventDefault();
-                    const nd = [...data];
-                    nd[i].paths[pIdx].durations[j].showTripContent = !nd[i].paths[pIdx].durations[j].showTripContent;
-                    setData(nd);
-                  }} className={`p-2 rounded flex items-center gap-2 ${dur.showTripContent ? 'bg-art-text text-white' : 'bg-white border-2 border-art-text text-art-text hover:bg-gray-100'}`}>
-                    <Plus size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{dur.showTripContent ? 'Tutup Konten' : 'Tambah Konten Trip'}</span>
-                  </button>
-                  <button onClick={(e) => {
-                    e.preventDefault();
-                    const nd = [...data];
-                    nd[i].paths[pIdx].durations[j].showRundown = !nd[i].paths[pIdx].durations[j].showRundown;
-                    setData(nd);
-                  }} className={`p-2 rounded flex items-center gap-2 ${dur.showRundown ? 'bg-art-orange text-white' : 'bg-white border-2 border-art-text text-art-text hover:bg-gray-100'}`}>
-                        <FileText size={16} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{dur.showRundown ? 'Tutup Rundown' : 'Edit Rundown'}</span>
-                      </button>
-                      <button onClick={() => {
-                        const nd = [...data];
-                        nd[i].paths[pIdx].durations.splice(j, 1);
-                        setData(nd);
-                      }} className="text-red-500 p-2"><Trash2 size={16} /></button>
+                        }} className={`p-2 rounded-lg flex items-center justify-center transition-all ${dur.showRundown ? 'bg-art-orange text-white text-white' : 'bg-gray-100 text-art-text hover:bg-gray-200'}`} title="Edit Rundown">
+                          <FileText size={14} />
+                        </button>
+
+                        <div className="flex bg-white rounded-lg border border-art-text/10 overflow-hidden shrink-0 mx-1">
+                            <button type="button" onClick={() => moveDuration(i, pIdx, j, 'up')} className="p-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={j === 0}><ChevronDown size={12} className="rotate-180"/></button>
+                            <button type="button" onClick={() => moveDuration(i, pIdx, j, 'down')} className="p-2 hover:bg-gray-100 disabled:opacity-30" disabled={j === path.durations.length - 1}><ChevronDown size={12}/></button>
+                        </div>
+
+                        <button 
+                          onClick={() => {
+                            customConfirm(`Hapus durasi ${dur.label}?`, () => {
+                              const nd = [...data];
+                              nd[i].paths[pIdx].durations.splice(j, 1);
+                              setData(nd);
+                            });
+                          }} 
+                          className="text-red-500 p-2 hover:bg-red-50 rounded-lg"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                     {dur.showTripContent && (
                       <div className="bg-white border-2 border-art-text p-3 rounded-lg mt-2 mb-4 space-y-3">

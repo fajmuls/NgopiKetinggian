@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History } from 'lucide-react';
+import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History, CheckCircle } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
@@ -349,6 +349,18 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
+      {/* Top Slogan Banner */}
+      <div className="bg-art-text py-2 relative z-[110] border-b border-white/5 overflow-hidden">
+        <div className="flex whitespace-nowrap animate-marquee">
+          {[1,2,3,4,5,6].map(i => (
+            <div key={i} className="flex items-center gap-4 px-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/90">{config?.homepage?.heroSub || "Open Trip Eksklusif No. 1"} •</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-orange">{config?.homepage?.heroTagline || "Ngopi Di Ketinggian"} •</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Navigation */}
       <Header 
         config={config}
@@ -510,76 +522,131 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       </section>
 
       {/* Fasilitas / Include Paket Section */}
-      <section id="trip" className="py-20 md:py-24 bg-art-green text-white relative overflow-hidden">
+      <section id="trip" className="py-24 bg-art-green text-white relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
-          <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-40" alt="Mountain bg" />
+          <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-40 shrink-0" alt="Mountain bg" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4">Fasilitas Trip</h2>
-            <div className="w-12 h-1 bg-art-orange mx-auto mb-8"></div>
-            <p className="font-medium text-white/80 leading-relaxed">
-              Berikut ini adalah berbagai fasilitas premium dan pelayanan maksimal yang akan Anda dapatkan jika memilih jasa trip kami. Kami memastikan setiap perjalanan Anda aman, nyaman, dan tentu saja ditemani pengalaman menyeduh kopi terbaik di alam bebas.
+          <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16 md:mb-20">
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.8 }}
+               whileInView={{ opacity: 1, scale: 1 }}
+               className="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 mb-6 rotate-3 shadow-2xl"
+            >
+               <Mountain className="text-white" size={32} />
+            </motion.div>
+            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight mb-4 drop-shadow-2xl">Fasilitas Trip</h2>
+            <div className="w-24 h-2 bg-art-orange rounded-full mb-8 shadow-[0_0_20px_#ff6b00]"></div>
+            <p className="font-bold text-white/90 leading-relaxed uppercase tracking-widest text-[10px] md:text-sm">
+              Kami memberikan pelayanan terbaik untuk setiap seduhan kopi di puncak tertinggi.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white/10 p-8 rounded-2xl border-2 border-white/20">
-              <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><CheckCircle2 /> Include</h3>
-              <ul className="space-y-4 text-sm font-medium">
-                {(config.facilities?.include || []).map((item: any, i: number) => {
-                  const isHidden = typeof item === 'object' ? item.isHidden : false;
-                  const name = typeof item === 'object' ? item.name : item;
-                  if (isHidden) return null;
-                  return (
-                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div><span>{name}</span></li>
-                )})}
-              </ul>
-            </div>
+          <div className="grid lg:grid-cols-3 gap-6 md:gap-10">
+            {/* INCLUDE BOX */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="bg-white/10 p-1 rounded-3xl border-2 border-white/20 shadow-2xl overflow-hidden group hover:scale-[1.02] transition-transform duration-500"
+            >
+              <div className="bg-white/5 rounded-[1.25rem] p-8 h-full">
+                <div className="flex justify-between items-start mb-8">
+                  <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
+                    <div className="w-10 h-10 bg-art-orange rounded-xl flex items-center justify-center shadow-lg"><CheckCircle2 size={20} className="text-white" /></div>
+                    Include
+                  </h3>
+                  <div className="px-3 py-1 bg-white/10 rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest text-white/60">Gratis</div>
+                </div>
+                <ul className="space-y-4">
+                  {(config.facilities?.include || []).map((item: any, i: number) => {
+                    const isHidden = typeof item === 'object' ? item.isHidden : false;
+                    const name = typeof item === 'object' ? item.name : item;
+                    if (isHidden) return null;
+                    return (
+                    <li key={i} className="flex items-start gap-4 group/li">
+                      <div className="w-4 h-4 mt-0.5 rounded-full bg-art-orange/20 flex items-center justify-center flex-shrink-0 group-hover/li:scale-125 transition-transform"><CheckCircle size={10} className="text-art-orange" /></div>
+                      <span className="text-xs md:text-sm font-bold uppercase tracking-wide text-white/90">{name}</span>
+                    </li>
+                  )})}
+                </ul>
+              </div>
+            </motion.div>
             
-            <div className="bg-art-bg text-art-text p-8 rounded-2xl border-2 border-art-text">
-              <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><X /> Exclude</h3>
-              <ul className="space-y-4 text-sm font-medium">
-                {(config.facilities?.exclude || []).map((item: any, i: number) => {
-                  const isHidden = typeof item === 'object' ? item.isHidden : false;
-                  const name = typeof item === 'object' ? item.name : item;
-                  if (isHidden) return null;
-                  return (
-                  <li key={i} className="flex items-start gap-3"><div className="w-2 h-2 mt-1.5 rounded-full bg-art-text flex-shrink-0"></div><span>{name}</span></li>
-                )})}
-              </ul>
-            </div>
+            {/* EXCLUDE BOX */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-art-bg p-1 rounded-3xl border-2 border-art-text shadow-[16px_16px_0px_0px_#1a1a1a] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#1a1a1a] transition-all"
+            >
+              <div className="bg-white rounded-[1.25rem] p-8 h-full text-art-text">
+                <div className="flex justify-between items-start mb-8">
+                  <h3 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shadow-lg"><X size={20} className="text-red-500" /></div>
+                    Exclude
+                  </h3>
+                  <div className="px-3 py-1 bg-red-100/50 rounded-full border border-red-200 text-[8px] font-black uppercase tracking-widest text-red-500">Pribadi</div>
+                </div>
+                <ul className="space-y-4">
+                  {(config.facilities?.exclude || []).map((item: any, i: number) => {
+                    const isHidden = typeof item === 'object' ? item.isHidden : false;
+                    const name = typeof item === 'object' ? item.name : item;
+                    if (isHidden) return null;
+                    return (
+                    <li key={i} className="flex items-start gap-4 group/li">
+                      <div className="w-4 h-4 mt-0.5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 group-hover/li:rotate-90 transition-transform"><X size={10} className="text-red-400" /></div>
+                      <span className="text-xs md:text-sm font-bold uppercase tracking-wide text-art-text/80">{name}</span>
+                    </li>
+                  )})}
+                </ul>
+              </div>
+            </motion.div>
 
-            <div className="bg-white/5 border-2 border-white/20 text-white p-8 rounded-2xl relative overflow-hidden">
-               <div className="absolute inset-0 bg-art-orange/10"></div>
-               <div className="relative z-10">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-art-orange rounded-full mix-blend-overlay filter blur-3xl opacity-50 translate-x-10 -translate-y-10"></div>
-                 <h3 className="text-xl font-bold uppercase tracking-widest text-art-orange mb-6 flex items-center gap-3"><PlusCircle /> Optional (Tambahan)</h3>
-                 <p className="text-sm font-medium text-white/70 mb-4">Pilih fasilitas tambahan jika Anda membutuhkannya. <br/><span className="text-art-orange">Catatan: Tambahan opsional ini dikenakan biaya dan tidak termasuk harga tertera.</span></p>
-                 <ul className="space-y-4 text-sm font-medium">
+            {/* OPTIONAL BOX */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white/5 border-2 border-white/20 p-1 rounded-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500"
+            >
+               <div className="bg-white/5 rounded-[1.25rem] p-8 h-full relative z-10">
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-art-orange rounded-full mix-blend-overlay filter blur-[100px] opacity-30 translate-x-32 -translate-y-32 pointer-events-none"></div>
+                 <div className="flex justify-between items-start mb-8">
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
+                      <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg"><PlusCircle size={20} className="text-white" /></div>
+                      Optional
+                    </h3>
+                    <div className="px-3 py-1 bg-indigo-500/20 rounded-full border border-indigo-400/20 text-[8px] font-black uppercase tracking-widest text-indigo-300">Add-On</div>
+                 </div>
+                 <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-6 leading-relaxed italic">
+                    Upgrade kenyamanan Anda dengan berbagai layanan tambahan premium kami.
+                 </p>
+                 <ul className="space-y-6">
                   {(config.facilities?.opsi || []).map((opt: any, i: number) => {
                     if (opt.isHidden) return null;
                     return (
-                    <li key={i} className="flex flex-col gap-1 items-start">
-                      <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 mt-1.5 rounded-full bg-art-orange flex-shrink-0"></div>
-                        <span>{opt.name} {opt.priceInfo ? `- ${opt.priceInfo}` : ''}</span>
+                    <li key={i} className="flex flex-col gap-2 items-start bg-white/5 p-4 rounded-xl border border-white/5 hover:border-art-orange transition-colors">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                          <PlusCircle size={14} className="text-art-orange" />
+                          <span className="text-[11px] md:text-xs font-black uppercase tracking-widest text-white">{opt.name}</span>
+                        </div>
+                        {opt.priceInfo && <span className="text-[10px] font-black text-art-orange bg-art-orange/10 px-2 py-0.5 rounded-lg">{opt.priceInfo}</span>}
                       </div>
                       {opt.subItems && opt.subItems.length > 0 && (
-                        <ul className="ml-5 mt-1 space-y-1">
+                        <div className="ml-6 flex flex-wrap gap-2">
                           {opt.subItems.map((sub: any, subIdx: number) => (
-                             <li key={subIdx} className="text-xs text-white/50 flex items-start gap-2">
-                               <span>-</span>
-                               <span>{sub.name} {sub.priceInfo ? `- ${sub.priceInfo}` : ''}</span>
-                             </li>
+                             <span key={subIdx} className="text-[9px] font-bold text-white/40 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                               {sub.name} {sub.priceInfo ? `- ${sub.priceInfo}` : ''}
+                             </span>
                           ))}
-                        </ul>
+                        </div>
                       )}
                     </li>
                   )})}
                  </ul>
                </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
