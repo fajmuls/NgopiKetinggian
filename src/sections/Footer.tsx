@@ -1,5 +1,5 @@
 import React from 'react';
-import { Coffee, MapPin, MessageCircle, Instagram, Send, Globe, ChevronRight, Phone, Mail, Youtube, Facebook } from 'lucide-react';
+import { Coffee, MapPin, MessageCircle, Instagram, Send, Globe, ChevronRight, Phone, Mail, Youtube, Facebook, Map } from 'lucide-react';
 
 export const Footer = ({ config }: any) => {
   const hp = config?.homepage;
