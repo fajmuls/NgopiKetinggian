@@ -304,13 +304,8 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
 
     if (currentType === 'private') {
       if (selectedJadwal) {
-        const selectedDate = new Date(selectedJadwal);
-        if (selectedDate.getDay() !== 6) {
-           customAlert("Maaf, keberangkatan Private Trip hanya tersedia di hari Sabtu.", "Jadwal Terbatas");
-           return;
-        }
-
         const today = new Date();
+        const selectedDate = new Date(selectedJadwal);
         const diffTime = selectedDate.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         if (diffDays < 7) {
@@ -862,7 +857,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                       </div>
                       <div className="relative">
                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Durasi</label>
-                        {currentType === 'open_request' ? (
+                        {/* MARKER */} {currentType === 'open_request' ? (
                           <div className="w-full border-2 border-art-text bg-art-bg/30 px-3 py-3 rounded-xl text-[10px] font-black text-art-text/40 shadow-sm flex items-center gap-2">
                             <Clock size={12} className="text-art-text/20" /> 2H 1M (Weekend Only)
                           </div>
@@ -901,7 +896,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                </div>
                             )}
                             {showPdf && (
-                              <div className="flex gap-2">
+                              <div className="flex flex-col gap-2">
                                 {durInfo.rundownHtml ? (
                                   <button type="button" onClick={() => generateRundownPdf(durInfo, selectedDestinasi, selectedJalur, selectedDurasi)} className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
                                     Lihat PDF Rundown <Download size={10} />
@@ -916,58 +911,34 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                    <div className="grid grid-cols-2 gap-4">
                       {currentType === 'open_request' ? (
                         <div className="col-span-2">
-                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Request Jadwal Weekend (Bulan & Tanggal)</label>
-                           <div className="flex gap-2">
-                             <select 
-                               className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange"
-                               value={selectedJadwal.split('|')[0] || ''}
-                               onChange={e => setSelectedJadwal(`${e.target.value}|`)}
-                             >
-                                <option value="">-- Bulan --</option>
-                                {Array.from({ length: 6 }).map((_, i) => {
-                                  const d = new Date();
-                                  d.setMonth(d.getMonth() + i);
-                                  const monthStr = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-                                  const monthVal = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}`;
-                                  return <option key={monthVal} value={monthVal}>{monthStr}</option>;
-                                })}
-                             </select>
-                             <select 
-                               className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-100"
-                               value={selectedJadwal.split('|')[1] || ''}
-                               onChange={e => setSelectedJadwal(`${selectedJadwal.split('|')[0]}|${e.target.value}`)}
-                               disabled={!selectedJadwal.split('|')[0]}
-                             >
-                                <option value="">-- Tanggal --</option>
-                                {(() => {
-                                   const [monthVal] = selectedJadwal.split('|');
-                                   if (!monthVal) return null;
-                                   const [year, month] = monthVal.split('-').map(Number);
-                                   const daysInMonth = new Date(year, month, 0).getDate();
-                                   
-                                   const weekends = [];
-                                   for (let i = 1; i <= daysInMonth; i++) {
-                                      const date = new Date(year, month - 1, i);
-                                      if (date.getDay() === 6) {
-                                         const endDate = new Date(date);
-                                         endDate.setDate(date.getDate() + 1);
-                                         // User requested: Month should NOT be displayed, only the day.
-                                         // Spanning months should stay as days only.
-                                         weekends.push(`${i}-${endDate.getDate()}`);
-                                      }
-                                   }
-                                   return weekends.map((w, idx) => (
-                                      <option key={idx} value={w}>{w}</option>
-                                   ));
-                                })()}
-                             </select>
-                           </div>
+                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1 flex justify-between items-center">
+                             Pilih Tanggal (Khusus Sabtu)
+                             <span className="text-[7px] text-art-orange animate-pulse">Wajib Sabtu</span>
+                           </label>
+                           <input 
+                             type="date"
+                             required
+                             value={selectedJadwal}
+                             onChange={(e) => {
+                               const date = e.target.value;
+                               if (date) {
+                                 const d = new Date(date);
+                                 if (d.getDay() !== 6) {
+                                   customAlert("Mohon maaf, Open Request Trip only available on SATURDAY. Please choose another Saturday.", "Pick Saturday");
+                                   return;
+                                 }
+                               }
+                               setSelectedJadwal(date);
+                             }}
+                             className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange shadow-sm"
+                           />
+                           <p className="text-[7px] font-bold text-art-text/30 mt-1 uppercase italic tracking-tighter">* Open Request departures only available on Saturdays.</p>
                         </div>
                       ) : (
                         <div className="relative">
                            <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1 flex justify-between items-center">
                              Rencana Tanggal
-                             {currentType === 'private' && <span className="text-[7px] text-art-orange animate-pulse">Hanya Hari Sabtu</span>}
+                             {currentType === 'private' && <span className="text-[7px] text-art-green">Bebas Pilih Hari</span>}
                            </label>
                            <input 
                              name="jadwal" 
@@ -976,19 +947,12 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                              value={selectedJadwal}
                              onChange={e => {
                                const date = e.target.value;
-                               if (currentType === 'private' && date) {
-                                  const d = new Date(date);
-                                  if (d.getDay() !== 6) {
-                                     customAlert("Silakan pilih hari Sabtu.", "Wajib Hari Sabtu");
-                                     return;
-                                  }
-                               }
                                setSelectedJadwal(date);
                              }}
                              readOnly={currentType === 'open'}
                              className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
                            />
-                           {currentType === 'private' && <p className="text-[7px] font-bold text-art-text/30 mt-1 uppercase italic tracking-tighter">* Khusus Private Trip, keberangkatan hanya di hari Sabtu.</p>}
+                           {currentType === 'private' && <p className="text-[7px] font-bold text-art-text/30 mt-1 uppercase italic tracking-tighter">* Untuk Private Trip, Anda bebas menentukan tanggal keberangkatan.</p>}
                         </div>
                       )}
                        <div className="relative">

@@ -21,8 +21,8 @@ export const RundownPreviewModal = ({ isOpen, onClose, rundownText, title }: { i
             <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={20} /></button>
         </div>
         <div className="p-8 overflow-y-auto flex-1 bg-[#FAFAFA]">
-            <div className="whitespace-pre-wrap text-[11px] font-medium text-art-text/80 leading-relaxed font-mono bg-white p-6 rounded-2xl border-2 border-art-text/5 shadow-inner">
-               {rundownText}
+            <div className="whitespace-pre-wrap text-[11px] font-medium text-art-text/80 leading-relaxed font-mono bg-white p-6 rounded-2xl border-2 border-art-text/5 shadow-inner overflow-x-auto">
+               <div dangerouslySetInnerHTML={{ __html: rundownText }} />
             </div>
             <div className="mt-8 text-center">
                <p className="text-[10px] font-black uppercase text-art-text/20 tracking-[0.3em]">Ngopi Di Ketinggian • Adventure & Brew</p>
