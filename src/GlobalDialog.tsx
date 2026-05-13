@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 type DialogOptions = {
   title?: string;
-  message: string;
+  message: string | React.ReactNode;
   type?: 'alert' | 'confirm';
   confirmText?: string;
   cancelText?: string;
@@ -13,19 +13,19 @@ type DialogOptions = {
 
 let showDialogCb: (options: DialogOptions) => void;
 
-export const customAlert = (message: string, title?: string) => {
+export const customAlert = (message: string | React.ReactNode, title?: string) => {
   if (showDialogCb) {
     showDialogCb({ message, title, type: 'alert', confirmText: 'OK' });
   } else {
-    window.alert(message);
+    window.alert(typeof message === 'string' ? message : 'Check the console for details');
   }
 };
 
-export const customConfirm = (message: string, onConfirm: () => void, title?: string) => {
+export const customConfirm = (message: string | React.ReactNode, onConfirm: () => void, title?: string) => {
   if (showDialogCb) {
     showDialogCb({ message, title, type: 'confirm', confirmText: 'Ya', cancelText: 'Batal', onConfirm });
   } else {
-    if (window.confirm(message)) onConfirm();
+    if (window.confirm(typeof message === 'string' ? message : 'Are you sure?')) onConfirm();
   }
 };
 
@@ -60,8 +60,12 @@ export const GlobalDialogProvider = () => {
         exit={{ opacity: 0, scale: 0.9 }}
         className="bg-white max-w-sm w-full rounded-2xl border-2 border-art-text p-6 shadow-2xl flex flex-col gap-4 text-art-text"
       >
-        {options.title && <h3 className="font-bold text-lg uppercase tracking-tight">{options.title}</h3>}
-        <p className="text-sm">{options.message}</p>
+        {options.title && <h3 className="font-bold text-lg uppercase tracking-tight -mb-2">{options.title}</h3>}
+        {typeof options.message === 'string' ? (
+          <p className="text-sm leading-relaxed">{options.message}</p>
+        ) : (
+          <div className="w-full">{options.message}</div>
+        )}
         <div className="flex gap-2 justify-end mt-2">
           {options.type === 'confirm' && (
             <button 

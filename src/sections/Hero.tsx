@@ -21,9 +21,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
   }, [slides.length]);
 
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-art-text">
+    <section className="relative min-h-screen flex items-center pt-20 bg-art-text">
       {/* Background Slider */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -66,7 +66,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   <motion.span 
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="block text-[#fff7ed] text-[9px] md:text-xs font-black uppercase tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-art-orange/20"
+                    className="block text-[#fff7ed] text-[7px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-art-orange/20"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
@@ -79,10 +79,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mt-4 p-2 px-6 md:p-3 md:px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-xl"
+                  className="mt-4 p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)]"
                 >
-                  <p className="text-[8px] md:text-xs font-black text-art-orange italic tracking-[0.4em] uppercase">
-                    {config.homepage.heroTagline}
+                  <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.2em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center gap-2">
+                    <span className="text-art-orange">★</span> {config.homepage.heroTagline} <span className="text-art-orange">★</span>
                   </p>
                 </motion.div>
               )}
@@ -129,9 +129,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
             </motion.div>
           </div>
           
-          <div className="lg:col-span-4 hidden lg:block relative">
-            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative">
-              <div className="border border-white/50 p-2 rounded-[3.5rem] shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-110">
+          <div className="lg:col-span-4 block relative mt-10 lg:mt-0">
+            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[280px] md:max-w-none mx-auto lg:mx-0">
+              <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[15px_15px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-100 md:scale-110">
                 <AnimatePresence mode="wait">
                   <motion.img 
                     key={currentSlide}
@@ -146,16 +146,16 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
                 
                 {/* Mountain Name - Transparent Background */}
-                <div className="absolute bottom-10 left-8 right-8 pointer-events-none drop-shadow-2xl text-center">
-                  <p className="text-3xl font-black uppercase text-white leading-none tracking-tighter drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">{slides[currentSlide]?.name}</p>
+                <div className="absolute bottom-6 md:bottom-10 left-4 md:left-8 right-4 md:right-8 pointer-events-none drop-shadow-2xl text-center">
+                  <p className="text-xl md:text-3xl font-black uppercase text-white leading-none tracking-tighter drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">{slides[currentSlide]?.name}</p>
                 </div>
               </div>
               
               {/* Larger MDPL Circle */}
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
-                <p className="text-3xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
-                <p className="text-[12px] font-black text-art-orange uppercase tracking-[0.4em] mt-1.5">MDPL</p>
-                <div className="w-12 h-1 bg-white/20 mt-2 rounded-full"></div>
+              <div className="absolute -top-6 -right-6 md:-top-10 md:-right-10 w-20 h-20 md:w-32 md:h-32 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
+                <p className="text-xl md:text-3xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
+                <p className="text-[8px] md:text-[12px] font-black text-art-orange uppercase tracking-[0.4em] mt-1.5">MDPL</p>
+                <div className="w-8 md:w-12 h-0.5 md:h-1 bg-white/20 mt-2 rounded-full"></div>
               </div>
             </motion.div>
           </div>
