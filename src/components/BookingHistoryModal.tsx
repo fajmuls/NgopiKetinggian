@@ -250,6 +250,17 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                               </div>
 
                               <div className="flex flex-col gap-2">
+                                {b.status === 'approved_to_draft' && (
+                                  <button 
+                                      onClick={() => {
+                                        playClick();
+                                        window.dispatchEvent(new CustomEvent('continueRegistration', { detail: b }));
+                                      }}
+                                      className="w-full flex items-center justify-center gap-2 bg-art-orange text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-orange-600 transition-colors shadow-sm mb-2"
+                                  >
+                                      <Edit2 size={14} /> Lanjutkan Registrasi
+                                  </button>
+                                )}
                                 {(b.status === 'lunas' || b.status === 'selesai') ? (
                                   <button 
                                     onClick={() => { playClick(); generateInvoice(b); }}

@@ -55,25 +55,25 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               className="w-full flex flex-col items-center"
             >
               <div className="flex justify-center w-full">
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl mb-6 md:mb-8 transform -rotate-1 shadow-xl mx-auto flex-nowrap">
-                  <Coffee size={14} className="text-art-orange animate-bounce md:size-[18px] shrink-0" />
-                  <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl mb-6 md:mb-8 transform -rotate-1 shadow-[0_10px_20px_rgba(0,0,0,0.4)] mx-auto flex-nowrap">
+                  <Coffee size={12} className="text-art-orange animate-bounce md:size-[16px] shrink-0" />
+                  <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">
                     {config?.homepage?.heroSub || "Open Trip Eksklusif"}
                   </span>
                 </div>
               </div>
               
-              <h1 className="text-7xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter uppercase mb-4 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex flex-col items-center">
+              <h1 className="text-7xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter uppercase mb-4 drop-shadow-[0_20px_50px_rgba(0,0,0,1)] flex flex-col items-center">
                 {config?.homepage?.heroFeatures && (
                   <motion.span 
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="block text-[#fff7ed] text-[7px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-art-orange/20 whitespace-nowrap"
+                    className="block text-[#fff7ed] text-[7px] md:text-[9px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-art-orange/20 whitespace-nowrap shadow-[0_5px_15px_rgba(255,107,0,0.4)]"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
                 )}
-                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-5xl md:text-6xl mb-2 tracking-[0.2em] drop-shadow-[0_5px_15px_rgba(255,107,0,0.5)]">{config.homepage.heroTitlePrefix}</span>}
+                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-5xl md:text-6xl mb-2 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)]">{config.homepage.heroTitlePrefix}</span>}
                 {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
               </h1>
 
@@ -90,7 +90,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               )}
 
               <div className="flex flex-col items-center gap-4 mt-6 mb-6">
-                <p className="text-[10px] md:text-[13px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
+                <p className="text-[9px] md:text-[12px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
                   {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
                 </p>
               </div>
@@ -120,10 +120,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     ))}
                   </div>
                   <div className="text-left">
-                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
+                    <p className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
                     <div className="flex items-center gap-1">
-                      <TrendingUp size={10} className="text-art-green" />
-                      <p className="text-[8px] md:text-[10px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
+                      <TrendingUp size={8} className="text-art-green" />
+                      <p className="text-[7px] md:text-[9px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
                     </div>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
             </motion.div>
           </div>
           
-          <div className="lg:col-span-4 block relative -mt-5 lg:mt-0 z-20">
+          <div className="lg:col-span-4 block relative mt-4 lg:mt-0 z-20">
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[280px] md:max-w-none mx-auto lg:mx-0">
               <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-100 md:scale-110">
                 <AnimatePresence mode="wait">
@@ -168,10 +168,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
       <motion.div 
         animate={{ y: [0, 8, 0] }} 
         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        className="absolute bottom-20 md:bottom-12 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-2 z-[60]"
+        className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-2 z-[60]"
       >
         <span className="text-[9px] font-black uppercase tracking-[0.5em] text-art-orange drop-shadow-sm">Scroll</span>
-        <div className="w-[2px] h-10 bg-gradient-to-b from-art-orange to-transparent rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)]" />
+        <div className="w-[2px] h-6 md:h-10 bg-gradient-to-b from-art-orange to-transparent rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)]" />
       </motion.div>
     </section>
   );

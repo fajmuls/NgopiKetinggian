@@ -272,7 +272,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
 
   const discountRate = activePromo ? activePromo.discount / 100 : 0;
   const discountAmount = grossPrice * discountRate;
-  const netPrice = (grossPrice - discountAmount) + totalOpsionalPrice;
+  const netPrice = (currentType === 'private' || currentType === 'open_request') ? 0 : ((grossPrice - discountAmount) + totalOpsionalPrice);
   
   if (!isOpen) return null;
 
@@ -303,9 +303,14 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
     }
 
     if (currentType === 'private') {
-      const today = new Date();
       if (selectedJadwal) {
         const selectedDate = new Date(selectedJadwal);
+        if (selectedDate.getDay() !== 6) {
+           customAlert("Maaf, keberangkatan Private Trip hanya tersedia di hari Sabtu.", "Jadwal Terbatas");
+           return;
+        }
+
+        const today = new Date();
         const diffTime = selectedDate.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         if (diffDays < 7) {
@@ -460,10 +465,12 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
                    <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Map size={14} className="text-art-text/40"/> Trip Utama</h5>
+                   {(currentType !== 'private' && currentType !== 'open_request') && (
                    <div className="text-right">
                      <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
                      <span className="text-[12px] font-black text-art-text">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
                    </div>
+                   )}
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -480,7 +487,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                     </div>
                     <div>
                        <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
-                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax x Rp {basePricePerPax.toLocaleString('id-ID')}</p>
+                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax {(currentType !== 'private' && currentType !== 'open_request') && `x Rp ${basePricePerPax.toLocaleString('id-ID')}`}</p>
                     </div>
                  </div>
                </div>
@@ -490,16 +497,18 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                  <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
                    <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
                      <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
+                     {(currentType !== 'private' && currentType !== 'open_request') && (
                      <div className="text-right">
                        <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Layanan</p>
                        <span className="text-[12px] font-black text-art-orange">Rp {totalOpsionalPrice.toLocaleString('id-ID')}</span>
                      </div>
+                     )}
                    </div>
                    <div className="space-y-2 text-[10px] font-bold text-art-text/60">
                      {opsionalItemsList.map((item: any, idx: number) => (
                        <div key={idx} className="flex justify-between items-start">
                          <span className="uppercase">{item.name} {item.isRental ? `(${item.count}x • ${item.days} Hari)` : ''}</span>
-                         <span className="text-art-text font-black ml-2 text-right">{item.status === 'pending_price' ? 'Biaya Menyusul' : `Rp ${item.subtotal.toLocaleString('id-ID')}`}</span>
+                         <span className="text-art-text font-black ml-2 text-right">{(currentType === 'private' || currentType === 'open_request' || item.status === 'pending_price') ? 'Biaya Menyusul' : `Rp ${item.subtotal.toLocaleString('id-ID')}`}</span>
                        </div>
                      ))}
                    </div>
@@ -507,7 +516,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                )}
 
                {/* Promosi Area Box */}
-               {isPromoValid && (
+               {isPromoValid && (currentType !== 'private' && currentType !== 'open_request') && (
                  <div className="bg-art-green/10 p-5 rounded-2xl border-2 border-art-green/20">
                    <div className="flex justify-between items-center">
                      <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area <span className="bg-art-green text-white px-2 py-0.5 rounded-full text-[8px] ml-1">-{activePromo.discount}%</span></h5>
@@ -523,6 +532,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                )}
 
                {/* Total Area Box */}
+               {(currentType !== 'private' && currentType !== 'open_request') ? (
                <div className="bg-art-text p-6 rounded-2xl border-2 border-art-text text-white shadow-[6px_6px_0px_0px_rgba(255,107,0,0.3)]">
                   <div className="flex justify-between items-end">
                      <div>
@@ -531,6 +541,20 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                      </div>
                   </div>
                </div>
+               ) : (
+                <div className="bg-art-orange text-white p-6 rounded-2xl border-2 border-art-text shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
+                   <div className="flex justify-between items-center">
+                      <div>
+                         <p className="text-[9px] font-black text-white/70 uppercase tracking-widest mb-1">Status Pembayaran</p>
+                         <h4 className="text-2xl font-black uppercase leading-none tracking-tighter">Request Trip Baru</h4>
+                      </div>
+                      <div className="text-right">
+                         <p className="text-[8px] font-black uppercase opacity-60">Estimasi Biaya</p>
+                         <p className="text-sm font-black italic">Menunggu Review Admin</p>
+                      </div>
+                   </div>
+                </div>
+               )}
              </div>
 
              <div className="flex gap-3">
@@ -941,16 +965,30 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                         </div>
                       ) : (
                         <div className="relative">
-                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Rencana Tanggal</label>
+                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1 flex justify-between items-center">
+                             Rencana Tanggal
+                             {currentType === 'private' && <span className="text-[7px] text-art-orange animate-pulse">Hanya Hari Sabtu</span>}
+                           </label>
                            <input 
                              name="jadwal" 
                              required 
                              type={currentType === 'open' ? 'text' : 'date'} 
                              value={selectedJadwal}
-                             onChange={e => setSelectedJadwal(e.target.value)}
+                             onChange={e => {
+                               const date = e.target.value;
+                               if (currentType === 'private' && date) {
+                                  const d = new Date(date);
+                                  if (d.getDay() !== 6) {
+                                     customAlert("Silakan pilih hari Sabtu.", "Wajib Hari Sabtu");
+                                     return;
+                                  }
+                               }
+                               setSelectedJadwal(date);
+                             }}
                              readOnly={currentType === 'open'}
                              className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
                            />
+                           {currentType === 'private' && <p className="text-[7px] font-bold text-art-text/30 mt-1 uppercase italic tracking-tighter">* Khusus Private Trip, keberangkatan hanya di hari Sabtu.</p>}
                         </div>
                       )}
                        <div className="relative">

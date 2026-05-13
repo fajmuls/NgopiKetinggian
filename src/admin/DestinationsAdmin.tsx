@@ -90,16 +90,16 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
             const nd = data.map((d: any) => ({ ...d, isActive: true }));
             setData(nd);
             showToast('Semua Destinasi Diaktifkan!');
-          }} className="bg-art-green/10 text-art-green border border-art-green/30 px-3 py-2 rounded text-[10px] font-black uppercase tracking-widest hidden lg:flex items-center gap-2">
-            <Eye size={14} /> Aktif Semua
+          }} className="bg-art-green/10 text-art-green border border-art-green/30 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1">
+            <Eye size={14} /> <span className="hidden sm:inline">Aktif Semua</span>
           </button>
           
           <button onClick={() => {
             const nd = data.map((d: any) => ({ ...d, enablePrivateTrip: true }));
             setData(nd);
             showToast('Semua Private Trip Diaktifkan!');
-          }} className="bg-art-orange/10 text-art-orange border border-art-orange/30 px-3 py-2 rounded text-[10px] font-black uppercase tracking-widest hidden lg:flex items-center gap-2">
-            <Lock size={14} /> Privat Semua
+          }} className="bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1">
+            <Lock size={14} /> <span className="hidden sm:inline">Privat Semua</span>
           </button>
 
           <button type="button" onClick={(e) => {
@@ -160,65 +160,72 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
         if (matchesSearch && regionFilter !== "Semua" && dest.region !== regionFilter) return null;
 
         return (
-        <div key={i} className={`bg-white p-4 rounded-lg border-2 ${dest.isActive !== false ? 'border-art-text' : 'border-gray-300 opacity-70'} space-y-4 relative w-full overflow-hidden`}>
-          <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 z-10 bg-white/80 backdrop-blur-sm p-1 rounded-md">
-            <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm mr-2">
-                <button type="button" onClick={() => moveDestination(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
-                <button type="button" onClick={() => moveDestination(i, 'down')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
-                <button onClick={() => {
-                   const nd = [...data]; nd.splice(i, 1); setData(nd);
-                }} className="p-1.5 text-red-500 hover:bg-red-50 shadow-sm" title="Hapus"><Trash2 size={16}/></button>
+         <div key={i} className={`bg-white p-4 rounded-xl border-2 transition-all ${dest.isActive !== false ? 'border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]' : 'border-gray-200 opacity-70'} relative w-full overflow-hidden`}>
+          {/* Action Row */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 bg-gray-50/50 p-2 rounded-lg border border-dashed border-art-text/10">
+            <div className="flex items-center gap-2">
+               <div className="flex bg-white rounded-lg border border-art-text/20 overflow-hidden shadow-sm">
+                   <button type="button" onClick={() => moveDestination(i, 'up')} className="p-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
+                   <button type="button" onClick={() => moveDestination(i, 'down')} className="p-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
+                   <button onClick={() => {
+                      customConfirm(`Hapus ${dest.name}?`, () => {
+                        const nd = [...data]; nd.splice(i, 1); setData(nd);
+                      });
+                   }} className="p-2 text-red-500 hover:bg-red-50" title="Hapus"><Trash2 size={16}/></button>
+               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button 
                 type="button"
                 onClick={() => {
                   const nd = [...data];
-                  nd[i].enablePrivateTrip = !(nd[i].enablePrivateTrip !== false);
+                  nd[i].enablePrivateTrip = !(dest.enablePrivateTrip !== false);
                   setData(nd);
                 }}
-                className={`p-2 rounded flex items-center gap-1.5 transition-all ${dest.enablePrivateTrip !== false ? 'bg-art-orange text-white' : 'bg-gray-100 text-gray-400'}`}
-                title={dest.enablePrivateTrip !== false ? 'Private Trip Aktif' : 'Private Trip Nonaktif'}
+                className={`flex-1 sm:flex-none p-2 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${dest.enablePrivateTrip !== false ? 'bg-indigo-600 border-indigo-700 text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
               >
-                {dest.enablePrivateTrip !== false ? <Lock size={14} /> : <Unlock size={14} />}
-                <span className="text-[8px] font-black uppercase">Private</span>
+                {dest.enablePrivateTrip !== false ? <Lock size={14} fill="white" /> : <Unlock size={14} />}
+                <span className="text-[10px] font-black uppercase">Private</span>
               </button>
               
               <button 
                 type="button"
                 onClick={() => {
                   const nd = [...data];
-                  nd[i].isActive = ! (dest.isActive !== false);
+                  nd[i].isActive = !(dest.isActive !== false);
                   setData(nd);
                 }}
-                className={`p-2 rounded flex items-center gap-1.5 transition-all ${dest.isActive !== false ? 'bg-art-green text-white' : 'bg-gray-100 text-gray-400'}`}
-                title={dest.isActive !== false ? 'Destinasi Aktif' : 'Destinasi Nonaktif'}
+                className={`flex-1 sm:flex-none p-2 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${dest.isActive !== false ? 'bg-art-green border-art-green text-white shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
               >
                 {dest.isActive !== false ? <Eye size={14} /> : <EyeOff size={14} />}
-                <span className="text-[8px] font-black uppercase">Status</span>
+                <span className="text-[10px] font-black uppercase">Status</span>
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-4 pr-16 sm:pr-32">
+
+          <div className="flex items-center gap-4">
             <button
                onClick={() => {
                  setExpandedIndexes(prev => prev.includes(i) ? prev.filter(idx => idx !== i) : [...prev, i])
                }}
-               className="text-art-text hover:text-art-orange w-6 h-6 flex items-center justify-center shrink-0"
+               className="w-10 h-10 flex items-center justify-center shrink-0 bg-art-bg rounded-xl border-2 border-art-text shadow-[2px_2px_0px_0px_#1a1a1a] active:shadow-none"
             >
-               <span className="font-bold text-xl">{expandedIndexes.includes(i) ? '-' : '+'}</span>
+               <span className="font-black text-xl">{expandedIndexes.includes(i) ? '-' : '+'}</span>
             </button>
-            <input 
-              className="font-bold text-lg border-b border-dashed border-art-text/30 outline-none focus:border-art-orange w-full bg-transparent max-w-[calc(100%-2rem)]" 
-              value={dest.name}
-              onChange={e => {
-                const nd = [...data];
-                nd[i].name = e.target.value;
-                setData(nd);
-              }}
-              placeholder="Nama Gunung"
-            />
+            <div className="flex-1">
+              <input 
+                className="font-black text-lg md:text-xl border-b-2 border-dashed border-art-text/20 outline-none focus:border-art-orange w-full bg-transparent pr-4" 
+                value={dest.name}
+                onChange={e => {
+                  const nd = [...data];
+                  nd[i].name = e.target.value;
+                  setData(nd);
+                }}
+                placeholder="Nama Gunung"
+              />
+              <p className="text-[10px] font-bold text-art-text/40 uppercase mt-1 italic">{dest.region || 'Region Belum Set'} • {dest.difficulty || 'Level Belum Set'}</p>
+            </div>
           <button type="button" onClick={(e) => {
              e.preventDefault();
              const nd = [...data];
@@ -226,7 +233,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
              nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] });
              setData(nd);
              if (!expandedIndexes.includes(i)) setExpandedIndexes([...expandedIndexes, i]);
-          }} className="text-[10px] bg-art-text text-white px-3 py-1.5 rounded whitespace-nowrap hidden sm:block">+ Jalur</button>
+          }} className="text-[9px] font-black uppercase bg-art-text text-white px-3 py-2 rounded-xl border-2 border-art-text shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-none transition-all hidden sm:block">+ Jalur</button>
           </div>
 
           {expandedIndexes.includes(i) && (

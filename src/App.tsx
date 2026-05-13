@@ -244,6 +244,16 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
     }, 50);
   };
 
+  useEffect(() => {
+    const handleContinueReg = (e: any) => {
+      const b = e.detail;
+      handleOpenBooking(b.destinasi, b.jalur, b.durasi, b.type, b.jadwal);
+      setIsHistoryOpen(false);
+    };
+    window.addEventListener('continueRegistration', handleContinueReg);
+    return () => window.removeEventListener('continueRegistration', handleContinueReg);
+  }, []);
+
   return (
     <>
       <GlobalDialogProvider />
