@@ -9,10 +9,26 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
-      doc.setGState(new (doc.GState as any)({ opacity: 0.1 }));
+      // Use setGState if available, otherwise just use setAlpha/setDrawColor if possible
+      try {
+        const GState = (doc as any).GState || (jsPDF as any).GState;
+        if (GState) {
+          doc.setGState(new GState({ opacity: 0.1 }));
+        }
+      } catch (e) {
+        console.warn("GState not supported, skipping watermark opacity");
+      }
+      
       const aspectRatio = img.width / img.height;
       doc.addImage(img, 'PNG', 45, 100, 120, 120 / aspectRatio);
-      doc.setGState(new (doc.GState as any)({ opacity: 1 }));
+      
+      try {
+        const GState = (doc as any).GState || (jsPDF as any).GState;
+        if (GState) {
+          doc.setGState(new GState({ opacity: 1 }));
+        }
+      } catch (e) {}
+      
       resolve();
     };
     img.onerror = () => {

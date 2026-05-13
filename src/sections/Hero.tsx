@@ -23,7 +23,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
   }, [slides.length]);
 
   return (
-    <section className="relative min-h-[90vh] md:min-h-screen flex items-center pt-8 md:pt-20 bg-art-text overflow-hidden">
+    <section className="relative min-h-screen flex items-center pt-6 bg-art-text">
       {/* Background Slider */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <AnimatePresence mode="wait">
@@ -45,7 +45,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
         <div className="absolute inset-0 bg-gradient-to-b from-art-text/80 via-transparent to-art-text/90" />
       </div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pt-2 md:pt-10 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pt-0 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-8 flex flex-col items-center text-center">
             <motion.div 
@@ -55,20 +55,20 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               className="w-full flex flex-col items-center"
             >
               <div className="flex justify-center w-full">
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl mb-4 md:mb-8 transform -rotate-1 shadow-[0_10px_20px_rgba(0,0,0,0.4)] mx-auto flex-nowrap">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl mb-6 md:mb-8 transform -rotate-1 shadow-[0_10px_20px_rgba(0,0,0,0.4)] mx-auto flex-nowrap">
                   <Coffee size={12} className="text-art-orange animate-bounce md:size-[16px] shrink-0" />
-                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.1em] text-white whitespace-nowrap">
+                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] text-white whitespace-nowrap">
                     {config?.homepage?.heroSub || "Open Trip Eksklusif"}
                   </span>
                 </div>
               </div>
               
-              <h1 className="text-8xl md:text-9xl font-black text-white leading-[0.75] md:leading-[0.8] tracking-tighter uppercase mb-4 drop-shadow-[0_20px_50px_rgba(0,0,0,1)] flex flex-col items-center">
+              <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter uppercase mb-4 drop-shadow-[0_20px_50px_rgba(0,0,0,1)] flex flex-col items-center">
                 {config?.homepage?.heroFeatures && (
                   <motion.span 
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="block text-[#fff7ed] text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] md:tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-art-orange/20 whitespace-nowrap shadow-[0_5px_15px_rgba(255,107,0,0.4)]"
+                    className="block text-[#fff7ed] text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.3em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-art-orange/20 whitespace-nowrap shadow-[0_5px_15px_rgba(255,107,0,0.4)]"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
@@ -81,18 +81,16 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mt-2 p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                  className="mt-4 p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)]"
                 >
-                  <p className="text-[12px] md:text-base font-serif italic text-white tracking-[0.05em] md:tracking-[0.1em] lowercase drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] flex items-center gap-2">
-                    <span className="text-art-green text-sm animate-pulse">✦</span> 
-                    <span className="font-medium">{config.homepage.heroTagline}</span>
-                    <span className="text-art-green text-sm animate-pulse">✦</span>
+                  <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.2em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center gap-2">
+                    <span className="text-art-orange">★</span> {config.homepage.heroTagline} <span className="text-art-orange">★</span>
                   </p>
                 </motion.div>
               )}
 
               <div className="flex flex-col items-center gap-4 mt-6 mb-6">
-                <p className="text-[9px] md:text-[12px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
+                <p className="text-[10px] md:text-[12px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
                   {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
                 </p>
               </div>
@@ -101,13 +99,13 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 <div className="grid grid-cols-2 gap-3 md:gap-5 w-full max-w-md mx-auto">
                   <Button 
                     onClick={() => { playClick(); onExplore(); }}
-                    className="px-2 py-4 md:px-10 md:py-5 text-[10px] md:text-[11px] font-black uppercase tracking-tight md:tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(255,107,0,0.4)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
+                    className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(255,107,0,0.4)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
                   >
                     Destinations <ChevronRight size={14} className="md:size-[18px] group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button 
                     onClick={() => { playClick(); onBooking(); }}
-                    className="px-2 py-4 md:px-10 md:py-5 text-[10px] md:text-[11px] font-black uppercase tracking-tight md:tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
+                    className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
                   >
                     Explore Trips <Calendar size={14} className="md:size-[18px] group-hover:rotate-12 transition-transform" />
                   </Button>
@@ -122,10 +120,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     ))}
                   </div>
                   <div className="text-left">
-                    <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
+                    <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white">{config?.homepage?.statHikers || "500+"} Happy Hikers</p>
                     <div className="flex items-center gap-1">
-                      <TrendingUp size={9} className="text-art-green" />
-                      <p className="text-[8px] md:text-[9px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
+                      <TrendingUp size={8} className="text-art-green" />
+                      <p className="text-[9px] md:text-[10px] font-bold text-art-green uppercase">{config?.homepage?.statSatisfaction || "98%"} Satisfaction</p>
                     </div>
                   </div>
                 </div>
@@ -133,9 +131,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
             </motion.div>
           </div>
           
-          <div className="lg:col-span-4 block relative -mt-10 lg:mt-0 z-20">
-            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[240px] md:max-w-none mx-auto lg:mx-0">
-              <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-90 md:scale-110">
+          <div className="lg:col-span-4 block relative mt-2 lg:mt-0 z-20">
+            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[280px] md:max-w-none mx-auto lg:mx-0">
+              <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] relative group scale-100 md:scale-110">
                 <AnimatePresence mode="wait">
                   <motion.img 
                     key={currentSlide}
@@ -156,10 +154,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               </div>
               
               {/* Larger MDPL Circle */}
-              <div className="absolute -top-6 -right-6 md:-top-12 md:-right-12 w-24 h-24 md:w-40 md:h-40 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20 pb-4 md:pb-8">
+              <div className="absolute -top-6 -right-6 md:-top-10 md:-right-10 w-24 h-24 md:w-36 md:h-36 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
                 <p className="text-2xl md:text-5xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
-                <p className="text-[10px] md:text-[16px] font-black text-art-orange uppercase tracking-[0.2em] md:tracking-[0.4em] mt-1 md:mt-3">MDPL</p>
-                <div className="w-10 md:w-20 h-1 md:h-2 bg-white/20 mt-2 md:mt-6 rounded-full"></div>
+                <p className="text-[10px] md:text-[14px] font-black text-art-orange uppercase tracking-[0.4em] mt-0.5 md:mt-1">MDPL</p>
+                <div className="w-8 md:w-16 h-1 md:h-1.5 bg-white/20 mt-1 md:mt-2 rounded-full"></div>
               </div>
             </motion.div>
           </div>

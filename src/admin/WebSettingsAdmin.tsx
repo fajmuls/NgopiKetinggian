@@ -996,26 +996,20 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
                       <div className="flex-1">
                         <input className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" value={sub.name} onChange={e => updateSubItem(i, sIdx, 'name', e.target.value)} placeholder="Nama Item" />
                       </div>
-                      <div className="w-16 relative">
-                        <span className="absolute left-0 bottom-1.5 text-[9px] font-black text-art-text/40 uppercase">K</span>
+                      <div className="w-32 relative">
+                        <span className="absolute left-0 bottom-1.5 text-[9px] font-black text-art-text/40 uppercase">Rp</span>
                         <input 
                           className="w-full border-b pl-6 p-1 text-[11px] outline-none focus:border-art-orange bg-transparent font-mono" 
-                          value={sub.price || 0} 
-                          onChange={e => {
-                            const val = parseInt(e.target.value) || 0;
-                            updateSubItem(i, sIdx, 'price', val as any);
-                          }} 
-                          placeholder="50" 
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <input 
-                          className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" 
                           value={sub.priceInfo || ''} 
                           onChange={e => {
-                            updateSubItem(i, sIdx, 'priceInfo', e.target.value);
+                            const raw = e.target.value.replace(/[^0-9]/g, '');
+                            const num = parseInt(raw);
+                            updateSubItem(i, sIdx, 'priceInfo', raw ? Number(raw).toLocaleString('id-ID') : '');
+                            const nd = { ...data };
+                            nd.opsi[i].subItems[sIdx].price = isNaN(num) ? 0 : num / 1000;
+                            setData(nd);
                           }} 
-                          placeholder="Info Harga (Cth: / Hari)" 
+                          placeholder="50.000" 
                         />
                       </div>
                       <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600"><Trash2 size={14}/></button>
