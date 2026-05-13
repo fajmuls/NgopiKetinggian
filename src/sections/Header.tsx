@@ -20,7 +20,7 @@ export const Header = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-[2.25rem] left-0 right-0 z-[100] bg-white/90 backdrop-blur-md border-b-2 border-art-text">
+    <header className="fixed top-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-md border-b-2 border-art-text">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>

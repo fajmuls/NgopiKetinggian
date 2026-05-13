@@ -86,35 +86,45 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           
-          <button 
-            type="button"
-            onClick={() => {
-              const nd = data.map((d: any) => {
-                const newD = { ...d, isActive: true };
-                if (newD.paths) {
-                  newD.paths = newD.paths.map((p: any) => ({ ...p, isActive: true }));
-                }
-                return newD;
-              });
-              setData(nd);
-              showToast('Semua Destinasi Diaktifkan!');
-            }} 
-            className="bg-art-green/10 text-art-green border border-art-green/30 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 active:bg-art-green/20"
-          >
-            <Eye size={14} /> <span className="hidden sm:inline">Aktif Semua</span>
-          </button>
+          {(() => {
+            const isAllActive = data.every((d: any) => d.isActive !== false);
+            return (
+              <button 
+                type="button"
+                onClick={() => {
+                  const nd = data.map((d: any) => {
+                    const newD = { ...d, isActive: !isAllActive };
+                    if (newD.paths) {
+                      newD.paths = newD.paths.map((p: any) => ({ ...p, isActive: !isAllActive }));
+                    }
+                    return newD;
+                  });
+                  setData(nd);
+                  showToast(isAllActive ? 'Semua Destinasi Dinonaktifkan!' : 'Semua Destinasi Diaktifkan!');
+                }} 
+                className={`${isAllActive ? 'bg-red-50 text-red-600 border-red-200 active:bg-red-100' : 'bg-art-green/10 text-art-green border-art-green/30 active:bg-art-green/20'} border px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 transition-colors`}
+              >
+                {isAllActive ? <EyeOff size={14} /> : <Eye size={14} />} <span className="hidden sm:inline">{isAllActive ? 'Nonaktif Semua' : 'Aktif Semua'}</span>
+              </button>
+            );
+          })()}
           
-          <button 
-            type="button"
-            onClick={() => {
-              const nd = data.map((d: any) => ({ ...d, enablePrivateTrip: true }));
-              setData(nd);
-              showToast('Semua Private Trip Diaktifkan!');
-            }} 
-            className="bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 active:bg-indigo-100"
-          >
-            <Lock size={14} /> <span className="hidden sm:inline">Privat Semua</span>
-          </button>
+          {(() => {
+            const isAllPrivate = data.every((d: any) => d.enablePrivateTrip !== false);
+            return (
+              <button 
+                type="button"
+                onClick={() => {
+                  const nd = data.map((d: any) => ({ ...d, enablePrivateTrip: !isAllPrivate }));
+                  setData(nd);
+                  showToast(isAllPrivate ? 'Semua Private Trip Dinonaktifkan!' : 'Semua Private Trip Diaktifkan!');
+                }} 
+                className={`${isAllPrivate ? 'bg-gray-50 text-gray-600 border-gray-200 active:bg-gray-100' : 'bg-indigo-50 text-indigo-600 border-indigo-200 active:bg-indigo-100'} border px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 transition-colors`}
+              >
+                {isAllPrivate ? <Unlock size={14} /> : <Lock size={14} />} <span className="hidden sm:inline">{isAllPrivate ? 'Non-Privat Semua' : 'Privat Semua'}</span>
+              </button>
+            );
+          })()}
 
           <button type="button" onClick={(e) => {
              e.preventDefault();
@@ -455,14 +465,14 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                         />
                       </div>
 
-                      <div className="flex items-center gap-1 h-full pl-2 border-l border-art-text/10 ml-auto">
+                      <div className="flex w-full sm:w-auto items-center justify-end gap-1 h-full pt-2 sm:pt-0 sm:pl-2 sm:border-l border-art-text/10 sm:ml-auto border-t sm:border-t-0 mt-2 sm:mt-0">
                         <button type="button" onClick={(e) => {
                           e.preventDefault();
                           const nd = [...data];
                           nd[i].paths[pIdx].durations[j].showTripContent = !nd[i].paths[pIdx].durations[j].showTripContent;
                           setData(nd);
-                        }} className={`p-2 rounded-lg flex items-center justify-center transition-all ${dur.showTripContent ? 'bg-art-text text-white' : 'bg-gray-100 text-art-text hover:bg-gray-200'}`} title="Konten Tambahan">
-                          <Plus size={14} />
+                        }} className={`p-1.5 rounded-md flex items-center justify-center transition-all ${dur.showTripContent ? 'bg-art-text text-white' : 'bg-gray-200 text-art-text hover:bg-gray-300'}`} title="Konten Tambahan (Private)">
+                          <Plus size={12} />
                         </button>
 
                         <button onClick={(e) => {
@@ -470,13 +480,13 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                           const nd = [...data];
                           nd[i].paths[pIdx].durations[j].showRundown = !nd[i].paths[pIdx].durations[j].showRundown;
                           setData(nd);
-                        }} className={`p-2 rounded-lg flex items-center justify-center transition-all ${dur.showRundown ? 'bg-art-orange text-white text-white' : 'bg-gray-100 text-art-text hover:bg-gray-200'}`} title="Edit Rundown">
-                          <FileText size={14} />
+                        }} className={`p-1.5 rounded-md flex items-center justify-center transition-all ${dur.showRundown ? 'bg-art-orange text-white' : 'bg-gray-200 text-art-text hover:bg-gray-300'}`} title="Edit Rundown">
+                          <FileText size={12} />
                         </button>
 
-                        <div className="flex bg-white rounded-lg border border-art-text/10 overflow-hidden shrink-0 mx-1">
-                            <button type="button" onClick={() => moveDuration(i, pIdx, j, 'up')} className="p-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={j === 0}><ChevronDown size={12} className="rotate-180"/></button>
-                            <button type="button" onClick={() => moveDuration(i, pIdx, j, 'down')} className="p-2 hover:bg-gray-100 disabled:opacity-30" disabled={j === path.durations.length - 1}><ChevronDown size={12}/></button>
+                        <div className="flex bg-white rounded-md border border-art-text/10 overflow-hidden shrink-0 mx-1">
+                            <button type="button" onClick={() => moveDuration(i, pIdx, j, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={j === 0}><ChevronDown size={12} className="rotate-180"/></button>
+                            <button type="button" onClick={() => moveDuration(i, pIdx, j, 'down')} className="p-1.5 hover:bg-gray-100 disabled:opacity-30" disabled={j === path.durations.length - 1}><ChevronDown size={12}/></button>
                         </div>
 
                         <button 
@@ -487,9 +497,9 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                               setData(nd);
                             });
                           }} 
-                          className="text-red-500 p-2 hover:bg-red-50 rounded-lg"
+                          className="text-red-500 p-1.5 hover:bg-red-50 border border-transparent hover:border-red-100 rounded-md shrink-0"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>

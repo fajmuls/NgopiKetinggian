@@ -441,6 +441,43 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
            <Edit2 size={16} className="text-art-orange" /> Edit Teks Hero Utama
         </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 p-4 bg-art-bg/50 rounded-xl border-2 border-art-text/10">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Slogan Atas</p>
+            </div>
+            <button 
+              onClick={() => setData({...data, hideHeroSlogan: !data.hideHeroSlogan})}
+              className={`w-10 h-5 rounded-full p-0.5 transition-all ${!data.hideHeroSlogan ? 'bg-art-green' : 'bg-gray-300'}`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${!data.hideHeroSlogan ? 'translate-x-5' : 'translate-x-0'}`}></div>
+            </button>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Floating Features</p>
+            </div>
+            <button 
+              onClick={() => setData({...data, hideHeroFeatures: !data.hideHeroFeatures})}
+              className={`w-10 h-5 rounded-full p-0.5 transition-all ${!data.hideHeroFeatures ? 'bg-art-green' : 'bg-gray-300'}`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${!data.hideHeroFeatures ? 'translate-x-5' : 'translate-x-0'}`}></div>
+            </button>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Tagline</p>
+            </div>
+            <button 
+              onClick={() => setData({...data, hideHeroTagline: !data.hideHeroTagline})}
+              className={`w-10 h-5 rounded-full p-0.5 transition-all ${!data.hideHeroTagline ? 'bg-art-green' : 'bg-gray-300'}`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${!data.hideHeroTagline ? 'translate-x-5' : 'translate-x-0'}`}></div>
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Slogan Atas</label>
@@ -653,14 +690,49 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                     placeholder="support@ngopi.com"
                   />
                </div>
-               <div>
-                  <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">WhatsApp / Phone</label>
-                  <input 
-                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all font-mono" 
-                    value={data.officePhone || ''} 
-                    onChange={e => setData({...data, officePhone: e.target.value})} 
-                    placeholder="6281234..."
-                  />
+               <div className="col-span-1 md:col-span-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-[10px] font-black uppercase text-art-text/40 ml-1">Kontak WhatsApp</label>
+                    <button type="button" onClick={() => {
+                       const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone || ''}])];
+                       nw.push({ name: 'Admin ' + (nw.length + 1), phone: '628123456789' });
+                       setData({...data, whatsappContacts: nw});
+                    }} className="text-[9px] bg-art-bg px-2 py-1 flex items-center gap-1 rounded font-bold uppercase tracking-widest hover:bg-art-text hover:text-white transition-all"><Plus size={10} /> Tambah Kontak</button>
+                  </div>
+                  <div className="space-y-2">
+                    {(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone || ''}]).map((wa: any, i: number) => (
+                       <div key={i} className="flex gap-2">
+                          <input 
+                            className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
+                            value={wa.name || ''} 
+                            onChange={e => {
+                               const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
+                               nw[i] = { ...nw[i], name: e.target.value };
+                               setData({...data, whatsappContacts: nw});
+                            }} 
+                            placeholder="Nama Kontak (mis. Admin 1)"
+                          />
+                          <input 
+                            className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all font-mono" 
+                            value={wa.phone || ''} 
+                            onChange={e => {
+                               const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
+                               nw[i] = { ...nw[i], phone: e.target.value };
+                               setData({...data, whatsappContacts: nw});
+                            }} 
+                            placeholder="62812xxx..."
+                          />
+                          <button type="button" onClick={() => {
+                             const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
+                             nw.splice(i, 1);
+                             setData({...data, whatsappContacts: nw});
+                          }} className="p-2 text-red-500 hover:bg-red-50 border-2 border-red-100 rounded-xl"><Trash2 size={16} /></button>
+                       </div>
+                    ))}
+                  </div>
+                  <p className="text-[10px] font-medium leading-relaxed italic text-art-text/40 mt-2 ml-1">
+                    Pastikan nomor diawali kode negara (cth: 62). Nama kontak akan ditampilkan di website (Mis: "Admin 1", "Admin Reservasi"), bukan nomornya.
+                  </p>
                </div>
             </div>
           </div>

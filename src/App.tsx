@@ -269,9 +269,13 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="w-48 h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative bg-white"
+              className="w-48 h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative bg-white flex items-center justify-center"
             >
-              <img src={config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain" />
+              {loading ? (
+                <Coffee size={48} className="animate-pulse text-art-orange" />
+              ) : (
+                <img src={config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain p-2" />
+              )}
             </motion.div>
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}
@@ -377,15 +381,15 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       />
 
       {/* The Concept Section */}
-      <section id="cerita" className="py-20 md:py-32 bg-art-section relative border-y border-art-text overflow-hidden">
+      <section id="cerita" className="pt-36 pb-20 md:py-32 bg-art-section relative border-y border-art-text overflow-hidden">
         {/* Scroll Indicator Moved Here */}
         <motion.div 
           animate={{ y: [0, 12, 0] }} 
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          className="absolute top-8 left-1/2 -translate-x-1/2 text-art-text/40 flex flex-col items-center gap-3 z-[60]"
+          className="absolute top-8 md:top-12 left-1/2 -translate-x-1/2 text-art-text/40 flex flex-col items-center gap-2 md:gap-3 z-[60]"
         >
-          <span className="text-[10px] font-black uppercase tracking-[0.6em] text-art-orange drop-shadow-sm">Discover More</span>
-          <div className="w-[3px] h-10 md:h-16 bg-gradient-to-b from-art-orange via-art-orange/50 to-transparent rounded-full shadow-[0_0_20px_rgba(255,107,0,0.4)]" />
+          <span className="text-[10px] font-black uppercase tracking-[0.6em] text-art-orange drop-shadow-sm whitespace-nowrap">Discover More</span>
+          <div className="w-[3px] h-8 md:h-16 bg-gradient-to-b from-art-orange via-art-orange/50 to-transparent rounded-full shadow-[0_0_20px_rgba(255,107,0,0.4)]" />
         </motion.div>
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
           <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop" className="w-full h-full object-cover opacity-[0.25] grayscale" alt="Mountain bg" />
@@ -544,15 +548,15 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="bg-white/10 p-1 rounded-3xl border-2 border-white/20 shadow-2xl overflow-hidden group hover:scale-[1.02] transition-transform duration-500"
+              className="bg-art-bg p-1 rounded-3xl border-2 border-art-text/20 shadow-[16px_16px_0px_0px_#ffffff20] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#ffffff20] transition-all"
             >
-              <div className="bg-white/5 rounded-[1.25rem] p-8 h-full">
+              <div className="bg-black/30 backdrop-blur-sm rounded-[1.25rem] p-8 h-full text-white border border-white/10">
                 <div className="flex justify-between items-start mb-8">
                   <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
                     <div className="w-10 h-10 bg-art-orange rounded-xl flex items-center justify-center shadow-lg"><CheckCircle2 size={20} className="text-white" /></div>
                     Include
                   </h3>
-                  <div className="px-3 py-1 bg-white/10 rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest text-white/60">Gratis</div>
+                  <div className="px-3 py-1 bg-art-orange/20 rounded-full border border-art-orange/30 text-[8px] font-black uppercase tracking-widest text-art-orange">Gratis</div>
                 </div>
                 <ul className="space-y-4">
                   {(config.facilities?.include || []).map((item: any, i: number) => {
@@ -561,7 +565,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                     if (isHidden) return null;
                     return (
                     <li key={i} className="flex items-start gap-4 group/li">
-                      <div className="w-4 h-4 mt-0.5 rounded-full bg-art-orange/20 flex items-center justify-center flex-shrink-0 group-hover/li:scale-125 transition-transform"><CheckCircle size={10} className="text-art-orange" /></div>
+                      <div className="w-4 h-4 mt-0.5 rounded-full bg-art-orange flex items-center justify-center flex-shrink-0 group-hover/li:scale-125 transition-transform"><CheckCircle size={10} className="text-white" /></div>
                       <span className="text-xs md:text-sm font-bold uppercase tracking-wide text-white/90">{name}</span>
                     </li>
                   )})}
@@ -591,7 +595,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                     if (isHidden) return null;
                     return (
                     <li key={i} className="flex items-start gap-4 group/li">
-                      <div className="w-4 h-4 mt-0.5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 group-hover/li:rotate-90 transition-transform"><X size={10} className="text-red-400" /></div>
+                      <div className="w-4 h-4 mt-0.5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 group-hover/li:scale-125 transition-transform"><X size={10} className="text-red-500" /></div>
                       <span className="text-xs md:text-sm font-bold uppercase tracking-wide text-art-text/80">{name}</span>
                     </li>
                   )})}
@@ -604,36 +608,35 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white/5 border-2 border-white/20 p-1 rounded-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500"
+              className="bg-art-bg p-1 rounded-3xl border-2 border-art-text shadow-[16px_16px_0px_0px_#1a1a1a] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#1a1a1a] transition-all"
             >
-               <div className="bg-white/5 rounded-[1.25rem] p-8 h-full relative z-10">
-                 <div className="absolute top-0 right-0 w-64 h-64 bg-art-orange rounded-full mix-blend-overlay filter blur-[100px] opacity-30 translate-x-32 -translate-y-32 pointer-events-none"></div>
+               <div className="bg-white rounded-[1.25rem] p-8 h-full text-art-text">
                  <div className="flex justify-between items-start mb-8">
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg"><PlusCircle size={20} className="text-white" /></div>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                      <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shadow-lg"><PlusCircle size={20} className="text-indigo-500" /></div>
                       Optional
                     </h3>
-                    <div className="px-3 py-1 bg-indigo-500/20 rounded-full border border-indigo-400/20 text-[8px] font-black uppercase tracking-widest text-indigo-300">Add-On</div>
+                    <div className="px-3 py-1 bg-indigo-100/50 rounded-full border border-indigo-200 text-[8px] font-black uppercase tracking-widest text-indigo-500">Add-On</div>
                  </div>
-                 <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-6 leading-relaxed italic">
-                    Upgrade kenyamanan Anda dengan berbagai layanan tambahan premium kami.
+                 <p className="text-[10px] font-black uppercase tracking-widest text-art-text/80 mb-6 leading-relaxed italic border-b border-art-text/10 pb-4">
+                    Upgrade kenyamanan Anda dengan layanan tambahan premium.
                  </p>
-                 <ul className="space-y-6">
+                 <ul className="space-y-4">
                   {(config.facilities?.opsi || []).map((opt: any, i: number) => {
                     if (opt.isHidden) return null;
                     return (
-                    <li key={i} className="flex flex-col gap-2 items-start bg-white/5 p-4 rounded-xl border border-white/5 hover:border-art-orange transition-colors">
+                    <li key={i} className="flex flex-col gap-2 items-start bg-art-bg/30 p-4 rounded-xl border border-art-text/5 hover:border-art-orange hover:bg-art-orange/5 transition-colors">
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-3">
                           <PlusCircle size={14} className="text-art-orange" />
-                          <span className="text-[11px] md:text-xs font-black uppercase tracking-widest text-white">{opt.name}</span>
+                          <span className="text-[11px] md:text-xs font-black uppercase tracking-widest text-art-text">{opt.name}</span>
                         </div>
-                        {opt.priceInfo && <span className="text-[10px] font-black text-art-orange bg-art-orange/10 px-2 py-0.5 rounded-lg">{opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}</span>}
+                        {opt.priceInfo && <span className="text-[10px] font-black text-white bg-art-orange px-2 py-0.5 rounded-lg">{opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}</span>}
                       </div>
                       {opt.subItems && opt.subItems.length > 0 && (
                         <div className="ml-6 flex flex-wrap gap-2">
                           {opt.subItems.map((sub: any, subIdx: number) => (
-                             <span key={subIdx} className="text-[9px] font-bold text-white/40 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                             <span key={subIdx} className="text-[9px] font-bold text-art-text/60 bg-white px-2 py-1 rounded-md border border-art-text/10 shadow-sm">
                                {sub.name} {sub.priceInfo ? `- ${sub.priceInfo.toString().toLowerCase().includes('rp') ? sub.priceInfo : `Rp ${sub.priceInfo}`}` : ''}
                              </span>
                           ))}

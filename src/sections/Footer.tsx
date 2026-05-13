@@ -67,9 +67,14 @@ export const Footer = ({ config }: any) => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase text-white/40 mb-1">Office</p>
-                  <a href={hp?.officeMaps || "#"} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-art-orange transition-colors">
+                  <a href={hp?.officeMaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia")}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-art-orange transition-colors">
                     {hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia"}
                   </a>
+                  <div className="mt-2">
+                    <a href={hp?.officeMaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-art-orange hover:text-white transition-colors bg-art-orange/10 px-2 py-1 rounded">
+                       <Map size={10} /> Lihat Peta
+                    </a>
+                  </div>
                 </div>
               </li>
               <li className="flex gap-4">
@@ -78,7 +83,7 @@ export const Footer = ({ config }: any) => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase text-white/40 mb-1">Email Support</p>
-                  <a href={`mailto:${hp?.officeEmail || 'hello@ngopidiketinggian.com'}`} className="text-sm font-bold hover:text-art-orange transition-colors">
+                  <a href={`mailto:${hp?.officeEmail || 'hello@ngopidiketinggian.com'}`} className="text-sm font-bold hover:text-art-orange transition-colors break-all">
                     {hp?.officeEmail || "hello@ngopidiketinggian.com"}
                   </a>
                 </div>
@@ -87,11 +92,16 @@ export const Footer = ({ config }: any) => {
                 <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-art-orange shrink-0 border border-white/5">
                   <Phone size={20} />
                 </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase text-white/40 mb-1">WhatsApp</p>
-                  <a href={`https://wa.me/${hp?.officePhone || ''}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-art-orange transition-colors">
-                    +{hp?.officePhone || "628123456789"}
-                  </a>
+                <div className="w-full">
+                  <p className="text-[10px] font-black uppercase text-white/40 mb-2">WhatsApp</p>
+                  <div className="flex flex-col gap-2">
+                    {(hp?.whatsappContacts || [{name: 'Admin', phone: hp?.officePhone || "628123456789"}]).map((wa: any, i: number) => (
+                      <a key={i} href={`https://wa.me/${wa.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between text-sm font-bold bg-white/5 p-2 px-3 rounded-lg hover:bg-art-orange/10 hover:border-art-orange/50 border border-transparent transition-all w-full">
+                        <span className="group-hover:text-art-orange transition-colors">{wa.name}</span>
+                        <ChevronRight size={14} className="text-white/20 group-hover:text-art-orange transform group-hover:translate-x-1 transition-all" />
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </li>
             </ul>

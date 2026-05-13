@@ -42,17 +42,18 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
             />
           </motion.div>
         </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-b from-art-text/80 via-transparent to-art-text/90" />
+        <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-b from-art-text/90 via-art-text/50 to-art-text/95" />
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pt-0 pb-16">
-        <div className="flex flex-col items-center gap-8 md:gap-10 w-full z-30 relative">
+        <div className="flex flex-col items-center gap-6 md:gap-10 w-full z-30 relative">
           {(config?.homepage?.heroOrder || ['slogan', 'features', 'title', 'tagline', 'description', 'buttons', 'stats', 'slider']).map((block: string) => {
             switch (block) {
               case 'slogan':
-                return (
+                return (config?.homepage?.hideHeroSlogan ? null :
                   <motion.div key={block} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center w-full z-30">
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl transform -rotate-1 shadow-[0_10px_20px_rgba(0,0,0,0.4)] flex-nowrap">
+                    <div className="inline-flex items-center gap-2 bg-black/30 backdrop-blur-md border border-white/20 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl transform -rotate-1 shadow-[0_10px_20px_rgba(0,0,0,0.4)] flex-nowrap">
                       <Coffee size={12} className="text-art-orange animate-bounce md:size-[16px] shrink-0" />
                       <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] text-white whitespace-nowrap">
                         {config?.homepage?.heroSub || "Open Trip Eksklusif"}
@@ -66,14 +67,14 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     key={block}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex text-[#fff7ed] text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] drop-shadow-none bg-art-orange/95 backdrop-blur-sm px-4 py-1.5 md:px-6 md:py-2 rounded-[2rem] border-2 border-white/20 whitespace-normal text-center max-w-[90vw] leading-relaxed shadow-[0_10px_30px_rgba(255,107,0,0.5)] italic z-30"
+                    className="flex text-[#fff7ed] text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] drop-shadow-none bg-art-orange/95 backdrop-blur-sm px-4 py-1.5 md:px-6 md:py-2 rounded-[2rem] border-2 border-white/20 whitespace-normal text-center max-w-[90vw] leading-relaxed shadow-[0_10px_30px_rgba(255,107,0,0.5)] italic z-30"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
                 ) : null;
               case 'title':
                 return (
-                  <h1 key={block} className="text-7xl sm:text-8xl md:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center text-center max-w-[95vw] mx-auto break-words z-30">
+                  <h1 key={block} className="text-7xl sm:text-8xl md:text-[11rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center text-center max-w-[95vw] mx-auto break-words z-30">
                     {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-6xl md:text-8xl mb-3 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)] font-serif italic normal-case">{config.homepage.heroTitlePrefix}</span>}
                     <span className="relative drop-shadow-[0_10px_20px_rgba(0,0,0,1)] inline-block">
                       {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
@@ -87,10 +88,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     key={block}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)] z-30 max-w-[90vw] mx-auto flex justify-center text-center"
+                    className="p-2 px-4 md:p-3 md:px-8 bg-black/40 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)] z-30 max-w-[90vw] mx-auto flex justify-center text-center w-full sm:w-auto"
                   >
-                    <p className="text-[9px] md:text-sm font-serif italic text-white tracking-[0.2em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center justify-center gap-2 flex-wrap">
-                      <span className="text-art-orange shrink-0">★</span> <span className="text-center">{config.homepage.heroTagline}</span> <span className="text-art-orange shrink-0">★</span>
+                    <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.1em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center justify-center gap-2 flex-wrap sm:flex-nowrap">
+                      <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span> <span className="text-center w-full sm:w-auto">{config.homepage.heroTagline}</span> <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span>
                     </p>
                   </motion.div>
                 ) : null;
