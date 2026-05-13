@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Coffee, ChevronRight, Tent, Mountain, TrendingUp, Search, Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
 import { Button } from '../components/Button';
+import { useSound } from '../hooks/useSound';
 
 export const Hero = ({ config, onExplore, onBooking }: any) => {
+  const { playClick } = useSound();
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = config?.homepage?.heroSlides || [
     {
@@ -61,7 +63,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </div>
               </div>
               
-              <h1 className="text-7xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter uppercase mb-4 drop-shadow-2xl flex flex-col items-center">
+              <h1 className="text-7xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter uppercase mb-4 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex flex-col items-center">
                 {config?.homepage?.heroFeatures && (
                   <motion.span 
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -71,7 +73,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     {config.homepage.heroFeatures}
                   </motion.span>
                 )}
-                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-5xl md:text-6xl mb-2 tracking-[0.2em]">{config.homepage.heroTitlePrefix}</span>}
+                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-5xl md:text-6xl mb-2 tracking-[0.2em] drop-shadow-[0_5px_15px_rgba(255,107,0,0.5)]">{config.homepage.heroTitlePrefix}</span>}
                 {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
               </h1>
 
@@ -87,8 +89,8 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </motion.div>
               )}
 
-              <div className="flex flex-col items-center gap-4 mt-8 mb-8">
-                <p className="text-[13px] md:text-base font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
+              <div className="flex flex-col items-center gap-4 mt-6 mb-6">
+                <p className="text-[10px] md:text-[13px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
                   {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
                 </p>
               </div>
@@ -96,13 +98,13 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               <div className="flex flex-col items-center gap-4 mt-8 mb-8 w-full">
                 <div className="grid grid-cols-2 gap-3 md:gap-5 w-full max-w-md mx-auto">
                   <Button 
-                    onClick={onExplore}
+                    onClick={() => { playClick(); onExplore(); }}
                     className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(255,107,0,0.4)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
                   >
                     Destinations <ChevronRight size={14} className="md:size-[18px] group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button 
-                    onClick={onBooking}
+                    onClick={() => { playClick(); onBooking(); }}
                     className="px-2 py-4 md:px-10 md:py-5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] transition-all flex items-center justify-center gap-1 md:gap-2 group"
                   >
                     Explore Trips <Calendar size={14} className="md:size-[18px] group-hover:rotate-12 transition-transform" />
@@ -152,10 +154,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               </div>
               
               {/* Larger MDPL Circle */}
-              <div className="absolute -top-6 -right-6 md:-top-10 md:-right-10 w-20 h-20 md:w-32 md:h-32 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
-                <p className="text-xl md:text-3xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
-                <p className="text-[8px] md:text-[12px] font-black text-art-orange uppercase tracking-[0.4em] mt-1.5">MDPL</p>
-                <div className="w-8 md:w-12 h-0.5 md:h-1 bg-white/20 mt-2 rounded-full"></div>
+              <div className="absolute -top-6 -right-6 md:-top-12 md:-right-12 w-24 h-24 md:w-40 md:h-40 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
+                <p className="text-2xl md:text-5xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
+                <p className="text-[10px] md:text-[16px] font-black text-art-orange uppercase tracking-[0.4em] mt-1.5 md:mt-3">MDPL</p>
+                <div className="w-10 md:w-20 h-1 md:h-2 bg-white/20 mt-3 md:mt-6 rounded-full"></div>
               </div>
             </motion.div>
           </div>
@@ -166,7 +168,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
       <motion.div 
         animate={{ y: [0, 8, 0] }} 
         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-2 z-[60]"
+        className="absolute bottom-20 md:bottom-12 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-2 z-[60]"
       >
         <span className="text-[9px] font-black uppercase tracking-[0.5em] text-art-orange drop-shadow-sm">Scroll</span>
         <div className="w-[2px] h-10 bg-gradient-to-b from-art-orange to-transparent rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)]" />

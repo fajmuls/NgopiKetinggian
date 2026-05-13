@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '../lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff, Lock, Unlock } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -85,6 +85,23 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
              setExpandedIndexes([]);
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
+          
+          <button onClick={() => {
+            const nd = data.map((d: any) => ({ ...d, isActive: true }));
+            setData(nd);
+            showToast('Semua Destinasi Diaktifkan!');
+          }} className="bg-art-green/10 text-art-green border border-art-green/30 px-3 py-2 rounded text-[10px] font-black uppercase tracking-widest hidden lg:flex items-center gap-2">
+            <Eye size={14} /> Aktif Semua
+          </button>
+          
+          <button onClick={() => {
+            const nd = data.map((d: any) => ({ ...d, enablePrivateTrip: true }));
+            setData(nd);
+            showToast('Semua Private Trip Diaktifkan!');
+          }} className="bg-art-orange/10 text-art-orange border border-art-orange/30 px-3 py-2 rounded text-[10px] font-black uppercase tracking-widest hidden lg:flex items-center gap-2">
+            <Lock size={14} /> Privat Semua
+          </button>
+
           <button type="button" onClick={(e) => {
              e.preventDefault();
              const nd = [...data];
@@ -153,34 +170,34 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                 }} className="p-1.5 text-red-500 hover:bg-red-50 shadow-sm" title="Hapus"><Trash2 size={16}/></button>
             </div>
             
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60">Private?</span>
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 accent-art-orange"
-                  checked={dest.enablePrivateTrip !== false}
-                  onChange={(e) => {
-                    const nd = [...data];
-                    nd[i].enablePrivateTrip = e.target.checked;
-                    setData(nd);
-                  }}
-                />
-              </label>
+            <div className="flex items-center gap-2">
+              <button 
+                type="button"
+                onClick={() => {
+                  const nd = [...data];
+                  nd[i].enablePrivateTrip = !(nd[i].enablePrivateTrip !== false);
+                  setData(nd);
+                }}
+                className={`p-2 rounded flex items-center gap-1.5 transition-all ${dest.enablePrivateTrip !== false ? 'bg-art-orange text-white' : 'bg-gray-100 text-gray-400'}`}
+                title={dest.enablePrivateTrip !== false ? 'Private Trip Aktif' : 'Private Trip Nonaktif'}
+              >
+                {dest.enablePrivateTrip !== false ? <Lock size={14} /> : <Unlock size={14} />}
+                <span className="text-[8px] font-black uppercase">Private</span>
+              </button>
               
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60">Aktif?</span>
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 accent-art-orange"
-                  checked={dest.isActive !== false}
-                  onChange={(e) => {
-                    const nd = [...data];
-                    nd[i].isActive = e.target.checked;
-                    setData(nd);
-                  }}
-                />
-              </label>
+              <button 
+                type="button"
+                onClick={() => {
+                  const nd = [...data];
+                  nd[i].isActive = ! (dest.isActive !== false);
+                  setData(nd);
+                }}
+                className={`p-2 rounded flex items-center gap-1.5 transition-all ${dest.isActive !== false ? 'bg-art-green text-white' : 'bg-gray-100 text-gray-400'}`}
+                title={dest.isActive !== false ? 'Destinasi Aktif' : 'Destinasi Nonaktif'}
+              >
+                {dest.isActive !== false ? <Eye size={14} /> : <EyeOff size={14} />}
+                <span className="text-[8px] font-black uppercase">Status</span>
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-4 pr-16 sm:pr-32">

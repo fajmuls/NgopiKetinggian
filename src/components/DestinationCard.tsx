@@ -68,7 +68,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
         {(currentDur?.rundownHtml || currentDur?.rundownPdf) && (
            <div className="absolute bottom-4 right-4 flex gap-2">
               <button 
-                 onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); }}
+                 onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
                  className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
                  title="Lihat Rundown (Web)"
               >
@@ -269,6 +269,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                         variant="primary" 
                         className="w-full py-4 text-xs font-black uppercase tracking-[0.2em] bg-art-orange shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none transition-all"
                         onClick={() => {
+                          playClick();
                           onBook(dest.name, currentPath.name, currentDur?.label || "", "private");
                           setShowDetails(false);
                         }}
