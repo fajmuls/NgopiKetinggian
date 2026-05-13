@@ -550,9 +550,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               whileInView={{ opacity: 1, y: 0 }}
               className="bg-art-bg p-1 rounded-3xl border-2 border-art-text shadow-[16px_16px_0px_0px_#1a1a1a] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#1a1a1a] transition-all"
             >
-              <div className="bg-art-text rounded-[1.25rem] p-8 h-full text-white border-2 border-art-text/10">
+              <div className="bg-white rounded-[1.25rem] p-8 h-full text-art-text border-2 border-art-text/10">
                 <div className="flex justify-between items-start mb-8">
-                  <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
+                  <h3 className="text-2xl font-black uppercase tracking-tighter text-art-text flex items-center gap-3">
                     <div className="w-10 h-10 bg-art-orange rounded-xl flex items-center justify-center shadow-lg"><CheckCircle2 size={20} className="text-white" /></div>
                     Include
                   </h3>
@@ -566,7 +566,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                     return (
                     <li key={i} className="flex items-start gap-4 group/li">
                       <div className="w-4 h-4 mt-0.5 rounded-full bg-art-orange flex items-center justify-center flex-shrink-0 group-hover/li:scale-125 transition-transform"><CheckCircle size={10} className="text-white" /></div>
-                      <span className="text-xs md:text-sm font-bold uppercase tracking-wide text-white/90">{name}</span>
+                      <span className="text-xs md:text-sm font-bold uppercase tracking-wide text-art-text/90">{name}</span>
                     </li>
                   )})}
                 </ul>
@@ -610,7 +610,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ delay: 0.2 }}
               className="bg-art-bg p-1 rounded-3xl border-2 border-art-text shadow-[16px_16px_0px_0px_#1a1a1a] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#1a1a1a] transition-all"
             >
-               <div className="bg-white rounded-[1.25rem] p-8 h-full text-art-text">
+               <div className="bg-art-bg/20 rounded-[1.25rem] p-8 h-full text-art-text">
                  <div className="flex justify-between items-start mb-8">
                     <h3 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
                       <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shadow-lg"><PlusCircle size={20} className="text-indigo-500" /></div>

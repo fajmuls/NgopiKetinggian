@@ -442,42 +442,6 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
            <Edit2 size={16} className="text-art-orange" /> Edit Teks Hero Utama
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 p-4 bg-art-bg/50 rounded-xl border-2 border-art-text/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Slogan Atas</p>
-            </div>
-            <button 
-              onClick={() => setData({...data, hideHeroSlogan: !data.hideHeroSlogan})}
-              className={`w-10 h-5 rounded-full p-0.5 transition-all ${!data.hideHeroSlogan ? 'bg-art-green' : 'bg-gray-300'}`}
-            >
-              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${!data.hideHeroSlogan ? 'translate-x-5' : 'translate-x-0'}`}></div>
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Floating Features</p>
-            </div>
-            <button 
-              onClick={() => setData({...data, hideHeroFeatures: !data.hideHeroFeatures})}
-              className={`w-10 h-5 rounded-full p-0.5 transition-all ${!data.hideHeroFeatures ? 'bg-art-green' : 'bg-gray-300'}`}
-            >
-              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${!data.hideHeroFeatures ? 'translate-x-5' : 'translate-x-0'}`}></div>
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Tagline</p>
-            </div>
-            <button 
-              onClick={() => setData({...data, hideHeroTagline: !data.hideHeroTagline})}
-              className={`w-10 h-5 rounded-full p-0.5 transition-all ${!data.hideHeroTagline ? 'bg-art-green' : 'bg-gray-300'}`}
-            >
-              <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${!data.hideHeroTagline ? 'translate-x-5' : 'translate-x-0'}`}></div>
-            </button>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Slogan Atas</label>
@@ -523,37 +487,50 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         <div className="mt-6 border-2 border-dashed border-art-text/20 p-4 rounded-2xl">
           <label className="text-[10px] font-black uppercase text-art-text/40 mb-3 block">Urutan Elemen Hero (Atas ke Bawah)</label>
           <div className="flex flex-col gap-2">
-            {(data.heroOrder || ['slogan', 'features', 'title', 'tagline', 'description', 'buttons', 'stats', 'slider']).map((item: string, idx: number, arr: string[]) => (
-              <div key={item} className="flex items-center justify-between bg-white border border-art-text/10 p-2 px-3 rounded-lg shadow-sm">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-art-text">{item}</span>
-                <div className="flex gap-1">
-                  <button 
-                    type="button" 
-                    className="p-1 bg-art-bg rounded hover:bg-art-text hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-art-bg disabled:hover:text-current"
-                    disabled={idx === 0}
-                    onClick={() => {
-                      const newOrder = [...arr];
-                      [newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
-                      setData({...data, heroOrder: newOrder});
-                    }}
-                  >
-                    <ChevronUp size={12} />
-                  </button>
-                  <button 
-                    type="button" 
-                    className="p-1 bg-art-bg rounded hover:bg-art-text hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-art-bg disabled:hover:text-current"
-                    disabled={idx === arr.length - 1}
-                    onClick={() => {
-                      const newOrder = [...arr];
-                      [newOrder[idx + 1], newOrder[idx]] = [newOrder[idx], newOrder[idx + 1]];
-                      setData({...data, heroOrder: newOrder});
-                    }}
-                  >
-                    <ChevronDown size={12} />
-                  </button>
+            {(data.heroOrder || ['slogan', 'features', 'title', 'tagline', 'description', 'buttons', 'stats', 'slider']).map((item: string, idx: number, arr: string[]) => {
+              const hideKey = `hideHero${item.charAt(0).toUpperCase() + item.slice(1)}`;
+              const isHidden = data[hideKey] === true;
+              
+              return (
+                <div key={item} className={`flex items-center justify-between border p-2 px-3 rounded-lg shadow-sm transition-colors ${isHidden ? 'bg-gray-50 border-gray-200' : 'bg-white border-art-text/10'}`}>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => setData({...data, [hideKey]: !isHidden})}
+                      className={`w-10 h-5 rounded-full p-0.5 transition-all ${!isHidden ? 'bg-art-green' : 'bg-gray-300'}`}
+                    >
+                      <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${!isHidden ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                    </button>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${isHidden ? 'text-gray-400 line-through' : 'text-art-text'}`}>{item}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <button 
+                      type="button" 
+                      className="p-1 bg-art-bg rounded hover:bg-art-text hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-art-bg disabled:hover:text-current"
+                      disabled={idx === 0}
+                      onClick={() => {
+                        const newOrder = [...arr];
+                        [newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
+                        setData({...data, heroOrder: newOrder});
+                      }}
+                    >
+                      <ChevronUp size={12} />
+                    </button>
+                    <button 
+                      type="button" 
+                      className="p-1 bg-art-bg rounded hover:bg-art-text hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-art-bg disabled:hover:text-current"
+                      disabled={idx === arr.length - 1}
+                      onClick={() => {
+                        const newOrder = [...arr];
+                        [newOrder[idx + 1], newOrder[idx]] = [newOrder[idx], newOrder[idx + 1]];
+                        setData({...data, heroOrder: newOrder});
+                      }}
+                    >
+                      <ChevronDown size={12} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

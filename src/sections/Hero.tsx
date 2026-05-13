@@ -12,6 +12,11 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
       name: "Gunung Gede Pangrango",
       height: "2.958",
       image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2671&auto=format&fit=crop"
+    },
+    {
+      name: "Gunung Ciremai",
+      height: "3.078",
+      image: "https://images.unsplash.com/photo-1583091171810-7389ea1562b7?q=80&w=2070&auto=format&fit=crop"
     }
   ];
 
@@ -91,13 +96,19 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     className="p-2 px-4 md:p-3 md:px-8 bg-black/40 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)] z-30 max-w-[90vw] mx-auto flex justify-center text-center w-full sm:w-auto"
                   >
                     <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.1em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center justify-center gap-2 flex-wrap sm:flex-nowrap">
-                      <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span> <span className="text-center w-full sm:w-auto">
+                      <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span> <span className="text-center w-full sm:w-auto relative">
                         {config.homepage.heroTagline.split('').map((char: string, i: number) => (
                           <motion.span
                             key={i}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ duration: 0.1, delay: i * 0.05 }}
+                            transition={{ 
+                              duration: 0.1, 
+                              delay: i * 0.05,
+                              repeat: Infinity,
+                              repeatDelay: config.homepage.heroTagline.length * 0.05 + 2,
+                              repeatType: "reverse"
+                            }}
                           >
                             {char}
                           </motion.span>
@@ -171,10 +182,18 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                             className="w-full h-full object-cover rounded-[2.5rem] transition-all duration-700" 
                           />
                         </AnimatePresence>
+                        
+                        {/* Shimmer Effect */}
+                        <motion.div 
+                          animate={{ x: ['-100%', '200%'] }}
+                          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                          className="absolute inset-0 z-10 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-20deg] pointer-events-none"
+                        />
+
                         <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
                         
                         {/* Mountain Name - Transparent Background */}
-                        <div className="absolute bottom-4 md:bottom-8 left-4 md:left-6 right-4 md:right-6 pointer-events-none drop-shadow-2xl text-left">
+                        <div className="absolute bottom-4 md:bottom-8 left-4 md:left-6 right-4 md:right-6 pointer-events-none drop-shadow-2xl text-left bg-black/60 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl">
                           {(() => {
                             const nameObj = slides[currentSlide]?.name || "";
                             let prefix = "";
@@ -192,9 +211,9 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                             return (
                               <div className="flex flex-col">
                                 {prefix && (
-                                  <p className="text-3xl md:text-5xl font-serif italic normal-case text-art-orange opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] -mb-2 md:-mb-4 ml-1 relative z-10">{prefix}</p>
+                                  <p className="text-3xl md:text-5xl font-serif italic normal-case text-art-orange opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] -mb-2 md:-mb-4 ml-1 relative z-10 tracking-widest">{prefix}</p>
                                 )}
-                                <p className="text-3xl md:text-5xl font-black uppercase text-white leading-[0.9] tracking-tighter drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] relative z-20 break-words">{theRest}</p>
+                                <p className="text-3xl md:text-5xl font-black uppercase text-white leading-[0.9] tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] relative z-20 break-words">{theRest}</p>
                               </div>
                             );
                           })()}
@@ -202,12 +221,16 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                       </div>
                       
                       {/* Larger MDPL Circle */}
-                      <div className="absolute -top-10 -right-10 md:-top-16 md:-right-16 w-28 h-28 md:w-36 md:h-36 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20 overflow-hidden">
+                      <motion.div 
+                        animate={{ scale: [1, 1.1, 1], rotate: [-12, -8, -12] }}
+                        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                        className="absolute -top-10 -right-10 md:-top-16 md:-right-16 w-28 h-28 md:w-36 md:h-36 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20 overflow-hidden"
+                      >
                         <div className="absolute inset-0 bg-gradient-to-tr from-art-orange/10 to-transparent"></div>
                         <p className="text-2xl md:text-5xl font-black text-white leading-none tracking-tighter relative z-10">{slides[currentSlide]?.height}</p>
                         <p className="text-[10px] md:text-[14px] font-black text-art-orange uppercase tracking-[0.4em] mt-0.5 md:mt-1 relative z-10">MDPL</p>
                         <div className="w-8 md:w-16 h-1 md:h-1.5 bg-white/20 mt-1 md:mt-2 rounded-full relative z-10"></div>
-                      </div>
+                      </motion.div>
                     </motion.div>
                   </div>
                 );
