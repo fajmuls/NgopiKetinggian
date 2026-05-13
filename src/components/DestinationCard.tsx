@@ -96,7 +96,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
         <div className="flex justify-between items-end mb-4">
            <div>
               <h3 className="text-lg md:text-xl font-black uppercase text-art-text tracking-tight mb-1">{dest.name}</h3>
-              <p className="text-[9px] font-bold text-art-text/40 uppercase tracking-widest">{String(dest.height).replace(/mdpl/i, '').trim()} MDPL</p>
+              <p className="text-[8px] font-bold text-art-text/30 uppercase tracking-widest">{String(dest.height).replace(/mdpl/i, '').trim()} MDPL</p>
            </div>
            <div className="text-right">
               <p className="text-[9px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>

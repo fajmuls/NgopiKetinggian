@@ -3,7 +3,7 @@ import { BookingsAdmin } from './admin/BookingsAdmin';
 import { DestinationsAdmin } from './admin/DestinationsAdmin';
 import { OpenTripsAdmin } from './admin/OpenTripsAdmin';
 import { TeamPhotosAdmin, LeadersAdmin } from './admin/TeamAndLeadersAdmin';
-import { GalleryAdmin, CeritaAdmin, HomepageAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin } from './admin/WebSettingsAdmin';
+import { GalleryAdmin, CeritaAdmin, HomepageAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin, FooterAdmin } from './admin/WebSettingsAdmin';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
@@ -56,13 +56,17 @@ export const AdminPanelModal = ({
   if (!isOpen || !config) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left text-art-text">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-5xl max-h-[95vh] flex flex-col rounded-2xl border-2 border-art-text relative shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 text-left text-art-text overflow-x-hidden overflow-y-auto">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }} 
+        animate={{ opacity: 1, scale: 1 }} 
+        className="bg-art-section w-full h-[100dvh] sm:h-auto sm:max-w-5xl sm:min-h-[80vh] sm:max-h-[95vh] flex flex-col rounded-none sm:rounded-2xl border-0 sm:border-2 border-art-text relative shadow-2xl"
+      >
         <div className="flex flex-col border-b border-art-text bg-white">
-          <div className="flex justify-between items-center p-4 sm:p-6">
+          <div className="flex justify-between items-center p-3 sm:p-6 pb-0 sm:pb-6">
             <div className="flex items-center gap-4">
-              <h2 className="text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
-              <p className="text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
+              <p className="text-[9px] sm:text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
             </div>
             <div className="flex items-center gap-3">
               <button 
@@ -128,10 +132,10 @@ export const AdminPanelModal = ({
         </div>
 
 
-        <div className="flex flex-col sm:flex-row flex-1 overflow-y-auto">
+        <div className="flex flex-col sm:flex-row flex-1 min-h-0 overflow-y-auto sm:overflow-y-visible">
 
           {/* Sub Sidebar Tabs */}
-          <div className="flex sm:flex-col gap-1.5 p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0 justify-between">
+          <div className="flex sm:flex-col gap-1.5 p-3 sm:p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
             <div className="flex sm:flex-col gap-1.5 w-full">
               {activeCategory === 'booking' && (
                 <>
@@ -151,11 +155,12 @@ export const AdminPanelModal = ({
               )}
               {activeCategory === 'website' && (
                 <>
-                  <button onClick={() => setActiveTab('homepage')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'homepage' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Homepage</button>
-                  <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Cerita</button>
-                  <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Fasilitas</button>
+                  <button onClick={() => setActiveTab('homepage')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'homepage' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Branding & Homepage</button>
+                  <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Story</button>
+                  <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Facilities</button>
                   <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
                   <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
+                  <button onClick={() => setActiveTab('footerAdmin')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'footerAdmin' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>About & Footer</button>
                   <button onClick={() => setActiveTab('cleanupPhotos')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cleanupPhotos' ? 'bg-red-600 text-white' : 'hover:bg-red-50 text-red-600'}`}>Cleanup Foto</button>
                 </>
               )}
@@ -184,6 +189,7 @@ export const AdminPanelModal = ({
             {activeTab === 'promoCodes' && <PromoCodesAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cerita' && <CeritaAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultVideo={defaultLists.cerita} />}
             {activeTab === 'homepage' && <HomepageAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'footerAdmin' && <FooterAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cleanupPhotos' && <CleanupPhotosAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
           </div>
         </div>

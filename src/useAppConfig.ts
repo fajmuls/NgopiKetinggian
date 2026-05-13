@@ -15,9 +15,7 @@ export interface FacilityOption {
 
 export const DIFFICULTY_LEVELS = [
   "Pemula",
-  "Pemula - Menengah",
   "Menengah",
-  "Menengah - Mahir",
   "Mahir",
   "Ahli"
 ];
@@ -100,6 +98,17 @@ export interface AppConfig {
     statHikers?: string;
     statSatisfaction?: string;
     statTrips?: string;
+    logo?: string;
+    logos?: { id: string, name: string, url: string }[];
+    footerDesc?: string;
+    officeEmail?: string;
+    officePhone?: string;
+    officeAddress?: string;
+    officeMaps?: string;
+    socialLinks?: { icon: string, url: string }[];
+    paymentMethods?: { name: string, active: boolean }[];
+    soundEnabled?: boolean;
+    soundVolume?: number;
   };
 }
 
@@ -168,14 +177,36 @@ const getDefaultWebsiteData = () => ({
     { code: "Emikari", discount: 10 }
   ],
   homepage: {
+    logo: "",
+    logos: [],
     heroSub: "Open Trip Eksklusif",
     heroFeatures: "Fasilitas Premium • Pemandu Ahli • Keamanan Terjamin",
-    heroSlogan: "The Real Adventure",
+    heroSlogan: "Ngopi Trip Kami",
     heroTitlePrefix: "Trip",
     heroTitle: "Ngopi Di\nKetinggian",
     heroDescription: "Harga terjangkau dengan pengalaman trip profesional. Nikmati secangkir kopi manual brew terbaik, hangatnya kebersamaan, dan magisnya lautan awan dari puncak gunung.",
-    heroTagline: "Jaya / Jaya / Jaya",
+    heroTagline: "Sederhana tapi berkesan",
     heroPhotoUrl: "",
+    footerDesc: "Provider layanan pendakian gunung premium dengan standar keamanan tinggi dan kenyamanan maksimal.",
+    officeEmail: "mrachmanfm@gmail.com",
+    officePhone: "628123456789",
+    officeAddress: "Jl. Raya Puncak, Bogor, Jawa Barat",
+    officeMaps: "https://goo.gl/maps/example",
+    socialLinks: [
+      { icon: 'instagram', url: 'https://instagram.com' },
+      { icon: 'whatsapp', url: 'https://wa.me/628123456789' },
+      { icon: 'telegram', url: 'https://t.me' }
+    ],
+    paymentMethods: [
+      { name: 'BCA', active: true },
+      { name: 'BNI', active: true },
+      { name: 'MANDIRI', active: true },
+      { name: 'GOPAY', active: true },
+      { name: 'DANA', active: true },
+      { name: 'QRIS', active: true }
+    ],
+    soundEnabled: true,
+    soundVolume: 0.8,
     ceritaTitle: "Secangkir Cerita",
     ceritaSub: "di Atas Awan",
     ceritaParagraph1: "Selama lebih dari 10 tahun, kami telah menemani ribuan langkah menapaki puncak-puncak tertinggi di Nusantara. Mengarungi samudra awan dan dinginnya udara gunung mengajarkan kami satu hal: mendaki bukan sekadar tentang seberapa cepat Anda tiba di puncak, melainkan bagaimana Anda meresapi setiap detik perjalanannya. Ya... dan tentunya dengan secangkir kopi hangat di genggaman.",

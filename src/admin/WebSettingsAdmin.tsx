@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '../lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff, Phone } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -271,16 +271,173 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
 
 
 export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
-  const [data, setData] = useState({ ...config.homepage, heroSlides: config.homepage.heroSlides || [] });
+  const [data, setData] = useState({ 
+    ...config.homepage, 
+    heroSlides: config.homepage.heroSlides || [],
+    logo: config.homepage.logo || "https://files.catbox.moe/lubzno.png",
+    logos: config.homepage.logos || [{ id: 'default', name: 'Logo Default', url: config.homepage.logo || "https://files.catbox.moe/lubzno.png" }]
+  });
 
   const handleSave = () => {
     updateConfig({ homepage: data });
     showToast('Hero & Slide Tersimpan!');
   };
 
+  const activateLogo = (url: string) => {
+    setData({ ...data, logo: url });
+    showToast('Logo Aktif Diperbarui!');
+  };
+
   return (
-    <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8">
-      <div className="space-y-4">
+    <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8 text-left">
+      {/* Branding & Logo Section */}
+      <div className="bg-art-bg/30 p-6 rounded-2xl border-2 border-art-text space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-art-orange rounded-xl flex items-center justify-center text-white shadow-sm rotate-3">
+              <ShoppingBag size={20} />
+            </div>
+            <div>
+              <h3 className="font-black text-sm uppercase tracking-widest text-art-text">Manajemen Branding</h3>
+              <p className="text-[10px] font-bold text-art-text/40 uppercase">Kelola koleksi logo dan pilih yang aktif</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setData({...data, logos: [...(data.logos || []), { id: Date.now().toString(), url: "", name: "Logo Baru" }]})}
+            className="bg-art-text text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+          >
+            <Plus size={14} /> Tambah Logo
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+              {(data.logos || []).map((l: any, idx: number) => (
+                <div key={l.id || idx} className={`bg-white p-4 rounded-2xl border-2 transition-all relative group ${data.logo === l.url ? 'border-art-orange shadow-[4px_4px_0px_0px_rgba(255,107,0,1)]' : 'border-art-text/10'}`}>
+                  {data.logo === l.url && (
+                    <div className="absolute -top-3 -left-3 bg-art-orange text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">Aktif</div>
+                  )}
+                  <button 
+                    onClick={() => {
+                      const nl = [...data.logos];
+                      nl.splice(idx, 1);
+                      setData({...data, logos: nl});
+                    }}
+                    className="absolute top-2 right-2 text-red-400 hover:text-red-600 p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                  
+                  <div className="flex gap-4 items-start">
+                    <div className="w-16 h-16 rounded-xl border border-art-text/10 bg-art-bg/50 p-2 flex items-center justify-center shrink-0">
+                      {l.url ? <img src={l.url} className="w-full h-full object-contain" alt="Preview"/> : <ShoppingBag size={20} className="text-art-text/10"/>}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                       <input 
+                         className="w-full border-b border-art-text/10 text-[10px] font-bold outline-none focus:border-art-orange pb-1"
+                         value={l.name || ''}
+                         onChange={e => {
+                            const nl = [...data.logos];
+                            nl[idx].name = e.target.value;
+                            setData({...data, logos: nl});
+                         }}
+                         placeholder="Nama Label"
+                       />
+                       <InputWithPaste 
+                         className="w-full border-b border-art-text/10 text-[9px] font-mono outline-none focus:border-art-orange pb-1"
+                         value={l.url || ''}
+                         onChange={(e: any) => {
+                            const nl = [...data.logos];
+                            nl[idx].url = e.target.value;
+                            setData({...data, logos: nl});
+                         }}
+                         placeholder="URL Image"
+                       />
+                       {data.logo !== l.url && l.url && (
+                         <button 
+                           onClick={() => activateLogo(l.url)}
+                           className="w-full mt-2 bg-art-bg text-art-text py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border border-art-text/10 hover:bg-art-text hover:text-white transition-all"
+                         >
+                           Aktivasi Logo
+                         </button>
+                       )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {(data.logos || []).length === 0 && (
+                <div className="col-span-full py-10 border-2 border-dashed border-art-text/10 rounded-2xl text-center">
+                  <p className="text-[10px] font-bold text-art-text/30 uppercase tracking-widest">Koleksi logo kosong</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border-2 border-art-text p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden group">
+             {data.logo ? (
+                <>
+                  <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-30"></div>
+                  <img src={data.logo} className="max-w-full max-h-40 object-contain drop-shadow-2xl relative z-10 transition-transform group-hover:scale-110" alt="Active Logo" key={data.logo}/>
+                  <div className="mt-8 relative z-10 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-art-orange mb-1">Logo Website Aktif</p>
+                    <p className="text-[9px] font-bold text-art-text/30 uppercase italic">Tampil di Header & Footer</p>
+                  </div>
+                </>
+             ) : (
+                <div className="text-center space-y-4">
+                  <div className="w-20 h-20 bg-art-bg rounded-3xl flex items-center justify-center mx-auto border-2 border-dashed border-art-text/10">
+                    <ShoppingBag size={40} className="text-art-text/10"/>
+                  </div>
+                  <p className="text-[10px] font-black uppercase text-art-text/20 tracking-widest">Belum ada logo aktif</p>
+                </div>
+             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Sound Settings Section */}
+      <div className="bg-art-bg/30 p-6 rounded-2xl border-2 border-art-text space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-art-green rounded-xl flex items-center justify-center text-white shadow-sm rotate-3">
+            <Clock size={20} />
+          </div>
+          <div>
+            <h3 className="font-black text-sm uppercase tracking-widest text-art-text">Pengaturan Efek Suara</h3>
+            <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur volume dan status suara aplikasi</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div className="flex items-center justify-between bg-white p-4 rounded-2xl border-2 border-art-text">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Status Efek Suara</p>
+                <p className="text-[9px] font-bold text-art-text/40 uppercase mt-1">{data.soundEnabled ? 'Suara Aktif' : 'Suara Dimatikan'}</p>
+              </div>
+              <button 
+                onClick={() => setData({...data, soundEnabled: !data.soundEnabled})}
+                className={`w-14 h-8 rounded-full p-1 transition-all ${data.soundEnabled ? 'bg-art-green' : 'bg-gray-300'}`}
+              >
+                <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all ${data.soundEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+              </button>
+           </div>
+           
+           <div className="bg-white p-4 rounded-2xl border-2 border-art-text">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Master Volume</p>
+                <span className="text-[10px] font-black text-art-orange px-2 py-1 bg-art-orange/10 rounded-lg">{Math.round((data.soundVolume || 0.8) * 100)}%</span>
+              </div>
+              <input 
+                type="range" min="0" max="1" step="0.01"
+                className="w-full accent-art-orange h-2 bg-art-bg rounded-lg appearance-none cursor-pointer"
+                value={data.soundVolume || 0.8}
+                onChange={e => setData({...data, soundVolume: parseFloat(e.target.value)})}
+              />
+           </div>
+        </div>
+      </div>
+
+      <div className="space-y-4 pt-4">
         <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
            <Edit2 size={16} className="text-art-orange" /> Edit Teks Hero Utama
         </h3>
@@ -306,8 +463,8 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
               <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-medium h-20 resize-none" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Nikmati pengalaman trip tak terlupakan..."></textarea>
            </div>
            <div>
-              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Tagline Bawah</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="JAYA / JAYA / JAYA" />
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Tagline Bawah (Copy Sederhana)</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="Sederhana tapi berkesan" />
            </div>
         </div>
 
@@ -388,46 +545,249 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         </div>
       </div>
 
-      <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
+      <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4 pb-4">
         <div className="space-y-1.5">
-          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Logo Aplikasi (Header & Footer)</label>
-          <ImageUploader value={data.logo || ''} onChange={(url) => setData({...data, logo: url})} placeholder="URL Logo Transparan" />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Foto Background Hero Utama</label>
+          <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Foto Background Hero Utama (Manual Override)</label>
           <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
         </div>
       </div>
 
-        <div className="space-y-4 pt-4 border-t-2 border-dashed border-art-text/20">
-           <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-             <h3 className="font-bold text-sm uppercase">Sosial Media Links (Footer)</h3>
-           </div>
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-             {['instagram', 'whatsapp', 'telegram'].map((platform, idx) => {
-               const links = data.socialLinks || [
-                 { icon: 'instagram', url: '#' },
-                 { icon: 'whatsapp', url: '#' },
-                 { icon: 'telegram', url: '#' }
-               ];
-               const currentLink = links.find((l: any) => l.icon === platform)?.url || '#';
-               return (
-                 <div key={platform}>
-                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">URL {platform}</label>
-                   <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={currentLink} onChange={e => {
-                     const newLinks = [...links];
-                     const fIndex = newLinks.findIndex((l: any) => l.icon === platform);
-                     if(fIndex >= 0) newLinks[fIndex].url = e.target.value;
-                     else newLinks.push({ icon: platform, url: e.target.value });
-                     setData({...data, socialLinks: newLinks});
-                   }} placeholder="https://..." />
-                 </div>
-               );
-             })}
-           </div>
+      <button onClick={handleSave} className="bg-art-orange text-white px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">Simpan Konfigurasi Branding & Hero</button>
+    </div>
+  );
+};
+
+
+export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
+  const [data, setData] = useState({ 
+    ...config.homepage,
+    socialLinks: config.homepage.socialLinks || [
+      { icon: 'instagram', url: '#' },
+      { icon: 'whatsapp', url: '#' },
+      { icon: 'telegram', url: '#' }
+    ],
+    paymentMethods: config.homepage.paymentMethods || [
+      { name: 'BCA', active: true },
+      { name: 'BNI', active: true },
+      { name: 'MANDIRI', active: true },
+      { name: 'GOPAY', active: true },
+      { name: 'DANA', active: true },
+      { name: 'QRIS', active: true }
+    ]
+  });
+
+  const handleSave = () => {
+    updateConfig({ homepage: data });
+    showToast('Tersimpan!');
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8 text-left">
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 bg-art-text rounded-2xl flex items-center justify-center text-white rotate-6 shadow-lg">
+          <Info size={24} />
+        </div>
+        <div>
+          <h2 className="font-black text-lg uppercase tracking-tighter text-art-text leading-none">About Us & Footer</h2>
+          <p className="text-[10px] font-bold text-art-text/30 uppercase mt-1 tracking-widest">Atur konten bagian bawah website</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text space-y-4">
+            <h3 className="font-black text-[10px] uppercase tracking-widest text-art-text/60 mb-2">Informasi Perusahaan</h3>
+            <div className="space-y-4">
+               <div>
+                  <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Deskripsi Footer</label>
+                  <textarea 
+                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium h-24 resize-none bg-white focus:border-art-orange outline-none transition-all" 
+                    value={data.footerDesc || ''} 
+                    onChange={e => setData({...data, footerDesc: e.target.value})} 
+                    placeholder="Tuliskan deskripsi singkat tentang provider trip Anda..."
+                  />
+               </div>
+               <div>
+                  <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Email Support</label>
+                  <input 
+                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
+                    value={data.officeEmail || ''} 
+                    onChange={e => setData({...data, officeEmail: e.target.value})} 
+                    placeholder="support@ngopi.com"
+                  />
+               </div>
+               <div>
+                  <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">WhatsApp / Phone</label>
+                  <input 
+                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all font-mono" 
+                    value={data.officePhone || ''} 
+                    onChange={e => setData({...data, officePhone: e.target.value})} 
+                    placeholder="6281234..."
+                  />
+               </div>
+            </div>
+          </div>
+
+          <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text space-y-4">
+             <h3 className="font-black text-[10px] uppercase tracking-widest text-art-text/60 mb-2">Promo Banner (Bottom)</h3>
+             <div className="space-y-4">
+                <div>
+                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Banner Image URL</label>
+                   <ImageUploader value={data.promoBannerImg || ''} onChange={(url) => setData({...data, promoBannerImg: url})} />
+                </div>
+                <div>
+                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Banner Link (e.g. #destinasi)</label>
+                   <input 
+                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
+                     value={data.promoBannerLink || ''} 
+                     onChange={e => setData({ ...data, promoBannerLink: e.target.value })}
+                     placeholder="#destinasi"
+                   />
+                </div>
+             </div>
+          </div>
+
+          <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text space-y-4">
+             <h3 className="font-black text-[10px] uppercase tracking-widest text-art-text/60 mb-2">Lokasi & Maps</h3>
+             <div className="space-y-4">
+                <div>
+                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Alamat Kantor</label>
+                   <textarea 
+                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium h-20 resize-none bg-white focus:border-art-orange outline-none transition-all" 
+                     value={data.officeAddress || ''} 
+                     onChange={e => setData({...data, officeAddress: e.target.value})} 
+                     placeholder="Jl. Raya..."
+                   />
+                </div>
+                <div>
+                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Link Google Maps (Iframe Src / Link)</label>
+                   <InputWithPaste 
+                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-[10px] font-mono bg-white focus:border-art-orange outline-none transition-all" 
+                     value={data.officeMaps || ''} 
+                     onChange={(e: any) => setData({...data, officeMaps: e.target.value})} 
+                     placeholder="https://goo.gl/maps/..." 
+                   />
+                </div>
+             </div>
+          </div>
         </div>
 
-      <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase w-full">Simpan Homepage</button>
+        <div className="space-y-6">
+           <div className="bg-art-orange/10 p-5 rounded-2xl border-2 border-art-orange/30 space-y-4">
+              <div className="flex justify-between items-center bg-white p-3 rounded-xl border border-art-orange/20">
+                <h3 className="font-black text-[10px] uppercase tracking-widest text-art-orange">Sosial Media & Kontak</h3>
+                <button 
+                  onClick={() => setData({...data, socialLinks: [...(data.socialLinks || []), { icon: 'instagram', url: '#' }]})}
+                  className="bg-art-orange text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase"
+                >
+                  + Link
+                </button>
+              </div>
+              <div className="space-y-3">
+                 {(data.socialLinks || []).map((link: any, idx: number) => (
+                   <div key={idx} className="flex gap-3 items-center bg-white p-3 rounded-xl border-2 border-art-text/5 relative">
+                      <select 
+                        value={link.icon} 
+                        onChange={e => {
+                           const nl = [...data.socialLinks];
+                           nl[idx].icon = e.target.value;
+                           setData({...data, socialLinks: nl});
+                        }}
+                        className="bg-art-bg text-[10px] font-black uppercase p-2 rounded-lg border border-art-text/10 outline-none"
+                      >
+                         <option value="instagram">Instagram</option>
+                         <option value="whatsapp">WhatsApp</option>
+                         <option value="telegram">Telegram</option>
+                         <option value="facebook">Facebook</option>
+                         <option value="tiktok">TikTok</option>
+                         <option value="youtube">YouTube</option>
+                      </select>
+                      <input 
+                        className="flex-1 border-b-2 border-art-text/5 p-2 text-xs font-bold focus:border-art-orange outline-none" 
+                        value={link.url}
+                        onChange={e => {
+                           const nl = [...data.socialLinks];
+                           nl[idx].url = e.target.value;
+                           setData({...data, socialLinks: nl});
+                        }}
+                        placeholder="https://..."
+                      />
+                      <button 
+                        onClick={() => {
+                           const nl = [...data.socialLinks];
+                           nl.splice(idx, 1);
+                           setData({...data, socialLinks: nl});
+                        }}
+                        className="text-red-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                   </div>
+                 ))}
+              </div>
+           </div>
+
+           <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text space-y-4">
+              <h3 className="font-black text-[10px] uppercase tracking-widest text-art-text/60 mb-2">Metode Pembayaran (Footer)</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                 {(data.paymentMethods || []).map((method: any, idx: number) => (
+                   <button 
+                     key={method.name}
+                     onClick={() => {
+                        const npm = [...data.paymentMethods];
+                        npm[idx].active = !npm[idx].active;
+                        setData({...data, paymentMethods: npm});
+                     }}
+                     className={`p-3 rounded-xl border-2 font-black text-[10px] uppercase tracking-tighter transition-all flex items-center justify-between ${method.active ? 'bg-white border-art-orange text-art-orange shadow-[2px_2px_0px_0px_rgba(255,107,0,1)]' : 'bg-gray-100 border-gray-200 text-gray-400'}`}
+                   >
+                     {method.name}
+                     {method.active ? <CheckCircle size={10} /> : <div className="w-2.5 h-2.5 rounded-full border border-gray-300"></div>}
+                   </button>
+                 ))}
+              </div>
+              <div className="flex gap-2">
+                 <input 
+                   id="newPaymentMethod"
+                   className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange"
+                   placeholder="Tambah Metode Baru (cth: OVO)"
+                 />
+                 <button 
+                   onClick={() => {
+                      const input = document.getElementById('newPaymentMethod') as HTMLInputElement;
+                      if(input.value) {
+                         setData({...data, paymentMethods: [...(data.paymentMethods || []), { name: input.value.toUpperCase(), active: true }]});
+                         input.value = '';
+                      }
+                   }}
+                   className="bg-art-text text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase"
+                 >
+                   +
+                 </button>
+              </div>
+           </div>
+
+           <div className="bg-art-text text-white p-6 rounded-2xl border-2 border-art-text shadow-xl space-y-4">
+              <h4 className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                <CheckCircle size={14} className="text-art-orange" /> Preview Footer
+              </h4>
+              <div className="space-y-4 opacity-70">
+                 <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center"><Phone size={14} /></div>
+                    <span className="text-[10px] font-bold">{data.officePhone || '-'}</span>
+                 </div>
+                 <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center"><MessageCircle size={14} /></div>
+                    <span className="text-[10px] font-bold">{data.officeEmail || '-'}</span>
+                 </div>
+              </div>
+              <p className="text-[10px] font-medium leading-relaxed italic text-white/40">
+                "Pastikan nomor WhatsApp diawali dengan kode negara (cth: 62) agar link chat otomatis berfungsi dengan baik."
+              </p>
+           </div>
+        </div>
+      </div>
+
+      <button onClick={handleSave} className="bg-art-text text-white px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] w-full shadow-[4px_4px_0px_0px_rgba(255,107,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">Simpan Konten Footer</button>
     </div>
   );
 };

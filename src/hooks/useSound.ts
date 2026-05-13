@@ -41,14 +41,14 @@ export const useSound = () => {
       gain.connect(ctx.destination);
       
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.05);
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.1);
       
-      gain.gain.setValueAtTime(3.0 * volume, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+      gain.gain.setValueAtTime(4.0 * volume, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
       
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.05);
+      osc.stop(ctx.currentTime + 0.1);
     } catch (e) {}
   }), [volume]);
 
@@ -63,15 +63,15 @@ export const useSound = () => {
       gain.connect(ctx.destination);
       
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(900, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.12);
       
       gain.gain.setValueAtTime(0.0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(2.0 * volume, ctx.currentTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      gain.gain.linearRampToValueAtTime(3.5 * volume, ctx.currentTime + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
       
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.1);
+      osc.stop(ctx.currentTime + 0.12);
     } catch (e) {}
   }), [volume]);
 
@@ -86,14 +86,14 @@ export const useSound = () => {
       gain.connect(ctx.destination);
       
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(300, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(250, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.2);
       
-      gain.gain.setValueAtTime(1.5 * volume, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(2.5 * volume, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
       
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.15);
+      osc.stop(ctx.currentTime + 0.2);
     } catch (e) {}
   }), [volume]);
 
@@ -108,15 +108,15 @@ export const useSound = () => {
       gain.connect(ctx.destination);
       
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(300, ctx.currentTime);
-      osc.frequency.linearRampToValueAtTime(350, ctx.currentTime + 0.08);
+      osc.frequency.setValueAtTime(350, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.1);
       
       gain.gain.setValueAtTime(0.0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.3 * volume, ctx.currentTime + 0.04);
-      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      gain.gain.linearRampToValueAtTime(0.6 * volume, ctx.currentTime + 0.05);
+      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.1);
       
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.08);
+      osc.stop(ctx.currentTime + 0.1);
     } catch (e) {}
   }, [volume]);
 
@@ -131,9 +131,9 @@ export const useSound = () => {
       osc1.connect(gain1);
       gain1.connect(ctx.destination);
       osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(440, ctx.currentTime);
+      osc1.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
       gain1.gain.setValueAtTime(0.0, ctx.currentTime);
-      gain1.gain.linearRampToValueAtTime(1.5 * volume, ctx.currentTime + 0.05);
+      gain1.gain.linearRampToValueAtTime(2.0 * volume, ctx.currentTime + 0.05);
       gain1.gain.linearRampToValueAtTime(0.0, ctx.currentTime + 0.15);
       osc1.start(ctx.currentTime);
       osc1.stop(ctx.currentTime + 0.15);
@@ -146,7 +146,7 @@ export const useSound = () => {
       osc2.type = 'sine';
       osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
       gain2.gain.setValueAtTime(0.0, ctx.currentTime + 0.1);
-      gain2.gain.linearRampToValueAtTime(1.5 * volume, ctx.currentTime + 0.15);
+      gain2.gain.linearRampToValueAtTime(2.0 * volume, ctx.currentTime + 0.15);
       gain2.gain.linearRampToValueAtTime(0.0, ctx.currentTime + 0.5);
       osc2.start(ctx.currentTime + 0.1);
       osc2.stop(ctx.currentTime + 0.5);

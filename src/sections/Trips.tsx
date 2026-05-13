@@ -8,7 +8,7 @@ export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tri
   if (openTrips.length === 0) return null;
 
   return (
-    <section id="trip" className="py-24 bg-art-bg/20">
+    <section id="trips" className="py-24 bg-art-bg/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">
@@ -19,7 +19,7 @@ export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tri
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">{t('nav.trips')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-              {lang === 'id' ? <><span className="text-art-orange">Trip</span> Terbuka.</> : <><span className="text-art-orange">Open</span> Trips.</>}
+              {lang === 'id' ? <><span className="text-art-orange">Trip</span>.</> : <><span className="text-art-orange">Trips</span>.</>}
             </h2>
             <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
               {t('trip.openDesc')}

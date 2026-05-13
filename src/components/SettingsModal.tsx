@@ -14,7 +14,8 @@ import { Button } from './Button';
 export const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOpen }: { isOpen: boolean, onClose: () => void, theme: string, setTheme: (t: string) => void, setIsHistoryOpen: (v: boolean) => void }) => {
   const { playClick, playHover, playBack, playPop } = useSound();
   const [user] = useAuthState(auth);
-  const [showTokenInput, setShowTokenInput] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(false);
   const [localVolume, setLocalVolume] = useState(() => {
     const saved = localStorage.getItem('appVolume');
     return saved ? parseFloat(saved) : 1.0;
@@ -44,11 +45,40 @@ export const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOp
     { id: 'wasabi', name: 'Wasabi (Kuning)', color: '#dcd189' },
   ];
 
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      setCheckingAdmin(true);
+      try {
+        // Simple check against hardcoded emails first for immediate UI 
+        // then verify with Firestore
+        const isHardcoded = user.email === 'mrachmanfm@gmail.com' || user.email === 'mrahmanfm@gmail.com';
+        
+        // Use getDocs to check if user exists in admins collection
+        // or just verify if the document with currentUser.uid exists
+        const adminDoc = await getDocs(collection(db, 'admins'));
+        const isAdminInDb = adminDoc.docs.some(doc => doc.id === user.uid || doc.data().email === user.email);
+        
+        setIsAdmin(isHardcoded || isAdminInDb);
+      } catch (err) {
+        console.warn("Failed to verify admin status", err);
+        // Fallback to hardcoded for primary owners if offline/permission issue
+        setIsAdmin(user.email === 'mrachmanfm@gmail.com' || user.email === 'mrahmanfm@gmail.com');
+      } finally {
+        setCheckingAdmin(false);
+      }
+    };
+    checkAdminStatus();
+  }, [user]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left text-art-text">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl p-6 md:p-8 border-2 border-art-text relative shadow-2xl">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left text-art-text overflow-y-auto overflow-x-hidden">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-art-section w-full max-w-sm my-auto rounded-2xl p-6 md:p-8 border-2 border-art-text relative shadow-2xl">
         <button onClick={(e) => { playClick(); onClose(); e.preventDefault(); }} className="absolute top-4 right-4 text-art-text hover:text-art-orange transition-colors" type="button">
           <X size={24} />
         </button>
@@ -119,61 +149,18 @@ export const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOp
               </div>
             )}
             
-            {showTokenInput ? (
-              <div className="flex gap-2 w-full mt-2">
-                <input 
-                  type="password"
-                  id="adminTokenInput"
-                  placeholder="Masukkan Token Admin"
-                  className="w-full border border-art-text/30 px-3 py-2 rounded-lg text-xs outline-none focus:border-art-orange"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      if (e.currentTarget.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com' || user?.email === 'mrahmanfm@gmail.com') {
-                        localStorage.setItem('isAdminValid', 'true');
-                        window.dispatchEvent(new Event('adminModeToggled'));
-                        onClose();
-                      } else {
-                        customAlert('Token salah!');
-                      }
-                    }
-                  }}
-                />
-                <button 
-                  onClick={() => {
-                    playClick();
-                    const inputElement = document.getElementById('adminTokenInput') as HTMLInputElement;
-                    if (inputElement) {
-                      if (inputElement.value === 'Fajmuls22' || user?.email === 'mrachmanfm@gmail.com' || user?.email === 'mrahmanfm@gmail.com') {
-                        localStorage.setItem('isAdminValid', 'true');
-                        window.dispatchEvent(new Event('adminModeToggled'));
-                        onClose();
-                      } else {
-                        customAlert('Token salah!');
-                      }
-                    }
-                  }}
-                  className="bg-art-text text-white px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap"
-                >
-                  Go
-                </button>
-              </div>
-            ) : (
+            {isAdmin && user && (
               <button 
                 onClick={(e) => { 
                   playClick(); 
-                  if (user?.email === 'mrachmanfm@gmail.com' || user?.email === 'mrahmanfm@gmail.com') {
-                    localStorage.setItem('isAdminValid', 'true');
-                    window.dispatchEvent(new Event('adminModeToggled'));
-                    onClose();
-                  } else {
-                    setShowTokenInput(true);
-                  }
+                  localStorage.setItem('isAdminValid', 'true');
+                  window.dispatchEvent(new Event('adminModeToggled'));
+                  onClose();
                 }} 
-                className="flex items-center justify-center gap-2 border border-art-text/30 py-2 px-4 rounded-lg hover:bg-art-text/10 transition-colors mt-2 text-art-text/50 w-full"
+                className="flex items-center justify-center gap-2 border border-art-text bg-art-text text-white py-3 px-4 rounded-lg hover:bg-art-text/90 transition-all mt-4 w-full shadow-[4px_4px_0px_0px_rgba(255,107,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none"
                 onMouseEnter={playHover}
               >
-                <span className="font-bold text-[10px] uppercase tracking-widest">Mode Admin</span>
+                <span className="font-black text-[10px] uppercase tracking-[0.2em]">Masuk Mode Admin</span>
               </button>
             )}
           </div>

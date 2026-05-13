@@ -74,24 +74,38 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-3xl md:text-5xl mb-3 tracking-[0.2em]">{config.homepage.heroTitlePrefix}</span>}
                 {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
               </h1>
-              
-              <p className="text-sm md:text-base font-bold text-white/70 leading-relaxed max-w-2xl mb-10 uppercase italic mx-auto">
-                {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
-              </p>
 
-              <div className="flex flex-col sm:flex-row gap-6 items-center justify-center mt-6 w-full">
-                <div className="flex flex-wrap gap-4 justify-center w-full sm:w-auto">
+              {config?.homepage?.heroSlogan && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-8 p-3 px-8 bg-white/10 backdrop-blur-md border-2 border-art-orange/30 rounded-2xl rotate-1 shadow-art-orange/20 shadow-lg"
+                >
+                  <p className="text-lg md:text-2xl font-black text-white italic tracking-widest uppercase">
+                    "{config.homepage.heroSlogan}"
+                  </p>
+                </motion.div>
+              )}
+              
+              <div className="flex flex-col items-center gap-4 mb-4">
+                <p className="text-sm md:text-base font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
+                  {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-6 items-center justify-center mt-2 w-full">
+                <div className="flex flex-wrap gap-5 justify-center w-full sm:w-auto">
                   <Button 
                     onClick={onExplore}
-                    className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-art-orange shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+                    className="px-10 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[8px_8px_0px_0px_rgba(255,107,0,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:bg-orange-400 hover:border-white transition-all flex items-center gap-2 group ring-offset-2 ring-art-orange focus:ring-2"
                   >
-                    View Destinations <ChevronRight size={18} />
+                    View Destinations <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button 
                     onClick={onBooking}
-                    className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-amber-500 text-white border-2 border-amber-500 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] hover:bg-amber-600 hover:border-amber-600 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+                    className="px-10 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-amber-500 text-white border-2 border-white/20 shadow-[8px_8px_0px_0px_rgba(245,158,11,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:bg-amber-400 hover:border-white transition-all flex items-center gap-2 group ring-offset-2 ring-amber-500 focus:ring-2"
                   >
-                    Explore Trips <Calendar size={18} />
+                    Explore Trips <Calendar size={18} className="group-hover:rotate-12 transition-transform" />
                   </Button>
                 </div>
                 
@@ -112,6 +126,20 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   </div>
                 </div>
               </div>
+
+
+              {config?.homepage?.heroTagline && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="mt-12 px-6 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full inline-block"
+                >
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-art-orange drop-shadow-sm">
+                    {config.homepage.heroTagline}
+                  </p>
+                </motion.div>
+              )}
             </motion.div>
           </div>
           
@@ -137,11 +165,11 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </div>
               </div>
               
-              {/* Enlarged MDPL Circle */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-art-text rounded-full border-4 border-white flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
+              {/* MDPL Circle */}
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
                 <p className="text-xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
-                <p className="text-[10px] font-black text-white/80 uppercase tracking-[0.3em] mt-1">MDPL</p>
-                <div className="w-8 h-1 bg-art-orange mt-1.5 rounded-full"></div>
+                <p className="text-[10px] font-black text-art-orange uppercase tracking-[0.3em] mt-1">MDPL</p>
+                <div className="w-8 h-1 bg-white/20 mt-1.5 rounded-full"></div>
               </div>
             </motion.div>
           </div>

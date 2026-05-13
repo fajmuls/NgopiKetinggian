@@ -63,8 +63,12 @@ export const Header = ({
                       className="w-full p-3 px-4 flex items-center justify-between hover:bg-art-bg transition-colors group/item"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-art-text/10 ${item.type === 'section' ? 'bg-art-orange/10 text-art-orange' : 'bg-art-text/10 text-art-text'}`}>
-                          {item.type === 'section' ? <Search size={12} /> : <Mountain size={12} />}
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border border-art-text/10 overflow-hidden ${item.type === 'section' ? 'bg-art-orange/10 text-art-orange' : 'bg-art-text/10 text-art-text'}`}>
+                          {item.image ? (
+                            <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+                          ) : (
+                            item.type === 'section' ? <Search size={14} /> : <Mountain size={14} />
+                          )}
                         </div>
                         <div className="text-left">
                           <p className="text-[10px] font-black uppercase text-art-text tracking-widest group-hover/item:text-art-orange transition-colors">{item.name}</p>
@@ -109,18 +113,45 @@ export const Header = ({
             initial={{ height: 0, opacity: 0 }} 
             animate={{ height: 'auto', opacity: 1 }} 
             exit={{ height: 0, opacity: 0 }} 
-            className="md:hidden bg-white border-t-2 border-art-text overflow-hidden shadow-2xl"
+            className="md:hidden bg-white border-t-2 border-art-text overflow-visible shadow-2xl"
           >
-             <div className="p-3 space-y-3 bg-art-bg/20">
-                <div className="relative group">
+             <div className="p-3 space-y-3 bg-art-bg/20 border-b border-art-text/10 overflow-visible">
+                <div className="relative">
                   <input 
                     type="text" 
-                    placeholder="Destination..."
-                    className="w-full bg-white border-2 border-art-text py-2 pl-4 pr-10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all shadow-sm"
+                    placeholder="Cari Gunung..."
+                    className="w-full bg-white border-2 border-art-text py-2.5 pl-4 pr-10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all shadow-sm"
                     value={searchQuery}
                     onChange={onSearchChange}
+                    onFocus={() => searchQuery && setShowSearchDropdown(true)}
                   />
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40" size={12} />
+                  
+                  <AnimatePresence>
+                    {showSearchDropdown && searchResults.length > 0 && isMenuOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-art-text rounded-xl shadow-xl overflow-hidden z-[120]">
+                        {searchResults.slice(0, 5).map((item: any, idx: number) => (
+                          <button 
+                            key={idx}
+                            onClick={() => { onExecuteSearch(item); setIsMenuOpen(false); }}
+                            className="w-full p-3 px-4 flex items-center justify-between border-b border-art-text/5 last:border-0 hover:bg-art-bg"
+                          >
+                             <div className="flex items-center gap-3">
+                                {item.image ? (
+                                  <img src={item.image} className="w-8 h-8 rounded-lg object-cover border border-art-text/10" alt={item.name} />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center border border-art-text/10"><Mountain size={12} /></div>
+                                )}
+                                <div className="text-left">
+                                   <p className="text-[10px] font-black uppercase text-art-text tracking-widest">{item.name}</p>
+                                </div>
+                             </div>
+                             <ChevronRight size={10} className="text-art-orange" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div className="flex flex-col gap-2">

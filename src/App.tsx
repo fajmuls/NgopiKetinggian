@@ -85,17 +85,25 @@ export default function App() {
   const getSearchResults = () => {
      if (!searchQuery) return [];
      const q = searchQuery.toLowerCase();
-     const results = [];
-     if ('fasilitas'.includes(q) || 'premium'.includes(q)) {
-        results.push({ type: 'section', id: 'fasilitas', name: 'Fasilitas & Layanan' });
+     const results: any[] = [];
+     if ('fasilitas'.includes(q) || 'premium'.includes(q) || 'trip'.includes(q)) {
+        results.push({ type: 'section', id: 'trip', name: 'Fasilitas Trip' });
      }
      if ('gunung'.includes(q) || 'destinasi'.includes(q)) {
-        results.push({ type: 'section', id: 'destinasi', name: 'Semua Gunung & Destinasi' });
+        results.push({ type: 'section', id: 'destinasi', name: 'Destinasi Gunung' });
      }
      
-     destinationsData.forEach(d => {
-        if (d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q)) {
-           results.push({ type: 'mountain', id: d.id, name: d.name });
+     // Search in destinations
+     config.destinationsData.forEach((d: any) => {
+        if (d.name.toLowerCase().includes(q) || (d.desc && d.desc.toLowerCase().includes(q))) {
+           results.push({ type: 'mountain', id: d.id, name: d.name, image: d.image });
+        }
+     });
+
+     // Search in open trips
+     (config.openTrips || []).forEach((ot: any) => {
+        if (ot.name.toLowerCase().includes(q)) {
+           results.push({ type: 'mountain', id: ot.id, name: ot.name, image: ot.image });
         }
      });
      
@@ -170,6 +178,14 @@ export default function App() {
 
   const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   
+  // Sync sound volume to localStorage for useSound hook
+  useEffect(() => {
+    if (config?.homepage?.soundVolume !== undefined) {
+      localStorage.setItem('appVolume', config.homepage.soundVolume.toString());
+      window.dispatchEvent(new Event('volumeChange'));
+    }
+  }, [config?.homepage?.soundVolume]);
+
   const currentDestinations = config.destinationsData;
   const currentTripLeaders = config.tripLeaders;
   const galleryPhotos = (config.galleryPhotos || []).filter((p: any) => !p.isHidden);
@@ -484,7 +500,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       </section>
 
       {/* Fasilitas / Include Paket Section */}
-      <section id="fasilitas" className="py-20 md:py-24 bg-art-green text-white relative overflow-hidden">
+      <section id="trip" className="py-20 md:py-24 bg-art-green text-white relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay">
           <img src="https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover opacity-40" alt="Mountain bg" />
         </div>
@@ -631,8 +647,8 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         <div className="w-full max-w-7xl mx-auto px-4 md:px-12 py-12 flex items-center justify-center relative">
           <div className="absolute top-0 right-12 w-24 h-24 bg-art-orange rounded-full mix-blend-multiply blur-xl opacity-50 pointer-events-none"></div>
           <div className="absolute bottom-0 left-12 w-32 h-32 bg-art-green rounded-full mix-blend-multiply blur-xl opacity-50 pointer-events-none"></div>
-          <a href="#destinasi" onClick={(e) => scrollToSection(e, 'destinasi')} className="w-full block hover:scale-[1.02] transition-transform duration-500 z-10 flex justify-center">
-            <img src="https://files.catbox.moe/lbf6xr.png" alt="Promo Promo Trip Ngopi" className="w-full max-w-4xl h-auto object-contain rounded-3xl shadow-2xl border-[6px] md:border-[10px] border-white" />
+          <a href={config.homepage?.promoBannerLink || "#destinasi"} onClick={(e) => scrollToSection(e, config.homepage?.promoBannerLink?.replace('#', '') || 'destinasi')} className="w-full block hover:scale-[1.02] transition-transform duration-500 z-10 flex justify-center">
+            <img src={config.homepage?.promoBannerImg || "https://files.catbox.moe/lbf6xr.png"} alt="Promo Promo Trip Ngopi" className="w-full max-w-4xl h-auto object-contain rounded-3xl shadow-2xl border-[6px] md:border-[10px] border-white" />
           </a>
         </div>
       </section>
