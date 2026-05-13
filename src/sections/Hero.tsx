@@ -91,7 +91,23 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     className="p-2 px-4 md:p-3 md:px-8 bg-black/40 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)] z-30 max-w-[90vw] mx-auto flex justify-center text-center w-full sm:w-auto"
                   >
                     <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.1em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center justify-center gap-2 flex-wrap sm:flex-nowrap">
-                      <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span> <span className="text-center w-full sm:w-auto">{config.homepage.heroTagline}</span> <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span>
+                      <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span> <span className="text-center w-full sm:w-auto">
+                        {config.homepage.heroTagline.split('').map((char: string, i: number) => (
+                          <motion.span
+                            key={i}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.1, delay: i * 0.05 }}
+                          >
+                            {char}
+                          </motion.span>
+                        ))}
+                        <motion.span
+                          animate={{ opacity: [1, 0, 1] }}
+                          transition={{ repeat: Infinity, duration: 0.8 }}
+                          className="inline-block w-1.5 h-3 md:w-2 md:h-4 bg-art-orange ml-1 align-middle"
+                        />
+                      </span> <span className="text-art-orange shrink-0 hidden sm:inline-block">★</span>
                     </p>
                   </motion.div>
                 ) : null;
@@ -158,8 +174,30 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                         <div className="absolute inset-0 bg-art-text/10 mix-blend-multiply pointer-events-none" />
                         
                         {/* Mountain Name - Transparent Background */}
-                        <div className="absolute bottom-6 md:bottom-10 left-4 md:left-8 right-4 md:right-8 pointer-events-none drop-shadow-2xl text-center px-4">
-                          <p className="text-2xl md:text-4xl font-black uppercase text-white leading-none tracking-tighter drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">{slides[currentSlide]?.name}</p>
+                        <div className="absolute bottom-4 md:bottom-8 left-4 md:left-6 right-4 md:right-6 pointer-events-none drop-shadow-2xl text-left">
+                          {(() => {
+                            const nameObj = slides[currentSlide]?.name || "";
+                            let prefix = "";
+                            let theRest = nameObj;
+                            if (nameObj.toLowerCase().startsWith("gunung ")) {
+                              prefix = "Gunung";
+                              theRest = nameObj.substring(7);
+                            } else if (nameObj.toLowerCase().startsWith("mt. ")) {
+                              prefix = "Mt.";
+                              theRest = nameObj.substring(4);
+                            } else if (nameObj.toLowerCase().startsWith("bukit ")) {
+                              prefix = "Bukit";
+                              theRest = nameObj.substring(6);
+                            }
+                            return (
+                              <div className="flex flex-col">
+                                {prefix && (
+                                  <p className="text-3xl md:text-5xl font-serif italic normal-case text-art-orange opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] -mb-2 md:-mb-4 ml-1 relative z-10">{prefix}</p>
+                                )}
+                                <p className="text-3xl md:text-5xl font-black uppercase text-white leading-[0.9] tracking-tighter drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] relative z-20 break-words">{theRest}</p>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                       

@@ -106,12 +106,12 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
 
   return (
     <div className="space-y-4 bg-white border-2 border-art-text rounded-2xl overflow-hidden shadow-sm">
-      <div className="bg-art-text text-white p-3 flex justify-between items-center">
+      <div className="bg-art-text text-white p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-2">
           <Clock size={16} />
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">{title}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <select
             value=""
             onChange={(e) => {
@@ -170,7 +170,7 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
               }
               e.target.value = ""; // reset
             }}
-            className="bg-white/10 text-white border border-white/20 px-2 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-text transition-all mr-2 outline-none cursor-pointer"
+            className="bg-white/10 text-white border border-white/20 px-2 py-1.5 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-text transition-all flex-1 sm:flex-none sm:mr-2 outline-none cursor-pointer"
           >
             <option value="" className="text-art-text">Terapkan Template...</option>
             <option value="1" className="text-art-text">Template 1 Hari (Tektok)</option>
@@ -185,7 +185,7 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
               const nextDay = Math.max(...items.map(i => Number(i.day)), 0) + 1;
               addItem(nextDay);
             }}
-            className="bg-art-orange text-white px-3 py-1 rounded text-[8px] font-black uppercase hover:bg-white hover:text-art-orange transition-all border border-transparent hover:border-art-orange shadow-sm"
+            className="bg-art-orange text-white px-3 py-1.5 rounded text-[8px] shrink-0 font-black uppercase hover:bg-white hover:text-art-orange transition-all border border-transparent hover:border-art-orange shadow-sm"
           >
             + Tambah Hari
           </button>
@@ -225,10 +225,10 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
               </button>
             </div>
 
-            <div className="space-y-2 pl-2">
+            <div className="space-y-2 pl-0 sm:pl-2">
               {items.filter(i => i.day === day).map((item) => (
-                <div key={item.id} className="flex gap-2 items-center group">
-                  <div className="w-20 shrink-0 relative">
+                <div key={item.id} className="flex gap-1.5 sm:gap-2 items-center group">
+                  <div className="w-16 sm:w-20 shrink-0 relative">
                     <input 
                       type="time"
                       className="w-full border-2 border-art-text/10 p-1 rounded-lg text-[10px] font-bold outline-none focus:border-art-orange bg-art-bg/20 font-mono"
@@ -239,7 +239,7 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
                   <div className="flex-1">
                     <input 
                       type="text"
-                      className="w-full border-2 border-art-text/10 p-1.5 rounded-lg text-[10px] font-medium outline-none focus:border-art-orange"
+                      className="w-full border-2 border-art-text/10 p-1.5 rounded-lg text-[10px] sm:text-[10px] font-medium outline-none focus:border-art-orange"
                       value={item.activity}
                       placeholder="Contoh: Briefing & Start Trekking"
                       onChange={(e) => updateItem(item.id, 'activity', e.target.value)}
@@ -248,7 +248,7 @@ export const RundownEditor = ({ value, onChange, title = "Editor Rundown" }: Run
                   <button 
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    className="p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                   >
                     <Trash2 size={14} />
                   </button>

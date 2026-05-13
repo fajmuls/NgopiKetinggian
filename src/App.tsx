@@ -274,7 +274,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               {loading ? (
                 <Coffee size={48} className="animate-pulse text-art-orange" />
               ) : (
-                <img src={config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain p-2" />
+                <img src={config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo Ngopi Ketinggian" className="w-full h-full object-cover" />
               )}
             </motion.div>
             <motion.h1 
@@ -548,9 +548,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="bg-art-bg p-1 rounded-3xl border-2 border-art-text/20 shadow-[16px_16px_0px_0px_#ffffff20] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#ffffff20] transition-all"
+              className="bg-art-bg p-1 rounded-3xl border-2 border-art-text shadow-[16px_16px_0px_0px_#1a1a1a] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#1a1a1a] transition-all"
             >
-              <div className="bg-black/30 backdrop-blur-sm rounded-[1.25rem] p-8 h-full text-white border border-white/10">
+              <div className="bg-art-text rounded-[1.25rem] p-8 h-full text-white border-2 border-art-text/10">
                 <div className="flex justify-between items-start mb-8">
                   <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
                     <div className="w-10 h-10 bg-art-orange rounded-xl flex items-center justify-center shadow-lg"><CheckCircle2 size={20} className="text-white" /></div>
