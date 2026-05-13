@@ -15,6 +15,7 @@ import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, WEBSITE_VERSION } from './useAppConfig';
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf } from './lib/pdf-utils';
+import { useSound } from './hooks/useSound';
 
 import { customConfirm, customAlert } from './GlobalDialog';
 
@@ -35,6 +36,7 @@ export const AdminPanelModal = ({
   defaultLists: any,
   showToast: (msg: string, type?: 'success' | 'info' | 'error') => void
 }) => {
+  const { playClick, playBack } = useSound();
   const [activeCategory, setActiveCategory] = useState<'booking' | 'trip' | 'website'>('booking');
   const [activeTab, setActiveTab] = useState<string>('bookings');
   const [openTripPrefill, setOpenTripPrefill] = useState<any>(null);
@@ -71,6 +73,7 @@ export const AdminPanelModal = ({
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => {
+                  playClick();
                   customConfirm("Jadikan pengaturan saat ini sebagai default global? Tindakan ini tidak bisa dibatalkan.", async () => {
                     try {
                       const { writeBatch, doc } = await import('firebase/firestore');
@@ -111,6 +114,7 @@ export const AdminPanelModal = ({
               </button>
               <button 
                 onClick={() => {
+                  playClick();
                   customConfirm("Kembalikan ke pengaturan awal tersimpan?", async () => {
                     await revertToDefault();
                     showToast("Direset ke default!", "success");
@@ -121,7 +125,7 @@ export const AdminPanelModal = ({
                 Reset Default
               </button>
               <div className="w-[1px] h-6 bg-art-text/10 mx-1"></div>
-              <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
+              <button onClick={() => { playBack(); onClose(); }} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
             </div>
           </div>
           <div className="flex gap-2 px-4 pb-2 border-t border-art-text/10 pt-2">

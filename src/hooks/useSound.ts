@@ -9,6 +9,18 @@ const debouncePlay = (fn: () => void) => {
   fn();
 };
 
+let sharedCtx: AudioContext | null = null;
+const initCtx = () => {
+  if (sharedCtx) {
+    if (sharedCtx.state === 'suspended') sharedCtx.resume();
+    return sharedCtx;
+  }
+  const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioContextClass) return null;
+  sharedCtx = new AudioContextClass();
+  return sharedCtx;
+};
+
 export const useSound = () => {
   const [volume, setVolume] = useState(() => {
     const saved = localStorage.getItem('appVolume');
@@ -24,11 +36,16 @@ export const useSound = () => {
     return () => window.removeEventListener('volumeChange', handleStorage);
   }, []);
 
-  const initCtx = () => {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContext) return null;
-    return new AudioContext();
-  };
+  // Pre-warm context on first user interaction if possible
+  useEffect(() => {
+    const warm = () => initCtx();
+    window.addEventListener('touchstart', warm, { once: true });
+    window.addEventListener('mousedown', warm, { once: true });
+    return () => {
+      window.removeEventListener('touchstart', warm);
+      window.removeEventListener('mousedown', warm);
+    };
+  }, []);
 
   const playClick = useCallback(() => debouncePlay(() => {
     try {
@@ -156,4 +173,3 @@ export const useSound = () => {
 
   return { playClick, playHover, playSuccess, playPop, playBack };
 };
-

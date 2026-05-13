@@ -99,8 +99,14 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
               <p className="text-[8px] font-bold text-art-text/30 uppercase tracking-widest">{String(dest.height).replace(/mdpl/i, '').trim()} MDPL</p>
            </div>
            <div className="text-right">
-              <p className="text-[9px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>
-              <p className="text-lg md:text-xl font-black text-art-text">Rp {dest.paths?.[0]?.durations?.[0]?.price || '0'}k</p>
+              {dest.enablePrivateTrip !== false ? (
+                <>
+                  <p className="text-[9px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>
+                  <p className="text-lg md:text-xl font-black text-art-text">Rp {dest.paths?.[0]?.durations?.[0]?.price || '0'}k</p>
+                </>
+              ) : (
+                <p className="text-[9px] font-black uppercase text-art-text/30 border border-art-text/10 px-2 py-1 rounded">Private Trip Closed</p>
+              )}
            </div>
         </div>
 
@@ -195,16 +201,30 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                        </div>
 
 
-                       <div className="bg-art-orange/10 p-4 rounded-xl border border-dashed border-art-orange/30">
-                          <div className="flex justify-between items-center mb-1">
-                             <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
-                             <div className="flex items-center gap-2">
-                                {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
-                                <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
-                             </div>
+                       {currentDur.tripContent && (
+                          <div className="bg-blue-50 border-2 border-blue-200 p-4 rounded-xl mb-4">
+                            <p className="text-[9px] font-black uppercase text-blue-600 mb-1 flex items-center gap-1"><Info size={12} /> Info Penting</p>
+                            <p className="text-[10px] font-bold text-blue-900 leading-relaxed italic whitespace-pre-wrap">{currentDur.tripContent}</p>
                           </div>
-                          <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Per Orang (Min. 2 Pax)</p>
-                       </div>
+                       )}
+
+                       {dest.enablePrivateTrip !== false ? (
+                          <div className="bg-art-orange/10 p-4 rounded-xl border border-dashed border-art-orange/30">
+                             <div className="flex justify-between items-center mb-1">
+                                <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
+                                <div className="flex items-center gap-2">
+                                   {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
+                                   <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
+                                </div>
+                             </div>
+                             <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Per Orang (Min. 2 Pax)</p>
+                          </div>
+                       ) : (
+                          <div className="bg-gray-100 p-4 rounded-xl border-2 border-gray-200 text-center">
+                            <p className="text-xs font-black uppercase text-gray-400">Pemesanan Private Trip Sedang Ditutup</p>
+                            <p className="text-[8px] font-bold text-gray-300 uppercase mt-1">Silakan cek Open Trip yang tersedia</p>
+                          </div>
+                       )}
 
                        {(() => {
                           const durInfo = currentDur;
@@ -244,16 +264,18 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                        })()}
                     </div>
 
-                    <Button 
-                      variant="primary" 
-                      className="w-full py-4 text-xs font-black uppercase tracking-[0.2em] bg-art-orange shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none transition-all"
-                      onClick={() => {
-                        onBook(dest.name, currentPath.name, currentDur?.label || "", "private");
-                        setShowDetails(false);
-                      }}
-                    >
-                      Booking Private Trip
-                    </Button>
+                    {dest.enablePrivateTrip !== false && (
+                      <Button 
+                        variant="primary" 
+                        className="w-full py-4 text-xs font-black uppercase tracking-[0.2em] bg-art-orange shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none transition-all"
+                        onClick={() => {
+                          onBook(dest.name, currentPath.name, currentDur?.label || "", "private");
+                          setShowDetails(false);
+                        }}
+                      >
+                        Booking Private Trip
+                      </Button>
+                    )}
                   </div>
                </motion.div>
              )}

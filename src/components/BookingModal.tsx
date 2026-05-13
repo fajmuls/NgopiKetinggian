@@ -1030,9 +1030,9 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                                               )}
                                                           </div>
                                                           <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
-                                                             <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, -1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
+                                                             <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, sub.name, -1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
                                                              <span className="w-5 text-center font-black text-[10px] text-art-text">{qty}</span>
-                                                             <button type="button" onClick={() => handleUpdateSubItem(opt.name, sub.name, 1)} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
+                                                             <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, sub.name, 1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
                                                           </div>
                                                        </div>
                                                     );

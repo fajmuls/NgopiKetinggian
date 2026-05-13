@@ -88,7 +88,17 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
           <button type="button" onClick={(e) => {
              e.preventDefault();
              const nd = [...data];
-             nd.unshift({ id: Date.now().toString(), name: "Gunung Baru", desc: "Deskripsi", region: "Jawa", difficulty: "Pemula", image: "https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?w=500", paths: [] });
+             nd.unshift({ 
+               id: Date.now().toString(), 
+               name: "Gunung Baru", 
+               desc: "Deskripsi", 
+               region: "Jawa", 
+               difficulty: "Pemula", 
+               image: "https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?w=500", 
+               paths: [],
+               enablePrivateTrip: true,
+               privateTripContent: ""
+             });
              setData(nd);
              setExpandedIndexes([0]);
           }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Destinasi</button>
@@ -135,24 +145,43 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
         return (
         <div key={i} className={`bg-white p-4 rounded-lg border-2 ${dest.isActive !== false ? 'border-art-text' : 'border-gray-300 opacity-70'} space-y-4 relative w-full overflow-hidden`}>
           <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 z-10 bg-white/80 backdrop-blur-sm p-1 rounded-md">
-            <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
+            <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm mr-2">
                 <button type="button" onClick={() => moveDestination(i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
                 <button type="button" onClick={() => moveDestination(i, 'down')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
                 <button onClick={() => {
                    const nd = [...data]; nd.splice(i, 1); setData(nd);
                 }} className="p-1.5 text-red-500 hover:bg-red-50 shadow-sm" title="Hapus"><Trash2 size={16}/></button>
             </div>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60 hidden sm:inline">Aktif?</span>
-            <input 
-              type="checkbox" 
-              className="w-4 h-4 accent-art-orange"
-              checked={dest.isActive !== false}
-              onChange={(e) => {
-                const nd = [...data];
-                nd[i].isActive = e.target.checked;
-                setData(nd);
-              }}
-            />
+            
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60">Private?</span>
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 accent-art-orange"
+                  checked={dest.enablePrivateTrip !== false}
+                  onChange={(e) => {
+                    const nd = [...data];
+                    nd[i].enablePrivateTrip = e.target.checked;
+                    setData(nd);
+                  }}
+                />
+              </label>
+              
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-art-text/60">Aktif?</span>
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 accent-art-orange"
+                  checked={dest.isActive !== false}
+                  onChange={(e) => {
+                    const nd = [...data];
+                    nd[i].isActive = e.target.checked;
+                    setData(nd);
+                  }}
+                />
+              </label>
+            </div>
           </div>
           <div className="flex items-center gap-4 pr-16 sm:pr-32">
             <button
@@ -387,12 +416,21 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                         }} 
                         placeholder="Final" 
                       />
-                      <button onClick={(e) => {
-                        e.preventDefault();
-                        const nd = [...data];
-                        nd[i].paths[pIdx].durations[j].showRundown = !nd[i].paths[pIdx].durations[j].showRundown;
-                        setData(nd);
-                      }} className={`p-2 rounded flex items-center gap-2 ${dur.showRundown ? 'bg-art-orange text-white' : 'bg-white border-2 border-art-text text-art-text hover:bg-gray-100'}`}>
+                  <button type="button" onClick={(e) => {
+                    e.preventDefault();
+                    const nd = [...data];
+                    nd[i].paths[pIdx].durations[j].showTripContent = !nd[i].paths[pIdx].durations[j].showTripContent;
+                    setData(nd);
+                  }} className={`p-2 rounded flex items-center gap-2 ${dur.showTripContent ? 'bg-art-text text-white' : 'bg-white border-2 border-art-text text-art-text hover:bg-gray-100'}`}>
+                    <Plus size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{dur.showTripContent ? 'Tutup Konten' : 'Tambah Konten Trip'}</span>
+                  </button>
+                  <button onClick={(e) => {
+                    e.preventDefault();
+                    const nd = [...data];
+                    nd[i].paths[pIdx].durations[j].showRundown = !nd[i].paths[pIdx].durations[j].showRundown;
+                    setData(nd);
+                  }} className={`p-2 rounded flex items-center gap-2 ${dur.showRundown ? 'bg-art-orange text-white' : 'bg-white border-2 border-art-text text-art-text hover:bg-gray-100'}`}>
                         <FileText size={16} />
                         <span className="text-[10px] font-black uppercase tracking-widest">{dur.showRundown ? 'Tutup Rundown' : 'Edit Rundown'}</span>
                       </button>
@@ -402,6 +440,24 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                         setData(nd);
                       }} className="text-red-500 p-2"><Trash2 size={16} /></button>
                     </div>
+                    {dur.showTripContent && (
+                      <div className="bg-white border-2 border-art-text p-3 rounded-lg mt-2 mb-4 space-y-3">
+                         <div className="flex justify-between items-center bg-art-bg p-2 rounded-t-lg -mx-3 -mt-3 mb-3 border-b-2 border-art-text">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-art-text/60">Konten Tambahan Trip (Khusus Private)</span>
+                         </div>
+                         <textarea 
+                            className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium focus:border-art-orange outline-none transition-all resize-none"
+                            rows={4}
+                            value={dur.tripContent || ''}
+                            onChange={e => {
+                              const nd = [...data];
+                              nd[i].paths[pIdx].durations[j].tripContent = e.target.value;
+                              setData(nd);
+                            }}
+                            placeholder="Tuliskan info tambahan khusus untuk durasi ini (misal: Minimal order, upgrade layanan, dll)..."
+                          />
+                      </div>
+                    )}
                     {dur.showRundown && (
                       <div className="bg-white border-2 border-art-text p-3 rounded-lg mt-2 mb-4 space-y-3 relative before:content-[''] before:absolute before:-top-2 before:left-6 before:w-3 before:h-3 before:bg-white before:border-l-2 before:border-t-2 before:border-art-text before:rotate-45">
                          <div className="flex justify-between items-center bg-art-bg p-2 rounded-t-lg -mx-3 -mt-3 mb-3 border-b-2 border-art-text">

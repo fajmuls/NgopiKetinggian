@@ -48,7 +48,7 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
 
          <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
                <button 
-                  onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); }}
+                  onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
                   className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-md group/btn"
                   title="Lihat Rundown (Web)"
                >
@@ -57,6 +57,7 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                <button 
                   onClick={(e) => { 
                      e.stopPropagation(); 
+                     playClick();
                      if (ot.rundownPdf) {
                         window.open(ot.rundownPdf, '_blank');
                      } else {
