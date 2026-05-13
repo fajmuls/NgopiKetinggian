@@ -52,8 +52,8 @@ export const DestinationSection = ({
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">{t('nav.destinations') || 'Private Trip'}</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-                 {t('dest.privateTitle')}
+              <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]">
+                 {useLanguage().lang === 'id' ? <><span className="text-art-orange">Trip</span> Privat.</> : <><span className="text-art-orange">Private</span> Trip.</>}
               </h2>
               <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
                 {t('dest.privateDesc')}

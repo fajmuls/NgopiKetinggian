@@ -120,36 +120,45 @@ export const Header = ({
                   <input 
                     type="text" 
                     placeholder="Cari Gunung..."
-                    className="w-full bg-white border-2 border-art-text py-2.5 pl-4 pr-10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all shadow-sm"
+                    className="w-full bg-white border-2 border-art-text py-3 pl-4 pr-10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all shadow-sm"
                     value={searchQuery}
-                    onChange={onSearchChange}
+                    onChange={(e) => {
+                      onSearchChange(e);
+                      if (e.target.value.length > 0) setShowSearchDropdown(true);
+                    }}
                     onFocus={() => searchQuery && setShowSearchDropdown(true)}
                   />
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40" size={12} />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40" size={14} />
                   
                   <AnimatePresence>
-                    {showSearchDropdown && searchResults.length > 0 && isMenuOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-art-text rounded-xl shadow-xl overflow-hidden z-[120]">
-                        {searchResults.slice(0, 5).map((item: any, idx: number) => (
+                    {showSearchDropdown && searchResults.length > 0 && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="absolute left-0 right-0 mt-3 bg-white border-2 border-art-text rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden z-[1001]"
+                      >
+                        {searchResults.slice(0, 6).map((item: any, idx: number) => (
                           <button 
                             key={idx}
                             onClick={() => { onExecuteSearch(item); setIsMenuOpen(false); }}
-                            className="w-full p-3 px-4 flex items-center justify-between border-b border-art-text/5 last:border-0 hover:bg-art-bg"
+                            className="w-full p-4 px-5 flex items-center justify-between border-b border-art-text/5 last:border-0 hover:bg-art-bg active:bg-art-orange/10 transition-colors"
                           >
-                             <div className="flex items-center gap-3">
+                             <div className="flex items-center gap-4">
                                 {item.image ? (
-                                  <img src={item.image} className="w-8 h-8 rounded-lg object-cover border border-art-text/10" alt={item.name} />
+                                  <img src={item.image} className="w-10 h-10 rounded-lg object-cover border border-art-text/10" alt={item.name} />
                                 ) : (
-                                  <div className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center border border-art-text/10"><Mountain size={12} /></div>
+                                  <div className="w-10 h-10 rounded-lg bg-art-bg flex items-center justify-center border border-art-text/10"><Mountain size={16} /></div>
                                 )}
                                 <div className="text-left">
                                    <p className="text-[10px] font-black uppercase text-art-text tracking-widest">{item.name}</p>
+                                   <p className="text-[8px] font-bold text-art-text/40 uppercase tracking-tighter">{item.type === 'section' ? 'Menu' : 'Gunung'}</p>
                                 </div>
                              </div>
-                             <ChevronRight size={10} className="text-art-orange" />
+                             <ChevronRight size={12} className="text-art-orange" />
                           </button>
                         ))}
-                      </div>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>

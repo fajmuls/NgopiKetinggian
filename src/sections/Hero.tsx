@@ -61,28 +61,28 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase mb-8 drop-shadow-2xl flex flex-col items-center">
+              <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase mb-4 drop-shadow-2xl flex flex-col items-center">
                 {config?.homepage?.heroFeatures && (
                   <motion.span 
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="block text-[#fff7ed] text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mb-6 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-art-orange/20"
+                    className="block text-[#fff7ed] text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mb-4 drop-shadow-none bg-art-orange/90 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-art-orange/20"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
                 )}
-                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-3xl md:text-5xl mb-3 tracking-[0.2em]">{config.homepage.heroTitlePrefix}</span>}
+                {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-3xl md:text-5xl mb-2 tracking-[0.2em]">{config.homepage.heroTitlePrefix}</span>}
                 {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
               </h1>
 
-               {config?.homepage?.heroSlogan && (
+               {config?.homepage?.heroTagline && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mt-12 p-3 px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-xl"
+                  className="mt-4 p-3 px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-xl"
                 >
                   <p className="text-[10px] md:text-xs font-black text-art-orange italic tracking-[0.4em] uppercase">
-                    {config.homepage.heroSlogan}
+                    {config.homepage.heroTagline}
                   </p>
                 </motion.div>
               )}
@@ -97,13 +97,13 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 <div className="flex flex-wrap gap-5 justify-center w-full sm:w-auto">
                   <Button 
                     onClick={onExplore}
-                    className="px-10 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[8px_8px_0px_0px_rgba(255,107,0,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:bg-orange-400 hover:border-white transition-all flex items-center gap-2 group ring-offset-2 ring-art-orange focus:ring-2"
+                    className="px-10 py-5 text-[11px] font-black uppercase tracking-[0.2em] bg-art-orange text-white border-2 border-white/20 shadow-[0_15px_30px_-10px_rgba(255,107,0,0.5)] hover:translate-y-[-4px] hover:shadow-[0_20px_40px_-15px_rgba(255,107,0,0.6)] hover:bg-[#ff8c33] hover:border-white transition-all flex items-center gap-2 group ring-offset-2 ring-art-orange"
                   >
                     View Destinations <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button 
                     onClick={onBooking}
-                    className="px-10 py-4 text-[11px] font-black uppercase tracking-[0.2em] bg-amber-500 text-white border-2 border-white/20 shadow-[8px_8px_0px_0px_rgba(245,158,11,0.3)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:bg-amber-400 hover:border-white transition-all flex items-center gap-2 group ring-offset-2 ring-amber-500 focus:ring-2"
+                    className="px-10 py-5 text-[11px] font-black uppercase tracking-[0.2em] bg-art-text text-white border-2 border-white/20 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.3)] hover:translate-y-[-4px] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.4)] hover:bg-black hover:border-white transition-all flex items-center gap-2 group ring-offset-2"
                   >
                     Explore Trips <Calendar size={18} className="group-hover:rotate-12 transition-transform" />
                   </Button>

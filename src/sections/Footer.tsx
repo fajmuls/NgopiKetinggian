@@ -45,7 +45,7 @@ export const Footer = ({ config }: any) => {
                 { name: 'Story', link: '#cerita' },
                 { name: 'Fasilitas Trip', link: '#trip' },
                 { name: 'Open Trip', link: '#trips' },
-                { name: 'Destination', link: '#destinasi' },
+                { name: 'Private Trip', link: '#destinasi-private' },
                 { name: 'About Us', link: '#tentang-kami' }
               ].map((item) => (
                 <li key={item.name}>

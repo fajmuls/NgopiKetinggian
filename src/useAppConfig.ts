@@ -188,7 +188,7 @@ const getDefaultWebsiteData = () => ({
     heroTagline: "Sederhana tapi berkesan",
     heroPhotoUrl: "",
     footerDesc: "Provider layanan pendakian gunung premium dengan standar keamanan tinggi dan kenyamanan maksimal.",
-    officeEmail: "mrachmanfm@gmail.com",
+    officeEmail: "siliwangiputra1510@gmail.com",
     officePhone: "628123456789",
     officeAddress: "Jl. Raya Puncak, Bogor, Jawa Barat",
     officeMaps: "https://goo.gl/maps/example",
