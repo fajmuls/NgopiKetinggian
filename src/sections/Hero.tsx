@@ -35,20 +35,20 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
           <motion.div
             key={currentSlide}
             initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 0.4, scale: 1 }}
+            animate={{ opacity: 0.6, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5 }}
             className="absolute inset-0"
           >
             <img 
               src={slides[currentSlide]?.image} 
-              className="w-full h-full object-cover grayscale" 
+              className="w-full h-full object-cover" 
               alt="Hero background"
             />
           </motion.div>
         </AnimatePresence>
-        <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-gradient-to-b from-art-text/90 via-art-text/50 to-art-text/95" />
+        <div className="absolute inset-0 bg-black/20 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-b from-art-text/60 via-transparent to-art-text/90" />
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pt-0 pb-16">
