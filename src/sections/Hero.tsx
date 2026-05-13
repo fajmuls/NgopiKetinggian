@@ -75,25 +75,25 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
               </h1>
 
-              {config?.homepage?.heroSlogan && (
+               {config?.homepage?.heroSlogan && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mb-8 p-3 px-8 bg-white/10 backdrop-blur-md border-2 border-art-orange/30 rounded-2xl rotate-1 shadow-art-orange/20 shadow-lg"
+                  className="mt-12 p-3 px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-xl"
                 >
-                  <p className="text-lg md:text-2xl font-black text-white italic tracking-widest uppercase">
-                    "{config.homepage.heroSlogan}"
+                  <p className="text-[10px] md:text-xs font-black text-art-orange italic tracking-[0.4em] uppercase">
+                    {config.homepage.heroSlogan}
                   </p>
                 </motion.div>
               )}
-              
-              <div className="flex flex-col items-center gap-4 mb-4">
+
+              <div className="flex flex-col items-center gap-4 mt-8 mb-8">
                 <p className="text-sm md:text-base font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto">
                   {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-6 items-center justify-center mt-2 w-full">
+              <div className="flex flex-col sm:flex-row gap-8 items-center justify-center w-full">
                 <div className="flex flex-wrap gap-5 justify-center w-full sm:w-auto">
                   <Button 
                     onClick={onExplore}
@@ -126,20 +126,6 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                   </div>
                 </div>
               </div>
-
-
-              {config?.homepage?.heroTagline && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="mt-12 px-6 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full inline-block"
-                >
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-art-orange drop-shadow-sm">
-                    {config.homepage.heroTagline}
-                  </p>
-                </motion.div>
-              )}
             </motion.div>
           </div>
           
@@ -165,11 +151,11 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 </div>
               </div>
               
-              {/* MDPL Circle */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
-                <p className="text-xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
-                <p className="text-[10px] font-black text-art-orange uppercase tracking-[0.3em] mt-1">MDPL</p>
-                <div className="w-8 h-1 bg-white/20 mt-1.5 rounded-full"></div>
+              {/* Larger MDPL Circle */}
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-art-text rounded-full border-4 border-art-orange/20 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20">
+                <p className="text-3xl font-black text-white leading-none tracking-tighter">{slides[currentSlide]?.height}</p>
+                <p className="text-[12px] font-black text-art-orange uppercase tracking-[0.4em] mt-1.5">MDPL</p>
+                <div className="w-12 h-1 bg-white/20 mt-2 rounded-full"></div>
               </div>
             </motion.div>
           </div>

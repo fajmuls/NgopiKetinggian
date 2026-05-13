@@ -19,7 +19,7 @@ export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tri
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">{t('nav.trips')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-art-text uppercase leading-none tracking-tighter">
-              {lang === 'id' ? <><span className="text-art-orange">Trip</span>.</> : <><span className="text-art-orange">Trips</span>.</>}
+              {lang === 'id' ? <><span className="text-art-orange">Open Trip</span>.</> : <><span className="text-art-orange">Open Trips</span>.</>}
             </h2>
             <p className="mt-4 text-[10px] sm:text-xs font-bold text-art-text/60 uppercase tracking-widest max-w-sm">
               {t('trip.openDesc')}
