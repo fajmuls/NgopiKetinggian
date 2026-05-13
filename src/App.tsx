@@ -271,7 +271,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ duration: 1, ease: "easeOut" }}
               className="w-48 h-48 rounded-full overflow-hidden border-4 border-art-text mb-8 mx-auto shadow-2xl relative bg-white"
             >
-              <img src="https://files.catbox.moe/lubzno.png" alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain" />
+              <img src={config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo Ngopi Ketinggian" className="w-full h-full object-contain" />
             </motion.div>
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}
@@ -349,18 +349,6 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
-      {/* Top Slogan Banner */}
-      <div className="bg-art-text py-2 relative z-[110] border-b border-white/5 overflow-hidden">
-        <div className="flex whitespace-nowrap animate-marquee">
-          {[1,2,3,4,5,6].map(i => (
-            <div key={i} className="flex items-center gap-4 px-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/90">{config?.homepage?.heroSub || "Open Trip Eksklusif No. 1"} •</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-art-orange">{config?.homepage?.heroTagline || "Ngopi Di Ketinggian"} •</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Navigation */}
       <Header 
         config={config}
@@ -640,13 +628,13 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                           <PlusCircle size={14} className="text-art-orange" />
                           <span className="text-[11px] md:text-xs font-black uppercase tracking-widest text-white">{opt.name}</span>
                         </div>
-                        {opt.priceInfo && <span className="text-[10px] font-black text-art-orange bg-art-orange/10 px-2 py-0.5 rounded-lg">{opt.priceInfo}</span>}
+                        {opt.priceInfo && <span className="text-[10px] font-black text-art-orange bg-art-orange/10 px-2 py-0.5 rounded-lg">{opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}</span>}
                       </div>
                       {opt.subItems && opt.subItems.length > 0 && (
                         <div className="ml-6 flex flex-wrap gap-2">
                           {opt.subItems.map((sub: any, subIdx: number) => (
                              <span key={subIdx} className="text-[9px] font-bold text-white/40 bg-white/5 px-2 py-1 rounded-md border border-white/5">
-                               {sub.name} {sub.priceInfo ? `- ${sub.priceInfo}` : ''}
+                               {sub.name} {sub.priceInfo ? `- ${sub.priceInfo.toString().toLowerCase().includes('rp') ? sub.priceInfo : `Rp ${sub.priceInfo}`}` : ''}
                              </span>
                           ))}
                         </div>

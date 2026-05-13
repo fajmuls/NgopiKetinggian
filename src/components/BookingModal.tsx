@@ -9,6 +9,7 @@ import { generateRundownPdf, generateInvoice } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
+import { CustomSelect } from './CustomSelect';
 
 
 export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig, setIsHistoryOpen, userBookings }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void, setIsHistoryOpen: (v: boolean) => void, userBookings: any[] }) => {
@@ -841,19 +842,15 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                    <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jalur</label>
-                        <select 
+                        <CustomSelect 
                           name="jalur" 
                           required={currentType !== 'open_request'}
                           value={selectedJalur}
-                          onChange={e => { setSelectedJalur(e.target.value); setSelectedDurasi(''); }}
-                          className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
+                          onChange={(val: string) => { setSelectedJalur(val); setSelectedDurasi(''); }}
                           disabled={!selectedDestinasi || currentType === 'open'}
-                        >
-                          <option value="">-- PILIH JALUR --</option>
-                          {selectedDestinasi && destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.map((p: any) => (
-                             <option key={p.name} value={p.name}>{p.name}</option>
-                          ))}
-                        </select>
+                          placeholder="-- PILIH JALUR --"
+                          options={selectedDestinasi ? (destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.map((p: any) => ({ value: p.name, label: p.name })) || []) : []}
+                        />
                       </div>
                       <div className="relative">
                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Durasi</label>
@@ -862,19 +859,15 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                             <Clock size={12} className="text-art-text/20" /> 2H 1M (Weekend Only)
                           </div>
                         ) : (
-                          <select 
+                          <CustomSelect 
                             name="durasi" 
                             required={currentType !== 'open_request'}
                             value={selectedDurasi}
-                            onChange={e => setSelectedDurasi(e.target.value)}
-                            className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
+                            onChange={(val: string) => setSelectedDurasi(val)}
                             disabled={!selectedJalur || currentType === 'open'}
-                          >
-                            <option value="">-- DURASI --</option>
-                            {selectedJalur && destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.map((dur: any, idx: number) => (
-                               <option key={idx} value={dur.label}>{dur.label}</option>
-                            ))}
-                          </select>
+                            placeholder="-- DURASI --"
+                            options={selectedJalur ? (destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.map((dur: any) => ({ value: dur.label, label: dur.label })) || []) : []}
+                          />
                         )}
                       </div>
                    </div>
@@ -913,49 +906,46 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                         <div className="col-span-2">
                            <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Request Jadwal Weekend (Bulan & Tanggal)</label>
                            <div className="flex gap-2">
-                             <select 
-                               className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange"
+                             <CustomSelect 
                                value={selectedJadwal.split('|')[0] || ''}
-                               onChange={e => setSelectedJadwal(`${e.target.value}|`)}
-                             >
-                                <option value="">-- Bulan --</option>
-                                {Array.from({ length: 6 }).map((_, i) => {
-                                  const d = new Date();
-                                  d.setMonth(d.getMonth() + i);
-                                  const monthStr = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-                                  const monthVal = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}`;
-                                  return <option key={monthVal} value={monthVal}>{monthStr}</option>;
-                                })}
-                             </select>
-                             <select 
-                               className="w-1/2 border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-100"
+                               onChange={(val: string) => setSelectedJadwal(val ? `${val}|` : '')}
+                               placeholder="-- Bulan --"
+                               options={Array.from({ length: 6 }).map((_, i) => {
+                                 const d = new Date();
+                                 d.setMonth(d.getMonth() + i);
+                                 const monthStr = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                                 const monthVal = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}`;
+                                 return { value: monthVal, label: monthStr };
+                               })}
+                               className="w-1/2"
+                             />
+                             <CustomSelect 
                                value={selectedJadwal.split('|')[1] || ''}
-                               onChange={e => setSelectedJadwal(`${selectedJadwal.split('|')[0]}|${e.target.value}`)}
+                               onChange={(val: string) => setSelectedJadwal(`${selectedJadwal.split('|')[0]}|${val}`)}
                                disabled={!selectedJadwal.split('|')[0]}
-                             >
-                                <option value="">-- Tanggal --</option>
-                                {(() => {
-                                   const [monthVal] = selectedJadwal.split('|');
-                                   if (!monthVal) return null;
-                                   const [year, month] = monthVal.split('-').map(Number);
-                                   const daysInMonth = new Date(year, month, 0).getDate();
-                                   
-                                   const weekends = [];
-                                   for (let i = 1; i <= daysInMonth; i++) {
-                                      const date = new Date(year, month - 1, i);
-                                      if (date.getDay() === 6) {
-                                         const endDate = new Date(date);
-                                         endDate.setDate(date.getDate() + 1);
-                                         // User requested: Month should NOT be displayed, only the day.
-                                         // Spanning months should stay as days only.
-                                         weekends.push(`${i}-${endDate.getDate()}`);
-                                      }
-                                   }
-                                   return weekends.map((w, idx) => (
-                                      <option key={idx} value={w}>{w}</option>
-                                   ));
-                                })()}
-                             </select>
+                               placeholder="-- Tanggal --"
+                               className="w-1/2"
+                               options={(() => {
+                                  const [monthVal] = selectedJadwal.split('|');
+                                  if (!monthVal) return [];
+                                  const [year, month] = monthVal.split('-').map(Number);
+                                  const daysInMonth = new Date(year, month, 0).getDate();
+                                  
+                                  const weekends = [];
+                                  for (let i = 1; i <= daysInMonth; i++) {
+                                     const date = new Date(year, month - 1, i);
+                                     if (date.getDay() === 6) {
+                                        const endDate = new Date(date);
+                                        endDate.setDate(date.getDate() + 1);
+                                        weekends.push({
+                                           value: `${i}-${endDate.getDate()}`,
+                                           label: `${i}-${endDate.getDate()}`
+                                        });
+                                     }
+                                  }
+                                  return weekends;
+                               })()}
+                             />
                            </div>
                         </div>
                       ) : (

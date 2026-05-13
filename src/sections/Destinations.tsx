@@ -60,31 +60,53 @@ export const DestinationSection = ({
               </p>
             </div>
 
-            <div className="flex flex-col gap-6 w-full lg:w-auto">
-               <div className="flex flex-col gap-3">
+             <div className="flex flex-col sm:flex-row gap-6 w-full lg:w-auto">
+               <div className="flex flex-col gap-3 relative">
                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Difficulty</p>
-                 <select 
-                   value={filterDifficulty}
-                   onChange={(e) => setFilterDifficulty(e.target.value)}
-                   className="w-full sm:w-48 bg-white border-2 border-art-text p-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-art-orange transition-colors cursor-pointer"
+                 <div
+                   onClick={() => { setIsDiffOpen(!isDiffOpen); setIsRegionOpen(false); }}
+                   className={`w-full sm:w-48 bg-white border-2 border-art-text p-2 px-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-between cursor-pointer transition-colors ${isDiffOpen ? 'border-art-orange text-art-orange' : 'text-art-text hover:border-art-orange'}`}
                  >
-                    {difficulties.map((opt: any) => (
-                      <option key={opt as string} value={opt as string}>{opt as string}</option>
-                    ))}
-                 </select>
+                    <span>{filterDifficulty}</span>
+                    <ChevronDown size={14} className={`transition-transform ${isDiffOpen ? 'rotate-180' : ''}`} />
+                 </div>
+                 {isDiffOpen && (
+                   <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-xl shadow-xl z-50 overflow-hidden">
+                     {difficulties.map((opt: any) => (
+                       <div
+                         key={opt as string}
+                         onClick={() => { setFilterDifficulty(opt as string); setIsDiffOpen(false); }}
+                         className={`px-3 py-2 text-[10px] font-black uppercase cursor-pointer hover:bg-art-bg transition-colors ${filterDifficulty === opt ? 'bg-art-orange/10 text-art-orange' : 'text-art-text'}`}
+                       >
+                         {opt as string}
+                       </div>
+                     ))}
+                   </div>
+                 )}
                </div>
 
-               <div className="flex flex-col gap-3">
+               <div className="flex flex-col gap-3 relative">
                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-art-text/40">Filter by Region</p>
-                 <select 
-                   value={filterRegion}
-                   onChange={(e) => typeof setFilterRegion === 'function' && setFilterRegion(e.target.value)}
-                   className="w-full sm:w-48 bg-white border-2 border-art-text p-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-art-orange transition-colors cursor-pointer"
+                 <div
+                   onClick={() => { setIsRegionOpen(!isRegionOpen); setIsDiffOpen(false); }}
+                   className={`w-full sm:w-48 bg-white border-2 border-art-text p-2 px-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-between cursor-pointer transition-colors ${isRegionOpen ? 'border-art-orange text-art-orange' : 'text-art-text hover:border-art-orange'}`}
                  >
-                    {regions.map((opt: any) => (
-                      <option key={opt as string} value={opt as string}>{opt as string}</option>
-                    ))}
-                 </select>
+                    <span>{filterRegion}</span>
+                    <ChevronDown size={14} className={`transition-transform ${isRegionOpen ? 'rotate-180' : ''}`} />
+                 </div>
+                 {isRegionOpen && (
+                   <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-xl shadow-xl z-50 overflow-hidden max-h-48 overflow-y-auto">
+                     {regions.map((opt: any) => (
+                       <div
+                         key={opt as string}
+                         onClick={() => { typeof setFilterRegion === 'function' && setFilterRegion(opt as string); setIsRegionOpen(false); }}
+                         className={`px-3 py-2 text-[10px] font-black uppercase cursor-pointer hover:bg-art-bg transition-colors ${filterRegion === opt ? 'bg-art-orange/10 text-art-orange' : 'text-art-text'}`}
+                       >
+                         {opt as string}
+                       </div>
+                     ))}
+                   </div>
+                 )}
                </div>
             </div>
           </div>

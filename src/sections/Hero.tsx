@@ -66,14 +66,14 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     key={block}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex text-[#fff7ed] text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] drop-shadow-none bg-art-orange/95 backdrop-blur-sm px-4 py-1.5 md:px-6 md:py-2 rounded-[2rem] border-2 border-white/20 whitespace-normal text-center max-w-[90vw] leading-relaxed shadow-[0_10px_30px_rgba(255,107,0,0.5)] italic z-30"
+                    className="flex text-[#fff7ed] text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] drop-shadow-none bg-art-orange/95 backdrop-blur-sm px-4 py-1.5 md:px-6 md:py-2 rounded-[2rem] border-2 border-white/20 whitespace-normal text-center max-w-[90vw] leading-relaxed shadow-[0_10px_30px_rgba(255,107,0,0.5)] italic z-30"
                   >
                     {config.homepage.heroFeatures}
                   </motion.span>
                 ) : null;
               case 'title':
                 return (
-                  <h1 key={block} className="text-6xl sm:text-7xl md:text-9xl font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center text-center max-w-[95vw] mx-auto break-words z-30">
+                  <h1 key={block} className="text-7xl sm:text-8xl md:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] flex flex-col items-center text-center max-w-[95vw] mx-auto break-words z-30">
                     {config?.homepage?.heroTitlePrefix && <span className="block text-art-orange text-6xl md:text-8xl mb-3 tracking-[0.2em] drop-shadow-[0_10px_20px_rgba(255,107,0,0.6)] font-serif italic normal-case">{config.homepage.heroTitlePrefix}</span>}
                     <span className="relative drop-shadow-[0_10px_20px_rgba(0,0,0,1)] inline-block">
                       {config?.homepage?.heroTitle || "Ngopi Di Puncak Tertinggi."}
@@ -87,10 +87,10 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                     key={block}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)] z-30"
+                    className="p-2 px-6 md:p-3 md:px-8 bg-white/5 backdrop-blur-md border border-white/20 rounded-full rotate-1 shadow-[0_0_20px_rgba(255,107,0,0.3)] z-30 max-w-[90vw] mx-auto flex justify-center text-center"
                   >
-                    <p className="text-[10px] md:text-sm font-serif italic text-white tracking-[0.2em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center gap-2">
-                      <span className="text-art-orange">★</span> {config.homepage.heroTagline} <span className="text-art-orange">★</span>
+                    <p className="text-[9px] md:text-sm font-serif italic text-white tracking-[0.2em] md:tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,107,0,1)] flex items-center justify-center gap-2 flex-wrap">
+                      <span className="text-art-orange shrink-0">★</span> <span className="text-center">{config.homepage.heroTagline}</span> <span className="text-art-orange shrink-0">★</span>
                     </p>
                   </motion.div>
                 ) : null;
