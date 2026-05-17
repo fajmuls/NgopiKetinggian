@@ -5,34 +5,22 @@ import { Button } from '../components/Button';
 import { useSound } from '../hooks/useSound';
 
 const TypewriterText = ({ text }: { text: string }) => {
-  const [displayText, setDisplayText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    const typeSpeed = 50;
-    const deleteSpeed = 30;
-    const pauseBeforeDelete = 2000;
-    const pauseBeforeType = 500;
-
-    if (!isDeleting && displayText === text) {
-      timer = setTimeout(() => setIsDeleting(true), pauseBeforeDelete);
-    } else if (isDeleting && displayText === "") {
-      timer = setTimeout(() => setIsDeleting(false), pauseBeforeType);
-    } else {
-      timer = setTimeout(() => {
-        setDisplayText(prev => 
-          isDeleting 
-            ? prev.slice(0, -1) 
-            : text.slice(0, prev.length + 1)
-        );
-      }, isDeleting ? deleteSpeed : typeSpeed);
-    }
-    
-    return () => clearTimeout(timer);
-  }, [displayText, isDeleting, text]);
-
-  return <>{displayText}</>;
+  return (
+    <motion.span
+      initial={{ width: "0%" }}
+      animate={{ width: "100%" }}
+      transition={{ 
+        duration: 3,
+        ease: "linear",
+        repeat: Infinity,
+        repeatType: "reverse",
+        repeatDelay: 1
+      }}
+      className="inline-block overflow-hidden whitespace-nowrap align-bottom pr-1"
+    >
+      {text}
+    </motion.span>
+  );
 };
 
 export const Hero = ({ config, onExplore, onBooking }: any) => {
@@ -194,8 +182,8 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
                 );
               case 'slider':
                 return config?.homepage?.hideHeroSlider ? null : (
-                  <div key={block} className="block relative lg:mt-8 z-30 w-full">
-                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[300px] md:max-w-md mx-auto lg:ml-auto lg:mr-0">
+                  <div key={block} className="block relative mt-16 md:mt-24 lg:mt-8 z-30 w-full mb-8 lg:mb-0">
+                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative max-w-[280px] md:max-w-md mx-auto lg:ml-auto lg:mr-0">
                       <div className="border border-white/50 p-2 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[10px_10px_0px_0px_#ff6b00] md:shadow-[20px_20px_0px_0px_#ff6b00] rotate-3 overflow-hidden aspect-[4/5] md:aspect-[3/4] relative group scale-105 md:scale-110 object-cover">
                         <AnimatePresence mode="wait">
                           <motion.img 

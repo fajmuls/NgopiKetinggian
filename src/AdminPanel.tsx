@@ -3,7 +3,7 @@ import { BookingsAdmin } from './admin/BookingsAdmin';
 import { DestinationsAdmin } from './admin/DestinationsAdmin';
 import { OpenTripsAdmin } from './admin/OpenTripsAdmin';
 import { TeamPhotosAdmin, LeadersAdmin } from './admin/TeamAndLeadersAdmin';
-import { GalleryAdmin, CeritaAdmin, HomepageAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin, FooterAdmin } from './admin/WebSettingsAdmin';
+import { GalleryAdmin, CeritaAdmin, HomepageAdmin, SplashAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin, FooterAdmin } from './admin/WebSettingsAdmin';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
@@ -160,6 +160,7 @@ export const AdminPanelModal = ({
               {activeCategory === 'website' && (
                 <>
                   <button onClick={() => setActiveTab('homepage')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'homepage' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Branding & Homepage</button>
+                  <button onClick={() => setActiveTab('splash')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'splash' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Awalan (Splash)</button>
                   <button onClick={() => setActiveTab('cerita')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cerita' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Story</button>
                   <button onClick={() => setActiveTab('facilities')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'facilities' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Facilities</button>
                   <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
@@ -193,6 +194,7 @@ export const AdminPanelModal = ({
             {activeTab === 'promoCodes' && <PromoCodesAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cerita' && <CeritaAdmin config={config} updateConfig={updateConfig} showToast={showToast} defaultVideo={defaultLists.cerita} />}
             {activeTab === 'homepage' && <HomepageAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'splash' && <SplashAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'footerAdmin' && <FooterAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cleanupPhotos' && <CleanupPhotosAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
           </div>

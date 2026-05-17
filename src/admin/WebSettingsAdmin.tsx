@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '../lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, ChevronUp, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff, Phone } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Monitor, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, ChevronUp, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff, Phone } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -264,6 +264,90 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
             }} placeholder="Caption" />
           </div>
         ))}
+      </div>
+    </div>
+  );
+};
+
+
+export const SplashAdmin = ({ config, updateConfig, showToast }: any) => {
+  const [data, setData] = useState({
+    splashTitleLine1: config.homepage?.splashTitleLine1 || "Ngopi Di",
+    splashTitleLine2: config.homepage?.splashTitleLine2 || "Ketinggian",
+    splashDesc: config.homepage?.splashDesc || "Open trip eksklusif yang menyediakan pengalaman mendaki dengan fasilitas lengkap dan secangkir kopi terbaik di atas awan.",
+    splashButtonText: config.homepage?.splashButtonText || "Mulai Melihat Tour",
+    splashIgUrl: config.homepage?.splashIgUrl || "https://www.instagram.com/ngopi.dketinggian?igsh=Y3JtN3Y2eXIya29y",
+    splashTiktokUrl: config.homepage?.splashTiktokUrl || "https://tiktok.com/@ngopidiketinggian",
+    showGoogleLogin: config.homepage?.showGoogleLogin !== false,
+    showIgButton: config.homepage?.showIgButton !== false,
+    showTiktokButton: config.homepage?.showTiktokButton !== false,
+  });
+
+  const handleSave = async (e: any) => {
+    e.preventDefault();
+    await updateConfig({
+      homepage: { ...config.homepage, ...data }
+    });
+    showToast('Pengaturan Awalan (Splash) Tersimpan!');
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-3xl border-2 border-art-text/10 shadow-sm relative text-left">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-art-text rounded-2xl flex items-center justify-center -rotate-6">
+          <Monitor size={20} className="text-white" />
+        </div>
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-widest text-art-text">Pengaturan Awalan (Splash Screen)</h3>
+          <p className="text-[10px] font-bold text-art-text/40">Atur tampilan awal sebelum masuk ke website utama.</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Judul Baris 1</label>
+          <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashTitleLine1} onChange={e => setData({...data, splashTitleLine1: e.target.value})} placeholder="Ngopi Di" />
+        </div>
+        <div>
+          <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Judul Baris 2 (Highlight)</label>
+          <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashTitleLine2} onChange={e => setData({...data, splashTitleLine2: e.target.value})} placeholder="Ketinggian" />
+        </div>
+        <div>
+          <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Deskripsi Splash</label>
+          <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold h-24 resize-none" value={data.splashDesc} onChange={e => setData({...data, splashDesc: e.target.value})} placeholder="Open trip eksklusif..."></textarea>
+        </div>
+        <div>
+          <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Teks Tombol Masuk</label>
+          <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashButtonText} onChange={e => setData({...data, splashButtonText: e.target.value})} placeholder="Mulai Melihat Tour" />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Kunjungi IG URL</label>
+            <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashIgUrl} onChange={e => setData({...data, splashIgUrl: e.target.value})} placeholder="URL Instagram" />
+          </div>
+          <div>
+            <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Kunjungi TikTok URL</label>
+            <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashTiktokUrl} onChange={e => setData({...data, splashTiktokUrl: e.target.value})} placeholder="URL TikTok" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <label className="flex items-center gap-3 p-3 bg-art-bg rounded-xl cursor-pointer">
+            <input type="checkbox" checked={data.showGoogleLogin} onChange={e => setData({...data, showGoogleLogin: e.target.checked})} className="w-5 h-5 accent-art-orange" />
+            <span className="text-[10px] font-black uppercase">Login Google</span>
+          </label>
+          <label className="flex items-center gap-3 p-3 bg-art-bg rounded-xl cursor-pointer">
+            <input type="checkbox" checked={data.showIgButton} onChange={e => setData({...data, showIgButton: e.target.checked})} className="w-5 h-5 accent-art-orange" />
+            <span className="text-[10px] font-black uppercase">Tombol IG</span>
+          </label>
+          <label className="flex items-center gap-3 p-3 bg-art-bg rounded-xl cursor-pointer">
+            <input type="checkbox" checked={data.showTiktokButton} onChange={e => setData({...data, showTiktokButton: e.target.checked})} className="w-5 h-5 accent-art-orange" />
+            <span className="text-[10px] font-black uppercase">Tombol TikTok</span>
+          </label>
+        </div>
+
+        <button onClick={handleSave} className="bg-art-orange text-white px-6 py-4 mt-6 rounded-2xl text-xs font-black uppercase tracking-[0.2em] w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">Simpan Pengaturan Awalan</button>
       </div>
     </div>
   );
