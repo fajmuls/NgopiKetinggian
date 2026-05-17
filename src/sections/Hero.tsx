@@ -125,7 +125,7 @@ export const Hero = ({ config, onExplore, onBooking }: any) => {
               case 'description':
                 return config?.homepage?.hideHeroDescription ? null : (
                   <motion.div key={block} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-4 z-30">
-                    <p className="text-[10px] md:text-[12px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto text-center px-4">
+                    <p className="text-[9px] md:text-[10px] font-bold text-white/70 leading-relaxed max-w-2xl uppercase italic mx-auto text-center px-4">
                       {config?.homepage?.heroDescription || "Pendakian premium dengan standar keamanan tinggi dan kenikmatan seduhan kopi original di setiap jengkal perjalanan Anda."}
                     </p>
                   </motion.div>

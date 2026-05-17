@@ -95,15 +95,15 @@ export default function App() {
      
      // Search in destinations
      config.destinationsData.forEach((d: any) => {
-        if (d.name.toLowerCase().includes(q) || (d.desc && d.desc.toLowerCase().includes(q))) {
-           results.push({ type: 'mountain', id: d.id, name: d.name, image: d.image });
+        if (d.isActive !== false && (d.name.toLowerCase().includes(q) || (d.desc && d.desc.toLowerCase().includes(q)))) {
+           results.push({ type: 'mountain', subType: 'private', id: d.id || d.name, name: d.name, image: d.image });
         }
      });
 
      // Search in open trips
      (config.openTrips || []).forEach((ot: any) => {
-        if (ot.name.toLowerCase().includes(q)) {
-           results.push({ type: 'mountain', id: ot.id, name: ot.name, image: ot.image });
+        if (ot.status === 'published' && ot.name.toLowerCase().includes(q)) {
+           results.push({ type: 'mountain', subType: 'open', id: ot.id || ot.name, name: ot.name, image: ot.image });
         }
      });
      

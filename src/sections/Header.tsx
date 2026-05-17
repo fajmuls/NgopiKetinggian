@@ -71,7 +71,11 @@ export const Header = ({
                           )}
                         </div>
                         <div className="text-left">
-                          <p className="text-[10px] font-black uppercase text-art-text tracking-widest group-hover/item:text-art-orange transition-colors">{item.name}</p>
+                          <p className="text-[10px] font-black uppercase text-art-text tracking-widest group-hover/item:text-art-orange transition-colors flex items-center gap-2">
+                             {item.name}
+                             {item.subType === 'open' && <span className="px-1.5 py-0.5 rounded text-[7px] bg-art-green/10 text-art-green border border-art-green/20 leading-none">OPEN TRIP</span>}
+                             {item.subType === 'private' && <span className="px-1.5 py-0.5 rounded text-[7px] bg-art-orange/10 text-art-orange border border-art-orange/20 leading-none">PRIVATE</span>}
+                          </p>
                           <p className="text-[8px] font-bold text-art-text/40 uppercase tracking-tighter">{item.type === 'section' ? 'Navigasi Cepat' : 'Gunung'}</p>
                         </div>
                       </div>
@@ -151,7 +155,11 @@ export const Header = ({
                                   <div className="w-10 h-10 rounded-lg bg-art-bg flex items-center justify-center border border-art-text/10"><Mountain size={16} /></div>
                                 )}
                                 <div className="text-left">
-                                   <p className="text-[10px] font-black uppercase text-art-text tracking-widest">{item.name}</p>
+                                   <p className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2">
+                                      {item.name}
+                                      {item.subType === 'open' && <span className="px-1.5 py-0.5 rounded text-[7px] bg-art-green/10 text-art-green border border-art-green/20 leading-none">OPEN TRIP</span>}
+                                      {item.subType === 'private' && <span className="px-1.5 py-0.5 rounded text-[7px] bg-art-orange/10 text-art-orange border border-art-orange/20 leading-none">PRIVATE</span>}
+                                   </p>
                                    <p className="text-[8px] font-bold text-art-text/40 uppercase tracking-tighter">{item.type === 'section' ? 'Menu' : 'Gunung'}</p>
                                 </div>
                              </div>

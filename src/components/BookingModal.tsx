@@ -255,18 +255,23 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
         const price = isCalculated ? (opt.price ? Number(opt.price) * 1000 : 0) : 0;
         const isManual = opt.pricingFormat === 'manual' || !opt.pricingFormat;
 
+        const qtyKey = `${optName}|_self`;
+        const qty = subSelected[qtyKey] !== undefined ? subSelected[qtyKey] : 1;
+        const days = isCalculated ? tripDays : 1;
+        const subtotal = isCalculated ? price * qty * days : price;
+
         opsionalItemsList.push({
           name: optName,
           parentName: optName,
           price: price,
-          count: 1,
-          days: 1, 
-          subtotal: price,
+          count: qty,
+          days: days, 
+          subtotal: subtotal,
           status: isManual ? 'pending_price' : 'confirmed',
-          isRental: false,
+          isRental: isCalculated,
           priceInfo: opt.priceInfo
         });
-        totalOpsionalPrice += price;
+        totalOpsionalPrice += subtotal;
       }
     }
   });
@@ -1022,15 +1027,28 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                               />
                                               <div className="flex flex-col">
                                                  <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name}</span>
-                                                 {opt.price && opt.pricingFormat === 'calculated' ? (
-                                                   <span className="text-[8px] font-bold text-art-orange uppercase tracking-tighter">Rp {(opt.price * 1000).toLocaleString('id-ID')} / Per Trip</span>
-                                                 ) : opt.priceInfo && (
+                                                 {opt.priceInfo && (
                                                    <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>
                                                  )}
                                               </div>
                                            </label>
                                            
-                                           {isSelected && opt.subItems && (
+                                           {isSelected && opt.pricingFormat === 'calculated' && (!opt.subItems || opt.subItems.length === 0) && (
+                                              <div className="ml-8 space-y-2 pt-1 border-l-2 border-art-orange/20 pl-4 mb-2">
+                                                 <div className="flex items-center justify-between gap-4">
+                                                    <div className="flex flex-col">
+                                                       <span className="text-[9px] font-bold text-art-text/60 uppercase">Kuantitas</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
+                                                       <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, '_self', -1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
+                                                       <span className="w-5 text-center font-black text-[10px] text-art-text">{subSelected[`${opt.name}|_self`] !== undefined ? subSelected[`${opt.name}|_self`] : 1}</span>
+                                                       <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, '_self', 1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
+                                                    </div>
+                                                 </div>
+                                              </div>
+                                           )}
+
+                                           {isSelected && opt.subItems && opt.subItems.length > 0 && (
                                               <div className="ml-8 space-y-2 pt-1 border-l-2 border-art-orange/20 pl-4">
                                                  {opt.subItems.map((sub: any, sIdx: number) => {
                                                     const qty = subSelected[`${opt.name}|${sub.name}`] || 0;
