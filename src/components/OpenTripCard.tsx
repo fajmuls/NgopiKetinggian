@@ -15,7 +15,20 @@ import { RundownPreviewModal } from './RundownPreviewModal';
 export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any, allLeaders: any[], config: any }> = ({ ot, onJoin, getSisaKuota, visibilities, allLeaders, config }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showWebRundown, setShowWebRundown] = useState(false);
+  const [highlighted, setHighlighted] = useState(false);
   const { playClick, playHover } = useSound();
+
+  useEffect(() => {
+    const handleHighlight = (e: CustomEvent) => {
+      const targetId = ot.id || ot.name;
+      if (e.detail === targetId) {
+        setHighlighted(true);
+        setTimeout(() => setHighlighted(false), 2000);
+      }
+    };
+    window.addEventListener('highlight-dest', handleHighlight as any);
+    return () => window.removeEventListener('highlight-dest', handleHighlight as any);
+  }, [ot.id, ot.name]);
   
   const v = ot.visibility || {
     mepo: true,
@@ -31,7 +44,7 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
   const durInfo = config?.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.find((p: any) => p.name === ot.path)?.durations?.find((dur: any) => dur.label === ot.duration);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative">
+    <motion.div id={`ot-card-${ot.id || ot.name}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={`bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative ${highlighted ? 'ring-4 ring-art-orange ring-offset-4 ring-offset-art-bg animate-pulse' : ''}`}>
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={ot.rundownHtml || ot.rundownText || durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
       <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
         <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />

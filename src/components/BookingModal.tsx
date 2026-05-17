@@ -488,7 +488,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                     </div>
                     <div>
                        <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
-                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax {(currentType !== 'private' && currentType !== 'open_request') && `x Rp ${basePricePerPax.toLocaleString('id-ID')}`}</p>
+                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax {(currentType !== 'private' && currentType !== 'open_request') && `• Rp ${basePricePerPax.toLocaleString('id-ID')}`}</p>
                     </div>
                  </div>
                </div>
@@ -508,7 +508,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                    <div className="space-y-2 text-[10px] font-bold text-art-text/60">
                      {opsionalItemsList.map((item: any, idx: number) => (
                        <div key={idx} className="flex justify-between items-start">
-                         <span className="uppercase">{item.name} {item.isRental ? `(${item.count}x • ${item.days} Hari)` : ''}</span>
+                         <span className="uppercase">{item.name} {item.isRental ? `(${item.count} • ${item.days} Hari)` : (item.count > 1 ? `(${item.count} •)` : '')}</span>
                          <span className="text-art-text font-black ml-2 text-right">{(currentType === 'private' || currentType === 'open_request' || item.status === 'pending_price') ? 'Biaya Menyusul' : `Rp ${item.subtotal.toLocaleString('id-ID')}`}</span>
                        </div>
                      ))}

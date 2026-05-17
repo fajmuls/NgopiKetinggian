@@ -9,35 +9,33 @@ export const Footer = ({ config }: any) => {
     { icon: 'telegram', url: '#' }
   ];
 
+  const whatsappContacts = hp?.whatsappContacts || [{name: 'Admin', phone: hp?.officePhone || "628123456789"}];
+  const uniqueWhatsapp = whatsappContacts.filter((wa: any, index: number, self: any[]) =>
+    index === self.findIndex((t) => (t.phone || '').replace(/\D/g, '') === (wa.phone || '').replace(/\D/g, ''))
+  );
+
+  const igLink = socialLinks.find((s: any) => s.icon === 'instagram');
+
   return (
     <footer id="tentang-kami" className="bg-art-text text-white pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20 text-left">
-          <div className="col-span-1 md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-12 mb-20 text-left">
+          
+          {/* 1. Tentang Kami */}
+          <div className="col-span-1 lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden">
                 <img src={hp?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo" className="w-full h-full object-cover" />
               </div>
               <h2 className="text-lg font-black leading-none tracking-tighter uppercase">Ngopi Di<br/><span className="text-art-orange">Ketinggian</span></h2>
             </div>
-            <p className="text-sm text-white/60 leading-relaxed font-medium mb-8 pr-4">
+            <p className="text-sm text-white/60 leading-relaxed font-medium mb-8">
               {hp?.footerDesc || "Penyedia layanan pendakian premium yang mengutamakan kenyamanan, keamanan, dan pengalaman seduhan kopi original di puncak gunung."}
             </p>
-            <div className="flex gap-3 flex-wrap">
-              {socialLinks.map((social: any, idx: number) => (
-                <a key={idx} href={social.url} target={social.url !== '#' ? '_blank' : '_self'} rel="noopener noreferrer" className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center hover:bg-art-orange hover:border-art-orange transition-all shadow-sm">
-                  {social.icon === 'instagram' && <Instagram size={18} />}
-                  {social.icon === 'whatsapp' && <MessageCircle size={18} />}
-                  {social.icon === 'telegram' && <Send size={18} />}
-                  {social.icon === 'facebook' && <Facebook size={18} />}
-                  {social.icon === 'youtube' && <Youtube size={18} />}
-                  {!['instagram', 'whatsapp', 'telegram', 'facebook', 'youtube'].includes(social.icon) && <Globe size={18} />}
-                </a>
-              ))}
-            </div>
           </div>
 
-          <div className="col-span-1">
+          {/* 2. Menu Utama */}
+          <div className="col-span-1 lg:col-span-1">
             <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-8 text-art-orange">Menu Utama</h4>
             <ul className="space-y-4">
               {[
@@ -58,46 +56,70 @@ export const Footer = ({ config }: any) => {
             </ul>
           </div>
 
-          <div className="col-span-1">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-8 text-art-orange">Informasi Kontak</h4>
-            <ul className="space-y-6">
-              <li className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-art-orange shrink-0 border border-white/5">
-                  <MapPin size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase text-white/40 mb-1">Office</p>
-                  <a href={hp?.officeMaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia")}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-art-orange transition-colors">
-                    {hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia"}
+          {/* 3. Lokasi */}
+          <div className="col-span-1 lg:col-span-1">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-8 text-art-orange">Lokasi</h4>
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-art-orange shrink-0 border border-white/5">
+                <MapPin size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase text-white/40 mb-1">Office</p>
+                <a href={hp?.officeMaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia")}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold leading-tight hover:text-art-orange transition-colors block">
+                  {hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia"}
+                </a>
+                <div className="mt-4">
+                  <a href={hp?.officeMaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-art-orange hover:text-white transition-colors bg-art-orange/10 px-3 py-2 rounded-lg">
+                     <Map size={14} /> Lihat Peta
                   </a>
-                  <div className="mt-2">
-                    <a href={hp?.officeMaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hp?.officeAddress || "Gunung Gede Pangrango, Jawa Barat, Indonesia")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-art-orange hover:text-white transition-colors bg-art-orange/10 px-2 py-1 rounded">
-                       <Map size={10} /> Lihat Peta
-                    </a>
-                  </div>
                 </div>
-              </li>
-              <li className="flex gap-4">
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Kontak & Sosial Media */}
+          <div className="col-span-1 lg:col-span-1">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-8 text-art-orange">Kontak & Sosial</h4>
+            <ul className="space-y-4">
+              {/* Email */}
+              <li className="flex gap-4 items-center">
                 <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-art-orange shrink-0 border border-white/5">
-                  <Mail size={20} />
+                  <Mail size={18} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase text-white/40 mb-1">Email Support</p>
+                  <p className="text-[10px] font-black uppercase text-white/40 mb-0.5">Email Support</p>
                   <a href={`mailto:${hp?.officeEmail || 'hello@ngopidiketinggian.com'}`} className="text-sm font-bold hover:text-art-orange transition-colors break-all">
                     {hp?.officeEmail || "hello@ngopidiketinggian.com"}
                   </a>
                 </div>
               </li>
-              <li className="flex gap-4">
+              
+              {/* Instagram */}
+              {igLink && (
+              <li className="flex gap-4 items-center">
                 <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-art-orange shrink-0 border border-white/5">
-                  <Phone size={20} />
+                  <Instagram size={18} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase text-white/40 mb-0.5">Instagram</p>
+                  <a href={igLink.url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-art-orange transition-colors">
+                    @ngopidiketinggian
+                  </a>
+                </div>
+              </li>
+              )}
+
+              {/* WhatsApp (Consolidated) */}
+              <li className="flex gap-4 items-start pt-2">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-art-orange shrink-0 border border-white/5">
+                  <Phone size={18} />
                 </div>
                 <div className="w-full">
-                  <p className="text-[10px] font-black uppercase text-white/40 mb-2">WhatsApp</p>
+                  <p className="text-[10px] font-black uppercase text-white/40 mb-2">Telepon / WhatsApp</p>
                   <div className="flex flex-col gap-2">
-                    {(hp?.whatsappContacts || [{name: 'Admin', phone: hp?.officePhone || "628123456789"}]).map((wa: any, i: number) => (
+                    {uniqueWhatsapp.map((wa: any, i: number) => (
                       <a key={i} href={`https://wa.me/${wa.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between text-sm font-bold bg-white/5 p-2 px-3 rounded-lg hover:bg-art-orange/10 hover:border-art-orange/50 border border-transparent transition-all w-full">
-                        <span className="group-hover:text-art-orange transition-colors">{wa.name}</span>
+                        <span className="group-hover:text-art-orange transition-colors">{wa.name || 'Admin'}</span>
                         <ChevronRight size={14} className="text-white/20 group-hover:text-art-orange transform group-hover:translate-x-1 transition-all" />
                       </a>
                     ))}
@@ -107,13 +129,14 @@ export const Footer = ({ config }: any) => {
             </ul>
           </div>
 
-          <div className="col-span-1">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-8 text-art-orange">Metode Pembayaran</h4>
-            <div className="p-6 bg-white/5 border border-white/10 rounded-3xl">
+          {/* 5. Metode Pembayaran */}
+          <div className="col-span-1 lg:col-span-1">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-8 text-art-orange">Pembayaran</h4>
+            <div className="p-5 bg-white/5 border border-white/10 rounded-3xl">
               <p className="text-[10px] font-medium text-white/40 leading-relaxed italic mb-4">
                 Kami mendukung berbagai metode pembayaran otomatis demi kemudahan transaksi Anda.
               </p>
-              <div className="flex gap-2 flex-wrap opacity-50">
+              <div className="flex gap-2 flex-wrap opacity-60">
                 {(hp?.paymentMethods || [
                   { name: 'BCA', active: true },
                   { name: 'BNI', active: true },
@@ -122,7 +145,7 @@ export const Footer = ({ config }: any) => {
                   { name: 'DANA', active: true },
                   { name: 'QRIS', active: true }
                 ]).filter((p: any) => p.active).map((p: any) => (
-                  <div key={p.name} className="px-3 py-1 bg-white rounded-lg font-black text-art-text text-[8px] uppercase tracking-tighter">{p.name}</div>
+                  <div key={p.name} className="px-3 py-1 bg-white rounded-lg font-black text-art-text text-[9px] uppercase tracking-tighter">{p.name}</div>
                 ))}
               </div>
             </div>

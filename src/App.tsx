@@ -118,7 +118,8 @@ export default function App() {
     } else {
        setSearchQuery('');
        setTimeout(() => {
-           scrollToSection({ preventDefault: () => {} } as any, `dest-card-${item.id}`);
+           const elementId = item.subType === 'open' ? `ot-card-${item.id}` : `dest-card-${item.id}`;
+           scrollToSection({ preventDefault: () => {} } as any, elementId);
            window.dispatchEvent(new CustomEvent('highlight-dest', { detail: item.id }));
        }, 300);
     }

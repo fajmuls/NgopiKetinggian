@@ -467,6 +467,22 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Tagline Bawah (Copy Sederhana)</label>
               <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="Sederhana tapi berkesan" />
            </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Teks Tombol 1</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroButtonText1 || ''} onChange={e => setData({...data, heroButtonText1: e.target.value})} placeholder="Mulai Melihat Tur" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Teks Tombol 2</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroButtonText2 || ''} onChange={e => setData({...data, heroButtonText2: e.target.value})} placeholder="Explore Trips" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">URL Instagram Utama (Hero)</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroIgUrl || ''} onChange={e => setData({...data, heroIgUrl: e.target.value})} placeholder="Misal: https://instagram.com/ngopi" />
+           </div>
+           <div>
+              <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">URL TikTok Utama (Hero)</label>
+              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTiktokUrl || ''} onChange={e => setData({...data, heroTiktokUrl: e.target.value})} placeholder="Misal: https://tiktok.com/@ngopi" />
+           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
