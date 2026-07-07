@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.6";
+export const WEBSITE_VERSION = "1.0.7";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,18 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.0.6",
+  version: "1.0.7",
   patchNotes: [
+    {
+      version: "1.0.7",
+      date: "2026-07-07",
+      notes: [
+        "Optimasi Alur Booking (Gabung Open Trip): Menghubungkan langsung tombol booking generik di halaman utama ke tab daftar Open Trip (Join Trip) aktif agar pendaftaran lebih cepat.",
+        "Studio Poster Baru (Pemisah Preview): Menambahkan tombol 'Lihat Preview Desain' sebelum poster di-render ke resolusi tinggi, menghemat performa.",
+        "Visual Responsif & Bebas Crop: Menggunakan formula auto-scale dinamis & mobile tabs ('Desain' vs 'Preview') agar poster tampil proporsional tanpa terpotong di layar handphone.",
+        "Spesialisasi Tiga Layout Promosi: Poster (cinematic adventure), Info (rundown detail, timeline, and fasilitas), dan Iklan (brutalist, bintang rating, trust badges, dan countdown slots)."
+      ]
+    },
     {
       version: "1.0.6",
       date: "2026-07-07",

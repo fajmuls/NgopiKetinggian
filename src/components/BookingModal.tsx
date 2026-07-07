@@ -16,10 +16,10 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
   const { playClick, playHover, playSuccess, playBack, playPop } = useSound();
   const [showSuccess, setShowSuccess] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [viewType, setViewType] = useState<'selection' | 'trip_list' | 'form'>('selection');
+  const [viewType, setViewType] = useState<'selection' | 'trip_list' | 'form'>('trip_list');
   const [user] = useAuthState(auth);
 
-  const [currentType, setCurrentType] = useState<'private' | 'open' | 'open_request'>('private');
+  const [currentType, setCurrentType] = useState<'private' | 'open' | 'open_request'>('open');
   const [selectedDestinasi, setSelectedDestinasi] = useState('');
   const [selectedJalur, setSelectedJalur] = useState('');
   const [selectedDurasi, setSelectedDurasi] = useState('');
@@ -27,7 +27,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
   const [destSearch, setDestSearch] = useState('');
   const [openDest, setOpenDest] = useState(false);
   const destRef = useRef<HTMLDivElement>(null);
-  const [pesertaCount, setPesertaCount] = useState<number | string>(currentType === 'private' ? 2 : 1);
+  const [pesertaCount, setPesertaCount] = useState<number | string>(1);
   const [promoCode, setPromoCode] = useState('');
   
   const [selectedOpsional, setSelectedOpsional] = useState<string[]>([]);
@@ -65,11 +65,14 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
         if (data.jadwal) setSelectedJadwal(data.jadwal);
         if (data.pesertaCount) setPesertaCount(data.pesertaCount);
         if (data.type) setCurrentType(data.type);
-        // Force viewType to selection as per user request
-        setViewType('selection');
+        setViewType(data.type === 'open' ? 'trip_list' : 'selection');
       } catch (e) {
         console.error("Failed to load draft", e);
       }
+    } else if (!prefill) {
+      setCurrentType('open');
+      setViewType('trip_list');
+      setPesertaCount(1);
     }
   }, [isOpen]);
 
