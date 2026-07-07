@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator, Share2, GitCompare } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
@@ -10,6 +10,8 @@ import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
 import { RundownPreviewModal } from './RundownPreviewModal';
+import { WeatherWidget } from './WeatherWidget';
+import { useCompare } from '../CompareContext';
 
 const StarRating = ({ rating, size = 16, interactive = false, onRate }: { rating: number, size?: number, interactive?: boolean, onRate?: (r: number) => void }) => {
   return (
@@ -37,6 +39,8 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   const [showWebRundown, setShowWebRundown] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
   const [highlighted, setHighlighted] = useState(false);
+  const { selectedItems, toggleItem } = useCompare();
+  const isSelectedForCompare = selectedItems.some(i => i.id === dest.id);
   
   // Reviews state
   const [reviews, setReviews] = useState<any[]>([]);
@@ -128,6 +132,16 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
     });
     return base;
   }, [currentDur, participants, selectedAddons, facilities]);
+
+  const handleShare = (platform: 'whatsapp' | 'twitter') => {
+    const url = window.location.href;
+    const text = `Halo! Cek destinasi mendaki seru ke ${dest.name} bersama Ngopi di Ketinggian. Cek di sini: ${url}`;
+    if (platform === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    } else {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  };
   
   return (
     <motion.div 
@@ -152,9 +166,23 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
           )}
         </div>
 
-        <div className="absolute top-4 right-4 bg-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
+        <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+          <div className="bg-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
+          <button 
+            onClick={(e) => { e.stopPropagation(); toggleItem({ id: dest.id, name: dest.name, image: dest.image, price: currentDur.price, difficulty: dest.difficulty, region: dest.region || dest.locationTag, duration: currentDur.label, type: 'private' }); }}
+            className={`p-2 rounded-xl border-2 transition-all shadow-sm ${isSelectedForCompare ? 'bg-art-text text-white border-art-text' : 'bg-white/90 text-art-text border-art-text/10 hover:border-art-text'}`}
+            title="Bandingkan Trip"
+          >
+            <GitCompare size={14} />
+          </button>
+        </div>
 
-        {(currentDur?.rundownHtml || currentDur?.rundownPdf) && (
+        <div className="absolute bottom-4 left-4 flex gap-2">
+          <button onClick={() => handleShare('whatsapp')} className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center hover:scale-110 transition-transform shadow-md"><MessageCircle size={14}/></button>
+          <button onClick={() => handleShare('twitter')} className="w-8 h-8 bg-sky-400 text-white rounded-lg flex items-center justify-center hover:scale-110 transition-transform shadow-md"><Share2 size={14}/></button>
+        </div>
+
+        {((currentDur?.rundownHtml || currentDur?.rundownPdf) && dest.rundownMode !== 'hidden') && (
            <div className="absolute bottom-4 right-4 flex gap-2">
               <button 
                  onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
@@ -216,6 +244,8 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden space-y-6 pt-4 border-dashed border-art-text/10"
                >
+                 <WeatherWidget location={dest.name} />
+                 
                  <p className="text-[11px] font-medium text-art-text/60 italic leading-loose bg-art-bg/20 p-4 rounded-xl border border-art-text/5">{dest.desc}</p>
 
                   <div className="space-y-4">
@@ -367,36 +397,52 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
 
                        {(() => {
                           const durInfo = currentDur;
-                          const hasRundown = durInfo.rundownHtml || durInfo.rundownPdf;
+                          const isRundownVisible = dest.visibility?.rundown !== false;
+                          const hasRundown = (durInfo.rundownHtml || durInfo.rundownPdf) && isRundownVisible;
+                          const rundownMode = dest.rundownMode || 'direct';
+
+                          if (rundownMode === 'hidden' || !isRundownVisible) return null;
+
                           return (
                             <div className="p-3 bg-white border border-art-text/10 rounded-xl space-y-2">
                               <h5 className="text-[9px] font-black uppercase text-art-text flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
-                              {durInfo.rundownHtml && (
-                                <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
-                                  {durInfo.rundownHtml}
-                                </div>
-                              )}
-                              {hasRundown ? (
-                                <div className="flex gap-2">
-                                  <button type="button" onClick={() => setShowWebRundown(true)} className="flex-1 py-2 border border-art-text text-art-text bg-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-bg transition-colors">
-                                    Lihat Web <Eye size={8} className="inline ml-1" />
-                                  </button>
-                                  <button 
-                                    type="button" 
-                                    onClick={() => {
-                                      if (durInfo.rundownPdf) {
-                                        window.open(durInfo.rundownPdf, '_blank');
-                                      } else {
-                                        generateRundownPdf(durInfo, dest.name, currentPath.name, currentDur.label);
-                                      }
-                                    }} 
-                                    className="flex-1 py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors"
-                                  >
-                                    Download PDF <Download size={8} className="inline ml-1" />
-                                  </button>
-                                </div>
+                              {rundownMode === 'whatsapp' ? (
+                                <button 
+                                  onClick={() => window.open(`https://wa.me/628123456789?text=${encodeURIComponent(`Halo, saya ingin menanyakan rincian itinerary untuk ${dest.name} - ${currentDur.label}`)}`, '_blank')}
+                                  className="w-full py-2.5 bg-green-500 text-white text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 hover:bg-green-600 transition-all shadow-md"
+                                >
+                                  <MessageCircle size={12}/> Hubungi via WhatsApp
+                                </button>
                               ) : (
-                                <p className="text-[8px] font-bold text-art-text/20 uppercase text-center py-2">Belum ada rincian rundown</p>
+                                <>
+                                  {durInfo.rundownHtml && (
+                                    <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
+                                      {durInfo.rundownHtml}
+                                    </div>
+                                  )}
+                                  {hasRundown ? (
+                                    <div className="flex gap-2">
+                                      <button type="button" onClick={() => setShowWebRundown(true)} className="flex-1 py-2 border border-art-text text-art-text bg-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-bg transition-colors">
+                                        Lihat Web <Eye size={8} className="inline ml-1" />
+                                      </button>
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          if (durInfo.rundownPdf) {
+                                            window.open(durInfo.rundownPdf, '_blank');
+                                          } else {
+                                            generateRundownPdf(durInfo, dest.name, currentPath.name, currentDur.label);
+                                          }
+                                        }} 
+                                        className="flex-1 py-2 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors"
+                                      >
+                                        Download PDF <Download size={8} className="inline ml-1" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <p className="text-[8px] font-bold text-art-text/20 uppercase text-center py-2">Belum ada rincian rundown</p>
+                                  )}
+                                </>
                               )}
                             </div>
                           );

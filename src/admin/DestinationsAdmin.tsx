@@ -20,7 +20,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
   const [showPoster, setShowPoster] = useState<any>(null);
 
-  const [visibilities, setVisibilities] = useState(config.visibilities || { map: true, quota: true, beans: true, routes: true });
+  const [visibilities, setVisibilities] = useState(config.visibilities || { map: true, quota: true, beans: true, routes: true, rundown: true });
 
   const moveDestination = (index: number, direction: 'up' | 'down') => {
     const list = [...data];
@@ -159,8 +159,8 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
       </div>
       </div>
       
-      <div className="bg-white p-4 rounded-lg border border-art-text/20 grid grid-cols-2 md:grid-cols-4 gap-4">
-        {['map', 'quota', 'beans', 'routes'].map(key => (
+      <div className="bg-white p-4 rounded-lg border border-art-text/20 grid grid-cols-2 md:grid-cols-5 gap-4">
+        {['map', 'quota', 'beans', 'routes', 'rundown'].map(key => (
           <label key={key} className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" className="accent-art-orange w-4 h-4" checked={(visibilities as any)[key]} onChange={e => setVisibilities({...visibilities, [key]: e.target.checked})} />
             <span className="text-xs font-bold uppercase tracking-tight text-art-text">Tampilkan {key}</span>
@@ -412,6 +412,19 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                    onChange={e => { const nd = [...data]; nd[i].instagramPostUrl = e.target.value; setData(nd); }} 
                    placeholder="Post URL" 
                  />
+              </div>
+
+              <div className="flex flex-col min-w-0">
+                <span className="text-[9px] font-bold uppercase mb-1">Rundown Mode:</span>
+                <select className="border p-2 rounded text-xs w-full" value={dest.rundownMode || 'direct'} onChange={e => {
+                  const nd = [...data];
+                  nd[i].rundownMode = e.target.value;
+                  setData(nd);
+                }}>
+                  <option value="direct">Langsung (Web & PDF)</option>
+                  <option value="whatsapp">Minta via WhatsApp</option>
+                  <option value="hidden">Sembunyikan</option>
+                </select>
               </div>
 
               <div className="flex flex-col min-w-0">

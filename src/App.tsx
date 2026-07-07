@@ -12,6 +12,8 @@ import { GlobalDialogProvider, customAlert, customConfirm } from './GlobalDialog
 import { DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip, useAppConfig } from './useAppConfig';
 import { AdminPanelModal } from './AdminPanel';
 import { generateRundownPdf, generateInvoice } from './lib/pdf-utils';
+import { useCompare } from './CompareContext';
+import { ComparisonModal } from './components/ComparisonModal';
 
 import { Button } from './components/Button';
 import { BookingModal } from './components/BookingModal';
@@ -275,6 +277,8 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
     window.addEventListener('continueRegistration', handleContinueReg);
     return () => window.removeEventListener('continueRegistration', handleContinueReg);
   }, []);
+
+  const { selectedItems, isComparing, setIsComparing, toggleItem } = useCompare();
 
   return (
     <>
@@ -763,6 +767,48 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
 
       {/* Footer */}
       <Footer config={config} />
+
+      {/* Compare Floating Button */}
+      {selectedItems.length > 0 && (
+        <motion.div 
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed bottom-24 right-6 z-[100]"
+        >
+          <button 
+            onClick={() => setIsComparing(true)}
+            className="group relative flex items-center gap-3 bg-art-text text-white px-6 py-4 rounded-full border-4 border-white shadow-2xl hover:scale-105 active:scale-95 transition-all"
+          >
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-[10px] font-black uppercase tracking-widest text-art-orange mb-1">Bandingkan Trip</span>
+              <span className="text-xl font-black">{selectedItems.length} Terpilih</span>
+            </div>
+            <div className="w-12 h-12 bg-art-orange rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform">
+              <TrendingUp size={24} />
+            </div>
+            
+            {/* Badge for clear all */}
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                selectedItems.forEach(item => toggleItem(item));
+              }}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white shadow-lg hover:bg-red-600 transition-colors"
+            >
+              <X size={12} />
+            </div>
+          </button>
+        </motion.div>
+      )}
+
+      <ComparisonModal 
+        isOpen={isComparing} 
+        onClose={() => setIsComparing(false)} 
+        onBook={(item) => {
+          setIsComparing(false);
+          handleOpenBooking(item.name, item.path || '', item.duration || '', item.type, item.jadwal || '');
+        }}
+      />
 
       <AnimatePresence>
         {toast && (

@@ -47,6 +47,7 @@ export interface OpenTrip {
   rundownText?: string;
   rundownPdf?: string;
   instagramPostUrl?: string;
+  rundownMode?: 'direct' | 'whatsapp' | 'hidden';
   groups?: { id: string, name: string, leader: string, members: string }[];
   visibility?: {
     mepo: boolean;
@@ -55,6 +56,7 @@ export interface OpenTrip {
     leader: boolean;
     beans: boolean;
     price: boolean;
+    rundown?: boolean;
   };
 }
 
@@ -69,6 +71,7 @@ export interface AppConfig {
     openTripDifficulty: boolean;
     openTripDuration: boolean;
     openTripLeader: boolean;
+    rundown?: boolean;
   };
   facilities: { include: string[], exclude: string[], opsi: FacilityOption[] };
   destinationsData: any[];

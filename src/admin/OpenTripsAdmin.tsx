@@ -812,6 +812,25 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Rundown Mode</label>
+                  <select 
+                    className="w-full border-2 border-art-text/5 p-2 rounded-xl text-xs font-bold outline-none focus:border-art-orange bg-white"
+                    value={ot.rundownMode || 'direct'}
+                    onChange={(e) => {
+                      const nd = [...data];
+                      nd[i].rundownMode = e.target.value;
+                      setData(nd);
+                    }}
+                  >
+                    <option value="direct">Langsung (Web & PDF)</option>
+                    <option value="whatsapp">Minta via WhatsApp</option>
+                    <option value="hidden">Sembunyikan</option>
+                  </select>
+                </div>
+              </div>
+
               </div>
 <div className={activeTabs[i] === 'price' ? "space-y-6" : "hidden"}>
 {/* Layer 4: Capacity + Availability */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, GitCompare, Share2 } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
@@ -10,6 +10,7 @@ import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
 import { RundownPreviewModal } from './RundownPreviewModal';
+import { useCompare } from '../CompareContext';
 
 
 export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any, allLeaders: any[], config: any }> = ({ ot, onJoin, getSisaKuota, visibilities, allLeaders, config }) => {
@@ -17,6 +18,8 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
   const [showWebRundown, setShowWebRundown] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
   const { playClick, playHover } = useSound();
+  const { selectedItems, toggleItem } = useCompare();
+  const isSelectedForCompare = selectedItems.some(i => i.id === ot.id);
 
   useEffect(() => {
     const handleHighlight = (e: CustomEvent) => {
@@ -36,12 +39,23 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
     duration: true,
     leader: true,
     beans: visibilities?.beans ?? true,
-    price: true
+    price: true,
+    rundown: visibilities?.rundown ?? true
   };
 
   const leaders = Array.isArray(ot.leaders) ? ot.leaders : (ot.leader ? [ot.leader] : []);
   
   const durInfo = config?.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.find((p: any) => p.name === ot.path)?.durations?.find((dur: any) => dur.label === ot.duration);
+
+  const handleShare = (platform: 'whatsapp' | 'twitter') => {
+    const url = window.location.href;
+    const text = `Halo! Cek Open Trip mendaki seru ke ${ot.name} pada tanggal ${ot.jadwal} bersama Ngopi di Ketinggian. Cek di sini: ${url}`;
+    if (platform === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    } else {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  };
 
   return (
     <motion.div id={`ot-card-${ot.id || ot.name}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={`bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative ${highlighted ? 'ring-4 ring-art-orange ring-offset-4 ring-offset-art-bg animate-pulse' : ''}`}>
@@ -61,30 +75,46 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
 
          <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
                <button 
-                  onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
-                  className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-md group/btn"
-                  title="Lihat Rundown (Web)"
+                  onClick={(e) => { e.stopPropagation(); toggleItem({ id: ot.id, name: ot.name, image: ot.image, price: ot.price, difficulty: ot.difficulty, region: ot.region, duration: ot.duration, type: 'open' }); }}
+                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all shadow-md ${isSelectedForCompare ? 'bg-art-text text-white border-art-text' : 'bg-white/90 text-art-text border-art-text/10 hover:border-art-text'}`}
+                  title="Bandingkan Trip"
                >
-                  <Eye size={14} />
+                  <GitCompare size={14} />
                </button>
-               <button 
-                  onClick={(e) => { 
-                     e.stopPropagation(); 
-                     playClick();
-                     if (ot.rundownPdf) {
-                        window.open(ot.rundownPdf, '_blank');
-                     } else {
-                        generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
-                     }
-                  }}
-                  className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-md"
-                  title="Download Itinerary (PDF)"
-               >
-                  <Download size={14} />
-               </button>
+               {(v.rundown !== false && ot.rundownMode !== 'hidden') && (
+                 <>
+                   <button 
+                      onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
+                      className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-md group/btn"
+                      title="Lihat Rundown (Web)"
+                   >
+                      <Eye size={14} />
+                   </button>
+                   <button 
+                      onClick={(e) => { 
+                         e.stopPropagation(); 
+                         playClick();
+                         if (ot.rundownPdf) {
+                            window.open(ot.rundownPdf, '_blank');
+                         } else {
+                            generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
+                         }
+                      }}
+                      className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-md"
+                      title="Download Itinerary (PDF)"
+                   >
+                      <Download size={14} />
+                   </button>
+                 </>
+               )}
             </div>
 
-         <div className={`absolute bottom-3 left-3 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
+         <div className="absolute bottom-3 left-3 flex gap-2">
+            <button onClick={() => handleShare('whatsapp')} className="w-6 h-6 bg-green-500 text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md"><MessageCircle size={10}/></button>
+            <button onClick={() => handleShare('twitter')} className="w-6 h-6 bg-sky-400 text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md"><Share2 size={10}/></button>
+         </div>
+
+         <div className={`absolute bottom-3 right-3 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
             {getSisaKuota(ot)} Pax Left
          </div>
       </div>
@@ -152,37 +182,54 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                  </div>
                   
                    {(() => {
-                      const hasRundown = durInfo?.rundownHtml || ot.rundownText || ot.rundownPdf;
+                      const isRundownVisible = v.rundown !== false;
+                      const hasRundown = (durInfo?.rundownHtml || ot.rundownText || ot.rundownPdf) && isRundownVisible;
+                      const rundownMode = ot.rundownMode || 'direct';
+
+                      if (rundownMode === 'hidden' || !isRundownVisible) return null;
+
                       return (
                         <div className="mt-4 p-3 bg-art-bg/30 rounded-xl border border-art-text/10">
                            <h5 className="text-[9px] font-black uppercase text-art-text mb-2 flex items-center gap-1"><FileText size={10} className="text-art-orange" /> Itinerary / Rundown</h5>
-                           {(durInfo?.rundownHtml || ot.rundownText) && (
-                              <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
-                                {durInfo?.rundownHtml || ot.rundownText}
-                              </div>
-                           )}
                            
-                           {hasRundown ? (
-                             <div className="flex gap-2 mt-3">
-                              <button type="button" onClick={() => setShowWebRundown(true)} className="flex-1 py-1.5 border border-art-text text-art-text bg-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-bg transition-colors">
-                                Lihat Web <Eye size={8} className="inline ml-1" />
-                              </button>
+                           {rundownMode === 'whatsapp' ? (
                               <button 
-                                type="button" 
-                                onClick={() => {
-                                  if (ot.rundownPdf) {
-                                    window.open(ot.rundownPdf, '_blank');
-                                  } else {
-                                    generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
-                                  }
-                                }} 
-                                className="flex-1 py-1.5 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors"
+                                onClick={() => window.open(`https://wa.me/628123456789?text=${encodeURIComponent(`Halo, saya ingin menanyakan rincian itinerary untuk Open Trip ${ot.name} - ${ot.jadwal}`)}`, '_blank')}
+                                className="w-full py-2 bg-green-500 text-white text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 hover:bg-green-600 transition-all shadow-md"
                               >
-                                Download PDF <Download size={8} className="inline ml-1" />
+                                <MessageCircle size={12}/> Hubungi via WhatsApp
                               </button>
-                             </div>
                            ) : (
-                             <p className="text-[8px] font-bold text-art-text/20 uppercase text-center py-2">Belum ada rincian rundown</p>
+                              <>
+                                {(durInfo?.rundownHtml || ot.rundownText) && (
+                                    <div className="text-[8px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-24 overflow-y-auto pr-2 no-scrollbar border-l border-art-orange/30 pl-2">
+                                      {durInfo?.rundownHtml || ot.rundownText}
+                                    </div>
+                                )}
+                                
+                                {hasRundown ? (
+                                  <div className="flex gap-2 mt-3">
+                                    <button type="button" onClick={() => setShowWebRundown(true)} className="flex-1 py-1.5 border border-art-text text-art-text bg-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-bg transition-colors">
+                                      Lihat Web <Eye size={8} className="inline ml-1" />
+                                    </button>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        if (ot.rundownPdf) {
+                                          window.open(ot.rundownPdf, '_blank');
+                                        } else {
+                                          generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
+                                        }
+                                      }} 
+                                      className="flex-1 py-1.5 bg-art-text text-white text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-art-orange transition-colors"
+                                    >
+                                      Download PDF <Download size={8} className="inline ml-1" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <p className="text-[8px] font-bold text-art-text/20 uppercase text-center py-2">Belum ada rincian rundown</p>
+                                )}
+                              </>
                            )}
                         </div>
                       );
