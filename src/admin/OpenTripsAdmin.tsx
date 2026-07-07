@@ -166,7 +166,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                    <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest leading-tight">Request custom / open trip baru (Belum diproses)</p>
                 </div>
              </div>
-             <div className="bg-white px-4 py-2 rounded-xl border-2 border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]">
+             <div className="bg-white px-4 py-3 md:py-2 rounded-xl border-2 border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]">
                 <span className="text-[10px] font-black uppercase text-blue-600">{openTripReqs.length} Masuk</span>
              </div>
            </div>
@@ -250,21 +250,21 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                    const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft', rundownText: '', rundownPdf: '' }, ...data];
                    setData(nd);
                    setExpandedIndexes([0]);
-                 }} className="w-full sm:w-auto hover:bg-art-bg px-4 py-3 sm:py-2 text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Manual</button>
+                 }} className="w-full sm:w-auto hover:bg-art-bg px-4 py-4 sm:py-3 min-h-[44px] text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Manual</button>
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
                    const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Pilih Tanggal Weekend", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2 Hari 1 Malam", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true, rundownText: '', rundownPdf: '' }, ...data];
                    setData(nd);
                    setExpandedIndexes([0]);
-                 }} className="w-full sm:w-auto hover:bg-blue-50 text-blue-600 px-4 py-3 sm:py-2 text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Weekend</button>
+                 }} className="w-full sm:w-auto hover:bg-blue-50 text-blue-600 px-4 py-4 sm:py-3 min-h-[44px] text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Weekend</button>
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
                    const message = `Halo Owner,\nMohon update jadwal Open Trip selanjutnya agar bisa segera kami upload ke website.\n\nMohon isi format berikut:\n- Gunung: ____________\n- Via / Jalur: ____________\n- Tanggal: ____________\n- Kuota: ____________\n- Harga (Final): ____________\n- Harga (Coret/Normal): ____________\n- Mepo (Meeting Point): ____________\n\nTerima kasih.`;
                    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
                    window.open(url, '_blank');
-                 }} className="w-full sm:w-auto hover:bg-green-50 text-green-600 px-4 py-3 sm:py-2 text-[10px] font-black uppercase tracking-widest flex items-center justify-center sm:justify-start gap-1"><MessageCircle size={12}/> Minta Jadwal (WA)</button>
+                 }} className="w-full sm:w-auto hover:bg-green-50 text-green-600 px-4 py-4 sm:py-3 min-h-[44px] text-[10px] font-black uppercase tracking-widest flex items-center justify-center sm:justify-start gap-1"><MessageCircle size={12}/> Minta Jadwal (WA)</button>
               </div>
-           <button onClick={handleSave} className="w-full sm:w-auto bg-art-orange text-white px-6 py-3 sm:py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
+           <button onClick={handleSave} className="w-full sm:w-auto bg-art-orange text-white px-6 py-4 sm:py-3 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4">
@@ -306,7 +306,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                         setData(nd);
                         showToast("Trip diterbitkan!");
                     }}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-1.5 text-[10px] font-black uppercase px-4 py-2.5 bg-art-green text-white rounded-xl hover:shadow-md transition-all disabled:opacity-30"
+                    className="flex-1 md:flex-none flex items-center justify-center gap-1.5 text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-art-green text-white rounded-xl hover:shadow-md transition-all disabled:opacity-30"
                   >
                     <Send size={14}/> Terbitkan
                   </button>
@@ -319,7 +319,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                         setData(nd);
                         showToast("Trip ditarik ke draft.");
                     }}
-                    className="flex-1 md:flex-none text-[10px] font-black uppercase px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all disabled:opacity-30 border border-gray-300"
+                    className="flex-1 md:flex-none text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all disabled:opacity-30 border border-gray-300"
                   >
                     Tarik ke Draft
                   </button>
@@ -333,7 +333,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
                     window.open(url, '_blank');
                   }}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-1 text-[10px] font-black uppercase px-4 py-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all border border-green-200"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-1 text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all border border-green-200"
                 >
                   <MessageCircle size={14}/> Konf. Owner
                 </button>
@@ -357,28 +357,28 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
           </div>
 
           {expandedIndexes.includes(i) && (
-          <div className="mt-4 pt-4 border-t-2 border-dashed border-art-text/10 space-y-4">
+          <div className="mt-4 pt-4 border-t border-art-text/5 space-y-4">
 
-              <div className="flex flex-wrap gap-2 mb-4 border-b-2 border-art-text/10 pb-2">
+              <div className="flex flex-wrap gap-2 mb-4 border-b border-art-text/5 pb-2">
                 <button 
                   type="button"
                   onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'basic' })); }} 
-                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${(!activeTabs[i] || activeTabs[i] === 'basic') ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  className={`px-4 py-3 md:py-2 text-[10px] font-black uppercase rounded-lg transition-all ${(!activeTabs[i] || activeTabs[i] === 'basic') ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 >Info Dasar</button>
                 <button 
                   type="button"
                   onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'price' })); }} 
-                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'price' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  className={`px-4 py-3 md:py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'price' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 >Harga & Kuota</button>
                 <button 
                   type="button"
                   onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'itinerary' })); }} 
-                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'itinerary' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  className={`px-4 py-3 md:py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'itinerary' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 >Rundown</button>
                 <button 
                   type="button"
                   onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'groups' })); }} 
-                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'groups' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  className={`px-4 py-3 md:py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'groups' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 >Grup</button>
                 
                 <button 
@@ -410,13 +410,13 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                         </div>
                      , "Manifest Peserta");
                   }} 
-                  className="px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 flex items-center gap-1 sm:ml-auto"
+                  className="px-4 py-3 md:py-2 text-[10px] font-black uppercase rounded-lg transition-all bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 flex items-center gap-1 sm:ml-auto"
                 ><Users size={12}/> Manifest</button>
               </div>
 
-<div className={activeTabs[i] === 'itinerary' ? "space-y-4" : "hidden"}>
+<div className={activeTabs[i] === 'itinerary' ? "space-y-6" : "hidden"}>
 {/* Rundown Section for Open Trip */}
-              <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10 space-y-4">
+              <div className="bg-art-bg/30 p-5 rounded-2xl border border-art-text/20 space-y-4">
                 <div className="flex items-center justify-between">
                    <div className="flex items-center gap-2">
                       <FileText size={16} className="text-art-text" />
@@ -483,7 +483,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
 
 
                </div>
-<div className={activeTabs[i] === 'groups' ? "space-y-4" : "hidden"}>
+<div className={activeTabs[i] === 'groups' ? "space-y-6" : "hidden"}>
 {/* Layer 7: Group Management (MOVED TO BOTTOM) */}
                <div className="bg-art-green/5 p-5 rounded-2xl border-2 border-art-green/20 space-y-4">
                   <div className="flex items-center justify-between">
@@ -507,7 +507,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                                       <h3 className="font-black uppercase text-sm">Broadcast WA ({tripBookings.length} Peserta)</h3>
                                    </div>
                                    <textarea 
-                                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium outline-none focus:border-art-orange transition-all min-h-[150px]"
+                                      className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-medium outline-none focus:border-art-orange transition-all min-h-[150px]"
                                       defaultValue={template}
                                       id={`broadcast-msg-${i}`}
                                    />
@@ -631,13 +631,13 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
 
 
               </div>
-<div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-4" : "hidden"}>
+<div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-6" : "hidden"}>
 {/* Layer 1: Mountain + Difficulty */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Gunung</label>
                   <select 
-                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
+                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
                     value={ot.name ?? ""} 
                     onChange={e => handleMountainSelect(i, e.target.value)}
                   >
@@ -650,7 +650,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Level</label>
                   <select 
-                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
+                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
                     value={ot.difficulty ?? ""} 
                     onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}
                   >
@@ -666,7 +666,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   <label className="text-[9px] font-black uppercase text-art-text/40">Durasi</label>
                   <select 
                     disabled={ot.isWeekend}
-                    className={`w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none transition-all ${ot.isWeekend ? 'bg-gray-100 opacity-80 cursor-not-allowed' : ''}`} 
+                    className={`w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none transition-all ${ot.isWeekend ? 'bg-gray-100 opacity-80 cursor-not-allowed' : ''}`} 
                     value={ot.duration ?? ""} 
                     onChange={e => { 
                       const dur = e.target.value;
@@ -683,7 +683,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Jalur (Sesuai Destinasi)</label>
                   <select 
-                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all" 
+                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all" 
                     value={ot.path || ""} 
                     onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }}
                   >
@@ -696,7 +696,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   {ot.path === "custom" && (
                     <input 
                       autoFocus
-                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all mt-1" 
+                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all mt-1" 
                       placeholder="Ketik Jalur..."
                       onBlur={e => { if(e.target.value) { const nd = [...data]; nd[i].path = e.target.value; setData(nd); } }}
                     />
@@ -713,7 +713,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                        <div className="flex-[3]">
                           <input 
                             type="date"
-                            className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                            className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
                             value={ot.startDate || ""} 
                             onChange={e => { 
                               const date = e.target.value;
@@ -734,7 +734,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   ) : (
                     <input 
                       type="date"
-                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
                       value={ot.startDate || ""} 
                       onChange={e => { 
                         const date = e.target.value;
@@ -751,14 +751,14 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   <label className="text-[9px] font-black uppercase text-art-text/40">Jadwal (Automatis)</label>
                   <input 
                     readOnly
-                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold bg-gray-50 text-art-green outline-none uppercase" 
+                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold bg-gray-50 text-art-green outline-none uppercase" 
                     value={ot.jadwal || "Otomatis..."} 
                   />
                 </div>
               </div>
 
               </div>
-<div className={activeTabs[i] === 'price' ? "space-y-4" : "hidden"}>
+<div className={activeTabs[i] === 'price' ? "space-y-6" : "hidden"}>
 {/* Layer 4: Capacity + Availability */}
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-1">
@@ -766,7 +766,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     <input 
                       type="text"
                       inputMode="numeric"
-                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
+                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono" 
                       value={ot.maxKuota ?? 15} 
                       onChange={e => { 
                         let valStr = e.target.value.replace(/^0+/, '');
@@ -798,7 +798,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     <input 
                       type="text"
                       inputMode="numeric"
-                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono pl-6" 
+                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono pl-6" 
                       value={ot.price ?? 0} 
                       onChange={e => { 
                         let valStr = e.target.value.replace(/^0+/, '');
@@ -818,7 +818,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     <input 
                       type="text"
                       inputMode="numeric"
-                      className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-black outline-none focus:border-art-orange transition-all font-mono pl-6 text-red-500" 
+                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-black outline-none focus:border-art-orange transition-all font-mono pl-6 text-red-500" 
                       value={ot.originalPrice ?? 0} 
                       onChange={e => { 
                         let valStr = e.target.value.replace(/^0+/, '');
@@ -835,12 +835,12 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
               </div>
 
                </div>
-<div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-4" : "hidden"}>
+<div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-6" : "hidden"}>
 {/* Layer 7: Leaders & Description */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="space-y-1">
                    <label className="text-[9px] font-black uppercase text-art-text/40">Leaders (Pilih beberapa)</label>
-                   <div className="flex flex-wrap gap-2 p-2 border-2 border-art-text/10 rounded-xl bg-white max-h-32 overflow-y-auto">
+                   <div className="flex flex-wrap gap-2 p-2 border border-art-text/20 rounded-xl bg-white max-h-32 overflow-y-auto">
                      {config.tripLeaders?.filter((l: any) => !l.isHidden).map((leader: any) => (
                        <label key={leader.id} className="flex items-center gap-1.5 px-2 py-1 bg-art-bg/30 rounded-lg cursor-pointer hover:bg-art-bg transition-colors">
                          <input 
@@ -891,7 +891,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     <textarea 
                       rows={3}
                       placeholder="Tuliskan detail trip atau copy..."
-                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-[10px] font-medium focus:border-art-orange outline-none transition-all resize-none" 
+                      className="w-full border border-art-text/20 p-3 rounded-xl text-[10px] font-medium focus:border-art-orange outline-none transition-all resize-none" 
                       value={ot.desc || ""} 
                       onChange={e => { const nd = [...data]; nd[i].desc = e.target.value; setData(nd); }} 
                     />
@@ -904,7 +904,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     <label className="text-[9px] font-black uppercase text-art-text/40">Nama Meeting Point</label>
                     <input 
                       placeholder="Basecamp Wates"
-                      className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all" 
+                      className="w-full border border-art-text/20 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-art-orange transition-all" 
                       value={ot.mepo || ""} 
                       onChange={e => { const nd = [...data]; nd[i].mepo = e.target.value; setData(nd); }}
                     />
@@ -933,7 +933,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     <div className="flex gap-1">
                       <InputWithPaste 
                         placeholder="https://maps.google.com/..." 
-                        className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
+                        className="w-full border border-art-text/20 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none transition-all" 
                         value={ot.mepoLink || ""} 
                         onChange={(e: any) => { const nd = [...data]; nd[i].mepoLink = e.target.value; setData(nd); }} 
                       />
@@ -955,7 +955,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Beans (Opsional)</label>
                   <input 
-                     className="w-full border-2 border-art-text/10 p-2.5 rounded-xl text-xs font-medium outline-none focus:border-art-orange transition-all" 
+                     className="w-full border border-art-text/20 p-2.5 rounded-xl text-xs font-medium outline-none focus:border-art-orange transition-all" 
                      value={ot.beans || ""} 
                      onChange={e => { const nd = [...data]; nd[i].beans = e.target.value; setData(nd); }}
                      placeholder="Contoh: Arabica Gayo Blend"

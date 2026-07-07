@@ -44,6 +44,17 @@ export const AdminPanelModal = ({
   const [user] = useAuthState(auth);
 
   useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isOpen || !user || !((user as any).email === 'mrachmanfm@gmail.com' || (user as any).email === 'mrahmanfm@gmail.com')) return;
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, (snap) => {
@@ -128,10 +139,10 @@ export const AdminPanelModal = ({
               <button onClick={() => { playBack(); onClose(); }} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
             </div>
           </div>
-          <div className="flex gap-2 px-4 pb-2 border-t border-art-text/10 pt-2">
-            <button onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }} className={`text-[10px] sm:text-xs font-black uppercase py-3 px-6 rounded-t-xl transition-all ${activeCategory === 'booking' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-art-bg text-art-text/40 hover:text-art-text'}`}>Booking Management</button>
-            <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className={`text-[10px] sm:text-xs font-black uppercase py-3 px-6 rounded-t-xl transition-all ${activeCategory === 'trip' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-art-bg text-art-text/40 hover:text-art-text'}`}>Trip Content</button>
-            <button onClick={() => { setActiveCategory('website'); setActiveTab('cerita'); }} className={`text-[10px] sm:text-xs font-black uppercase py-3 px-6 rounded-t-xl transition-all ${activeCategory === 'website' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-art-bg text-art-text/40 hover:text-art-text'}`}>Web Design</button>
+          <div className="flex gap-1.5 sm:gap-2 px-3 sm:px-4 pb-0 pt-2 bg-art-bg/30 border-t border-art-text/10 overflow-x-auto no-scrollbar">
+            <button onClick={() => { setActiveCategory('booking'); setActiveTab('bookings'); }} className={`shrink-0 text-[9px] sm:text-xs font-black uppercase py-2.5 px-4 sm:py-3 sm:px-6 rounded-t-xl transition-all ${activeCategory === 'booking' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-white text-art-text/40 hover:text-art-text border border-b-0 border-art-text/10'}`}>Booking Management</button>
+            <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className={`shrink-0 text-[9px] sm:text-xs font-black uppercase py-2.5 px-4 sm:py-3 sm:px-6 rounded-t-xl transition-all ${activeCategory === 'trip' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-white text-art-text/40 hover:text-art-text border border-b-0 border-art-text/10'}`}>Trip Content</button>
+            <button onClick={() => { setActiveCategory('website'); setActiveTab('cerita'); }} className={`shrink-0 text-[9px] sm:text-xs font-black uppercase py-2.5 px-4 sm:py-3 sm:px-6 rounded-t-xl transition-all ${activeCategory === 'website' ? 'bg-art-text text-white shadow-[0_-4px_0_0_#1a1a1a_inset]' : 'bg-white text-art-text/40 hover:text-art-text border border-b-0 border-art-text/10'}`}>Web Design</button>
           </div>
         </div>
 
@@ -139,8 +150,8 @@ export const AdminPanelModal = ({
         <div className="flex flex-col sm:flex-row flex-1 min-h-0 overflow-y-auto sm:overflow-y-visible">
 
           {/* Sub Sidebar Tabs */}
-          <div className="flex sm:flex-col gap-1.5 p-3 sm:p-4 border-b sm:border-b-0 sm:border-r border-art-text bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0">
-            <div className="flex sm:flex-col gap-1.5 w-full">
+          <div className="flex sm:flex-col gap-2 p-3 sm:p-4 border-b sm:border-b-0 sm:border-r border-art-text/10 bg-white overflow-x-auto sm:overflow-x-visible w-full sm:w-48 shrink-0 no-scrollbar">
+            <div className="flex sm:flex-col gap-1.5 w-max sm:w-full">
               {activeCategory === 'booking' && (
                 <>
                   <button onClick={() => setActiveTab('bookings')} className={`relative text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>

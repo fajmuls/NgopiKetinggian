@@ -68,9 +68,18 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg border border-art-text/20 gap-3">
-        <p className="text-xs font-bold text-art-text/60 uppercase">Mengedit Destinasi & Jalur</p>
-        <div className="flex gap-2">
+      <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+               <MapPin size={20} className="drop-shadow-sm" />
+             </div>
+             <div>
+               <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Destinasi & Durasi</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase">Kelola destinasi, via jalur, dan harga private trip</p>
+             </div>
+          </div>
+          <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
           <button onClick={() => {
             customConfirm("Beneran mau reset destinasi ke default?", () => {
               const defaultData = JSON.parse(JSON.stringify(defaultList));
@@ -78,13 +87,13 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
               updateConfig({ destinationsData: defaultData });
               showToast('Direset ke Default!');
             });
-          }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
+          }} className="bg-red-100 text-red-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={() => {
              setData(JSON.parse(JSON.stringify(config.destinationsData || [])));
              if (config.visibilities) setVisibilities(config.visibilities);
              setExpandedIndexes([]);
              showToast('Di-reset ke data tersimpan terakhir!');
-          }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
+          }} className="bg-gray-100 text-gray-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           
           {(() => {
             const isAllActive = data.every((d: any) => d.isActive !== false);
@@ -102,7 +111,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                   setData(nd);
                   showToast(isAllActive ? 'Semua Destinasi Dinonaktifkan!' : 'Semua Destinasi Diaktifkan!');
                 }} 
-                className={`${isAllActive ? 'bg-red-50 text-red-600 border-red-200 active:bg-red-100' : 'bg-art-green/10 text-art-green border-art-green/30 active:bg-art-green/20'} border px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 transition-colors`}
+                className={`${isAllActive ? 'bg-red-50 text-red-600 border-red-200 active:bg-red-100' : 'bg-art-green/10 text-art-green border-art-green/30 active:bg-art-green/20'} border px-3 py-3 min-h-[44px] rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 transition-colors`}
               >
                 {isAllActive ? <EyeOff size={14} /> : <Eye size={14} />} <span className="hidden sm:inline">{isAllActive ? 'Nonaktif Semua' : 'Aktif Semua'}</span>
               </button>
@@ -119,7 +128,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                   setData(nd);
                   showToast(isAllPrivate ? 'Semua Private Trip Dinonaktifkan!' : 'Semua Private Trip Diaktifkan!');
                 }} 
-                className={`${isAllPrivate ? 'bg-gray-50 text-gray-600 border-gray-200 active:bg-gray-100' : 'bg-indigo-50 text-indigo-600 border-indigo-200 active:bg-indigo-100'} border px-2 py-2 rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 transition-colors`}
+                className={`${isAllPrivate ? 'bg-gray-50 text-gray-600 border-gray-200 active:bg-gray-100' : 'bg-indigo-50 text-indigo-600 border-indigo-200 active:bg-indigo-100'} border px-3 py-3 min-h-[44px] rounded text-[9px] font-black uppercase tracking-tight flex items-center gap-1 transition-colors`}
               >
                 {isAllPrivate ? <Unlock size={14} /> : <Lock size={14} />} <span className="hidden sm:inline">{isAllPrivate ? 'Non-Privat Semua' : 'Privat Semua'}</span>
               </button>
@@ -142,9 +151,10 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
              });
              setData(nd);
              setExpandedIndexes([0]);
-          }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Destinasi</button>
-          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
+          }} className="bg-art-text text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest">+ Destinasi</button>
+          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
         </div>
+      </div>
       </div>
       
       <div className="bg-white p-4 rounded-lg border border-art-text/20 grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -283,7 +293,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
             <div className="flex flex-col mb-2">
               <span className="text-xs font-bold mb-1">Deskripsi & Info:</span>
               <textarea 
-                className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium focus:border-art-orange outline-none transition-all resize-none"
+                className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-medium focus:border-art-orange outline-none transition-all resize-none"
                 rows={3}
                 value={dest.desc || ''}
                 onChange={e => {
@@ -419,7 +429,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                   {path.durations.map((dur: any, j: number) => (
                     <React.Fragment key={j}>
                     <div className="flex gap-2 items-center min-w-full flex-wrap xl:flex-nowrap bg-white/50 p-2 rounded-lg border border-art-text/5">
-                      <select className="border-2 border-art-text/10 p-2 rounded-lg text-[10px] font-black uppercase tracking-tight flex-1 outline-none focus:border-art-orange bg-white" value={dur.label} onChange={e => {
+                      <select className="border border-art-text/20 p-2 rounded-lg text-[10px] font-black uppercase tracking-tight flex-1 outline-none focus:border-art-orange bg-white" value={dur.label} onChange={e => {
                         const nd = [...data];
                         nd[i].paths[pIdx].durations[j].label = e.target.value;
                         setData(nd);
@@ -432,7 +442,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                         <input 
                           type="text"
                           inputMode="numeric"
-                          className="border-2 border-art-text/10 p-2 rounded-lg text-xs w-20 font-mono focus:border-art-orange outline-none bg-white" 
+                          className="border border-art-text/20 p-2 rounded-lg text-xs w-20 font-mono focus:border-art-orange outline-none bg-white" 
                           value={dur.originalPrice ?? 0} 
                           onChange={e => {
                             let valStr = e.target.value.replace(/^0+/, '');
@@ -509,7 +519,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                             <span className="text-[10px] font-black uppercase tracking-widest text-art-text/60">Konten Tambahan Trip (Khusus Private)</span>
                          </div>
                          <textarea 
-                            className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium focus:border-art-orange outline-none transition-all resize-none"
+                            className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-medium focus:border-art-orange outline-none transition-all resize-none"
                             rows={4}
                             value={dur.tripContent || ''}
                             onChange={e => {

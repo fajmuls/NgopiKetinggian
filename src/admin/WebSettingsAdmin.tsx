@@ -93,10 +93,19 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
 
   return (
      <div className="space-y-6">
-       <div className="flex flex-col gap-4 bg-white p-6 rounded-lg border-2 border-art-text">
-        <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
-           <Edit2 size={16} className="text-art-orange" /> Edit Konten Cerita (Homepage)
-        </h3>
+       <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-art-text/10 pb-6">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+               <FileText size={20} className="drop-shadow-sm" />
+             </div>
+             <div>
+               <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Cerita Kami</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur konten cerita pada homepage</p>
+             </div>
+          </div>
+          <button onClick={handleSave} className="w-full sm:w-auto bg-art-orange text-white px-6 py-4 sm:py-3 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan</button>
+        </div>
         
         <div className="space-y-4 pt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -209,9 +218,18 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
 
   return (
     <div className="space-y-6">
-       <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-art-text/20">
-        <p className="text-xs font-bold text-art-text/60 uppercase">Gallery Foto</p>
-        <div className="flex gap-2">
+       <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+               <Map size={20} className="drop-shadow-sm" />
+             </div>
+             <div>
+               <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Galeri Foto</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase">Kelola foto pada halaman utama</p>
+             </div>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
           <button onClick={() => {
             customConfirm("Beneran mau reset gallery ke default?", () => {
               const defaultData = JSON.parse(JSON.stringify(defaultList));
@@ -219,11 +237,11 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
               updateConfig({ galleryPhotos: defaultData });
               showToast('Direset ke Default!');
             });
-          }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
+          }} className="bg-red-100 text-red-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
           <button onClick={() => {
              setData(JSON.parse(JSON.stringify(config.galleryPhotos || [])));
              showToast('Di-reset ke data tersimpan terakhir!');
-          }} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
+          }} className="bg-gray-100 text-gray-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
           <button onClick={() => {
             const bulkText = prompt("Masukkan URL foto (pisahkan dengan koma atau baris baru):");
             if (bulkText) {
@@ -231,12 +249,13 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
               const newPhotos = urls.map(u => ({ src: u, desc: "Gallery Photo" }));
               setData([...data, ...newPhotos]);
             }
-          }} className="bg-blue-100 text-blue-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Bulk Add</button>
+          }} className="bg-blue-100 text-blue-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Bulk Add</button>
           <button onClick={() => {
             setData([...data, { src: "", desc: "" }]);
-          }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">+ Foto</button>
-          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
+          }} className="bg-art-text text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest">+ Foto</button>
+          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
         </div>
+      </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {data.map((photo, i) => (
@@ -292,7 +311,7 @@ export const SplashAdmin = ({ config, updateConfig, showToast }: any) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl border-2 border-art-text/10 shadow-sm relative text-left">
+    <div className="bg-white p-6 rounded-3xl border border-art-text/20 shadow-sm relative text-left">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-art-text rounded-2xl flex items-center justify-center -rotate-6">
           <Monitor size={20} className="text-white" />
@@ -306,29 +325,29 @@ export const SplashAdmin = ({ config, updateConfig, showToast }: any) => {
       <div className="space-y-4">
         <div>
           <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Judul Baris 1</label>
-          <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashTitleLine1} onChange={e => setData({...data, splashTitleLine1: e.target.value})} placeholder="Ngopi Di" />
+          <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.splashTitleLine1} onChange={e => setData({...data, splashTitleLine1: e.target.value})} placeholder="Ngopi Di" />
         </div>
         <div>
           <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Judul Baris 2 (Highlight)</label>
-          <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashTitleLine2} onChange={e => setData({...data, splashTitleLine2: e.target.value})} placeholder="Ketinggian" />
+          <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.splashTitleLine2} onChange={e => setData({...data, splashTitleLine2: e.target.value})} placeholder="Ketinggian" />
         </div>
         <div>
           <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Deskripsi Splash</label>
-          <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold h-24 resize-none" value={data.splashDesc} onChange={e => setData({...data, splashDesc: e.target.value})} placeholder="Open trip eksklusif..."></textarea>
+          <textarea className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold h-24 resize-none" value={data.splashDesc} onChange={e => setData({...data, splashDesc: e.target.value})} placeholder="Open trip eksklusif..."></textarea>
         </div>
         <div>
           <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Teks Tombol Masuk</label>
-          <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashButtonText} onChange={e => setData({...data, splashButtonText: e.target.value})} placeholder="Mulai Melihat Tour" />
+          <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.splashButtonText} onChange={e => setData({...data, splashButtonText: e.target.value})} placeholder="Mulai Melihat Tour" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Kunjungi IG URL</label>
-            <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashIgUrl} onChange={e => setData({...data, splashIgUrl: e.target.value})} placeholder="URL Instagram" />
+            <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.splashIgUrl} onChange={e => setData({...data, splashIgUrl: e.target.value})} placeholder="URL Instagram" />
           </div>
           <div>
             <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Kunjungi TikTok URL</label>
-            <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.splashTiktokUrl} onChange={e => setData({...data, splashTiktokUrl: e.target.value})} placeholder="URL TikTok" />
+            <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.splashTiktokUrl} onChange={e => setData({...data, splashTiktokUrl: e.target.value})} placeholder="URL TikTok" />
           </div>
         </div>
 
@@ -392,7 +411,7 @@ export const LogoAudioAdmin = ({ config, updateConfig, showToast }: any) => {
           </div>
           <button 
             onClick={() => setData({...data, logos: [...(data.logos || []), { id: Date.now().toString(), url: "", name: "Logo Baru" }]})}
-            className="bg-art-text text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+            className="bg-art-text text-white px-4 py-3 min-h-[44px] rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
           >
             <Plus size={14} /> Tambah Logo
           </button>
@@ -491,7 +510,7 @@ export const LogoAudioAdmin = ({ config, updateConfig, showToast }: any) => {
         </div>
         <div className="space-y-4">
           <InputWithPaste 
-            className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-mono outline-none focus:border-art-orange"
+            className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-mono outline-none focus:border-art-orange"
             value={data.bgmUrl || ''}
             onChange={(e: any) => setData({...data, bgmUrl: e.target.value})}
             placeholder="URL Audio (Contoh: https://example.com/audio.mp3)"
@@ -529,66 +548,71 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
 
   return (
     <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8 text-left shadow-sm relative">
-      <div className="flex items-center gap-3 mb-2 pb-4 border-b border-art-text/10">
-        <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
-           <Edit2 size={16} className="text-art-orange" /> Edit Teks Hero Utama
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-art-text/10">
+        <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+           <Edit2 size={20} className="drop-shadow-sm" />
+        </div>
+        <div>
+           <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Branding & Hero</h3>
+           <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur konten utama pada halaman depan</p>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Slogan Atas</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroSub || ''} onChange={e => setData({...data, heroSub: e.target.value})} placeholder="Open Trip Eksklusif" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.heroSub || ''} onChange={e => setData({...data, heroSub: e.target.value})} placeholder="Open Trip Eksklusif" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Floating Features</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fasilitas premium • Pemandu ahli • Keamanan terjamin" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.heroFeatures || ''} onChange={e => setData({...data, heroFeatures: e.target.value})} placeholder="Fasilitas premium • Pemandu ahli • Keamanan terjamin" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Prefix Judul</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-black uppercase" value={data.heroTitlePrefix || ''} onChange={e => setData({...data, heroTitlePrefix: e.target.value})} placeholder="TRIP" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-black uppercase" value={data.heroTitlePrefix || ''} onChange={e => setData({...data, heroTitlePrefix: e.target.value})} placeholder="TRIP" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Judul Utama</label>
-              <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-black h-20 resize-none" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Ngopi Di Ketinggian"></textarea>
+              <textarea className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-black h-20 resize-none" value={data.heroTitle || ''} onChange={e => setData({...data, heroTitle: e.target.value})} placeholder="Ngopi Di Ketinggian"></textarea>
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Deskripsi Hero</label>
-              <textarea className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-medium h-20 resize-none" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Nikmati pengalaman trip tak terlupakan..."></textarea>
+              <textarea className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-medium h-20 resize-none" value={data.heroDescription || ''} onChange={e => setData({...data, heroDescription: e.target.value})} placeholder="Nikmati pengalaman trip tak terlupakan..."></textarea>
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Tagline Bawah (Copy Sederhana)</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="Sederhana tapi berkesan" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.heroTagline || ''} onChange={e => setData({...data, heroTagline: e.target.value})} placeholder="Sederhana tapi berkesan" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Teks Tombol 1</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroButtonText1 || ''} onChange={e => setData({...data, heroButtonText1: e.target.value})} placeholder="Mulai Melihat Tur" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.heroButtonText1 || ''} onChange={e => setData({...data, heroButtonText1: e.target.value})} placeholder="Mulai Melihat Tur" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Teks Tombol 2</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroButtonText2 || ''} onChange={e => setData({...data, heroButtonText2: e.target.value})} placeholder="Explore Trips" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.heroButtonText2 || ''} onChange={e => setData({...data, heroButtonText2: e.target.value})} placeholder="Explore Trips" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">URL Instagram Utama (Hero)</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroIgUrl || ''} onChange={e => setData({...data, heroIgUrl: e.target.value})} placeholder="Misal: https://instagram.com/ngopi" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.heroIgUrl || ''} onChange={e => setData({...data, heroIgUrl: e.target.value})} placeholder="Misal: https://instagram.com/ngopi" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">URL TikTok Utama (Hero)</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.heroTiktokUrl || ''} onChange={e => setData({...data, heroTiktokUrl: e.target.value})} placeholder="Misal: https://tiktok.com/@ngopi" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.heroTiktokUrl || ''} onChange={e => setData({...data, heroTiktokUrl: e.target.value})} placeholder="Misal: https://tiktok.com/@ngopi" />
            </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Stat: Happy Hikers</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.statHikers || ''} onChange={e => setData({...data, statHikers: e.target.value})} placeholder="100+" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.statHikers || ''} onChange={e => setData({...data, statHikers: e.target.value})} placeholder="100+" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Stat: Satisfaction Rate</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.statSatisfaction || ''} onChange={e => setData({...data, statSatisfaction: e.target.value})} placeholder="99%" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.statSatisfaction || ''} onChange={e => setData({...data, statSatisfaction: e.target.value})} placeholder="99%" />
            </div>
            <div>
               <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 ml-1">Stat: Trips Completed</label>
-              <input className="w-full border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold" value={data.statTrips || ''} onChange={e => setData({...data, statTrips: e.target.value})} placeholder="50+" />
+              <input className="w-full border border-art-text/20 p-2 rounded-xl text-xs font-bold" value={data.statTrips || ''} onChange={e => setData({...data, statTrips: e.target.value})} placeholder="50+" />
            </div>
         </div>
 
@@ -641,9 +665,8 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
             })}
           </div>
         </div>
-      </div>
 
-      <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4">
+      <div className="pt-6 border-t border-art-text/10 space-y-4">
         <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
           <h3 className="font-bold text-sm uppercase">Edit Slide Gunung (Ketinggian MDPL)</h3>
           <button type="button" onClick={(e) => { e.preventDefault(); setData({ ...data, heroSlides: [...data.heroSlides, { name: "Gunung Contoh", height: "0.000", image: "" }] })}} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Slide</button>
@@ -704,7 +727,7 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         </div>
       </div>
 
-      <div className="pt-6 border-t-2 border-dashed border-art-text/20 space-y-4 pb-4">
+      <div className="pt-6 border-t border-art-text/10 space-y-4 pb-4">
         <div className="space-y-1.5">
           <label className="text-[10px] font-black uppercase text-art-text/40 tracking-widest block">Foto Background Hero Utama (Manual Override)</label>
           <ImageUploader value={data.heroPhotoUrl || ''} onChange={(url) => setData({...data, heroPhotoUrl: url})} placeholder="URL Foto Utama Hero" />
@@ -760,7 +783,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                <div>
                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Deskripsi Footer</label>
                   <textarea 
-                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium h-24 resize-none bg-white focus:border-art-orange outline-none transition-all" 
+                    className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-medium h-24 resize-none bg-white focus:border-art-orange outline-none transition-all" 
                     value={data.footerDesc || ''} 
                     onChange={e => setData({...data, footerDesc: e.target.value})} 
                     placeholder="Tuliskan deskripsi singkat tentang provider trip Anda..."
@@ -769,7 +792,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                <div>
                   <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Email Support</label>
                   <input 
-                    className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
+                    className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
                     value={data.officeEmail || ''} 
                     onChange={e => setData({...data, officeEmail: e.target.value})} 
                     placeholder="support@ngopi.com"
@@ -788,7 +811,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                     {(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone || ''}]).map((wa: any, i: number) => (
                        <div key={i} className="flex gap-2">
                           <input 
-                            className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
+                            className="flex-1 border border-art-text/20 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
                             value={wa.name || ''} 
                             onChange={e => {
                                const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
@@ -798,7 +821,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                             placeholder="Nama Kontak (mis. Admin 1)"
                           />
                           <input 
-                            className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all font-mono" 
+                            className="flex-1 border border-art-text/20 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all font-mono" 
                             value={wa.phone || ''} 
                             onChange={e => {
                                const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
@@ -832,7 +855,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                 <div>
                    <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Banner Link (e.g. #destinasi)</label>
                    <input 
-                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
+                     className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
                      value={data.promoBannerLink || ''} 
                      onChange={e => setData({ ...data, promoBannerLink: e.target.value })}
                      placeholder="#destinasi"
@@ -847,7 +870,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                 <div>
                    <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Alamat Kantor</label>
                    <textarea 
-                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium h-20 resize-none bg-white focus:border-art-orange outline-none transition-all" 
+                     className="w-full border border-art-text/20 p-3 rounded-xl text-xs font-medium h-20 resize-none bg-white focus:border-art-orange outline-none transition-all" 
                      value={data.officeAddress || ''} 
                      onChange={e => setData({...data, officeAddress: e.target.value})} 
                      placeholder="Jl. Raya..."
@@ -856,7 +879,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                 <div>
                    <label className="text-[10px] font-black uppercase text-art-text/40 mb-1 block ml-1">Link Google Maps (Iframe Src / Link)</label>
                    <InputWithPaste 
-                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-[10px] font-mono bg-white focus:border-art-orange outline-none transition-all" 
+                     className="w-full border border-art-text/20 p-3 rounded-xl text-[10px] font-mono bg-white focus:border-art-orange outline-none transition-all" 
                      value={data.officeMaps || ''} 
                      onChange={(e: any) => setData({...data, officeMaps: e.target.value})} 
                      placeholder="https://goo.gl/maps/..." 
@@ -942,7 +965,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
               <div className="flex gap-2">
                  <input 
                    id="newPaymentMethod"
-                   className="flex-1 border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange"
+                   className="flex-1 border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange"
                    placeholder="Tambah Metode Baru (cth: OVO)"
                  />
                  <button 
@@ -953,7 +976,7 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                          input.value = '';
                       }
                    }}
-                   className="bg-art-text text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase"
+                   className="bg-art-text text-white px-4 py-3 min-h-[44px] rounded-xl text-[10px] font-black uppercase"
                  >
                    +
                  </button>
@@ -1006,7 +1029,7 @@ export const CleanupPhotosAdmin = ({ config, updateConfig, showToast }: any) => 
     <div className="bg-white p-4 rounded-lg border-2 border-red-500 space-y-4">
       <h3 className="font-bold text-sm uppercase text-red-600">Cleanup Database</h3>
       <p className="text-xs">Hapus semua referensi foto dari database untuk memperbarui secara manual.</p>
-      <button onClick={handleCleanup} className="bg-red-600 text-white px-4 py-2 rounded text-xs font-bold uppercase">Hapus Semua Foto</button>
+      <button onClick={handleCleanup} className="bg-red-600 text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase">Hapus Semua Foto</button>
     </div>
   );
 };
@@ -1105,9 +1128,18 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
-        <p className="text-xs font-bold uppercase text-art-text/60">Fasilitas Trip</p>
-        <div className="flex gap-2">
+      <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+               <Coffee size={20} className="drop-shadow-sm" />
+             </div>
+             <div>
+               <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Fasilitas & Harga</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur opsi fasilitas include dan exclude</p>
+             </div>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
           <button onClick={() => {
             customConfirm("Beneran mau reset fasilitas ke default?", () => {
               const defaultData = JSON.parse(JSON.stringify(defaultList || { include: [], exclude: [], opsi: [] }));
@@ -1115,10 +1147,9 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
               updateConfig({ facilities: defaultData });
               showToast('Direset ke Default!');
             });
-          }} className="bg-red-100 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
-          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
+          }} className="bg-red-100 text-red-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
+          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
         </div>
-      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {renderSimpleList('include', 'Termasuk (Include)')}
@@ -1133,7 +1164,7 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
         
         <div className="grid grid-cols-1 gap-4">
           {data.opsi.map((opt: FacilityOption, i: number) => (
-            <div key={i} className="border-2 border-art-text/10 p-4 rounded-xl space-y-3 relative bg-art-bg/20">
+            <div key={i} className="border border-art-text/20 p-4 rounded-xl space-y-3 relative bg-art-bg/20">
                <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
                     <button type="button" onClick={() => moveItem('opsi', i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={16} className="rotate-180"/></button>
@@ -1215,74 +1246,71 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
           ))}
         </div>
       </div>
+      </div>
     </div>
+      </div>
   )
 }
-
-
 export const PromoCodesAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState(config.promoCodes || []);
-
   useEffect(() => {
     setData(config.promoCodes || []);
   }, [config.promoCodes]);
-
   const handleSave = () => { updateConfig({ promoCodes: data }); showToast('Tersimpan!'); };
-
   return (
     <div className="space-y-6 text-left">
-      <div className="flex justify-between bg-white p-4 rounded-lg border border-art-text/20">
-        <p className="text-xs font-bold uppercase text-art-text/60 font-black">Manajemen Kode Promo</p>
-        <div className="flex gap-2">
-           <button type="button" onClick={(e) => {
-             e.preventDefault();
-             const nd = [{ code: "BARU", discount: 10 }, ...data];
-             setData(nd);
-           }} className="bg-art-text text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest font-black">+ Kode Promo</button>
-           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-widest font-black">Simpan</button>
+      <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+               <CreditCard size={20} className="drop-shadow-sm" />
+             </div>
+             <div>
+               <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Manajemen Kode Promo</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur kode promo untuk diskon booking</p>
+             </div>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+             <button type="button" onClick={(e) => {
+               e.preventDefault();
+               const nd = [{ code: "BARU", discount: 10 }, ...data];
+               setData(nd);
+             }} className="flex-1 sm:flex-none bg-art-text text-white px-4 py-3 min-h-[44px].5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all">+ Kode Promo</button>
+             <button onClick={handleSave} className="flex-1 sm:flex-none bg-art-orange text-white px-4 py-3 min-h-[44px].5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all">Simpan</button>
+          </div>
         </div>
-      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.map((promo: any, i: number) => (
-          <div key={i} className="bg-white p-4 rounded-xl border-2 border-art-text flex flex-col gap-3 relative">
-            <button onClick={() => {
-              const nd = [...data]; nd.splice(i, 1); setData(nd);
-            }} className="absolute top-2 right-2 text-red-500 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
-            
-            <div>
-              <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Kode Promo</label>
-              <input 
-                className="w-full border-2 border-art-text p-2 rounded-lg font-black uppercase text-sm" 
-                value={promo.code} 
-                onChange={e => {
-                  const nd = [...data]; nd[i].code = e.target.value; setData(nd);
-                }} 
-                placeholder="PROMOCODE"
-              />
-            </div>
-            
-            <div>
-              <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Diskon (%)</label>
-              <div className="flex items-center gap-3">
-                <input 
-                  type="number"
-                  className="w-full border-2 border-art-text p-2 rounded-lg font-black text-sm" 
-                  value={promo.discount} 
-                  onChange={e => {
-                    const nd = [...data]; nd[i].discount = parseInt(e.target.value) || 0; setData(nd);
-                  }} 
-                  min="0"
-                  max="100"
-                />
-                <span className="font-black text-xl text-art-text">%</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {data.map((promo: any, i: number) => (
+            <div key={i} className="bg-white p-4 rounded-xl border-2 border-art-text/20 flex flex-col gap-3 relative shadow-sm hover:border-art-orange/30 transition-all">
+              <button onClick={() => {
+                const nd = [...data]; nd.splice(i, 1); setData(nd);
+              }} className="absolute top-3 right-3 text-red-400 p-1 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+              
+              <div className="pr-8 space-y-1">
+                 <label className="text-[9px] font-black uppercase text-art-text/40">Kode Promo</label>
+                 <input className="w-full border-b border-art-text/5 p-1 text-sm font-black text-art-orange outline-none focus:border-art-orange uppercase tracking-widest bg-transparent" value={promo.code} onChange={e => {
+                    const nd = [...data]; nd[i].code = e.target.value; setData(nd);
+                 }} placeholder="KODEPROMO" />
+              </div>
+              <div className="space-y-1">
+                 <label className="text-[9px] font-black uppercase text-art-text/40">Diskon (%)</label>
+                 <div className="flex items-center gap-2">
+                   <input type="number" min="0" max="100" className="w-full border-b border-art-text/5 p-1 text-xs font-bold outline-none focus:border-art-orange font-mono bg-transparent" value={promo.discount} onChange={e => {
+                      const nd = [...data]; nd[i].discount = parseInt(e.target.value) || 0; setData(nd);
+                   }} placeholder="Cth: 10" />
+                   <span className="font-black text-sm text-art-text/50">%</span>
+                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+          {data.length === 0 && (
+             <div className="col-span-full py-12 text-center border-2 border-dashed border-art-text/10 rounded-2xl bg-gray-50/50">
+                <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest">Belum ada kode promo aktif</p>
+             </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
-
-

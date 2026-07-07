@@ -542,7 +542,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                    <div className="flex items-center gap-2 border-l border-art-text/10 pl-2">
                      <button 
                       onClick={() => generateInvoice(booking)}
-                      className="p-2 border-2 border-art-text/10 text-art-text/60 rounded-xl hover:bg-art-bg transition-colors"
+                      className="p-2 border border-art-text/20 text-art-text/60 rounded-xl hover:bg-art-bg transition-colors"
                       title="Download Invoice"
                     >
                       <Download size={16} />
@@ -711,7 +711,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                               <div className="space-y-1">
                                  <label className="text-[8px] font-black uppercase text-art-text/40">Teks Rundown / Itinerary</label>
                                  <textarea 
-                                    className="w-full border-2 border-art-text/10 p-2 rounded-xl text-[10px] font-medium outline-none focus:border-art-orange transition-all resize-none bg-white"
+                                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-medium outline-none focus:border-art-orange transition-all resize-none bg-white"
                                     rows={4}
                                     defaultValue={booking.rundownText || ""}
                                     onBlur={async (e) => {
