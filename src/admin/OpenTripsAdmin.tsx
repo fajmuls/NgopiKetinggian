@@ -16,6 +16,7 @@ import { handleFirestoreError, OperationType } from '../lib/firestore-error';
 export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPrefill }: any) => {
   const [data, setData] = useState<OpenTrip[]>(config.openTrips || []);
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
+  const [activeTabs, setActiveTabs] = useState<Record<number, string>>({});
   const [bookings, setBookings] = useState<any[]>([]);
   const [user] = useAuthState(auth);
 
@@ -242,29 +243,28 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
               <p className="text-[9px] font-bold text-art-text/40 uppercase">Kelola jadwal keberangkatan open trip</p>
            </div>
         </div>
-        <div className="flex flex-wrap gap-2 items-center">
-              <div className="flex bg-white rounded-xl border-2 border-art-text overflow-hidden shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full sm:w-auto mt-4 sm:mt-0">
+              <div className="flex flex-col sm:flex-row bg-white rounded-xl border-2 border-art-text overflow-hidden shadow-sm w-full sm:w-auto">
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
                    const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft', rundownText: '', rundownPdf: '' }, ...data];
                    setData(nd);
                    setExpandedIndexes([0]);
-                 }} className="hover:bg-art-bg px-4 py-2 text-[10px] font-black uppercase tracking-widest border-r-2 border-art-text">+ Trip Manual</button>
+                 }} className="w-full sm:w-auto hover:bg-art-bg px-4 py-3 sm:py-2 text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Manual</button>
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
                    const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Pilih Tanggal Weekend", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2 Hari 1 Malam", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true, rundownText: '', rundownPdf: '' }, ...data];
                    setData(nd);
                    setExpandedIndexes([0]);
-                 }} className="hover:bg-blue-50 text-blue-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest">+ Trip Weekend</button>
+                 }} className="w-full sm:w-auto hover:bg-blue-50 text-blue-600 px-4 py-3 sm:py-2 text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Weekend</button>
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
                    const message = `Halo Owner,\nMohon update jadwal Open Trip selanjutnya agar bisa segera kami upload ke website.\n\nMohon isi format berikut:\n- Gunung: ____________\n- Via / Jalur: ____________\n- Tanggal: ____________\n- Kuota: ____________\n- Harga (Final): ____________\n- Harga (Coret/Normal): ____________\n- Mepo (Meeting Point): ____________\n\nTerima kasih.`;
                    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
                    window.open(url, '_blank');
-                 }} className="hover:bg-green-50 text-green-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest border-l-2 border-art-text flex items-center gap-1"><MessageCircle size={12}/> Minta Jadwal (WA)</button>
+                 }} className="w-full sm:w-auto hover:bg-green-50 text-green-600 px-4 py-3 sm:py-2 text-[10px] font-black uppercase tracking-widest flex items-center justify-center sm:justify-start gap-1"><MessageCircle size={12}/> Minta Jadwal (WA)</button>
               </div>
-
-           <button onClick={handleSave} className="bg-art-orange text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
+           <button onClick={handleSave} className="w-full sm:w-auto bg-art-orange text-white px-6 py-3 sm:py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4">
@@ -274,8 +274,11 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
         const isLocked = isPublished; // If published, some fields are locked. User said "Once published and confirmed by admin, it cannot be edited" - I'll use published as the trigger for now.
 
         return (
-        <div key={i} className={`bg-white rounded-xl border-2 transition-all p-4 ${isPublished ? 'border-art-green shadow-md' : 'border-art-text bg-gray-50/30'}`}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div key={i} className={`relative bg-white rounded-2xl border-2 transition-all p-4 pt-10 md:pt-6 ${isPublished ? 'border-art-green shadow-md' : 'border-art-text bg-gray-50/30'}`}>
+          <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-1 ${isPublished ? 'bg-art-green text-white shadow-sm' : 'bg-gray-200 text-gray-500'}`}>
+             {isPublished ? <><Globe size={12}/> LIVE / TERBIT</> : 'DRAFT'}
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
              <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => setExpandedIndexes(prev => prev.includes(i) ? prev.filter(idx => idx !== i) : [...prev, i])}>
                 <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-black ${isPublished ? 'bg-art-green text-white' : 'bg-art-text text-white'}`}>
                    {expandedIndexes.includes(i) ? '-' : '+'}
@@ -284,18 +287,16 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                    <h4 className="font-black uppercase text-sm tracking-tight flex items-center gap-2">
                       {ot.name || 'Pilih Gunung'} 
                       {isPublished && <CheckCircle size={14} className="text-art-green" />}
-                      {!ot.name && <span className="text-[8px] bg-red-100 text-red-500 px-1.5 py-0.5 rounded">Draft</span>}
                    </h4>
                    <div className="flex gap-2 flex-wrap mt-1">
                       {ot.jadwal && <span className="text-[8px] font-bold bg-white border border-art-text/10 px-2 py-0.5 rounded uppercase">{ot.jadwal}</span>}
                       {ot.path && <span className="text-[8px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">{ot.path}</span>}
-                      {isPublished && <span className="text-[8px] font-black bg-art-green text-white px-2 py-0.5 rounded uppercase flex items-center gap-1"><Globe size={8}/> Terbit</span>}
                       {consumed > 0 && <span className="text-[8px] font-black bg-art-orange text-white px-2 py-0.5 rounded uppercase">DP: {consumed} Pax</span>}
                    </div>
                 </div>
              </div>
              
-             <div className="flex items-center gap-2">
+             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                 {!isPublished ? (
                   <button 
                     disabled={!ot.name || !ot.jadwal || !ot.price}
@@ -305,9 +306,9 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                         setData(nd);
                         showToast("Trip diterbitkan!");
                     }}
-                    className="flex items-center gap-1.5 text-[9px] font-black uppercase px-3 py-1.5 bg-art-green text-white rounded-lg hover:shadow-md transition-all disabled:opacity-30"
+                    className="flex-1 md:flex-none flex items-center justify-center gap-1.5 text-[10px] font-black uppercase px-4 py-2.5 bg-art-green text-white rounded-xl hover:shadow-md transition-all disabled:opacity-30"
                   >
-                    <Send size={12}/> Terbitkan
+                    <Send size={14}/> Terbitkan
                   </button>
                 ) : (
                   <button 
@@ -318,7 +319,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                         setData(nd);
                         showToast("Trip ditarik ke draft.");
                     }}
-                    className="text-[9px] font-black uppercase px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition-all disabled:opacity-30"
+                    className="flex-1 md:flex-none text-[10px] font-black uppercase px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all disabled:opacity-30 border border-gray-300"
                   >
                     Tarik ke Draft
                   </button>
@@ -332,9 +333,9 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
                     window.open(url, '_blank');
                   }}
-                  className="flex items-center gap-1 text-[9px] font-black uppercase px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-all border border-green-200"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-1 text-[10px] font-black uppercase px-4 py-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all border border-green-200"
                 >
-                  <MessageCircle size={12}/> Konf. Owner
+                  <MessageCircle size={14}/> Konf. Owner
                 </button>
 
                 <button 
@@ -348,7 +349,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                       const nd = [...data]; nd.splice(i, 1); setData(nd);
                     });
                   }} 
-                  className={`p-2 rounded-lg transition-all ${consumed > 0 ? 'text-gray-300 opacity-50 cursor-not-allowed' : 'text-red-400 hover:bg-red-50'}`}
+                  className={`flex items-center justify-center p-2.5 rounded-xl transition-all border ${consumed > 0 ? 'text-gray-300 border-gray-200 opacity-50 cursor-not-allowed' : 'text-red-500 border-red-200 hover:bg-red-50'}`}
                 >
                   <Trash2 size={16}/>
                 </button>
@@ -357,7 +358,64 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
 
           {expandedIndexes.includes(i) && (
           <div className="mt-4 pt-4 border-t-2 border-dashed border-art-text/10 space-y-4">
-              {/* Rundown Section for Open Trip */}
+
+              <div className="flex flex-wrap gap-2 mb-4 border-b-2 border-art-text/10 pb-2">
+                <button 
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'basic' })); }} 
+                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${(!activeTabs[i] || activeTabs[i] === 'basic') ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                >Info Dasar</button>
+                <button 
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'price' })); }} 
+                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'price' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                >Harga & Kuota</button>
+                <button 
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'itinerary' })); }} 
+                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'itinerary' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                >Rundown</button>
+                <button 
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setActiveTabs(prev => ({ ...prev, [i]: 'groups' })); }} 
+                  className={`px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${activeTabs[i] === 'groups' ? 'bg-art-text text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                >Grup</button>
+                
+                <button 
+                  type="button"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     customAlert(
+                        <div className="space-y-4 w-full">
+                           <div className="border-b-2 border-art-text pb-2 flex items-center justify-between">
+                              <h3 className="font-black uppercase text-sm">Manifest: {ot.name || '-'}</h3>
+                           </div>
+                           <div className="max-h-96 overflow-y-auto pr-2 space-y-2">
+                              {bookings.filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai' || b.status === 'dp_partial')).map(b => (
+                                 <div key={b.id} className="p-3 border border-gray-200 rounded-xl bg-gray-50 flex items-center justify-between">
+                                    <div>
+                                       <div className="font-bold text-xs uppercase text-art-text">{b.nama}</div>
+                                       <div className="text-[10px] text-gray-500 font-mono mt-1">{b.nohp}</div>
+                                    </div>
+                                    <div className="text-right">
+                                       <div className="text-[10px] font-black uppercase text-art-orange">{b.peserta} Pax</div>
+                                       <a href={`https://wa.me/${b.nohp?.replace(/^0/, '62')}`} target="_blank" className="text-[8px] bg-green-100 text-green-700 px-2 py-1 rounded inline-flex mt-1 uppercase font-bold items-center gap-1 hover:bg-green-200 transition-colors"><MessageCircle size={10}/> Chat</a>
+                                    </div>
+                                 </div>
+                              ))}
+                              {bookings.filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai' || b.status === 'dp_partial')).length === 0 && (
+                                 <p className="text-center text-xs text-gray-400 py-4 font-bold uppercase tracking-widest">Belum ada peserta</p>
+                              )}
+                           </div>
+                        </div>
+                     , "Manifest Peserta");
+                  }} 
+                  className="px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 flex items-center gap-1 sm:ml-auto"
+                ><Users size={12}/> Manifest</button>
+              </div>
+
+<div className={activeTabs[i] === 'itinerary' ? "space-y-4" : "hidden"}>
+{/* Rundown Section for Open Trip */}
               <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10 space-y-4">
                 <div className="flex items-center justify-between">
                    <div className="flex items-center gap-2">
@@ -424,22 +482,67 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
               </div>
 
 
-               {/* Layer 7: Group Management (MOVED TO BOTTOM) */}
+               </div>
+<div className={activeTabs[i] === 'groups' ? "space-y-4" : "hidden"}>
+{/* Layer 7: Group Management (MOVED TO BOTTOM) */}
                <div className="bg-art-green/5 p-5 rounded-2xl border-2 border-art-green/20 space-y-4">
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-2">
                         <Users size={16} className="text-art-green" />
                         <h4 className="text-[11px] font-black uppercase text-art-green tracking-widest">Group Management</h4>
                      </div>
-                     <button 
-                        onClick={() => {
-                           const nd = [...data];
-                           if (!nd[i].groups) nd[i].groups = [];
-                           nd[i].groups.push({ id: Date.now().toString(), name: `Grup ${nd[i].groups.length + 1}`, leader: "", members: "" });
-                           setData(nd);
-                        }}
-                        className="bg-art-green text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase shadow-sm hover:scale-105 transition-all"
-                     >Tambah Grup</button>
+                     <div className="flex gap-2">
+                       <button 
+                          onClick={() => {
+                             const tripBookings = bookings.filter(b => b.type === 'open' && b.destinasi === ot.name && b.jadwal === ot.jadwal && (b.status === 'processing' || b.status === 'lunas' || b.status === 'selesai' || b.status === 'dp_partial'));
+                             if (tripBookings.length === 0) {
+                                customAlert("Belum ada peserta di trip ini.");
+                                return;
+                             }
+                             const numbers = tripBookings.map(b => b.nohp?.replace(/^0/, '62')).filter(Boolean).join(',');
+                             const template = `Halo Kak!\nIni broadcast info dari admin untuk Trip ${ot.name || '-'} jadwal ${ot.jadwal || '-'}.\n\nMeeting Point: ${ot.mepo || '-'}\n\nMohon persiapkan diri dan barang bawaan ya!`;
+                             customAlert(
+                                <div className="space-y-4">
+                                   <div className="border-b-2 border-art-text pb-2">
+                                      <h3 className="font-black uppercase text-sm">Broadcast WA ({tripBookings.length} Peserta)</h3>
+                                   </div>
+                                   <textarea 
+                                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium outline-none focus:border-art-orange transition-all min-h-[150px]"
+                                      defaultValue={template}
+                                      id={`broadcast-msg-${i}`}
+                                   />
+                                   <div className="flex flex-col gap-2">
+                                      <p className="text-[9px] text-gray-500 font-medium italic">* WA Web tidak mendukung kirim massal otomatis. Klik tombol di bawah untuk membuka chat satu per satu dengan pesan yang sudah terisi.</p>
+                                      <div className="max-h-40 overflow-y-auto space-y-2 mt-2">
+                                        {tripBookings.map((b, idx) => (
+                                          <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                                            <span className="text-[10px] font-bold uppercase">{b.nama} ({b.nohp})</span>
+                                            <button 
+                                              onClick={() => {
+                                                const msg = (document.getElementById(`broadcast-msg-${i}`) as HTMLTextAreaElement)?.value || template;
+                                                window.open(`https://wa.me/${b.nohp?.replace(/^0/, '62')}?text=${encodeURIComponent(msg)}`, '_blank');
+                                              }}
+                                              className="text-[9px] font-black uppercase bg-green-500 text-white px-3 py-1.5 rounded hover:bg-green-600 transition-colors flex items-center gap-1"
+                                            ><Send size={10}/> Kirim</button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                   </div>
+                                </div>
+                             , "Broadcast Info");
+                          }}
+                          className="bg-white border-2 border-green-200 text-green-600 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase shadow-sm hover:bg-green-50 transition-all flex items-center gap-1"
+                       ><MessageCircle size={12}/> Broadcast WA</button>
+                       <button 
+                          onClick={() => {
+                             const nd = [...data];
+                             if (!nd[i].groups) nd[i].groups = [];
+                             nd[i].groups.push({ id: Date.now().toString(), name: `Grup ${nd[i].groups.length + 1}`, leader: "", members: "" });
+                             setData(nd);
+                          }}
+                          className="bg-art-green text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase shadow-sm hover:scale-105 transition-all"
+                       >Tambah Grup</button>
+                     </div>
                   </div>
 
                   <div className="space-y-3">
@@ -527,7 +630,9 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                </div>
 
 
-              {/* Layer 1: Mountain + Difficulty */}
+              </div>
+<div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-4" : "hidden"}>
+{/* Layer 1: Mountain + Difficulty */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Gunung</label>
@@ -652,7 +757,9 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 </div>
               </div>
 
-              {/* Layer 4: Capacity + Availability */}
+              </div>
+<div className={activeTabs[i] === 'price' ? "space-y-4" : "hidden"}>
+{/* Layer 4: Capacity + Availability */}
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase text-art-text/40">Kapasitas (Pax)</label>
@@ -668,16 +775,16 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                         const nd = [...data]; 
                         nd[i].maxKuota = val; 
                         nd[i].kuotaNum = val; 
-                        nd[i].kuota = `${val - (ot.consumedKuota || 0)} Pax Tersisa`;
+                        nd[i].kuota = `${val - consumed} Pax Tersisa`;
                         setData(nd); 
                       }} 
                     />
                  </div>
                  <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-art-green">Sisa Slot</label>
-                    <div className="w-full border-2 border-dashed border-art-green/20 bg-art-green/10 p-2 rounded-xl flex items-center justify-center">
-                       <span className="text-[10px] font-black uppercase text-art-green">
-                          {Math.max(0, (ot.maxKuota || 0) - (ot.consumedKuota || 0))} Pax Tersisa
+                    <label className={`text-[9px] font-black uppercase ${Math.max(0, (ot.maxKuota || 0) - consumed) <= 0 ? 'text-red-500' : Math.max(0, (ot.maxKuota || 0) - consumed) <= 3 ? 'text-art-orange' : 'text-art-green'}`}>Sisa Slot</label>
+                    <div className={`w-full border-2 border-dashed p-2 rounded-xl flex items-center justify-center ${Math.max(0, (ot.maxKuota || 0) - consumed) <= 0 ? 'border-red-500/30 bg-red-500/10' : Math.max(0, (ot.maxKuota || 0) - consumed) <= 3 ? 'border-art-orange/30 bg-art-orange/10' : 'border-art-green/30 bg-art-green/10'}`}>
+                       <span className={`text-[10px] font-black uppercase ${Math.max(0, (ot.maxKuota || 0) - consumed) <= 0 ? 'text-red-500' : Math.max(0, (ot.maxKuota || 0) - consumed) <= 3 ? 'text-art-orange' : 'text-art-green'}`}>
+                          {Math.max(0, (ot.maxKuota || 0) - consumed) <= 0 ? 'Kuota Penuh' : `${Math.max(0, (ot.maxKuota || 0) - consumed)} Pax Tersisa`}
                        </span>
                     </div>
                  </div>
@@ -727,7 +834,9 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 </div>
               </div>
 
-               {/* Layer 7: Leaders & Description */}
+               </div>
+<div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-4" : "hidden"}>
+{/* Layer 7: Leaders & Description */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="space-y-1">
                    <label className="text-[9px] font-black uppercase text-art-text/40">Leaders (Pilih beberapa)</label>
@@ -895,6 +1004,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 </div>
               </div>
             </div>
+          </div>
           )}
         </div>
       );
