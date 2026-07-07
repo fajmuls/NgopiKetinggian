@@ -227,10 +227,15 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                <button type="button" onClick={() => moveDestination(i, 'up')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
                <button type="button" onClick={() => moveDestination(i, 'down')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
                <button onClick={() => {
+                  const text = `*PRIVATE TRIP ${dest.name?.toUpperCase() || '-'}*\n\n⛰️ *Jalur:* ${dest.paths?.map((p: any) => p.name).join(', ') || '-'}\n💰 *Mulai:* Rp ${Math.min(...(dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.price)) || [0])).toLocaleString('id-ID')}\n👥 *Kuota:* ${dest.kuota || '-'}\n⏳ *Durasi:* ${dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.label)).filter((v: any, i: any, a: any) => a.indexOf(v) === i).join(', ') || '-'}\n\nYuk booking private trip kamu: https://ngopidiketinggian.com/destinasi`;
+                  navigator.clipboard.writeText(text);
+                  showToast("Teks destinasi disalin!");
+               }} className="px-2 text-indigo-500 hover:bg-indigo-50" title="Salin Teks"><Clipboard size={14}/></button>
+               <button onClick={() => {
                   customConfirm(`Hapus ${dest.name}?`, () => {
                     const nd = [...data]; nd.splice(i, 1); setData(nd);
                   });
-               }} className="px-2 text-red-500 hover:bg-red-50" title="Hapus"><Trash2 size={14}/></button>
+               }} className="px-2 text-red-400 hover:text-red-600 hover:bg-red-50 transition-all opacity-40 hover:opacity-100" title="Hapus"><Trash2 size={14}/></button>
             </div>
           </div>
 
@@ -260,7 +265,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
              e.preventDefault();
              const nd = [...data];
              if (!nd[i].paths) nd[i].paths = [];
-             nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] });
+             nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0 }] });
              setData(nd);
              if (!expandedIndexes.includes(i)) setExpandedIndexes([...expandedIndexes, i]);
           }} className="text-[9px] font-black uppercase bg-art-text text-white px-3 py-2 rounded-xl border-2 border-art-text shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-none transition-all hidden sm:block">+ Jalur</button>
@@ -375,14 +380,18 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
               
               <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Level:</span>
-                <select className="border p-2 rounded text-[11px] w-full" value={dest.difficulty || ''} onChange={e => {
-                  const nd = [...data];
-                  nd[i].difficulty = e.target.value;
-                  setData(nd);
-                }}>
-                  <option value="">Status</option>
-                  {difficultyLevels.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
-                </select>
+                <div className="flex gap-1 bg-white p-1 rounded-xl border border-art-text/10 overflow-x-auto no-scrollbar">
+                  {difficultyLevels.map(lvl => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => { const nd = [...data]; nd[i].difficulty = lvl; setData(nd); }}
+                      className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all whitespace-nowrap ${dest.difficulty === lvl ? 'bg-art-text text-white shadow-sm' : 'text-art-text/40 hover:bg-art-bg'}`}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             
@@ -391,7 +400,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                 e.preventDefault();
                 const nd = [...data];
                 if (!nd[i].paths) nd[i].paths = [];
-                nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] });
+                nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0 }] });
                 setData(nd);
               }}
               className="text-[10px] bg-art-text text-white px-3 py-1.5 rounded w-full sm:hidden"
@@ -420,7 +429,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                   <button type="button" onClick={(e) => {
                     e.preventDefault();
                     const nd = [...data];
-                    nd[i].paths[pIdx].durations.push({ label: "1H (Tektok)", price: 0, originalPrice: 0 });
+                    nd[i].paths[pIdx].durations.push({ label: "1H (Tektok)", price: 0 });
                     setData(nd);
                   }} className="text-[10px] bg-blue-500 text-white px-2 py-1.5 rounded whitespace-nowrap">+ Durasi</button>
                 </div>
@@ -437,25 +446,6 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                         {durationLevels.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
                       </select>
                       
-                      <div className="flex items-center gap-1">
-                        <span className="text-[8px] font-bold text-art-text/30">Coret:</span>
-                        <input 
-                          type="text"
-                          inputMode="numeric"
-                          className="border border-art-text/20 p-2 rounded-lg text-xs w-20 font-mono focus:border-art-orange outline-none bg-white" 
-                          value={dur.originalPrice ?? 0} 
-                          onChange={e => {
-                            let valStr = e.target.value.replace(/^0+/, '');
-                            if (valStr === '') valStr = '0';
-                            const val = parseInt(valStr) || 0;
-                            const nd = [...data];
-                            nd[i].paths[pIdx].durations[j].originalPrice = val;
-                            setData(nd);
-                          }} 
-                          placeholder="Coret" 
-                        />
-                      </div>
-
                       <div className="flex items-center gap-1">
                         <span className="text-[8px] font-bold text-art-orange">Final:</span>
                         <input 

@@ -122,10 +122,10 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(ceritaFeatures || []).map((feat: any, idx: number) => (
-                <div key={idx} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20">
+                <div key={idx} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20 group">
                   <button type="button" onClick={() => {
                     const nf = [...ceritaFeatures]; nf.splice(idx, 1); setCeritaFeatures(nf);
-                  }} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
+                  }} className="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
                   <input className="w-full border p-2 rounded text-xs" value={feat.title} onChange={e => {
                     const nf = [...ceritaFeatures]; nf[idx].title = e.target.value; setCeritaFeatures(nf);
                   }} placeholder="Judul Fitur" />
@@ -202,6 +202,8 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
 
 export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState([...(config.galleryPhotos || [])]);
+  const [showBulkAdd, setShowBulkAdd] = useState(false);
+  const [bulkText, setBulkText] = useState("");
   
   const movePhoto = (index: number, direction: 'up' | 'down') => {
     const list = [...data];
@@ -214,6 +216,17 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
   const handleSave = () => {
     updateConfig({ galleryPhotos: data });
     showToast('Disimpan!');
+  };
+
+  const handleBulkSubmit = () => {
+    if (bulkText) {
+      const urls = bulkText.split(/[\n,]/).map(u => u.trim()).filter(u => u);
+      const newPhotos = urls.map(u => ({ src: u, desc: "Gallery Photo" }));
+      setData([...data, ...newPhotos]);
+      setBulkText("");
+      setShowBulkAdd(false);
+      showToast(`${urls.length} foto ditambahkan!`);
+    }
   };
 
   return (
@@ -242,25 +255,34 @@ export const GalleryAdmin = ({ config, updateConfig, showToast, defaultList }: a
              setData(JSON.parse(JSON.stringify(config.galleryPhotos || [])));
              showToast('Di-reset ke data tersimpan terakhir!');
           }} className="bg-gray-100 text-gray-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Batal</button>
-          <button onClick={() => {
-            const bulkText = prompt("Masukkan URL foto (pisahkan dengan koma atau baris baru):");
-            if (bulkText) {
-              const urls = bulkText.split(/[\n,]/).map(u => u.trim()).filter(u => u);
-              const newPhotos = urls.map(u => ({ src: u, desc: "Gallery Photo" }));
-              setData([...data, ...newPhotos]);
-            }
-          }} className="bg-blue-100 text-blue-600 px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Bulk Add</button>
+          <button onClick={() => setShowBulkAdd(!showBulkAdd)} className={`${showBulkAdd ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'} px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest transition-colors`}>Bulk Add</button>
           <button onClick={() => {
             setData([...data, { src: "", desc: "" }]);
           }} className="bg-art-text text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest">+ Foto</button>
           <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 min-h-[44px] rounded text-xs font-bold uppercase tracking-widest">Simpan</button>
         </div>
       </div>
+
+      {showBulkAdd && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl space-y-3">
+          <label className="text-[10px] font-black uppercase text-blue-600">Masukkan banyak URL foto (Pisahkan koma atau baris baru)</label>
+          <textarea 
+            className="w-full border-2 border-blue-200 p-3 rounded-xl text-xs font-mono focus:border-blue-500 outline-none h-32"
+            value={bulkText}
+            onChange={e => setBulkText(e.target.value)}
+            placeholder="https://example.com/a.jpg&#10;https://example.com/b.jpg"
+          />
+          <div className="flex gap-2">
+            <button onClick={handleBulkSubmit} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase">Tambahkan Semua</button>
+            <button onClick={() => setShowBulkAdd(false)} className="bg-white text-blue-600 border border-blue-200 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Batal</button>
+          </div>
+        </motion.div>
+      )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {data.map((photo, i) => (
-          <div key={i} className="bg-white p-3 rounded border border-art-text relative space-y-2 flex flex-col">
-            <div className="absolute top-2 right-2 flex gap-1 z-10">
+          <div key={i} className="bg-white p-3 rounded border border-art-text relative space-y-2 flex flex-col group">
+            <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
                     <button type="button" onClick={() => movePhoto(i, 'up')} className="p-1 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
                     <button type="button" onClick={() => movePhoto(i, 'down')} className="p-1 hover:bg-gray-100" disabled={i === data.length - 1}><ChevronDown size={14}/></button>
@@ -674,10 +696,10 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
            {data.heroSlides.map((slide: any, i: number) => (
-             <div key={i} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20">
+             <div key={i} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20 group">
                 <button onClick={() => {
                    const ns = [...data.heroSlides]; ns.splice(i, 1); setData({...data, heroSlides: ns});
-                }} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
+                }} className="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
 
                 <div>
                    <label className="text-[10px] font-bold uppercase block mb-1">Pilih dari Destinasi (Opsional)</label>
@@ -830,11 +852,11 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                             }} 
                             placeholder="62812xxx..."
                           />
-                          <button type="button" onClick={() => {
+                        <button type="button" onClick={() => {
                              const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
                              nw.splice(i, 1);
                              setData({...data, whatsappContacts: nw});
-                          }} className="p-2 text-red-500 hover:bg-red-50 border-2 border-red-100 rounded-xl"><Trash2 size={16} /></button>
+                          }} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-100 rounded-xl transition-all"><Trash2 size={16} /></button>
                        </div>
                     ))}
                   </div>

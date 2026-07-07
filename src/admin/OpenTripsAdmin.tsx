@@ -59,10 +59,10 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
         path: "", 
         duration: "2H 1M", 
         price: 0, 
-        originalPrice: 0, 
         leaders: [], 
         startDate: "",
-        status: 'draft' 
+        status: 'draft',
+        igPostUrl: ""
       }, ...data];
       
       setData(nd);
@@ -135,7 +135,6 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
         path: defaultPath,
         duration: defaultDuration,
         price: basePrice,
-        originalPrice: originalPrice,
         rundownPdf: rundownPdf,
         rundownText: rundownText,
         leaders: [],
@@ -206,10 +205,10 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                               path: req.jalur || "Jalur Utama", 
                               duration: "2 Hari 1 Malam", 
                               price: 0, 
-                              originalPrice: 0, 
                               leaders: [], 
                               startDate: "",
-                              status: 'draft' 
+                              status: 'draft',
+                              igPostUrl: ""
                             }, ...data];
                             setData(nd);
                             setExpandedIndexes([0]);
@@ -247,19 +246,19 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
               <div className="flex flex-col sm:flex-row bg-white rounded-xl border-2 border-art-text overflow-hidden shadow-sm w-full sm:w-auto">
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
-                   const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, originalPrice: 0, leaders: [], status: 'draft', rundownText: '', rundownPdf: '' }, ...data];
+                   const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "", kuota: "", mepo: "", difficulty: "", image: "", beans: "", path: "", duration: "", price: 0, leaders: [], status: 'draft', rundownText: '', rundownPdf: '', igPostUrl: '' }, ...data];
                    setData(nd);
                    setExpandedIndexes([0]);
                  }} className="w-full sm:w-auto hover:bg-art-bg px-4 py-4 sm:py-3 min-h-[44px] text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Manual</button>
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
-                   const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Pilih Tanggal Weekend", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2 Hari 1 Malam", price: 0, originalPrice: 0, leaders: [], status: 'draft', isWeekend: true, rundownText: '', rundownPdf: '' }, ...data];
+                   const nd = [{ id: Date.now().toString(), name: "", region: "", jadwal: "Pilih Tanggal Weekend", kuota: "15 Pax", kuotaNum: 15, maxKuota: 15, mepo: "", difficulty: "Menengah", image: "", beans: "", path: "", duration: "2 Hari 1 Malam", price: 0, leaders: [], status: 'draft', isWeekend: true, rundownText: '', rundownPdf: '', igPostUrl: '' }, ...data];
                    setData(nd);
                    setExpandedIndexes([0]);
                  }} className="w-full sm:w-auto hover:bg-blue-50 text-blue-600 px-4 py-4 sm:py-3 min-h-[44px] text-[10px] font-black uppercase tracking-widest border-b-2 sm:border-b-0 sm:border-r-2 border-art-text">+ Trip Weekend</button>
                  <button type="button" onClick={(e) => {
                    e.preventDefault();
-                   const message = `Halo Owner,\nMohon update jadwal Open Trip selanjutnya agar bisa segera kami upload ke website.\n\nMohon isi format berikut:\n- Gunung: ____________\n- Via / Jalur: ____________\n- Tanggal: ____________\n- Kuota: ____________\n- Harga (Final): ____________\n- Harga (Coret/Normal): ____________\n- Mepo (Meeting Point): ____________\n\nTerima kasih.`;
+                   const message = `Halo Owner,\nMohon update jadwal Open Trip selanjutnya agar bisa segera kami upload ke website.\n\nMohon isi format berikut:\n- Gunung: ____________\n- Via / Jalur: ____________\n- Tanggal: ____________\n- Kuota: ____________\n- Harga (Final): ____________\n- Mepo (Meeting Point): ____________\n\nTerima kasih.`;
                    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
                    window.open(url, '_blank');
                  }} className="w-full sm:w-auto hover:bg-green-50 text-green-600 px-4 py-4 sm:py-3 min-h-[44px] text-[10px] font-black uppercase tracking-widest flex items-center justify-center sm:justify-start gap-1"><MessageCircle size={12}/> Minta Jadwal (WA)</button>
@@ -329,13 +328,26 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const msg = `Halo Owner,\nMohon konfirmasi untuk data Open Trip berikut:\n- Gunung: ${ot.name || '-'}\n- Via / Jalur: ${ot.path || '-'}\n- Tanggal: ${ot.jadwal || '-'}\n- Kuota: ${ot.kuota || '-'}\n- Harga (Final): Rp ${ot.price?.toLocaleString('id-ID') || '0'}\n- Harga (Coret/Normal): Rp ${ot.originalPrice?.toLocaleString('id-ID') || '0'}\n- Mepo: ${ot.mepo || '-'}\n- Durasi: ${ot.duration || '-'}\n\nApakah data di atas sudah benar dan siap untuk di-publish?`;
+                    const msg = `Halo Owner,\nMohon konfirmasi untuk data Open Trip berikut:\n- Gunung: ${ot.name || '-'}\n- Via / Jalur: ${ot.path || '-'}\n- Tanggal: ${ot.jadwal || '-'}\n- Kuota: ${ot.kuota || '-'}\n- Harga: Rp ${ot.price?.toLocaleString('id-ID') || '0'}\n- Mepo: ${ot.mepo || '-'}\n- Durasi: ${ot.duration || '-'}\n\nApakah data di atas sudah benar dan siap untuk di-publish?`;
                     const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
                     window.open(url, '_blank');
                   }}
                   className="flex-1 md:flex-none flex items-center justify-center gap-1 text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all border border-green-200"
                 >
                   <MessageCircle size={14}/> Konf. Owner
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const text = `*OPEN TRIP ${ot.name?.toUpperCase() || '-'}*\n\n📅 *Jadwal:* ${ot.jadwal || '-'}\n📍 *Mepo:* ${ot.mepo || '-'}\n⛰️ *Jalur:* ${ot.path || '-'}\n💰 *Harga:* Rp ${ot.price?.toLocaleString('id-ID') || '0'}\n⏳ *Durasi:* ${ot.duration || '-'}\n👥 *Kuota:* ${ot.kuota || '-'}\n\nYuk booking sekarang melalui website: https://ngopidiketinggian.com`;
+                    navigator.clipboard.writeText(text);
+                    showToast("Teks trip disalin!");
+                  }}
+                  className="flex-1 md:flex-none flex items-center justify-center gap-1 text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-gray-50 text-art-text rounded-xl hover:bg-gray-100 transition-all border border-art-text/10"
+                >
+                  <Clipboard size={14}/> Salin Teks
                 </button>
 
                 <button 
@@ -636,27 +648,35 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Gunung</label>
-                  <select 
-                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
-                    value={ot.name ?? ""} 
-                    onChange={e => handleMountainSelect(i, e.target.value)}
-                  >
-                    <option value=""> Pilih Gunung </option>
-                    {config.destinationsData?.map((d: any) => (
-                      <option key={d.id} value={d.name}>{d.name}</option>
-                    ))}
-                  </select>
+                  <div className="relative group">
+                    <div className="flex flex-wrap gap-1 p-2 border-2 border-art-text/10 rounded-xl bg-white max-h-40 overflow-y-auto no-scrollbar">
+                      {config.destinationsData?.map((d: any) => (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => handleMountainSelect(i, d.name)}
+                          className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase border-2 transition-all ${ot.name === d.name ? 'bg-art-orange text-white border-art-orange shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-white text-art-text/60 border-art-text/5 hover:border-art-orange/30'}`}
+                        >
+                          {d.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-art-text/40">Level</label>
-                  <select 
-                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold focus:border-art-orange outline-none transition-all" 
-                    value={ot.difficulty ?? ""} 
-                    onChange={e => { const nd = [...data]; nd[i].difficulty = e.target.value; setData(nd); }}
-                  >
-                    <option value=""> Level </option>
-                    {DIFFICULTY_LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
-                  </select>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Level Kesulitan</label>
+                  <div className="flex gap-1 bg-white p-1 rounded-xl border-2 border-art-text/5">
+                    {difficultyLevels.map(lvl => (
+                      <button
+                        key={lvl}
+                        type="button"
+                        onClick={() => { const nd = [...data]; nd[i].difficulty = lvl; setData(nd); }}
+                        className={`flex-1 py-2 rounded-lg text-[8px] font-black uppercase transition-all ${ot.difficulty === lvl ? 'bg-art-text text-white shadow-sm' : 'text-art-text/40 hover:bg-art-bg'}`}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -790,8 +810,8 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                  </div>
               </div>
 
-              {/* Layer 5: Price (K) + Strike Price */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Layer 5: Price (K) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Harga (k)</label>
                   <div className="relative">
@@ -813,23 +833,19 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-art-text/40">Coret (k)</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Link Post Instagram (Ads Source)</label>
                   <div className="relative">
-                    <input 
-                      type="text"
-                      inputMode="numeric"
-                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-black outline-none focus:border-art-orange transition-all font-mono pl-6 text-red-500" 
-                      value={ot.originalPrice ?? 0} 
-                      onChange={e => { 
-                        let valStr = e.target.value.replace(/^0+/, '');
-                        if (valStr === '') valStr = '0';
-                        const val = parseInt(valStr) || 0;
+                    <InputWithPaste 
+                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all pl-6" 
+                      value={ot.igPostUrl || ''} 
+                      onChange={(e: any) => { 
                         const nd = [...data]; 
-                        nd[i].originalPrice = val; 
+                        nd[i].igPostUrl = e.target.value; 
                         setData(nd); 
                       }} 
+                      placeholder="https://instagram.com/p/..."
                     />
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-red-300">Rp</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30"><ShoppingBag size={10} /></span>
                   </div>
                 </div>
               </div>
@@ -871,20 +887,22 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     {ot.leaders?.length > 0 && (
                       <div className="space-y-1 mb-4">
                         <label className="text-[9px] font-black uppercase text-art-orange tracking-widest">Primary Leader (Wajah Utama):</label>
-                        <select 
-                          className="w-full border-2 border-art-orange/20 p-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-art-orange transition-all bg-art-orange/5"
-                          value={ot.primaryLeader || ""}
-                          onChange={(e) => {
-                            const nd = [...data];
-                            nd[i].primaryLeader = e.target.value;
-                            setData(nd);
-                          }}
-                        >
-                          <option value="">-- Pilih Leader Utama --</option>
-                          {ot.leaders.map((ln: string) => (
-                            <option key={ln} value={ln}>{ln}</option>
-                          ))}
-                        </select>
+                        <div className="flex flex-wrap gap-1.5 p-1 bg-white border-2 border-art-orange/10 rounded-xl">
+                           {ot.leaders.map((ln: string) => (
+                             <button
+                               key={ln}
+                               type="button"
+                               onClick={() => {
+                                 const nd = [...data];
+                                 nd[i].primaryLeader = ln;
+                                 setData(nd);
+                               }}
+                               className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase border-2 transition-all ${ot.primaryLeader === ln ? 'bg-art-orange text-white border-art-orange shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-white text-art-text/40 border-transparent hover:border-art-orange/20'}`}
+                             >
+                               {ln}
+                             </button>
+                           ))}
+                        </div>
                       </div>
                     )}
                     <label className="text-[9px] font-black uppercase text-art-text/40">Deskripsi / Itinerary Singkat</label>

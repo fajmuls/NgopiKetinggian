@@ -87,10 +87,10 @@ export const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {photos.map((url: string, i: number) => (
-          <div key={i} className="space-y-2 relative">
+          <div key={i} className="space-y-2 relative group">
             <button onClick={() => {
               const np = [...photos]; np.splice(i, 1); setPhotos(np);
-            }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md z-10"><Trash2 size={12}/></button>
+            }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12}/></button>
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border border-art-text/10">
               {url && <img src={url} className="w-full h-full object-cover" />}
             </div>
