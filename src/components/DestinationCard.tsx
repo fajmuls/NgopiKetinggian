@@ -157,6 +157,11 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
         
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="bg-art-orange text-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm w-fit">{dest.difficulty}</div>
+          {dest.showDiscountBadge && currentDur.originalPrice > currentDur.price && (
+            <div className="bg-red-500 text-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm w-fit animate-pulse flex items-center gap-1">
+              Disc {Math.round(((currentDur.originalPrice - currentDur.price) / currentDur.originalPrice) * 100)}%
+            </div>
+          )}
           {avgRating > 0 && (
             <div className="bg-white/90 backdrop-blur-sm border-2 border-art-text px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
               <Star size={10} className="text-yellow-500 fill-yellow-500" />

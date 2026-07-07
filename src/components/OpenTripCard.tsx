@@ -68,8 +68,15 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
             <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[3px_3px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden shrink-0">
               <img src={ot.logo || config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Mountain Logo" className="w-full h-full object-cover" />
             </div>
-            <div className="bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1 shrink-0">
-               <Calendar size={10}/> {ot.jadwal}
+            <div className="flex flex-col gap-1">
+              <div className="bg-art-green text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1 shrink-0">
+                 <Calendar size={10}/> {ot.jadwal}
+              </div>
+              {ot.showDiscountBadge && ot.originalPrice > ot.price && (
+                <div className="bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-lg border border-white/20 uppercase shadow-sm flex items-center gap-1 shrink-0 animate-pulse">
+                  Disc {Math.round(((ot.originalPrice - ot.price) / ot.originalPrice) * 100)}%
+                </div>
+              )}
             </div>
          </div>
 

@@ -10,6 +10,7 @@ import { generateRundownPdf } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
 import { InputWithPaste, ImageUploader } from '../components/admin/SharedAdmin';
 import { RundownEditor } from '../components/admin/RundownEditor';
+import { CustomSelect } from '../components/CustomSelect';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION } from '../useAppConfig';
 import { TripPosterGenerator } from './TripPosterGenerator';
 
@@ -416,31 +417,30 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
 
               <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Rundown Mode:</span>
-                <select className="border p-2 rounded text-xs w-full" value={dest.rundownMode || 'direct'} onChange={e => {
-                  const nd = [...data];
-                  nd[i].rundownMode = e.target.value;
-                  setData(nd);
-                }}>
-                  <option value="direct">Langsung (Web & PDF)</option>
-                  <option value="whatsapp">Minta via WhatsApp</option>
-                  <option value="hidden">Sembunyikan</option>
-                </select>
+                <CustomSelect 
+                  value={dest.rundownMode || 'direct'}
+                  placeholder="Pilih Mode"
+                  options={[
+                    { value: 'direct', label: 'Langsung (Web & PDF)' },
+                    { value: 'whatsapp', label: 'Minta via WhatsApp' },
+                    { value: 'hidden', label: 'Sembunyikan' }
+                  ]}
+                  onChange={(val: string) => {
+                    const nd = [...data];
+                    nd[i].rundownMode = val;
+                    setData(nd);
+                  }}
+                />
               </div>
 
               <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Level:</span>
-                <div className="flex gap-1 bg-white p-1 rounded-xl border border-art-text/10 overflow-x-auto no-scrollbar">
-                  {difficultyLevels.map(lvl => (
-                    <button
-                      key={lvl}
-                      type="button"
-                      onClick={() => { const nd = [...data]; nd[i].difficulty = lvl; setData(nd); }}
-                      className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all whitespace-nowrap ${dest.difficulty === lvl ? 'bg-art-text text-white shadow-sm' : 'text-art-text/40 hover:bg-art-bg'}`}
-                    >
-                      {lvl}
-                    </button>
-                  ))}
-                </div>
+                <CustomSelect 
+                  value={dest.difficulty}
+                  placeholder="Pilih Level"
+                  options={difficultyLevels.map(lvl => ({ value: lvl, label: lvl }))}
+                  onChange={(val: string) => { const nd = [...data]; nd[i].difficulty = val; setData(nd); }}
+                />
               </div>
             </div>
             
@@ -513,6 +513,31 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                           placeholder="Final" 
                         />
                       </div>
+
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] font-bold text-gray-400">Coret:</span>
+                        <input 
+                          type="text"
+                          inputMode="numeric"
+                          className="border-2 border-gray-200 p-2 rounded-lg text-xs w-20 font-mono focus:border-art-orange outline-none bg-white" 
+                          value={dur.originalPrice ?? 0} 
+                          onChange={e => {
+                            let valStr = e.target.value.replace(/^0+/, '');
+                            if (valStr === '') valStr = '0';
+                            const val = parseInt(valStr) || 0;
+                            const nd = [...data];
+                            nd[i].paths[pIdx].durations[j].originalPrice = val;
+                            setData(nd);
+                          }} 
+                          placeholder="Coret" 
+                        />
+                      </div>
+
+                      {dur.originalPrice && dur.price && dur.originalPrice > dur.price && (
+                        <div className="flex flex-col items-center justify-center bg-art-orange/10 px-2 py-1 rounded-lg border border-art-orange/20">
+                          <span className="text-[9px] font-black text-art-orange">{Math.round(((dur.originalPrice - dur.price) / dur.originalPrice) * 100)}%</span>
+                        </div>
+                      )}
 
                       <div className="flex w-full sm:w-auto items-center justify-end gap-1 h-full pt-2 sm:pt-0 sm:pl-2 sm:border-l border-art-text/10 sm:ml-auto border-t sm:border-t-0 mt-2 sm:mt-0">
                         <button type="button" onClick={(e) => {

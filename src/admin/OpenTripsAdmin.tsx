@@ -12,6 +12,7 @@ import { InputWithPaste, ImageUploader } from '../components/admin/SharedAdmin';
 import { RundownEditor } from '../components/admin/RundownEditor';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION, DIFFICULTY_LEVELS, DURATION_LEVELS } from '../useAppConfig';
 import { handleFirestoreError, OperationType } from '../lib/firestore-error';
+import { CustomSelect } from '../components/CustomSelect';
 import { TripPosterGenerator } from './TripPosterGenerator';
 
 export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPrefill }: any) => {
@@ -669,89 +670,59 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
               </div>
 <div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-6" : "hidden"}>
 {/* Layer 1: Mountain + Difficulty */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Gunung</label>
-                  <div className="relative group">
-                    <div className="flex flex-wrap gap-1 p-2 border-2 border-art-text/10 rounded-xl bg-white max-h-40 overflow-y-auto no-scrollbar">
-                      {config.destinationsData?.map((d: any) => (
-                        <button
-                          key={d.id}
-                          type="button"
-                          onClick={() => handleMountainSelect(i, d.name)}
-                          className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase border-2 transition-all ${ot.name === d.name ? 'bg-art-orange text-white border-art-orange shadow-[2px_2px_0px_0px_#1a1a1a]' : 'bg-white text-art-text/60 border-art-text/5 hover:border-art-orange/30'}`}
-                        >
-                          {d.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <CustomSelect 
+                    value={ot.name}
+                    placeholder="Pilih Gunung"
+                    options={config.destinationsData?.map((d: any) => ({ value: d.name, label: d.name })) || []}
+                    onChange={(val: string) => handleMountainSelect(i, val)}
+                  />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Level Kesulitan</label>
-                  <div className="flex gap-1 bg-white p-1 rounded-xl border-2 border-art-text/5">
-                    {difficultyLevels.map(lvl => (
-                      <button
-                        key={lvl}
-                        type="button"
-                        onClick={() => { const nd = [...data]; nd[i].difficulty = lvl; setData(nd); }}
-                        className={`flex-1 py-2 rounded-lg text-[8px] font-black uppercase transition-all ${ot.difficulty === lvl ? 'bg-art-text text-white shadow-sm' : 'text-art-text/40 hover:bg-art-bg'}`}
-                      >
-                        {lvl}
-                      </button>
-                    ))}
-                  </div>
+                  <CustomSelect 
+                    value={ot.difficulty}
+                    placeholder="Pilih Level"
+                    options={difficultyLevels.map(lvl => ({ value: lvl, label: lvl }))}
+                    onChange={(val: string) => { const nd = [...data]; nd[i].difficulty = val; setData(nd); }}
+                  />
                 </div>
               </div>
 
               {/* Layer 2: Duration + Trail */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Durasi</label>
-                  <div className="flex flex-wrap gap-1 p-1 bg-white border border-art-text/20 rounded-xl max-h-24 overflow-y-auto no-scrollbar">
-                    {DURATION_LEVELS.map((lvl: string) => (
-                      <button
-                        key={lvl}
-                        type="button"
-                        disabled={ot.isWeekend}
-                        onClick={() => {
-                          const nd = [...data];
-                          nd[i].duration = lvl;
-                          nd[i].jadwal = calculateDateRange(ot.startDate, lvl);
-                          setData(nd);
-                        }}
-                        className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all flex-1 min-w-[60px] ${ot.duration === lvl ? 'bg-art-text text-white' : 'text-art-text/40 hover:bg-art-bg'}`}
-                      >
-                        {lvl}
-                      </button>
-                    ))}
-                  </div>
+                  <CustomSelect 
+                    value={ot.duration}
+                    placeholder="Pilih Durasi"
+                    disabled={ot.isWeekend}
+                    options={DURATION_LEVELS.map(lvl => ({ value: lvl, label: lvl }))}
+                    onChange={(val: string) => {
+                      const nd = [...data];
+                      nd[i].duration = val;
+                      nd[i].jadwal = calculateDateRange(ot.startDate, val);
+                      setData(nd);
+                    }}
+                  />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Jalur (Sesuai Destinasi)</label>
-                  <div className="flex flex-wrap gap-1 p-1 bg-white border border-art-text/20 rounded-xl max-h-24 overflow-y-auto no-scrollbar">
-                    {(config.destinationsData?.find((d: any) => d.name === ot.name)?.paths || []).map((p: any) => (
-                      <button
-                        key={p.name}
-                        type="button"
-                        onClick={() => { const nd = [...data]; nd[i].path = p.name; setData(nd); }}
-                        className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all flex-1 min-w-[80px] ${ot.path === p.name ? 'bg-art-orange text-white shadow-sm' : 'text-art-text/40 hover:bg-art-bg'}`}
-                      >
-                        {p.name}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => { const nd = [...data]; nd[i].path = "custom"; setData(nd); }}
-                      className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all border-2 border-dashed ${ot.path === 'custom' ? 'bg-art-orange border-art-orange text-white' : 'text-art-text/40 border-art-text/10 hover:bg-art-bg'}`}
-                    >
-                      Ketik Manual
-                    </button>
-                  </div>
+                  <CustomSelect 
+                    value={ot.path}
+                    placeholder="Pilih Jalur"
+                    options={[
+                      ...(config.destinationsData?.find((d: any) => d.name === ot.name)?.paths || []).map((p: any) => ({ value: p.name, label: p.name })),
+                      { value: 'custom', label: 'Ketik Manual' }
+                    ]}
+                    onChange={(val: string) => { const nd = [...data]; nd[i].path = val; setData(nd); }}
+                  />
                   {ot.path === "custom" && (
                     <input 
                       autoFocus
-                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all mt-1" 
+                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all mt-1" 
                       placeholder="Ketik Jalur..."
                       onBlur={e => { if(e.target.value) { const nd = [...data]; nd[i].path = e.target.value; setData(nd); } }}
                     />
@@ -862,17 +833,15 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                        </span>
                     </div>
                  </div>
-              </div>
-
-              {/* Layer 5: Price (K) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 {/* Layer 5: Price (K) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-art-text/40">Harga (k)</label>
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Harga Final (k)</label>
                   <div className="relative">
                     <input 
                       type="text"
                       inputMode="numeric"
-                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono pl-6" 
+                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono pl-8" 
                       value={ot.price ?? 0} 
                       onChange={e => { 
                         let valStr = e.target.value.replace(/^0+/, '');
@@ -883,10 +852,62 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                         setData(nd); 
                       }} 
                     />
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30">Rp</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30 uppercase">Rp</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Harga Coret (k) - Opsional</label>
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      inputMode="numeric"
+                      className="w-full border-2 border-art-text/10 p-3 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all font-mono pl-8" 
+                      value={ot.originalPrice ?? 0} 
+                      onChange={e => { 
+                        let valStr = e.target.value.replace(/^0+/, '');
+                        if (valStr === '') valStr = '0';
+                        const val = parseInt(valStr) || 0;
+                        const nd = [...data]; 
+                        nd[i].originalPrice = val; 
+                        setData(nd); 
+                      }} 
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30 uppercase">Rp</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-art-text/40">Diskon Otomatis</label>
+                  <div className="bg-gray-100 p-3 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center min-h-[44px]">
+                    {ot.originalPrice && ot.price && ot.originalPrice > ot.price ? (
+                      <>
+                        <span className="text-[14px] font-black text-art-orange leading-none">{Math.round(((ot.originalPrice - ot.price) / ot.originalPrice) * 100)}%</span>
+                        <span className="text-[8px] font-bold uppercase text-gray-400 mt-1">Diskon Hemat</span>
+                      </>
+                    ) : (
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Tanpa Diskon</span>
+                    )}
                   </div>
                 </div>
               </div>
+
+              <div className="bg-white p-4 rounded-xl border-2 border-art-text/5 flex items-center justify-between">
+                <div>
+                   <h4 className="text-[10px] font-black uppercase text-art-text tracking-widest">Tampilkan Badge Diskon?</h4>
+                   <p className="text-[8px] font-bold text-art-text/40 uppercase">Muncul di website & poster</p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const nd = [...data];
+                    nd[i].showDiscountBadge = !ot.showDiscountBadge;
+                    setData(nd);
+                  }}
+                  className={`w-12 h-6 rounded-full relative transition-all border-2 ${ot.showDiscountBadge ? 'bg-art-orange border-art-orange' : 'bg-gray-200 border-gray-300'}`}
+                >
+                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${ot.showDiscountBadge ? 'left-6' : 'left-0.5 shadow-sm'}`}></div>
+                </button>
+              </div>
+             </div>
 
                </div>
 <div className={(!activeTabs[i] || activeTabs[i] === 'basic') ? "space-y-6" : "hidden"}>

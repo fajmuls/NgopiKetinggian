@@ -8,6 +8,7 @@ import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setD
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
+import { CustomSelect } from '../components/CustomSelect';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION } from '../useAppConfig';
 
 export const InputWithPaste = ({ value, onChange, placeholder, className, ...props }: any) => {
@@ -153,24 +154,18 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
           </div>
           <div className="space-y-1.5">
              <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">Rasio Video</p>
-             <div className="flex flex-wrap gap-1 p-1 bg-white border-2 border-art-text rounded-xl overflow-x-auto no-scrollbar">
-                {[
-                  { value: 'auto', label: 'Auto' },
-                  { value: '16/9', label: '16:9' },
-                  { value: '9/16', label: '9:16' },
-                  { value: '3/4', label: '3:4' },
-                  { value: '1/1', label: '1:1' }
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => updateConfig({ ceritaVideoRatio: opt.value })}
-                    className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap flex-1 ${config.ceritaVideoRatio === opt.value ? 'bg-art-text text-white' : 'text-art-text/40 hover:bg-art-bg'}`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-             </div>
+             <CustomSelect 
+               value={config.ceritaVideoRatio || 'auto'}
+               placeholder="Pilih Rasio"
+               options={[
+                 { value: 'auto', label: 'Auto' },
+                 { value: '16/9', label: '16:9' },
+                 { value: '9/16', label: '9:16' },
+                 { value: '3/4', label: '3:4' },
+                 { value: '1/1', label: '1:1' }
+               ]}
+               onChange={(val: string) => updateConfig({ ceritaVideoRatio: val })}
+             />
              <p className="text-[9px] text-art-text/30 italic">Atur rasio untuk menyesuaikan iframe YouTube.</p>
           </div>
         </div>
@@ -717,10 +712,11 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
 
                 <div>
                    <label className="text-[10px] font-bold uppercase block mb-1">Pilih dari Destinasi (Opsional)</label>
-                   <select 
-                     className="w-full border p-2 rounded text-xs mb-2 bg-white outline-none focus:border-art-orange"
-                     onChange={(e) => {
-                       const destName = e.target.value;
+                   <CustomSelect 
+                     value=""
+                     placeholder="-- Pilih Gunung --"
+                     options={config.destinationsData?.map((d: any) => ({ value: d.name, label: d.name })) || []}
+                     onChange={(destName: string) => {
                        if (!destName) return;
                        const dest = config.destinationsData?.find((d: any) => d.name === destName);
                        if (dest) {
@@ -734,14 +730,8 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
                          setData({...data, heroSlides: ns});
                        }
                      }}
-                     value=""
-                   >
-                     <option value="">-- Pilih Gunung --</option>
-                     {config.destinationsData?.map((d: any) => (
-                       <option key={d.id} value={d.name}>{d.name}</option>
-                     ))}
-                   </select>
-                   <label className="text-[10px] font-bold uppercase block mb-1">Nama Gunung</label>
+                   />
+                   <label className="text-[10px] font-bold uppercase block mb-1 mt-3">Nama Gunung</label>
                    <input className="w-full border p-2 rounded text-xs" value={slide.name} onChange={e => {
                       const ns = [...data.heroSlides]; ns[i].name = e.target.value; setData({...data, heroSlides: ns});
                    }} placeholder="Nama Gunung" />
@@ -1228,25 +1218,19 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
                
                 <div className="mb-4 w-full sm:w-80">
                    <label className="text-[10px] font-black uppercase text-art-orange block mb-1 font-mono tracking-tighter">Format Perhitungan Biaya</label>
-                   <div className="flex gap-1 p-1 bg-white border border-art-text/20 rounded-xl overflow-hidden shadow-sm">
-                      {[
-                        { value: 'manual', label: 'Manual' },
-                        { value: 'calculated', label: 'Kalkulasi Otomatis' }
-                      ].map(f => (
-                        <button
-                          key={f.value}
-                          type="button"
-                          onClick={() => {
-                            const nd = { ...data };
-                            nd.opsi[i].pricingFormat = f.value as any;
-                            setData(nd);
-                          }}
-                          className={`flex-1 px-2 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${opt.pricingFormat === f.value ? 'bg-art-text text-white' : 'text-art-text/40 hover:bg-art-bg'}`}
-                        >
-                          {f.label}
-                        </button>
-                      ))}
-                   </div>
+                   <CustomSelect 
+                     value={opt.pricingFormat || 'manual'}
+                     placeholder="Pilih Format"
+                     options={[
+                       { value: 'manual', label: 'Manual' },
+                       { value: 'calculated', label: 'Kalkulasi Otomatis' }
+                     ]}
+                     onChange={(val: string) => {
+                       const nd = { ...data };
+                       nd.opsi[i].pricingFormat = val as any;
+                       setData(nd);
+                     }}
+                   />
                 </div>
                <div className="flex flex-col sm:flex-row gap-3 pr-10">
                  <div className="flex-1">

@@ -203,11 +203,16 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
         </div>
 
         {/* Right: Preview Area */}
-        <div className="flex-1 bg-gray-200/50 p-4 md:p-12 flex items-center justify-center overflow-auto relative custom-scrollbar">
-          <div 
-            ref={posterRef}
-            className={`${getContainerStyles()} ${theme.color} relative overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-500`}
-          >
+        <div className="flex-1 bg-gray-200/50 p-4 md:p-8 flex items-center justify-center overflow-hidden relative">
+          <div className="w-full h-full flex items-center justify-center overflow-auto custom-scrollbar p-4">
+            <div 
+              ref={posterRef}
+              style={{
+                transform: `scale(${ratio === '9:16' ? '0.8' : '1'})`,
+                transformOrigin: 'center center'
+              }}
+              className={`${getContainerStyles()} ${theme.color} relative overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-500 my-auto`}
+            >
             {/* Background Image */}
             <div 
               className="absolute inset-0 bg-cover bg-center transition-opacity duration-500" 
@@ -391,6 +396,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
             {/* Side Branding */}
             <div className="absolute right-0 top-1/2 -translate-y-1/2 rotate-90 origin-right mr-4 opacity-10 pointer-events-none">
                <span className={`text-[40px] font-black uppercase tracking-[0.5em] whitespace-nowrap ${theme.text}`}>EST. 2024 • NGOPI DI KETINGGIAN</span>
+            </div>
             </div>
           </div>
           
