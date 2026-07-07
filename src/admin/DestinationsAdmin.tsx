@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '../lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff, Lock, Unlock } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, EyeOff, Lock, Unlock, Layout } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -11,12 +11,14 @@ import { customConfirm, customAlert } from '../GlobalDialog';
 import { InputWithPaste, ImageUploader } from '../components/admin/SharedAdmin';
 import { RundownEditor } from '../components/admin/RundownEditor';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION } from '../useAppConfig';
+import { TripPosterGenerator } from './TripPosterGenerator';
 
 export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
   const [data, setData] = useState(JSON.parse(JSON.stringify(config.destinationsData || [])));
   const [search, setSearch] = useState("");
   const [regionFilter, setRegionFilter] = useState("Semua");
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
+  const [showPoster, setShowPoster] = useState<any>(null);
 
   const [visibilities, setVisibilities] = useState(config.visibilities || { map: true, quota: true, beans: true, routes: true });
 
@@ -226,6 +228,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
             <div className="flex bg-white rounded border border-art-text/20 overflow-hidden shadow-sm h-[28px]">
                <button type="button" onClick={() => moveDestination(i, 'up')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0} title="Pindah Atas"><ChevronDown size={14} className="rotate-180"/></button>
                <button type="button" onClick={() => moveDestination(i, 'down')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
+               <button onClick={() => setShowPoster(dest)} className="px-2 text-art-orange hover:bg-orange-50" title="Buat Poster"><Layout size={14}/></button>
                <button onClick={() => {
                   const text = `*PRIVATE TRIP ${dest.name?.toUpperCase() || '-'}*\n\n⛰️ *Jalur:* ${dest.paths?.map((p: any) => p.name).join(', ') || '-'}\n💰 *Mulai:* Rp ${Math.min(...(dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.price)) || [0])).toLocaleString('id-ID')}\n👥 *Kuota:* ${dest.kuota || '-'}\n⏳ *Durasi:* ${dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.label)).filter((v: any, i: any, a: any) => a.indexOf(v) === i).join(', ') || '-'}\n\nYuk booking private trip kamu: https://ngopidiketinggian.com/destinasi`;
                   navigator.clipboard.writeText(text);
@@ -562,6 +565,15 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
       </div>
     );
   })}
+    <AnimatePresence>
+      {showPoster && (
+        <TripPosterGenerator 
+          trip={showPoster} 
+          type="private" 
+          onClose={() => setShowPoster(null)} 
+        />
+      )}
+    </AnimatePresence>
 </div>
     );
   };

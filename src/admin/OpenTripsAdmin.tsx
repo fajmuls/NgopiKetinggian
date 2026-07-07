@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '../lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, Layout } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -12,6 +12,7 @@ import { InputWithPaste, ImageUploader } from '../components/admin/SharedAdmin';
 import { RundownEditor } from '../components/admin/RundownEditor';
 import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION, DIFFICULTY_LEVELS, DURATION_LEVELS } from '../useAppConfig';
 import { handleFirestoreError, OperationType } from '../lib/firestore-error';
+import { TripPosterGenerator } from './TripPosterGenerator';
 
 export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, clearPrefill }: any) => {
   const [data, setData] = useState<OpenTrip[]>(config.openTrips || []);
@@ -19,6 +20,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
   const [activeTabs, setActiveTabs] = useState<Record<number, string>>({});
   const [bookings, setBookings] = useState<any[]>([]);
   const [user] = useAuthState(auth);
+  const [showPoster, setShowPoster] = useState<any>(null);
 
   useEffect(() => {
     if (!user || (user.email !== 'mrachmanfm@gmail.com' && user.email !== 'mrahmanfm@gmail.com')) {
@@ -348,6 +350,17 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   className="flex-1 md:flex-none flex items-center justify-center gap-1 text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-gray-50 text-art-text rounded-xl hover:bg-gray-100 transition-all border border-art-text/10"
                 >
                   <Clipboard size={14}/> Salin Teks
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPoster(ot);
+                  }}
+                  className="flex-1 md:flex-none flex items-center justify-center gap-1 text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-art-orange text-white rounded-xl hover:bg-orange-600 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]"
+                >
+                  <Layout size={14}/> Poster
                 </button>
 
                 <button 
@@ -1028,6 +1041,15 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
       );
     })}
     </div>
+    <AnimatePresence>
+      {showPoster && (
+        <TripPosterGenerator 
+          trip={showPoster} 
+          type="open" 
+          onClose={() => setShowPoster(null)} 
+        />
+      )}
+    </AnimatePresence>
   </div>
 );
 };
