@@ -442,6 +442,23 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                   onChange={(val: string) => { const nd = [...data]; nd[i].difficulty = val; setData(nd); }}
                 />
               </div>
+
+              <div className="flex flex-col min-w-0">
+                <span className="text-[9px] font-bold uppercase mb-1">Badge Diskon:</span>
+                <div className="flex items-center gap-2 bg-white border border-art-text/10 p-1.5 rounded-xl">
+                   <button 
+                     type="button"
+                     onClick={() => {
+                        const nd = [...data];
+                        nd[i].showDiscountBadge = !dest.showDiscountBadge;
+                        setData(nd);
+                     }}
+                     className={`flex-1 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${dest.showDiscountBadge ? 'bg-red-500 text-white shadow-sm' : 'text-art-text/40 hover:bg-art-bg'}`}
+                   >
+                     {dest.showDiscountBadge ? 'ON' : 'OFF'}
+                   </button>
+                </div>
+              </div>
             </div>
             
             <button type="button" 

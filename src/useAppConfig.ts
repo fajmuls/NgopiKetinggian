@@ -41,6 +41,7 @@ export interface OpenTrip {
   duration: string;
   price: number;
   originalPrice: number;
+  showDiscountBadge?: boolean;
   leaders?: string[];
   status?: 'draft' | 'published';
   desc?: string;
@@ -82,38 +83,11 @@ export interface AppConfig {
   ceritaVideoRatio?: string;
   promoCodes: { code: string, discount: number }[];
   homepage: {
-    heroSub?: string;
-    heroFeatures?: string;
-    heroSlogan?: string;
-    heroTitlePrefix?: string;
-    heroTitle: string;
-    heroDescription: string;
-    heroTagline?: string;
-    heroPhotoUrl: string;
-    heroSlides?: { name: string, height: string, image: string }[];
-    ceritaTitle?: string;
-    ceritaSub?: string;
-    ceritaParagraph1?: string;
-    ceritaParagraph2?: string;
-    ceritaFeatures?: { title: string, desc: string }[];
-    leaderTitle?: string;
-    leaderSub?: string;
-    leaderParagraph?: string;
-    statHikers?: string;
-    statSatisfaction?: string;
-    statTrips?: string;
-    logo?: string;
-    logos?: { id: string, name: string, url: string }[];
-    footerDesc?: string;
-    officeEmail?: string;
-    officePhone?: string;
-    officeAddress?: string;
-    officeMaps?: string;
-    socialLinks?: { icon: string, url: string }[];
-    paymentMethods?: { name: string, active: boolean }[];
-    soundEnabled?: boolean;
+    // ...
     soundVolume?: number;
   };
+  version: string;
+  patchNotes: { version: string, date: string, notes: string[] }[];
 }
 
 const getDefaultWebsiteData = () => ({
@@ -197,9 +171,9 @@ const getDefaultWebsiteData = () => ({
     officeAddress: "Jl. Raya Puncak, Bogor, Jawa Barat",
     officeMaps: "https://goo.gl/maps/example",
     socialLinks: [
-      { icon: 'instagram', url: 'https://instagram.com' },
+      { icon: 'instagram', url: 'https://instagram.com/ngopi.dketinggian' },
       { icon: 'whatsapp', url: 'https://wa.me/628123456789' },
-      { icon: 'telegram', url: 'https://t.me' }
+      { icon: 'link', url: 'https://linktr.ee/ngopi.dketinggian' }
     ],
     paymentMethods: [
       { name: 'BCA', active: true },
@@ -248,7 +222,29 @@ const getDefaultWebsiteData = () => ({
          image: "https://images.unsplash.com/photo-1571365893322-921319c5c163?q=80&w=2659&auto=format&fit=crop"
       }
     ]
-  }
+  },
+  version: "1.0.3",
+  patchNotes: [
+    {
+      version: "1.0.3",
+      date: "2024-03-20",
+      notes: [
+        "Ditambahkan fitur kalkulator estimasi private trip dengan layout 2 kolom",
+        "Ditambahkan fitur badge diskon otomatis di website dan poster",
+        "Pembaruan branding Instagram dan Linktree",
+        "Sistem versioning dan patch notes di Admin Dashboard"
+      ]
+    },
+    {
+      version: "1.0.2",
+      date: "2024-03-15",
+      notes: [
+        "Pembaruan sistem filter destinasi",
+        "Penambahan fitur rundown via WhatsApp",
+        "Peningkatan performa load gambar"
+      ]
+    }
+  ]
 });
 
 export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], defaultPhotos: any[]) {

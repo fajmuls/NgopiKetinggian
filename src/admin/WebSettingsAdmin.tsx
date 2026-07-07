@@ -1046,6 +1046,146 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
 };
 
 
+export const PatchNotesAdmin = ({ config, updateConfig, showToast }: any) => {
+  const [data, setData] = useState([...(config.patchNotes || [])]);
+  const [version, setVersion] = useState(config.version || "1.0.3");
+
+  const handleSave = () => {
+    updateConfig({ patchNotes: data, version });
+    showToast('Patch Notes & Version Disimpan!');
+  };
+
+  const addPatch = () => {
+    setData([{ version: "", date: new Date().toISOString().split('T')[0], notes: [""] }, ...data]);
+  };
+
+  return (
+    <div className="space-y-6">
+       <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-art-text/10 pb-6">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+               <FileText size={20} className="drop-shadow-sm" />
+             </div>
+             <div>
+               <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Version & Patch Notes</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase">Kelola riwayat pembaruan aplikasi</p>
+             </div>
+          </div>
+          <button onClick={handleSave} className="w-full sm:w-auto bg-art-orange text-white px-6 py-4 sm:py-3 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Perubahan</button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="p-4 bg-white border-2 border-art-text rounded-2xl shadow-sm">
+            <label className="text-[10px] font-black uppercase text-art-text/40 mb-2 block">Versi Aplikasi Saat Ini</label>
+            <div className="flex items-center gap-4">
+              <input 
+                className="flex-1 border-2 border-art-text p-3 rounded-xl text-xl font-black uppercase tracking-widest outline-none focus:border-art-orange bg-art-bg/20"
+                value={version}
+                onChange={e => setVersion(e.target.value)}
+                placeholder="Contoh: 1.0.4"
+              />
+              <div className="p-3 bg-art-orange/10 rounded-xl">
+                <TrendingUp size={24} className="text-art-orange" />
+              </div>
+            </div>
+            <p className="text-[9px] text-art-text/40 mt-2 italic">*Ini akan muncul di tombol version di Admin Dashboard dan sebagai label build.</p>
+          </div>
+
+          <div className="pt-6 space-y-4">
+            <div className="flex justify-between items-center bg-art-bg/30 p-3 rounded-2xl border border-art-text/10">
+              <h4 className="font-black text-xs uppercase tracking-widest">Riwayat Perubahan (Patch Notes)</h4>
+              <button onClick={addPatch} className="bg-art-text text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                <Plus size={14} /> Tambah Patch
+              </button>
+            </div>
+
+            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+              {data.map((pn, pIdx) => (
+                <div key={pIdx} className="bg-white border-2 border-art-text rounded-2xl p-5 relative group shadow-sm">
+                  <button 
+                    onClick={() => {
+                      const nd = [...data]; nd.splice(pIdx, 1); setData(nd);
+                    }}
+                    className="absolute top-4 right-4 text-red-400 hover:text-red-600 p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="text-[9px] font-black uppercase text-art-text/40 mb-1 block">Versi</label>
+                      <input 
+                        className="w-full border-b-2 border-art-text/10 p-1 text-sm font-black outline-none focus:border-art-orange"
+                        value={pn.version}
+                        onChange={e => {
+                          const nd = [...data]; nd[pIdx].version = e.target.value; setData(nd);
+                        }}
+                        placeholder="1.0.x"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black uppercase text-art-text/40 mb-1 block">Tanggal</label>
+                      <input 
+                        type="date"
+                        className="w-full border-b-2 border-art-text/10 p-1 text-sm font-bold outline-none focus:border-art-orange"
+                        value={pn.date}
+                        onChange={e => {
+                          const nd = [...data]; nd[pIdx].date = e.target.value; setData(nd);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[9px] font-black uppercase text-art-text/40 block">Catatan Perubahan</label>
+                      <button 
+                        onClick={() => {
+                          const nd = [...data]; nd[pIdx].notes.push(""); setData(nd);
+                        }}
+                        className="text-[8px] font-black uppercase text-art-orange hover:underline"
+                      >
+                        + Tambah Note
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {pn.notes.map((note, nIdx) => (
+                        <div key={nIdx} className="flex gap-2">
+                          <div className="w-6 h-6 bg-art-green/10 rounded flex items-center justify-center shrink-0">
+                            <CheckCircle size={12} className="text-art-green" />
+                          </div>
+                          <input 
+                            className="flex-1 border-b border-art-text/5 p-1 text-[11px] font-medium outline-none focus:border-art-orange"
+                            value={note}
+                            onChange={e => {
+                              const nd = [...data]; nd[pIdx].notes[nIdx] = e.target.value; setData(nd);
+                            }}
+                            placeholder="Apa yang baru?"
+                          />
+                          <button 
+                            onClick={() => {
+                              const nd = [...data]; nd[pIdx].notes.splice(nIdx, 1); setData(nd);
+                            }}
+                            className="text-red-300 hover:text-red-500"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 export const CleanupPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
   const handleCleanup = () => {
     customConfirm("Beneran mau hapus semua URL foto? Tindakan ini tidak bisa dibatalkan!", () => {

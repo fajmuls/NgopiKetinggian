@@ -286,10 +286,10 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
 
                     {/* Cost Calculator Section */}
                     {dest.enablePrivateTrip !== false && (
-                      <div className="bg-art-orange/5 border-2 border-art-orange/10 rounded-2xl p-5 space-y-4">
-                         <div className="flex items-center justify-between">
+                      <div className="bg-art-orange/5 border-2 border-art-orange/10 rounded-2xl p-5">
+                         <div className="flex items-center justify-between mb-4 pb-2 border-b border-art-orange/10">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-art-orange flex items-center gap-2">
-                               <Calculator size={14} /> Kalkulator Estimasi
+                               <Calculator size={14} /> Kalkulator Estimasi Private
                             </h4>
                             <button 
                               onClick={() => setShowCalculator(!showCalculator)}
@@ -300,36 +300,56 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                          </div>
                          
                          {showCalculator && (
-                           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                              <div className="flex items-center justify-between bg-white border-2 border-art-text/10 p-3 rounded-xl shadow-sm">
-                                 <span className="text-[10px] font-black uppercase">Peserta</span>
-                                 <div className="flex items-center gap-3">
-                                    <button onClick={() => setParticipants(Math.max(2, participants - 1))} className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center hover:bg-art-orange hover:text-white transition-colors border-2 border-art-text/5"><Minus size={14}/></button>
-                                    <span className="text-xs font-black min-w-[20px] text-center">{participants}</span>
-                                    <button onClick={() => setParticipants(participants + 1)} className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center hover:bg-art-orange hover:text-white transition-colors border-2 border-art-text/5"><Plus size={14}/></button>
+                           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 {/* Left: Participants */}
+                                 <div className="space-y-3">
+                                    <p className="text-[9px] font-black uppercase text-art-text/40 tracking-widest">Kapasitas & Harga Dasar</p>
+                                    <div className="bg-white border-2 border-art-text/10 p-4 rounded-2xl shadow-sm space-y-4">
+                                       <div className="flex items-center justify-between">
+                                          <span className="text-[10px] font-black uppercase">Peserta</span>
+                                          <div className="flex items-center gap-3">
+                                             <button onClick={() => setParticipants(Math.max(2, participants - 1))} className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center hover:bg-art-orange hover:text-white transition-colors border-2 border-art-text/5"><Minus size={14}/></button>
+                                             <span className="text-sm font-black min-w-[20px] text-center">{participants}</span>
+                                             <button onClick={() => setParticipants(participants + 1)} className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center hover:bg-art-orange hover:text-white transition-colors border-2 border-art-text/5"><Plus size={14}/></button>
+                                          </div>
+                                       </div>
+                                       <div className="pt-3 border-t border-dashed border-art-text/5 flex justify-between items-center">
+                                          <span className="text-[9px] font-bold text-art-text/40 uppercase">Harga / Pax</span>
+                                          <span className="text-xs font-black text-art-text">Rp {currentDurPrice.toLocaleString('id-ID')}k</span>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 {/* Right: Add-ons */}
+                                 <div className="space-y-3">
+                                    <p className="text-[9px] font-black uppercase text-art-text/40 tracking-widest">Layanan Upgrade (Add-ons)</p>
+                                    <div className="flex flex-wrap gap-2">
+                                       {facilities?.opsi?.filter((o: any) => o.price).map((o: any) => (
+                                          <button 
+                                             key={o.name}
+                                             onClick={() => {
+                                                setSelectedAddons(prev => prev.includes(o.name) ? prev.filter(n => n !== o.name) : [...prev, o.name]);
+                                             }}
+                                             className={`text-[8px] font-black uppercase px-3 py-2 rounded-lg border-2 transition-all flex items-center gap-2 ${selectedAddons.includes(o.name) ? 'bg-art-orange text-white border-art-orange shadow-md' : 'bg-white border-art-text/5 text-art-text/40 hover:border-art-orange/20'}`}
+                                          >
+                                             {o.name}
+                                             <span className={`px-1 rounded-sm ${selectedAddons.includes(o.name) ? 'bg-white/20' : 'bg-art-bg text-art-orange'}`}>+{o.price}k</span>
+                                          </button>
+                                       ))}
+                                    </div>
                                  </div>
                               </div>
 
-                              <div className="space-y-2">
-                                 <p className="text-[9px] font-black uppercase text-art-text/40">Opsi Tambahan (Add-ons):</p>
-                                 <div className="flex flex-wrap gap-2">
-                                    {facilities?.opsi?.filter((o: any) => o.price).map((o: any) => (
-                                       <button 
-                                          key={o.name}
-                                          onClick={() => {
-                                             setSelectedAddons(prev => prev.includes(o.name) ? prev.filter(n => n !== o.name) : [...prev, o.name]);
-                                          }}
-                                          className={`text-[8px] font-black uppercase px-3 py-2 rounded-lg border-2 transition-all ${selectedAddons.includes(o.name) ? 'bg-art-orange text-white border-art-orange' : 'bg-white border-art-text/5 text-art-text/40 hover:border-art-orange/20'}`}
-                                       >
-                                          {o.name} (+{o.price}k)
-                                       </button>
-                                    ))}
+                              <div className="pt-4 border-t-2 border-art-orange/20 flex justify-between items-center bg-art-orange text-white p-4 rounded-2xl shadow-lg -mx-2">
+                                 <div>
+                                    <p className="text-[8px] font-black uppercase tracking-widest opacity-70">Total Estimasi Private</p>
+                                    <p className="text-[7px] font-bold uppercase opacity-50">*Harga sewaktu-waktu bisa berubah</p>
                                  </div>
-                              </div>
-
-                              <div className="pt-2 border-t border-art-orange/20 flex justify-between items-center">
-                                 <span className="text-[10px] font-black uppercase text-art-text/60">Total Estimasi:</span>
-                                 <span className="text-xl font-black text-art-orange">Rp {totalEstimation}k</span>
+                                 <div className="text-right">
+                                    <span className="text-2xl font-black">Rp {totalEstimation}k</span>
+                                    <p className="text-[8px] font-bold uppercase opacity-70">Sesuai Kapasitas</p>
+                                 </div>
                               </div>
                            </motion.div>
                          )}

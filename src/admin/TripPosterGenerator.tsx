@@ -35,15 +35,15 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
 
   const downloadPoster = async () => {
     if (posterRef.current === null) return;
+    // Temporarily reset transform for clean export
+    const originalTransform = posterRef.current.style.transform;
+    posterRef.current.style.transform = 'scale(1)';
+    
     try {
       const dataUrl = await toPng(posterRef.current, { 
         cacheBust: true, 
-        pixelRatio: 4, // 4x for Ultra HD
+        pixelRatio: 4, 
         quality: 1,
-        style: {
-          transform: 'scale(1)',
-          transformOrigin: 'top left'
-        }
       });
       const link = document.createElement('a');
       link.download = `poster-${trip.name || 'trip'}-${layout}-${ratio}.png`;
@@ -51,8 +51,12 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
       link.click();
     } catch (err) {
       console.error('Failed to download poster', err);
+    } finally {
+      posterRef.current.style.transform = originalTransform;
     }
   };
+
+  const [showDiscountBadge, setShowDiscountBadge] = useState(trip.showDiscountBadge !== false);
 
   const getContainerStyles = () => {
     switch (ratio) {
@@ -164,7 +168,10 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
           </div>
 
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Tema Visual</label>
+            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex justify-between">
+              <span>Tema Visual</span>
+              <span className="text-[8px] font-bold text-art-orange uppercase tracking-widest">Selected: {theme.id}</span>
+            </label>
             <div className="flex flex-wrap gap-2">
               {THEMES.map((t) => (
                 <button
@@ -176,6 +183,19 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex justify-between">
+              <span>Badge Diskon</span>
+              <span className={showDiscountBadge ? 'text-art-orange' : 'text-gray-300'}>{showDiscountBadge ? 'ON' : 'OFF'}</span>
+            </label>
+            <button 
+              onClick={() => setShowDiscountBadge(!showDiscountBadge)}
+              className={`w-full py-3 rounded-xl text-[10px] font-black uppercase border-2 transition-all flex items-center justify-center gap-2 ${showDiscountBadge ? 'bg-art-orange/10 border-art-orange text-art-orange' : 'bg-white border-gray-100 text-gray-400'}`}
+            >
+              {showDiscountBadge ? 'Tampilkan Diskon' : 'Sembunyikan Diskon'}
+            </button>
           </div>
 
           <div className="space-y-4">
@@ -236,8 +256,16 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
               </div>
 
               {/* Label Component */}
-              <div className="inline-block px-3 py-1 rounded-full border-2 border-current self-start mb-6" style={{ borderColor: theme.primary, color: theme.primary }}>
-                <span className="text-[9px] font-black tracking-widest">{tripTypeLabel}</span>
+              <div className="flex justify-between items-start self-stretch mb-6">
+                <div className="inline-block px-3 py-1 rounded-full border-2 border-current" style={{ borderColor: theme.primary, color: theme.primary }}>
+                  <span className="text-[9px] font-black tracking-widest">{tripTypeLabel}</span>
+                </div>
+                {showDiscountBadge && originalPrice > currentPrice && (
+                  <div className="w-16 h-16 rounded-full border-4 flex flex-col items-center justify-center -rotate-12 shadow-xl animate-bounce" style={{ backgroundColor: theme.primary, borderColor: 'white' }}>
+                    <span className="text-white text-[12px] font-black leading-none">{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%</span>
+                    <span className="text-white text-[8px] font-black uppercase leading-none mt-0.5">OFF</span>
+                  </div>
+                )}
               </div>
 
               {layout === 'poster' ? (
@@ -380,11 +408,11 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
               <div className={`flex items-center justify-between border-t border-current border-opacity-10 pt-6 mt-auto ${theme.text}`}>
                 <div className="space-y-1">
                   <p className="text-[8px] font-black uppercase tracking-[0.25em] opacity-40">Booking / Info Lengkap</p>
-                  <p className="text-xs font-black">ngopidiketinggian.com</p>
+                  <p className="text-xs font-black">linktr.ee/ngopi.dketinggian</p>
                 </div>
                 <div className="text-right space-y-1">
                   <p className="text-[8px] font-black uppercase tracking-[0.25em] opacity-40">Instagram</p>
-                  <p className="text-xs font-black">@ngopidiketinggian</p>
+                  <p className="text-xs font-black">@ngopi.dketinggian</p>
                 </div>
               </div>
 

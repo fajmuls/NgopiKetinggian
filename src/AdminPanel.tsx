@@ -3,7 +3,7 @@ import { BookingsAdmin } from './admin/BookingsAdmin';
 import { DestinationsAdmin } from './admin/DestinationsAdmin';
 import { OpenTripsAdmin } from './admin/OpenTripsAdmin';
 import { TeamPhotosAdmin, LeadersAdmin } from './admin/TeamAndLeadersAdmin';
-import { GalleryAdmin, CeritaAdmin, HomepageAdmin, SplashAdmin, LogoAudioAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin, FooterAdmin } from './admin/WebSettingsAdmin';
+import { GalleryAdmin, CeritaAdmin, HomepageAdmin, SplashAdmin, LogoAudioAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin, FooterAdmin, PatchNotesAdmin } from './admin/WebSettingsAdmin';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
@@ -63,6 +63,8 @@ export const AdminPanelModal = ({
     return () => unsub();
   }, [isOpen, user]);
 
+  const [showPatchNotes, setShowPatchNotes] = useState(false);
+
   const pendingCount = bookings.filter(b => b.status === 'pending').length;
   const requestCount = bookings.filter(b => b.type === 'open_request' && b.status === 'pending').length;
   
@@ -70,6 +72,47 @@ export const AdminPanelModal = ({
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 text-left text-art-text overflow-x-hidden overflow-y-auto">
+      <AnimatePresence>
+        {showPatchNotes && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+              className="bg-white w-full max-w-lg rounded-[2.5rem] border-2 border-art-text overflow-hidden shadow-2xl"
+            >
+              <div className="p-6 border-b border-art-text/10 flex justify-between items-center bg-art-bg/30">
+                <h3 className="font-black uppercase tracking-tight text-art-text">Website Patch Notes</h3>
+                <button onClick={() => setShowPatchNotes(false)} className="p-2 hover:bg-white rounded-full transition-colors"><X size={20}/></button>
+              </div>
+              <div className="p-8 max-h-[60vh] overflow-y-auto space-y-8 custom-scrollbar">
+                {(config.patchNotes || []).map((pn: any, idx: number) => (
+                  <div key={idx} className="relative pl-6 border-l-2 border-art-orange/20">
+                    <div className="absolute -left-[9px] top-0 w-4 h-4 bg-art-orange rounded-full border-4 border-white shadow-sm"></div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-lg font-black text-art-text">v{pn.version}</span>
+                      <span className="text-[10px] font-bold text-art-text/40 bg-art-bg px-2 py-0.5 rounded-full">{pn.date}</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {(pn.notes || []).map((note: string, nIdx: number) => (
+                        <li key={nIdx} className="text-[11px] font-bold text-art-text/60 flex items-start gap-2">
+                          <CheckCircle size={12} className="text-art-green mt-0.5 shrink-0" />
+                          {note}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <div className="p-6 bg-art-text text-white text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Ngopi di Ketinggian • Built with Passion</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }} 
         animate={{ opacity: 1, scale: 1 }} 
@@ -79,7 +122,12 @@ export const AdminPanelModal = ({
           <div className="flex justify-between items-center p-3 sm:p-6 pb-0 sm:pb-6">
             <div className="flex items-center gap-4">
               <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
-              <p className="text-[9px] sm:text-[10px] font-bold text-art-orange">v{WEBSITE_VERSION}</p>
+              <button 
+                onClick={() => setShowPatchNotes(true)}
+                className="text-[9px] sm:text-[10px] font-black text-art-orange bg-art-orange/10 px-2 py-0.5 rounded-full hover:bg-art-orange hover:text-white transition-all animate-pulse"
+              >
+                v{config.version || WEBSITE_VERSION}
+              </button>
             </div>
             <div className="flex items-center gap-3">
               <button 
@@ -178,6 +226,7 @@ export const AdminPanelModal = ({
                   <button onClick={() => setActiveTab('gallery')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'gallery' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Gallery</button>
                   <button onClick={() => setActiveTab('leaders')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'leaders' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Trip Leaders</button>
                   <button onClick={() => setActiveTab('footerAdmin')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'footerAdmin' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>About & Footer</button>
+                  <button onClick={() => setActiveTab('patchNotes')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'patchNotes' ? 'bg-art-orange text-white' : 'hover:bg-art-text/10'}`}>Patch Notes</button>
                   <button onClick={() => setActiveTab('cleanupPhotos')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'cleanupPhotos' ? 'bg-red-600 text-white' : 'hover:bg-red-50 text-red-600'}`}>Cleanup Foto</button>
                 </>
               )}
@@ -209,6 +258,7 @@ export const AdminPanelModal = ({
             {activeTab === 'homepage' && <HomepageAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'splash' && <SplashAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'footerAdmin' && <FooterAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
+            {activeTab === 'patchNotes' && <PatchNotesAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
             {activeTab === 'cleanupPhotos' && <CleanupPhotosAdmin config={config} updateConfig={updateConfig} showToast={showToast} />}
           </div>
         </div>
