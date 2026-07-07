@@ -283,40 +283,28 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
           </div>
 
           {expandedIndexes.includes(i) && (
-            <div className="grid gap-4 mt-4">
-              <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
-                <span className="text-xs font-bold w-16">Foto:</span>
-                <div className="w-full sm:flex-1">
-                  <ImageUploader value={dest.image} onChange={url => {
-                    const nd = [...data];
-                    nd[i].image = url;
-                    setData(nd);
-                  }} placeholder="URL Gambar / Unggah File" />
-                </div>
+          <div className="grid gap-4 mt-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
+              <span className="text-xs font-bold w-16">Foto:</span>
+              <div className="w-full sm:flex-1">
+                <ImageUploader value={dest.image} onChange={url => {
+                  const nd = [...data];
+                  nd[i].image = url;
+                  setData(nd);
+                }} placeholder="URL Gambar / Unggah File" />
               </div>
+            </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-                {/* Left Column: General Info */}
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <span className="text-xs font-bold mb-1 block">Nama Destinasi:</span>
-                      <input className="w-full border border-art-text/20 p-3 rounded-xl text-sm font-black focus:border-art-orange outline-none transition-all" value={dest.name} onChange={e => {
-                        const nd = [...data];
-                        nd[i].name = e.target.value;
-                        setData(nd);
-                      }} placeholder="Nama Gunung" />
-                    </div>
-                    <div className="w-full sm:flex-1">
-                      <span className="text-xs font-bold mb-1 block">Logo (URL):</span>
-                      <ImageUploader value={dest.logo || ''} onChange={url => {
-                        const nd = [...data];
-                        nd[i].logo = url;
-                        setData(nd);
-                      }} placeholder="URL Logo (Transparan)" />
-                    </div>
-                  </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
+              <span className="text-xs font-bold w-16">Logo:</span>
+              <div className="w-full sm:flex-1">
+                <ImageUploader value={dest.logo || ''} onChange={url => {
+                  const nd = [...data];
+                  nd[i].logo = url;
+                  setData(nd);
+                }} placeholder="URL Logo (Transparan disarankan)" />
+              </div>
+            </div>
 
             <div className="flex flex-col mb-2">
               <span className="text-xs font-bold mb-1">Deskripsi & Info:</span>
@@ -470,31 +458,21 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                      {dest.showDiscountBadge ? 'ON' : 'OFF'}
                    </button>
                 </div>
-                  </div>
-                </div>
               </div>
+            </div>
+            
+            <button type="button" 
+              onClick={(e) => {
+                e.preventDefault();
+                const nd = [...data];
+                if (!nd[i].paths) nd[i].paths = [];
+                nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0 }] });
+                setData(nd);
+              }}
+              className="text-[10px] bg-art-text text-white px-3 py-1.5 rounded w-full sm:hidden"
+            >+ Jalur</button>
 
-              {/* Right Column: Private Trip Settings */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center bg-art-text text-white p-4 rounded-2xl">
-                   <div className="flex items-center gap-2">
-                      <Mountain size={20} />
-                      <span className="text-xs font-black uppercase tracking-widest">Private Trip Settings</span>
-                   </div>
-                   <button type="button" 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const nd = [...data];
-                        if (!nd[i].paths) nd[i].paths = [];
-                        nd[i].paths.push({ name: "Jalur Baru", durations: [{ label: "1H (Tektok)", price: 0 }] });
-                        setData(nd);
-                      }}
-                      className="text-[10px] bg-white text-art-text px-4 py-2 rounded-xl font-black uppercase tracking-tight shadow-sm hover:bg-art-orange hover:text-white transition-all"
-                    >+ Jalur</button>
-                </div>
-
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                  {dest.paths?.map((path: any, pIdx: number) => (
+            {dest.paths?.map((path: any, pIdx: number) => (
               <div key={pIdx} className="border border-art-text/20 p-3 rounded-lg bg-gray-50 space-y-3 relative">
                 <div className="absolute top-2 right-2 flex gap-1 z-10">
                    <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm">
@@ -671,11 +649,10 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
-    </div>
-        </div>
-  })}}
+    );
+  })}
     <AnimatePresence>
       {showPoster && (
         <TripPosterGenerator 

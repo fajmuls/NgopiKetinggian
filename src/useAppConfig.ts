@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.3";
+export const WEBSITE_VERSION = "1.0.4";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,17 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.0.3",
+  version: "1.0.4",
   patchNotes: [
+    {
+      version: "1.0.4",
+      date: "2026-07-07",
+      notes: [
+        "Perbaikan error build: Menambahkan import AnimatePresence yang kurang pada komponen Admin Panel",
+        "Perbaikan error build: Mendefinisikan variabel currentDurPrice yang tidak ada pada kalkulator estimasi Destination Card",
+        "Peningkatan stabilitas: Sinkronisasi dan pembaruan sistem versioning dan patch notes di Admin Dashboard"
+      ]
+    },
     {
       version: "1.0.3",
       date: "2024-03-20",

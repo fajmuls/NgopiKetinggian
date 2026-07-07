@@ -119,6 +119,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   }, [selectedPath, safeDurations, selectedDuration]);
 
   const currentDur = safeDurations[selectedDuration] || safeDurations[0];
+  const currentDurPrice = currentDur?.price || 0;
 
   const totalEstimation = useMemo(() => {
     let base = (currentDur?.price || 0) * participants;
