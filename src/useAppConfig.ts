@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.4";
+export const WEBSITE_VERSION = "1.0.6";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,27 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.0.4",
+  version: "1.0.6",
   patchNotes: [
+    {
+      version: "1.0.6",
+      date: "2026-07-07",
+      notes: [
+        "Perbaikan Bug Kritis layout Booking Form: Menghapus duplikasi baris kode dan restrukturisasi kolom input nama, WhatsApp, dan email pada BookingModal.tsx.",
+        "Stabilitas & Pembersihan Kode: Memperbaiki parser split rundown html dan menutup tag unclosed JSX pada BookingModal.tsx agar kompilasi sukses.",
+        "Integrasi Versi Aplikasi & Patch Notes Otomatis: Sinkronisasi pembaruan versi dan patch notes ini di admin panel secara otomatis."
+      ]
+    },
+    {
+      version: "1.0.5",
+      date: "2026-07-07",
+      notes: [
+        "Fitur Ulasan Pelanggan Terverifikasi: Menambahkan ReviewForm rating bintang 1-5 dan ulasan singkat pada destinasi khusus pendaki login & terverifikasi.",
+        "Restrukturisasi UI Booking & Admin: Membagi layout form booking dan admin 'Optional/Add-on' ke dalam layout 2 kolom responsif.",
+        "Peningkatan Aksesibilitas Harga: Menyejajarkan harga item/fasilitas sewa sejalan dengan kapasitas tepat di bawah nama opsi.",
+        "Sistem Pelacakan Versi & Patch Notes: Menampilkan log versi dinamis saat menekan tombol versi di Admin Dashboard."
+      ]
+    },
     {
       version: "1.0.4",
       date: "2026-07-07",
@@ -293,12 +312,30 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
         if (snap.exists()) {
           const data = snap.data();
           if (name === 'website') {
+            const loadedVersion = data.version || "1.0.0";
+            let mergedPatchNotes = data.patchNotes || [];
+            
+            if (loadedVersion !== WEBSITE_VERSION) {
+              const defaultWebsite = getDefaultWebsiteData();
+              const existingVersions = new Set(mergedPatchNotes.map((pn: any) => pn.version));
+              const missingPatchNotes = defaultWebsite.patchNotes.filter((pn: any) => !existingVersions.has(pn.version));
+              if (missingPatchNotes.length > 0) {
+                mergedPatchNotes = [...missingPatchNotes, ...mergedPatchNotes];
+              }
+              data.version = WEBSITE_VERSION;
+              data.patchNotes = mergedPatchNotes;
+              
+              setDoc(docRef, { version: WEBSITE_VERSION, patchNotes: mergedPatchNotes }, { merge: true }).catch(() => {});
+            }
+
             currentConfig = { 
               ...currentConfig, 
               ...data,
               facilities: data.facilities || currentConfig.facilities,
               visibilities: { ...currentConfig.visibilities, ...(data.visibilities || {}) },
-              homepage: { ...currentConfig.homepage, ...(data.homepage || {}) }
+              homepage: { ...currentConfig.homepage, ...(data.homepage || {}) },
+              version: data.version || WEBSITE_VERSION,
+              patchNotes: mergedPatchNotes.length > 0 ? mergedPatchNotes : (currentConfig.patchNotes || [])
             };
           } else if (name === 'destinations') {
             currentConfig.destinationsData = data.items || [];

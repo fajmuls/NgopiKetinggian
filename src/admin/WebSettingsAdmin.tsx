@@ -760,6 +760,29 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         </div>
       </div>
 
+      {/* Reviews Configuration */}
+      <div className="pt-6 border-t border-art-text/10 space-y-4 pb-4">
+        <h4 className="text-xs font-black uppercase tracking-widest text-art-text">Konfigurasi Ulasan Pendaki</h4>
+        <div className="bg-art-bg/20 p-4 rounded-xl border border-art-text/10 flex items-center justify-between">
+          <div className="space-y-1 pr-4">
+            <span className="text-xs font-black uppercase text-art-text">Tampilkan Ulasan Overall (Testimoni)</span>
+            <p className="text-[9px] font-bold text-art-text/40 uppercase">Jika diaktifkan, ulasan keseluruhan dan rating bintang dari pendaki akan ditampilkan di bawah detail destinasi.</p>
+          </div>
+          <button 
+            type="button"
+            onClick={() => {
+              const currentVis = config.visibilities || {};
+              const newVis = { ...currentVis, showOverallReview: currentVis.showOverallReview === false ? true : false };
+              updateConfig({ visibilities: newVis });
+              showToast(`Visibilitas ulasan: ${newVis.showOverallReview !== false ? 'Aktif' : 'Non-aktif'}`);
+            }}
+            className={`w-12 h-6 rounded-full p-1 transition-colors shrink-0 ${config.visibilities?.showOverallReview !== false ? 'bg-art-orange' : 'bg-gray-300'}`}
+          >
+            <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform ${config.visibilities?.showOverallReview !== false ? 'translate-x-6' : 'translate-x-0'}`}></div>
+          </button>
+        </div>
+      </div>
+
       <button onClick={handleSave} className="bg-art-orange text-white px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">Simpan Konfigurasi Branding & Hero</button>
     </div>
   );
@@ -1340,84 +1363,112 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
         
         <div className="grid grid-cols-1 gap-4">
           {data.opsi.map((opt: FacilityOption, i: number) => (
-            <div key={i} className="border border-art-text/20 p-4 rounded-xl space-y-3 relative bg-art-bg/20">
-               <div className="absolute top-4 right-4 flex gap-2 z-20">
-                  <div className="flex bg-white rounded border border-art-text/10 overflow-hidden">
-                    <button type="button" onClick={() => moveItem('opsi', i, 'up')} className="p-1.5 hover:bg-gray-100 border-r border-art-text/10" disabled={i === 0}><ChevronDown size={16} className="rotate-180"/></button>
-                    <button type="button" onClick={() => moveItem('opsi', i, 'down')} className="p-1.5 hover:bg-gray-100" disabled={i === data.opsi.length - 1}><ChevronDown size={16}/></button>
-                  </div>
-                  <button type="button" onClick={() => {
-                    const nd = { ...data }; nd.opsi[i].isHidden = !nd.opsi[i].isHidden; setData(nd);
-                  }} className={`p-1.5 rounded shadow-sm border ${opt.isHidden ? 'bg-gray-100 text-gray-500 border-art-text/20' : 'bg-white text-art-text border-art-text/10'} hover:bg-gray-50`}>
-                    {opt.isHidden ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                  <button type="button" onClick={() => {
-                 const nd = { ...data }; nd.opsi.splice(i, 1); setData(nd);
-               }} className="bg-white border border-art-text/10 text-red-500 rounded p-1.5 shadow-sm hover:bg-red-50"><Trash2 size={18} /></button>
-                </div>
-               
-                <div className="mb-4 w-full sm:w-80">
-                   <label className="text-[10px] font-black uppercase text-art-orange block mb-1 font-mono tracking-tighter">Format Perhitungan Biaya</label>
-                   <CustomSelect 
-                     value={opt.pricingFormat || 'manual'}
-                     placeholder="Pilih Format"
-                     options={[
-                       { value: 'manual', label: 'Manual' },
-                       { value: 'calculated', label: 'Kalkulasi Otomatis' }
-                     ]}
-                     onChange={(val: string) => {
-                       const nd = { ...data };
-                       nd.opsi[i].pricingFormat = val as any;
-                       setData(nd);
-                     }}
-                   />
-                </div>
-               <div className="flex flex-col sm:flex-row gap-3 pr-10">
-                 <div className="flex-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Nama Opsi</label>
-                   <input className="w-full border p-2 rounded text-xs font-bold" value={opt.name} onChange={e => {
-                      const nd = { ...data }; nd.opsi[i].name = e.target.value; setData(nd);
-                   }} />
+            <div key={i} className="border-2 border-art-text p-6 rounded-[2rem] space-y-4 relative bg-white shadow-[4px_4px_0px_0px_#1a1a1a]">
+               {/* Header / Actions Row */}
+               <div className="flex justify-between items-center pb-3 border-b border-art-text/10">
+                 <div className="flex items-center gap-2">
+                   <span className="text-[10px] font-black uppercase text-art-text/40 bg-art-bg px-2.5 py-1 rounded-xl">Opsi #{i + 1}</span>
+                   {opt.isHidden && <span className="text-[8px] bg-gray-200 text-gray-500 font-black px-2 py-0.5 rounded uppercase">Sembunyi</span>}
                  </div>
-                 <div className="w-full sm:w-48">
-                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Info Harga (Slip Desc)</label>
-                   <input className="w-full border p-2 rounded text-xs" value={opt.priceInfo || ''} onChange={e => {
-                      const nd = { ...data }; nd.opsi[i].priceInfo = e.target.value; setData(nd);
-                   }} placeholder="Cth: Rp 10rb/pax" />
+                 <div className="flex gap-1.5 items-center">
+                    <div className="flex bg-white rounded border border-art-text/10 overflow-hidden shadow-sm h-[28px]">
+                      <button type="button" onClick={() => moveItem('opsi', i, 'up')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === 0}><ChevronDown size={14} className="rotate-180"/></button>
+                      <button type="button" onClick={() => moveItem('opsi', i, 'down')} className="px-2 hover:bg-gray-100 disabled:opacity-30" disabled={i === data.opsi.length - 1}><ChevronDown size={14}/></button>
+                    </div>
+                    <button type="button" onClick={() => {
+                      const nd = { ...data }; nd.opsi[i].isHidden = !nd.opsi[i].isHidden; setData(nd);
+                    }} className={`p-1.5 rounded shadow-sm border ${opt.isHidden ? 'bg-gray-100 text-gray-500 border-art-text/20' : 'bg-white text-art-text border-art-text/10'} hover:bg-gray-50 h-[28px] w-[28px] flex items-center justify-center`}>
+                      {opt.isHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                    <button type="button" onClick={() => {
+                      const nd = { ...data }; nd.opsi.splice(i, 1); setData(nd);
+                    }} className="bg-white border border-art-text/10 text-red-500 rounded p-1 shadow-sm hover:bg-red-50 h-[28px] w-[28px] flex items-center justify-center"><Trash2 size={14} /></button>
                  </div>
                </div>
 
-               <div className="pl-6 border-l-2 border-art-orange/20 space-y-3 pt-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase text-art-orange">Sub-Items (Spesifik)</span>
-          <button type="button" onClick={(e) => { e.preventDefault(); addSubItem(i); }} className="text-[9px] bg-art-orange text-white px-2 py-1 rounded uppercase font-bold">+ Tambah Sub</button>
-                  </div>
-                  
-                  {opt.subItems?.map((sub, sIdx) => (
-                    <div key={sIdx} className="flex gap-2 items-end">
-                      <div className="flex-1">
-                        <input className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" value={sub.name} onChange={e => updateSubItem(i, sIdx, 'name', e.target.value)} placeholder="Nama Item" />
+               {/* Responsive 2-column Grid */}
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                 {/* Left Column: Option Name & Sub-items */}
+                 <div className="space-y-4">
+                   <div>
+                     <label className="text-[9px] font-black uppercase text-art-text/40 block mb-1">Nama Opsi</label>
+                     <input className="w-full border-2 border-art-text bg-white p-2.5 rounded-xl text-xs font-black uppercase tracking-tight outline-none focus:border-art-orange shadow-sm" value={opt.name} onChange={e => {
+                        const nd = { ...data }; nd.opsi[i].name = e.target.value; setData(nd);
+                     }} placeholder="Nama Layanan Tambahan" />
+                   </div>
+
+                   <div className="space-y-3 pt-2 bg-art-bg/30 p-4 rounded-2xl border border-art-text/5">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] font-black uppercase text-art-text">Sub-Items (Spesifik)</span>
+                        <button type="button" onClick={(e) => { e.preventDefault(); addSubItem(i); }} className="text-[8px] bg-art-orange text-white px-2 py-1.5 rounded-lg uppercase font-black hover:bg-orange-600 transition-colors shadow-sm">+ Tambah Sub</button>
                       </div>
-                      <div className="w-32 relative">
-                        <span className="absolute left-0 bottom-1.5 text-[9px] font-black text-art-text/40 uppercase">Rp</span>
-                        <input 
-                          className="w-full border-b pl-6 p-1 text-[11px] outline-none focus:border-art-orange bg-transparent font-mono" 
-                          value={sub.priceInfo || ''} 
-                          onChange={e => {
-                            const raw = e.target.value.replace(/[^0-9]/g, '');
-                            const num = parseInt(raw);
-                            updateSubItem(i, sIdx, 'priceInfo', raw ? Number(raw).toLocaleString('id-ID') : '');
-                            const nd = { ...data };
-                            nd.opsi[i].subItems[sIdx].price = isNaN(num) ? 0 : num / 1000;
-                            setData(nd);
-                          }} 
-                          placeholder="50.000" 
-                        />
+                      
+                      <div className="space-y-2.5">
+                        {opt.subItems?.map((sub, sIdx) => (
+                          <div key={sIdx} className="flex gap-2 items-end bg-white p-2.5 rounded-xl border border-art-text/10 shadow-sm">
+                            <div className="flex-1">
+                              <span className="block text-[8px] font-black text-art-text/40 uppercase mb-0.5">Nama Item</span>
+                              <input className="w-full border-b border-art-text/10 pb-1 text-xs font-bold outline-none focus:border-art-orange bg-transparent" value={sub.name} onChange={e => updateSubItem(i, sIdx, 'name', e.target.value)} placeholder="Cth: Tenda Kapasitas 2" />
+                            </div>
+                            <div className="w-32 relative">
+                              <span className="block text-[8px] font-black text-art-text/40 uppercase mb-0.5">Harga / Hari</span>
+                              <span className="absolute left-0 bottom-1.5 text-[10px] font-black text-art-text/30 uppercase">Rp</span>
+                              <input 
+                                className="w-full border-b border-art-text/10 pl-6 pb-1 text-xs font-black outline-none focus:border-art-orange bg-transparent font-mono" 
+                                value={sub.priceInfo || ''} 
+                                onChange={e => {
+                                  const raw = e.target.value.replace(/[^0-9]/g, '');
+                                  const num = parseInt(raw);
+                                  updateSubItem(i, sIdx, 'priceInfo', raw ? Number(raw).toLocaleString('id-ID') : '');
+                                  const nd = { ...data };
+                                  nd.opsi[i].subItems[sIdx].price = isNaN(num) ? 0 : num / 1000;
+                                  setData(nd);
+                                }} 
+                                placeholder="50.000" 
+                              />
+                            </div>
+                            <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={14}/></button>
+                          </div>
+                        ))}
+                        {(!opt.subItems || opt.subItems.length === 0) && (
+                          <p className="text-[10px] text-art-text/30 italic uppercase font-bold text-center py-4">Belum ada sub-item spesifik.</p>
+                        )}
                       </div>
-                      <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600"><Trash2 size={14}/></button>
+                   </div>
+                 </div>
+
+                 {/* Right Column: Private Settings and Configuration */}
+                 <div className="space-y-4 bg-gray-50/50 p-4 rounded-2xl border border-dashed border-art-text/15">
+                    <h4 className="text-[10px] font-black uppercase text-art-text/50 tracking-widest border-b border-art-text/5 pb-1 mb-2">Private Settings & Config</h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                         <label className="text-[9px] font-black uppercase text-art-text/40 block mb-1">Format Perhitungan Biaya</label>
+                         <CustomSelect 
+                           value={opt.pricingFormat || 'manual'}
+                           placeholder="Pilih Format"
+                           options={[
+                             { value: 'manual', label: 'Manual (Biaya Menyusul)' },
+                             { value: 'calculated', label: 'Kalkulasi Otomatis (Sewa per Hari)' }
+                           ]}
+                           onChange={(val: string) => {
+                             const nd = { ...data };
+                             nd.opsi[i].pricingFormat = val as any;
+                             setData(nd);
+                           }}
+                         />
+                         <p className="text-[8px] text-art-text/30 uppercase font-bold mt-1 leading-normal italic">Manual: harga ditampilkan sebagai "Biaya Menyusul". Kalkulasi Otomatis: dikali jumlah x durasi hari.</p>
+                      </div>
+
+                      <div>
+                         <label className="text-[9px] font-black uppercase text-art-text/40 block mb-1">Info Harga (Slip Desc)</label>
+                         <input className="w-full border-2 border-art-text bg-white p-2.5 rounded-xl text-xs outline-none focus:border-art-orange shadow-sm font-bold" value={opt.priceInfo || ''} onChange={e => {
+                            const nd = { ...data }; nd.opsi[i].priceInfo = e.target.value; setData(nd);
+                         }} placeholder="Cth: Rp 10rb/pax atau Rp 35rb/hari" />
+                         <p className="text-[8px] text-art-text/30 uppercase font-bold mt-1 leading-normal italic">Keterangan harga singkat yang muncul di halaman draf slip atau struk detail.</p>
+                      </div>
                     </div>
-                  ))}
-                  {(!opt.subItems || opt.subItems.length === 0) && <p className="text-[10px] text-art-text/30 italic">Belum ada sub-item.</p>}
+                 </div>
                </div>
             </div>
           ))}

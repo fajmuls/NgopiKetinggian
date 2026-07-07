@@ -422,7 +422,13 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
 
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 text-left">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-2xl rounded-[2.5rem] p-6 md:p-10 border-2 border-art-text relative max-h-[92vh] overflow-y-auto shadow-2xl">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }} 
+        animate={{ opacity: 1, scale: 1 }} 
+        className={`bg-white w-full rounded-[2.5rem] p-6 md:p-10 border-2 border-art-text relative max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300 ${
+          viewType === 'form' ? 'max-w-4xl' : 'max-w-2xl'
+        }`}
+      >
         <button onClick={() => { playBack(); onClose(); }} className="absolute top-6 right-6 z-10 text-art-text hover:text-art-orange transition-colors"><X size={24} /></button>
         
         {showSuccess ? (
@@ -745,362 +751,356 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                </div>
              </div>
              
-             <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
-                     <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Nama Pemesan</label>
-                     <input name="nama" required type="text" value={formState.nama} onChange={e => setFormState({...formState, nama: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="NAMA LENGKAP" />
+              {/* 2-column responsive layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Left Column: General Booking Details */}
+                <div className="lg:col-span-6 space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                       <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Nama Pemesan</label>
+                       <input name="nama" required type="text" value={formState.nama} onChange={e => setFormState({...formState, nama: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="NAMA LENGKAP" />
+                    </div>
+                    <div className="relative">
+                       <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">WhatsApp</label>
+                       <input name="wa" required type="tel" value={formState.wa} onChange={e => setFormState({...formState, wa: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="0812..." />
+                    </div>
                   </div>
+
+                  {currentType !== 'open_request' && (
                   <div className="relative">
-                     <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">WhatsApp</label>
-                     <input name="wa" required type="tel" value={formState.wa} onChange={e => setFormState({...formState, wa: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="0812..." />
+                     <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Email</label>
+                     <input name="email" required type="email" value={formState.email} onChange={e => setFormState({...formState, email: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="ALAMAT@MAIL.COM" />
                   </div>
-                </div>
+                  )}
 
-                {currentType !== 'open_request' && (
-                <div className="relative">
-                   <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Email</label>
-                   <input name="email" required type="email" value={formState.email} onChange={e => setFormState({...formState, email: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange transition-all text-xs" placeholder="ALAMAT@MAIL.COM" />
-                </div>
-                )}
-
-                <div className="space-y-4">
-                   <div className="relative" ref={destRef}>
-                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Destinasi</label>
-                      <div className="relative">
-                        <input 
-                          type="text"
-                          placeholder="CARI GUNUNG..."
-                          className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-xs disabled:bg-gray-200/50 shadow-sm"
-                          value={destSearch}
-                          onChange={(e) => {
-                            setDestSearch(e.target.value);
-                            setOpenDest(true);
-                          }}
-                          onFocus={() => setOpenDest(true)}
-                          disabled={currentType === 'open'}
-                        />
-                        <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 text-art-text/20 transition-transform ${openDest ? 'rotate-180' : ''}`} size={16} />
-                        <AnimatePresence>
-                          {openDest && (
-                            <motion.div 
-                              initial={{ opacity: 0, y: 5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 5 }}
-                              className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-xl z-[120] max-h-60 overflow-y-auto overflow-x-hidden"
-                            >
-                              {currentType === 'open' ? (
-                                config.openTrips?.filter((ot: any) => ot.name.toLowerCase().includes(destSearch.toLowerCase())).map((ot: any, idx: number) => (
-                                  <button 
-                                    key={idx}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedDestinasi(ot.name);
-                                      setDestSearch(ot.name);
-                                      setOpenDest(false);
-                                      setSelectedJalur(ot.path || '');
-                                      setSelectedDurasi(ot.duration || '');
-                                      setSelectedJadwal(ot.jadwal || '');
-                                    }}
-                                    className="w-full p-4 hover:bg-art-bg text-left border-b border-art-text/5 last:border-none group"
-                                  >
-                                    <p className="text-[10px] font-black uppercase text-art-text group-hover:text-art-orange transition-colors">{ot.name}</p>
-                                    <p className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5">{ot.jadwal}</p>
-                                  </button>
-                                ))
-                              ) : (
-                                destinationOptions?.filter(d => d.isActive !== false && d.name.toLowerCase().includes(destSearch.toLowerCase())).map((d, i) => (
-                                  <button 
-                                    key={i}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedDestinasi(d.name);
-                                      setDestSearch(d.name);
-                                      setOpenDest(false);
-                                      setSelectedJalur(''); 
-                                      if (currentType === 'open_request') setSelectedDurasi('2H 1M');
-                                      else setSelectedDurasi(''); 
-                                      setSelectedJadwal(''); 
-                                    }}
-                                    className="w-full p-4 hover:bg-art-bg text-left border-b border-art-text/5 last:border-none group"
-                                  >
-                                    <p className="text-[10px] font-black uppercase text-art-text group-hover:text-art-orange transition-colors">{d.name}</p>
-                                    <p className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5">{d.region}</p>
-                                  </button>
-                                ))
-                              )}
-                              {(currentType === 'open' ? 
-                                config.openTrips?.filter((ot: any) => ot.name.toLowerCase().includes(destSearch.toLowerCase())).length === 0 :
-                                destinationOptions?.filter((d: any) => d.isActive !== false && d.name.toLowerCase().includes(destSearch.toLowerCase())).length === 0
-                              ) && (
-                                <div className="p-8 text-center bg-gray-50">
-                                  <p className="text-[10px] font-black uppercase text-art-text/20">Gunung tidak ditemukan</p>
-                                </div>
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                   </div>
-
-                   {true && (
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="relative">
-                        <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jalur</label>
-                        <CustomSelect 
-                          name="jalur" 
-                          required={currentType !== 'open_request'}
-                          value={selectedJalur}
-                          onChange={(val: string) => { setSelectedJalur(val); setSelectedDurasi(''); }}
-                          disabled={!selectedDestinasi || currentType === 'open'}
-                          placeholder="-- PILIH JALUR --"
-                          options={selectedDestinasi ? (destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.map((p: any) => ({ value: p.name, label: p.name })) || []) : []}
-                        />
-                      </div>
-                      <div className="relative">
-                        <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Durasi</label>
-                        {currentType === 'open_request' ? (
-                          <div className="w-full border-2 border-art-text bg-art-bg/30 px-3 py-3 rounded-xl text-[10px] font-black text-art-text/40 shadow-sm flex items-center gap-2">
-                            <Clock size={12} className="text-art-text/20" /> 2H 1M (Weekend Only)
-                          </div>
-                        ) : (
-                          <CustomSelect 
-                            name="durasi" 
-                            required={currentType !== 'open_request'}
-                            value={selectedDurasi}
-                            onChange={(val: string) => setSelectedDurasi(val)}
-                            disabled={!selectedJalur || currentType === 'open'}
-                            placeholder="-- DURASI --"
-                            options={selectedJalur ? (destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.map((dur: any) => ({ value: dur.label, label: dur.label })) || []) : []}
-                          />
-                        )}
-                      </div>
-                   </div>
-                   )}
-
-                   {selectedDestinasi && selectedJalur && selectedDurasi && (() => {
-                      const durInfo = destinationOptions?.find(d => d.name === selectedDestinasi)?.paths?.find((p: any) => p.name === selectedJalur)?.durations?.find((dur: any) => dur.label === selectedDurasi);
-                      if (!durInfo || (!durInfo.rundownHtml && !durInfo.rundownPdf)) return null;
-                      
-                      const currentOt = currentType === 'open' ? config.openTrips?.find((o: any) => o.name === selectedDestinasi) : null;
-                      const showPdf = currentOt ? currentOt.showRundownPdf !== false : true;
-
-                      return (
-                         <div className="bg-art-bg/50 border border-art-text/10 p-4 rounded-2xl relative shadow-sm">
-                            <h4 className="text-[10px] font-black uppercase text-art-text mb-2 flex items-center gap-1.5"><FileText size={12} className="text-art-orange" /> Itinerary / Rundown Kegiatan</h4>
-                            {durInfo.rundownHtml && (
-                               <div className="text-[9px] text-art-text/60 font-mono whitespace-pre-wrap leading-relaxed max-h-32 overflow-y-auto pr-2 no-scrollbar border-l-2 border-art-orange/30 pl-3">
-                                 {durInfo.rundownHtml}
-                               </div>
-                            )}
-                            {showPdf && (
-                              <div className="flex gap-2">
-                                {durInfo.rundownHtml ? (
-                                  <button type="button" onClick={() => generateRundownPdf(durInfo, selectedDestinasi, selectedJalur, selectedDurasi)} className={`inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest px-3 py-2 bg-white rounded-lg border-2 border-art-text text-art-text hover:bg-art-orange hover:border-art-orange hover:text-white transition-all ${durInfo.rundownHtml ? 'mt-3' : ''}`}>
-                                    Lihat PDF Rundown <Download size={10} />
-                                  </button>
-                                ) : null}
-                              </div>
-                            )}
-                         </div>
-                      );
-                    })()}
-
-                   <div className="grid grid-cols-2 gap-4">
-                      {currentType === 'open_request' ? (
-                        <div className="col-span-2">
-                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Request Jadwal Weekend (Bulan & Tanggal)</label>
-                           <div className="flex gap-2">
-                             <CustomSelect 
-                               value={selectedJadwal.split('|')[0] || ''}
-                               onChange={(val: string) => setSelectedJadwal(val ? `${val}|` : '')}
-                               placeholder="-- Bulan --"
-                               options={Array.from({ length: 6 }).map((_, i) => {
-                                 const d = new Date();
-                                 d.setMonth(d.getMonth() + i);
-                                 const monthStr = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-                                 const monthVal = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}`;
-                                 return { value: monthVal, label: monthStr };
-                               })}
-                               className="w-1/2"
-                             />
-                             <CustomSelect 
-                               value={selectedJadwal.split('|')[1] || ''}
-                               onChange={(val: string) => setSelectedJadwal(`${selectedJadwal.split('|')[0]}|${val}`)}
-                               disabled={!selectedJadwal.split('|')[0]}
-                               placeholder="-- Tanggal --"
-                               className="w-1/2"
-                               options={(() => {
-                                  const [monthVal] = selectedJadwal.split('|');
-                                  if (!monthVal) return [];
-                                  const [year, month] = monthVal.split('-').map(Number);
-                                  const daysInMonth = new Date(year, month, 0).getDate();
-                                  
-                                  const weekends = [];
-                                  for (let i = 1; i <= daysInMonth; i++) {
-                                     const date = new Date(year, month - 1, i);
-                                     if (date.getDay() === 6) {
-                                        const endDate = new Date(date);
-                                        endDate.setDate(date.getDate() + 1);
-                                        weekends.push({
-                                           value: `${i}-${endDate.getDate()}`,
-                                           label: `${i}-${endDate.getDate()}`
-                                        });
-                                     }
-                                  }
-                                  return weekends;
-                               })()}
-                             />
-                           </div>
-                        </div>
-                      ) : (
-                        <div className="relative">
-                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1 flex justify-between items-center">
-                             Rencana Tanggal
-                           </label>
-                           <input 
-                             name="jadwal" 
-                             required 
-                             type={currentType === 'open' ? 'text' : 'date'} 
-                             value={selectedJadwal}
-                             onChange={e => {
-                               const date = e.target.value;
-                               setSelectedJadwal(date);
-                             }}
-                             readOnly={currentType === 'open'}
-                             className="w-full border-2 border-art-text bg-white px-3 py-3 rounded-xl text-[10px] font-black text-art-text outline-none focus:border-art-orange disabled:bg-gray-200/50 shadow-sm" 
-                           />
-                           {currentType === 'private' && <p className="text-[7px] font-bold text-art-text/30 mt-1 uppercase italic tracking-tighter">Pilih tanggal keberangkatan yang Anda inginkan.</p>}
-                        </div>
-                      )}
+                  <div className="space-y-4">
+                    <div className="relative" ref={destRef}>
+                       <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Destinasi</label>
                        <div className="relative">
-                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Jumlah Peserta</label>
-                          <div className="flex items-center gap-2 bg-white border-2 border-art-text rounded-xl px-2 h-[42px] shadow-sm">
-                             <button type="button" onClick={() => setPesertaCount(Math.max(1, (Number(pesertaCount) || 1) - 1))} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-orange transition-colors text-[12px]">-</button>
-                             <input name="peserta" type="number" value={pesertaCount} onChange={e => setPesertaCount(e.target.value)} className="w-full text-center font-black text-art-text outline-none text-xs bg-transparent" min={1} />
-                             <button type="button" onClick={() => setPesertaCount((Number(pesertaCount) || 0) + 1)} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-green transition-colors text-[12px]">+</button>
-                          </div>
-                          {currentType === 'open' && (
-                             <div className="mt-1 ml-1 flex justify-between items-center">
-                               <span className="text-[7px] font-black uppercase text-art-text/30">Sisa Slot: {getOpenTripStats(selectedDestinasi, selectedJadwal).sisa} Pax</span>
-                               {Number(pesertaCount) > getOpenTripStats(selectedDestinasi, selectedJadwal).sisa && (
-                                 <span className="text-[7px] font-black uppercase text-red-500 animate-pulse">Kuota Tidak Cukup!</span>
-                               )}
-                             </div>
-                          )}
-                       </div>
-                   </div>
-
-
-                    {currentType !== 'open_request' && (
-                      <>
-                        <div className="relative">
-                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Opsi Layanan Tambahan</label>
-                          <div className="relative">
-                             <button 
-                               type="button" 
-                               onClick={() => {
-                                 const el = document.getElementById('addon-dropdown');
-                                 if (el) el.classList.toggle('hidden');
-                               }}
-                               className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black text-left text-[10px] flex justify-between items-center shadow-sm"
+                         <input 
+                           type="text"
+                           placeholder="CARI GUNUNG..."
+                           className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-xs disabled:bg-gray-200/50 shadow-sm"
+                           value={destSearch}
+                           onChange={(e) => {
+                             setDestSearch(e.target.value);
+                             setOpenDest(true);
+                           }}
+                           onFocus={() => setOpenDest(true)}
+                           disabled={currentType === 'open'}
+                         />
+                         <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 text-art-text/20 transition-transform ${openDest ? 'rotate-180' : ''}`} size={16} />
+                         <AnimatePresence>
+                           {openDest && (
+                             <motion.div 
+                               initial={{ opacity: 0, y: 5 }}
+                               animate={{ opacity: 1, y: 0 }}
+                               exit={{ opacity: 0, y: 5 }}
+                               className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-xl z-[120] max-h-60 overflow-y-auto overflow-x-hidden"
                              >
-                               <span className="truncate">{selectedOpsional.length === 0 && Object.keys(subSelected).length === 0 ? 'PILIH LAYANAN TAMBAHAN...' : `${selectedOpsional.length + Object.keys(subSelected).length} LAYANAN DIPILIH`}</span>
-                               <ChevronDown size={14} className="text-art-text/40" />
-                             </button>
-                             <div id="addon-dropdown" className="hidden absolute z-30 left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-2xl shadow-2xl p-4 max-h-64 overflow-y-auto">
-                                <div className="grid grid-cols-1 gap-2">
-                                  {config?.facilities?.opsi
-                                     ?.slice()
-                                     .filter((opt: any) => opt.isHidden !== true)
-                                     .sort((a: any, b: any) => (a.subItems?.length || 0) - (b.subItems?.length || 0))
-                                     .map((opt: any, i: number) => {
-                                     const isSelected = selectedOpsional.includes(opt.name);
-                                     return (
-                                        <div key={i} className="space-y-2 border-b border-art-text/5 last:border-0 pb-2">
-                                           <label className="flex items-center gap-3 p-1 hover:bg-art-bg rounded-xl cursor-pointer transition-colors group">
-                                              <input 
-                                                type="checkbox" 
-                                                checked={isSelected}
-                                                onChange={() => handleToggleOption(opt.name)}
-                                                className="w-4 h-4 accent-art-orange"
-                                              />
-                                              <div className="flex flex-col">
-                                                 <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange">{opt.name}</span>
-                                                 {opt.priceInfo && (
-                                                   <span className="text-[8px] font-bold text-art-text/40">{opt.priceInfo}</span>
-                                                 )}
-                                              </div>
-                                           </label>
-                                           
-                                           {isSelected && opt.pricingFormat === 'calculated' && (!opt.subItems || opt.subItems.length === 0) && (
-                                              <div className="ml-8 space-y-2 pt-1 border-l-2 border-art-orange/20 pl-4 mb-2">
-                                                 <div className="flex items-center justify-between gap-4">
-                                                    <div className="flex flex-col">
-                                                       <span className="text-[9px] font-bold text-art-text/60 uppercase">Kuantitas</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
-                                                       <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, '_self', -1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
-                                                       <span className="w-5 text-center font-black text-[10px] text-art-text">{subSelected[`${opt.name}|_self`] !== undefined ? subSelected[`${opt.name}|_self`] : 1}</span>
-                                                       <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, '_self', 1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
-                                                    </div>
-                                                 </div>
-                                              </div>
-                                           )}
+                               {destinationOptions
+                                 ?.filter(d => d.name.toLowerCase().includes(destSearch.toLowerCase()))
+                                 .map((dest, idx) => (
+                                   <button
+                                     key={idx}
+                                     type="button"
+                                     onClick={() => {
+                                       playClick();
+                                       setSelectedDestinasi(dest.name);
+                                       setDestSearch(dest.name);
+                                       setSelectedJalur('');
+                                       setSelectedDurasi('');
+                                       setSelectedJadwal('');
+                                       setOpenDest(false);
+                                     }}
+                                     className="w-full text-left font-black text-[10px] uppercase p-3 hover:bg-art-bg rounded-xl text-art-text transition-colors flex items-center gap-3"
+                                   >
+                                     <Mountain size={14} className="text-art-orange" /> {dest.name}
+                                   </button>
+                                 ))}
+                             </motion.div>
+                           )}
+                         </AnimatePresence>
+                       </div>
+                    </div>
 
-                                           {isSelected && opt.subItems && opt.subItems.length > 0 && (
-                                              <div className="ml-8 space-y-2 pt-1 border-l-2 border-art-orange/20 pl-4">
-                                                 {opt.subItems.map((sub: any, sIdx: number) => {
-                                                    const qty = subSelected[`${opt.name}|${sub.name}`] || 0;
-                                                    return (
-                                                       <div key={sIdx} className="flex items-center justify-between gap-4">
-                                                          <div className="flex flex-col">
-                                                             <span className="text-[9px] font-bold text-art-text/60 uppercase">{sub.name}</span>
-                                                             {sub.price ? (
-                                                                <span className="text-[8px] font-black text-art-orange/70 italic uppercase tracking-tighter">Rp {(sub.price * 1000).toLocaleString('id-ID')} / Hari</span>
-                                                              ) : sub.priceInfo && (
-                                                                <span className="text-[8px] font-medium text-art-text/30 italic">{sub.priceInfo}</span>
-                                                              )}
-                                                          </div>
-                                                          <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1 py-0.5">
-                                                             <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, sub.name, -1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px]">-</button>
-                                                             <span className="w-5 text-center font-black text-[10px] text-art-text">{qty}</span>
-                                                             <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, sub.name, 1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px]">+</button>
-                                                          </div>
-                                                       </div>
-                                                    );
-                                                 })}
-                                              </div>
-                                           )}
-                                        </div>
-                                     );
-                                  })}
-                                </div>
-                             </div>
+                    {selectedDestinasi && currentType !== 'open_request' && (
+                       <div className="relative">
+                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Jalur Pendakian</label>
+                          <div className="grid grid-cols-2 gap-2">
+                             {destinationOptions
+                                ?.find(d => d.name === selectedDestinasi)
+                                ?.paths?.map((jalur: any, idx: number) => {
+                                   const isSelected = selectedJalur === jalur.name;
+                                   return (
+                                      <button
+                                         key={idx}
+                                         type="button"
+                                         onClick={() => {
+                                            playClick();
+                                            setSelectedJalur(jalur.name);
+                                            setSelectedDurasi('');
+                                            setSelectedJadwal('');
+                                         }}
+                                         disabled={currentType === 'open'}
+                                         className={`p-3 rounded-xl border-2 font-black text-[10px] uppercase text-left transition-all flex items-center gap-2 ${isSelected ? 'border-art-orange bg-art-orange/5 text-art-text' : 'border-art-text/10 hover:border-art-text/30 text-art-text/60 bg-white'} disabled:opacity-50`}
+                                      >
+                                         <MapPin size={12} className={isSelected ? 'text-art-orange' : 'text-art-text/30'} />
+                                         <span className="truncate">{jalur.name}</span>
+                                      </button>
+                                   );
+                                })}
                           </div>
                        </div>
+                    )}
 
+                    {selectedDestinasi && selectedJalur && currentType !== 'open_request' && (
                        <div className="relative">
-                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Catatan Khusus / Kesehatan</label>
-                          <textarea name="deskripsi" value={formState.deskripsi} onChange={e => setFormState({...formState, deskripsi: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-bold outline-none focus:border-art-orange text-xs h-20 resize-none placeholder:text-art-text/20 shadow-sm" placeholder="Tuliskan jika ada request khusus..."></textarea>
+                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Pilih Durasi Trip</label>
+                          <div className="grid grid-cols-2 gap-2">
+                             {destinationOptions
+                                ?.find(d => d.name === selectedDestinasi)
+                                ?.paths?.find((p: any) => p.name === selectedJalur)
+                                ?.durations?.map((dur: any, idx: number) => {
+                                   const isSelected = selectedDurasi === dur.label;
+                                   return (
+                                      <button
+                                         key={idx}
+                                         type="button"
+                                         onClick={() => {
+                                            playClick();
+                                            setSelectedDurasi(dur.label);
+                                            setSelectedJadwal('');
+                                         }}
+                                         disabled={currentType === 'open'}
+                                         className={`p-3 rounded-xl border-2 font-black text-[10px] uppercase text-left transition-all flex justify-between items-center ${isSelected ? 'border-art-orange bg-art-orange/5 text-art-text' : 'border-art-text/10 hover:border-art-text/30 text-art-text/60 bg-white'} disabled:opacity-50`}
+                                      >
+                                         <span className="flex items-center gap-2 truncate">
+                                            <Clock size={12} className={isSelected ? 'text-art-orange' : 'text-art-text/30'} />
+                                            <span>{dur.label}</span>
+                                         </span>
+                                         {currentType === 'private' && (
+                                            <span className="text-[8px] font-black font-mono text-art-orange bg-art-orange/5 px-1.5 py-0.5 rounded">
+                                               Rp {(dur.basePrice * 1000).toLocaleString('id-ID')}
+                                            </span>
+                                         )}
+                                      </button>
+                                   );
+                                })}
+                          </div>
                        </div>
+                    )}
 
+                    {selectedDestinasi && selectedJalur && selectedDurasi && currentType !== 'open_request' && (
                        <div className="relative">
-                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Kode Promo</label>
-                          <input 
-                            name="promo" 
-                            type="text" 
-                            value={promoCode} 
-                            onChange={e => setPromoCode(e.target.value)} 
-                            className="w-full border-2 border-dashed border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-[10px] uppercase tracking-widest shadow-sm" 
-                            placeholder="MASUKKAN KODE DISINI"
-                          />
+                         <div className="flex justify-between items-center mb-1 ml-1">
+                           <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40">Rundown & Itinerary</label>
+                           <button
+                             type="button"
+                             onClick={() => {
+                               playClick();
+                               const dest = destinationOptions?.find(d => d.name === selectedDestinasi);
+                               const path = dest?.paths?.find((p: any) => p.name === selectedJalur);
+                               const dur = path?.durations?.find((d: any) => d.label === selectedDurasi);
+                               if (dur) {
+                                 generateRundownPdf(selectedDestinasi, selectedJalur, selectedDurasi, dur.rundownHtml || "");
+                               }
+                             }}
+                             className="text-[7px] font-black text-art-orange uppercase tracking-wider hover:underline flex items-center gap-1"
+                           >
+                             <FileText size={10} /> Download Rundown PDF
+                           </button>
+                         </div>
+                         <div className="bg-art-bg/30 p-4 rounded-2xl border border-art-text/10 max-h-40 overflow-y-auto text-[9px] font-bold text-art-text/60 leading-relaxed custom-scrollbar">
+                            {(() => {
+                              const dest = destinationOptions?.find(d => d.name === selectedDestinasi);
+                              const path = dest?.paths?.find((p: any) => p.name === selectedJalur);
+                              const dur = path?.durations?.find((d: any) => d.label === selectedDurasi);
+                              const html = dur?.rundownHtml || "";
+                              const lines = html.split('\n').filter((l: string) => l.trim().length > 0);
+                              return lines.map((line: string, idx: number) => (
+                                <p key={idx} className="mb-1.5 flex items-start gap-1.5"><span className="text-art-orange font-black shrink-0">▸</span> {line.replace(/<[^>]*>/g, '')}</p>
+                              ));
+                            })()}
+                         </div>
                        </div>
-                     </>
-                   )}
-                </div>
-             </div>
+                    )}
 
+                    {selectedDestinasi && (
+                       <div className="relative">
+                          <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">
+                             {currentType === 'open' ? 'Pilih Jadwal Open Trip Tersedia' : 'Rencana Tanggal Keberangkatan'}
+                          </label>
+                          {currentType === 'open' ? (
+                             <div className="grid grid-cols-1 gap-2">
+                                {config?.openTrips?.filter((ot: any) => ot.name === selectedDestinasi && ot.isActive !== false).map((ot: any, idx: number) => {
+                                   const isSel = selectedJadwal === ot.jadwal;
+                                   const stats = getOpenTripStats(selectedDestinasi, ot.jadwal);
+                                   const sisa = stats.sisa;
+                                   return (
+                                      <button
+                                         key={idx}
+                                         type="button"
+                                         onClick={() => {
+                                            playClick();
+                                            setSelectedJadwal(ot.jadwal);
+                                            if (ot.jalur) setSelectedJalur(ot.jalur);
+                                            if (ot.duration) setSelectedDurasi(ot.duration);
+                                         }}
+                                         className={`w-full text-left p-3.5 rounded-xl border-2 transition-all flex justify-between items-center ${isSel ? 'border-art-orange bg-art-orange/5 text-art-text shadow-sm' : 'border-art-text/10 hover:border-art-text/30 text-art-text/70 bg-white'}`}
+                                      >
+                                         <div className="flex flex-col">
+                                            <span className="text-[10px] font-black uppercase">{ot.jadwal ? ot.jadwal.replace(/\|/g, ' ') : ''}</span>
+                                            <span className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5">{ot.mepo || 'MEETING POINT'} • {ot.duration || ''}</span>
+                                         </div>
+                                         <div className="text-right">
+                                            <span className="text-[9px] font-black font-mono text-art-orange block">Rp {ot.price ? ot.price.toLocaleString('id-ID') : '0'}</span>
+                                            <span className={`text-[7px] font-black uppercase ${sisa <= 3 ? 'text-red-500 animate-pulse' : 'text-art-text/40'}`}>{sisa <= 0 ? 'Penuh' : `Sisa ${sisa} Slot`}</span>
+                                         </div>
+                                      </button>
+                                   );
+                                })}
+                                {config?.openTrips?.filter((ot: any) => ot.name === selectedDestinasi && ot.isActive !== false).length === 0 && (
+                                   <p className="text-[10px] text-art-text/30 italic uppercase font-bold text-center py-4 bg-art-bg/20 rounded-xl">Belum ada jadwal open trip terdekat.</p>
+                                )}
+                             </div>
+                          ) : (
+                             <input
+                                name="jadwal"
+                                required
+                                type="date"
+                                value={selectedJadwal}
+                                onChange={e => setSelectedJadwal(e.target.value)}
+                                className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-xs font-black text-art-text outline-none focus:border-art-orange shadow-sm"
+                             />
+                          )}
+                          {currentType === 'private' && <p className="text-[7px] font-bold text-art-text/30 mt-1 uppercase italic tracking-tighter">Pilih tanggal keberangkatan yang Anda inginkan.</p>}
+                       </div>
+                    )}
+                  </div>
+                </div> {/* End Left Column */}
+
+                {/* Right Column: Private Settings and Configurations */}
+                <div className="lg:col-span-6 space-y-5 bg-art-bg/25 p-5 sm:p-6 rounded-[2.5rem] border-2 border-dashed border-art-text/10">
+                  <div className="border-b border-art-text/5 pb-2 mb-3">
+                     <h4 className="text-[10px] font-black uppercase text-art-text/50 tracking-[0.25em]">Kapasitas & Layanan</h4>
+                     <p className="text-[8px] font-bold text-art-text/30 uppercase mt-0.5">Konfigurasi privat & add-on pemesanan</p>
+                  </div>
+                  
+                  {/* Jumlah Peserta */}
+                  <div className="relative">
+                     <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Jumlah Peserta</label>
+                     <div className="flex items-center gap-2 bg-white border-2 border-art-text rounded-xl px-2 h-[42px] shadow-sm">
+                        <button type="button" onClick={() => setPesertaCount(Math.max(1, (Number(pesertaCount) || 1) - 1))} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-orange transition-colors text-[12px]">-</button>
+                        <input name="peserta" type="number" value={pesertaCount} onChange={e => setPesertaCount(e.target.value)} className="w-full text-center font-black text-art-text outline-none text-xs bg-transparent" min={1} />
+                        <button type="button" onClick={() => setPesertaCount((Number(pesertaCount) || 0) + 1)} className="w-6 h-6 flex items-center justify-center bg-art-text text-white rounded-lg font-black hover:bg-art-green transition-colors text-[12px]">+</button>
+                     </div>
+                     {currentType === 'open' && (
+                        <div className="mt-1 ml-1 flex justify-between items-center">
+                          <span className="text-[7px] font-black uppercase text-art-text/30">Sisa Slot: {getOpenTripStats(selectedDestinasi, selectedJadwal).sisa} Pax</span>
+                          {Number(pesertaCount) > getOpenTripStats(selectedDestinasi, selectedJadwal).sisa && (
+                            <span className="text-[7px] font-black uppercase text-red-500 animate-pulse">Kuota Tidak Cukup!</span>
+                          )}
+                        </div>
+                     )}
+                  </div>
+
+                  {currentType !== 'open_request' && (
+                    <>
+                      {/* Opsi Layanan Tambahan (Add-on Section) - Now beautifully open and transparent */}
+                      <div className="space-y-3.5">
+                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 ml-1">Pilih Layanan Tambahan (Sewa Perlengkapan)</label>
+                         
+                         <div className="grid grid-cols-1 gap-3.5">
+                           {config?.facilities?.opsi
+                              ?.slice()
+                              .filter((opt: any) => opt.isHidden !== true)
+                              .sort((a: any, b: any) => (a.subItems?.length || 0) - (b.subItems?.length || 0))
+                              .map((opt: any, i: number) => {
+                              const isSelected = selectedOpsional.includes(opt.name);
+                              return (
+                                 <div key={i} className="bg-white p-4 rounded-2xl border-2 border-art-text/10 hover:border-art-text/30 transition-all space-y-3 shadow-sm">
+                                    <label className="flex items-start gap-3 cursor-pointer group">
+                                       <input 
+                                         type="checkbox" 
+                                         checked={isSelected}
+                                         onChange={() => handleToggleOption(opt.name)}
+                                         className="w-4 h-4 rounded border-2 border-art-text text-art-orange focus:ring-art-orange mt-0.5 cursor-pointer accent-art-orange"
+                                       />
+                                       <div className="flex flex-col">
+                                          <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange transition-colors">{opt.name}</span>
+                                          {opt.priceInfo && (
+                                            <span className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5 tracking-tighter">{opt.priceInfo}</span>
+                                          )}
+                                       </div>
+                                    </label>
+                                    
+                                    {isSelected && opt.pricingFormat === 'calculated' && (!opt.subItems || opt.subItems.length === 0) && (
+                                       <div className="ml-7 pt-2.5 border-t border-art-text/5 flex items-center justify-between gap-4">
+                                          <span className="text-[9px] font-black text-art-text/60 uppercase">Kuantitas</span>
+                                          <div className="flex items-center gap-1.5 bg-art-bg border border-art-text/10 rounded-lg px-1.5 py-1">
+                                             <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, '_self', -1); }} className="w-5 h-5 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px] font-black">-</button>
+                                             <span className="w-6 text-center font-black text-[10px] text-art-text">{subSelected[`${opt.name}|_self`] !== undefined ? subSelected[`${opt.name}|_self`] : 1}</span>
+                                             <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, '_self', 1); }} className="w-5 h-5 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px] font-black">+</button>
+                                          </div>
+                                       </div>
+                                    )}
+
+                                    {isSelected && opt.subItems && opt.subItems.length > 0 && (
+                                       <div className="ml-7 pt-2.5 border-t border-art-text/5 space-y-2.5">
+                                          <p className="text-[8px] font-black text-art-text/40 uppercase tracking-widest mb-1.5">Pilih Spesifik & Kapasitas:</p>
+                                          <div className="grid grid-cols-1 gap-2">
+                                            {opt.subItems.map((sub: any, sIdx: number) => {
+                                               const qty = subSelected[`${opt.name}|${sub.name}`] || 0;
+                                               return (
+                                                  <div key={sIdx} className="flex items-center justify-between gap-4 bg-art-bg/30 p-2.5 rounded-xl border border-art-text/5">
+                                                     <div className="flex flex-col">
+                                                        <span className="text-[9px] font-black text-art-text/70 uppercase leading-none">{sub.name}</span>
+                                                        {sub.price ? (
+                                                           <span className="text-[8px] font-black text-art-orange italic uppercase tracking-tighter mt-1 block font-mono">Rp {(sub.price * 1000).toLocaleString('id-ID')} / Hari</span>
+                                                        ) : sub.priceInfo && (
+                                                           <span className="text-[8px] font-medium text-art-text/40 italic mt-1 block">{sub.priceInfo}</span>
+                                                        )}
+                                                     </div>
+                                                     <div className="flex items-center gap-1.5 bg-white border border-art-text/10 rounded-lg px-1.5 py-1 shrink-0">
+                                                        <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, sub.name, -1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-orange hover:text-white transition-colors text-[10px] font-black">-</button>
+                                                        <span className="w-5 text-center font-black text-[10px] text-art-text">{qty}</span>
+                                                        <button type="button" onClick={() => { playClick(); handleUpdateSubItem(opt.name, sub.name, 1); }} className="w-4 h-4 flex items-center justify-center bg-white border border-art-text/20 text-art-text rounded hover:bg-art-green hover:text-white transition-colors text-[10px] font-black">+</button>
+                                                     </div>
+                                                  </div>
+                                               );
+                                            })}
+                                          </div>
+                                       </div>
+                                    )}
+                                 </div>
+                              );
+                           })}
+                         </div>
+                      </div>
+
+                      {/* Catatan Khusus */}
+                      <div className="relative">
+                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Catatan Khusus / Kesehatan</label>
+                         <textarea name="deskripsi" value={formState.deskripsi} onChange={e => setFormState({...formState, deskripsi: e.target.value})} className="w-full border-2 border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-bold outline-none focus:border-art-orange text-xs h-20 resize-none placeholder:text-art-text/20 shadow-sm" placeholder="Tuliskan jika ada request khusus atau riwayat medis..."></textarea>
+                      </div>
+
+                      {/* Kode Promo */}
+                      <div className="relative">
+                         <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Kode Promo</label>
+                         <input 
+                           name="promo" 
+                           type="text" 
+                           value={promoCode} 
+                           onChange={e => setPromoCode(e.target.value)} 
+                           className="w-full border-2 border-dashed border-art-text bg-white px-4 py-3 rounded-2xl text-art-text font-black outline-none focus:border-art-orange text-[10px] uppercase tracking-widest shadow-sm" 
+                           placeholder="MASUKKAN KODE DISINI"
+                         />
+                      </div>
+                    </>
+                  )}
+                </div> {/* End Right Column */}
+              </div> {/* End 2-column responsive layout */}
              <div className="space-y-3">
                <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">

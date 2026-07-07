@@ -26,6 +26,19 @@
       "schema": { "$ref": "#/entities/Booking" },
       "description": "Stores user trip bookings"
     },
+    "/destinations/{destId}/reviews/{reviewId}": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "rating": { "type": "number" },
+          "comment": { "type": "string" },
+          "date": { "type": "timestamp" }
+        },
+        "required": ["name", "rating", "comment", "date"]
+      },
+      "description": "Stores user reviews for destinations"
+    },
     "/website/data": {
       "schema": "object",
       "description": "General website configuration (hero, facilities, video)"

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator, Share2, GitCompare } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { db, auth } from '../firebase';
-import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { db, auth, loginWithGoogle } from '../firebase';
+import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, onSnapshot, query, orderBy, limit, where } from 'firebase/firestore';
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf, generateInvoice } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
@@ -42,11 +42,14 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   const { selectedItems, toggleItem } = useCompare();
   const isSelectedForCompare = selectedItems.some(i => i.id === dest.id);
   
+  const [user] = useAuthState(auth);
   // Reviews state
   const [reviews, setReviews] = useState<any[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReview, setNewReview] = useState({ name: '', rating: 5, comment: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [hasCompletedClimb, setHasCompletedClimb] = useState(false);
+  const [checkingCompletedClimb, setCheckingCompletedClimb] = useState(false);
   
   // Calculator state
   const [participants, setParticipants] = useState(2);
@@ -69,17 +72,43 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
     return reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length;
   }, [reviews]);
 
+  useEffect(() => {
+    if (!user) {
+      setHasCompletedClimb(false);
+      return;
+    }
+    setCheckingCompletedClimb(true);
+    const bookingsRef = collection(db, 'bookings');
+    const q = query(
+      bookingsRef,
+      where('userId', '==', user.uid),
+      where('destinasi', '==', dest.name),
+      where('status', '==', 'selesai')
+    );
+    getDocs(q).then((snap) => {
+      setHasCompletedClimb(!snap.empty);
+    }).catch((err) => {
+      console.error("Gagal memeriksa status pendakian:", err);
+      setHasCompletedClimb(false);
+    }).finally(() => {
+      setCheckingCompletedClimb(false);
+    });
+  }, [user, dest.name]);
+
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReview.name || !newReview.comment) {
-      customAlert("Harap isi nama dan komentar.");
+    const displayName = user?.displayName || newReview.name || 'Pendaki';
+    if (!displayName || !newReview.comment) {
+      customAlert("Harap isi ulasan terlebih dahulu.");
       return;
     }
     setIsSubmittingReview(true);
     try {
       const reviewsRef = collection(db, 'destinations', dest.id, 'reviews');
       await addDoc(reviewsRef, {
-        ...newReview,
+        name: displayName,
+        rating: newReview.rating,
+        comment: newReview.comment,
         date: serverTimestamp()
       });
       setNewReview({ name: '', rating: 5, comment: '' });
@@ -163,7 +192,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
               Disc {Math.round(((currentDur.originalPrice - currentDur.price) / currentDur.originalPrice) * 100)}%
             </div>
           )}
-          {avgRating > 0 && (
+          {visibilities?.showOverallReview !== false && avgRating > 0 && (
             <div className="bg-white/90 backdrop-blur-sm border-2 border-art-text px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
               <Star size={10} className="text-yellow-500 fill-yellow-500" />
               <span className="text-[10px] font-black">{avgRating.toFixed(1)}</span>
@@ -476,81 +505,107 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                     </div>
 
                     {/* Ratings & Reviews Section */}
-                    <div className="space-y-4">
-                       <div className="flex items-center justify-between">
-                          <h4 className="text-[10px] font-black uppercase tracking-widest text-art-text flex items-center gap-2">
-                             <MessageSquare size={14} /> Ulasan Pendaki ({reviews.length})
-                          </h4>
-                          <button 
-                            onClick={() => setShowReviewForm(!showReviewForm)}
-                            className="bg-art-text text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-art-orange transition-colors shadow-sm"
-                          >
-                            {showReviewForm ? 'Batal' : 'Tulis Ulasan'}
-                          </button>
-                       </div>
-
-                       <AnimatePresence>
-                          {showReviewForm && (
-                            <motion.form 
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              onSubmit={handleSubmitReview}
-                              className="bg-art-bg p-4 rounded-xl border border-art-text/5 space-y-3"
+                    {visibilities?.showOverallReview !== false && (
+                      <div className="space-y-4">
+                         <div className="flex items-center justify-between">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-art-text flex items-center gap-2">
+                               <MessageSquare size={14} /> Ulasan Pendaki ({reviews.length})
+                            </h4>
+                            <button 
+                              onClick={() => setShowReviewForm(!showReviewForm)}
+                              className="bg-art-text text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-art-orange transition-colors shadow-sm"
                             >
-                               <div className="space-y-1">
-                                  <label className="text-[8px] font-black uppercase text-art-text/40">Rating Anda</label>
-                                  <StarRating rating={newReview.rating} size={20} interactive onRate={(r) => setNewReview(prev => ({ ...prev, rating: r }))} />
-                               </div>
-                               <input 
-                                  className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-bold outline-none focus:border-art-orange"
-                                  placeholder="Nama Anda..."
-                                  value={newReview.name}
-                                  onChange={e => setNewReview(prev => ({ ...prev, name: e.target.value }))}
-                                  required
-                               />
-                               <textarea 
-                                  className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-medium outline-none focus:border-art-orange h-20"
-                                  placeholder="Ceritakan pengalaman Anda..."
-                                  value={newReview.comment}
-                                  onChange={e => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
-                                  required
-                               />
-                               <button 
-                                  type="submit"
-                                  disabled={isSubmittingReview}
-                                  className="w-full bg-art-text text-white py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors disabled:opacity-50"
-                                >
-                                  {isSubmittingReview ? 'Mengirim...' : 'Kirim Ulasan'}
-                               </button>
-                            </motion.form>
-                          )}
-                       </AnimatePresence>
+                              {showReviewForm ? 'Batal' : 'Tulis Ulasan'}
+                            </button>
+                         </div>
 
-                       <div className="space-y-3">
-                          {reviews.length === 0 ? (
-                            <div className="text-center py-8 opacity-20">
-                               <MessageSquare size={24} className="mx-auto mb-2" />
-                               <p className="text-[9px] font-black uppercase">Belum ada ulasan</p>
-                            </div>
-                          ) : (
-                            reviews.map((rev) => (
-                              <div key={rev.id} className="bg-white border border-art-text/5 p-4 rounded-xl shadow-sm">
-                                 <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                       <p className="text-[10px] font-black uppercase leading-none">{rev.name}</p>
-                                       <StarRating rating={rev.rating} size={10} />
-                                    </div>
-                                    <span className="text-[8px] font-bold text-art-text/30">
-                                       {rev.date?.toDate?.() ? rev.date.toDate().toLocaleDateString('id-ID') : 'Baru saja'}
-                                    </span>
-                                 </div>
-                                 <p className="text-[10px] font-medium text-art-text/70 italic leading-relaxed">"{rev.comment}"</p>
+                         <AnimatePresence>
+                            {showReviewForm && (
+                              <motion.div 
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="bg-art-bg p-4 rounded-xl border border-art-text/5 space-y-3"
+                              >
+                                {!user ? (
+                                  <div className="text-center py-4 space-y-3">
+                                    <AlertCircle size={20} className="mx-auto text-art-orange animate-pulse" />
+                                    <p className="text-[10px] font-black uppercase text-art-text">Anda Harus Login Terlebih Dahulu</p>
+                                    <p className="text-[8px] text-art-text/50 uppercase leading-normal">Silakan login menggunakan Google untuk mulai memberikan rating & ulasan.</p>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => loginWithGoogle().catch(() => {})} 
+                                      className="w-full bg-art-text text-white py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors"
+                                    >
+                                      Login dengan Google
+                                    </button>
+                                  </div>
+                                ) : checkingCompletedClimb ? (
+                                  <p className="text-[8px] font-black uppercase text-center text-art-text/40 py-4 animate-pulse">Memeriksa kelayakan ulasan...</p>
+                                ) : !hasCompletedClimb ? (
+                                  <div className="text-center py-4 space-y-2">
+                                    <AlertCircle size={20} className="mx-auto text-art-orange" />
+                                    <p className="text-[10px] font-black uppercase text-art-text">Akses Terbatas</p>
+                                    <p className="text-[8px] text-art-text/50 px-4 leading-normal uppercase">Hanya pendaki yang telah menyelesaikan perjalanan (booking status: selesai) ke Gunung ini yang dapat memberikan ulasan.</p>
+                                  </div>
+                                ) : (
+                                  <form onSubmit={handleSubmitReview} className="space-y-3">
+                                     <div className="space-y-1">
+                                        <label className="text-[8px] font-black uppercase text-art-text/40">Rating Anda</label>
+                                        <StarRating rating={newReview.rating} size={20} interactive onRate={(r) => setNewReview(prev => ({ ...prev, rating: r }))} />
+                                     </div>
+                                     <input 
+                                        className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-black text-art-text/50 bg-white/50 outline-none cursor-not-allowed"
+                                        placeholder="Nama Anda..."
+                                        value={user?.displayName || ''}
+                                        disabled
+                                        required
+                                     />
+                                     <textarea 
+                                        className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-medium outline-none focus:border-art-orange h-20"
+                                        placeholder="Ceritakan pengalaman Anda mendaki gunung ini..."
+                                        value={newReview.comment}
+                                        onChange={e => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+                                        required
+                                     />
+                                     <button 
+                                        type="submit"
+                                        disabled={isSubmittingReview}
+                                        className="w-full bg-art-text text-white py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors disabled:opacity-50"
+                                      >
+                                        {isSubmittingReview ? 'Mengirim...' : 'Kirim Ulasan'}
+                                     </button>
+                                  </form>
+                                )}
+                              </motion.div>
+                            )}
+                         </AnimatePresence>
+
+                         <div className="space-y-3">
+                            {reviews.length === 0 ? (
+                              <div className="text-center py-8 opacity-20">
+                                 <MessageSquare size={24} className="mx-auto mb-2" />
+                                 <p className="text-[9px] font-black uppercase">Belum ada ulasan</p>
                               </div>
-                            ))
-                          )}
-                       </div>
-                    </div>
+                            ) : (
+                              reviews.map((rev) => (
+                                <div key={rev.id} className="bg-white border border-art-text/5 p-4 rounded-xl shadow-sm">
+                                   <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                         <p className="text-[10px] font-black uppercase leading-none">{rev.name}</p>
+                                         <StarRating rating={rev.rating} size={10} />
+                                      </div>
+                                      <span className="text-[8px] font-bold text-art-text/30">
+                                         {rev.date?.toDate?.() ? rev.date.toDate().toLocaleDateString('id-ID') : 'Baru saja'}
+                                      </span>
+                                   </div>
+                                   <p className="text-[10px] font-medium text-art-text/70 italic leading-relaxed">"{rev.comment}"</p>
+                                </div>
+                              ))
+                            )}
+                         </div>
+                      </div>
+                    )}
 
                     {dest.enablePrivateTrip !== false && (
                       <Button 

@@ -53,6 +53,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    match /destinations/{destId}/reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn() && incoming().name is string && incoming().rating >= 1 && incoming().rating <= 5 && incoming().comment is string;
+      allow update, delete: if isAdmin();
+    }
     match /leaders/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
