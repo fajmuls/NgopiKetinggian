@@ -330,7 +330,13 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const msg = `Halo Owner,\nMohon konfirmasi untuk data Open Trip berikut:\n- Gunung: ${ot.name || '-'}\n- Via / Jalur: ${ot.path || '-'}\n- Tanggal: ${ot.jadwal || '-'}\n- Kuota: ${ot.kuota || '-'}\n- Harga: Rp ${ot.price?.toLocaleString('id-ID') || '0'}\n- Mepo: ${ot.mepo || '-'}\n- Durasi: ${ot.duration || '-'}\n\nApakah data di atas sudah benar dan siap untuk di-publish?`;
+                    const formatPrice = (p: number) => {
+                      if (p === 0) return '0';
+                      if (p < 1000) return `${p}K`;
+                      if (p % 1000 === 0) return `${p / 1000}K`;
+                      return p.toLocaleString('id-ID');
+                    };
+                    const msg = `Halo Owner,\nMohon konfirmasi untuk data Open Trip berikut:\n- Gunung: ${ot.name || '-'}\n- Via / Jalur: ${ot.path || '-'}\n- Tanggal: ${ot.jadwal || '-'}\n- Kuota: ${ot.kuota || '-'}\n- Harga: Rp ${formatPrice(ot.price || 0)}\n- Mepo: ${ot.mepo || '-'}\n- Durasi: ${ot.duration || '-'}\n\nApakah data di atas sudah benar dan siap untuk di-publish?`;
                     const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
                     window.open(url, '_blank');
                   }}
@@ -343,7 +349,13 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const text = `*OPEN TRIP ${ot.name?.toUpperCase() || '-'}*\n\n📅 *Jadwal:* ${ot.jadwal || '-'}\n📍 *Mepo:* ${ot.mepo || '-'}\n⛰️ *Jalur:* ${ot.path || '-'}\n💰 *Harga:* Rp ${ot.price?.toLocaleString('id-ID') || '0'}\n⏳ *Durasi:* ${ot.duration || '-'}\n👥 *Kuota:* ${ot.kuota || '-'}\n\nYuk booking sekarang melalui website: https://ngopidiketinggian.com`;
+                    const formatPrice = (p: number) => {
+                      if (p === 0) return '0';
+                      if (p < 1000) return `${p}K`;
+                      if (p % 1000 === 0) return `${p / 1000}K`;
+                      return p.toLocaleString('id-ID');
+                    };
+                    const text = `*OPEN TRIP ${ot.name?.toUpperCase() || '-'}*\n\n📅 *Jadwal:* ${ot.jadwal || '-'}\n📍 *Mepo:* ${ot.mepo || '-'}\n⛰️ *Jalur:* ${ot.path || '-'}\n💰 *Harga:* Rp ${formatPrice(ot.price || 0)}\n⏳ *Durasi:* ${ot.duration || '-'}\n👥 *Kuota:* ${ot.kuota || '-'}\n\nYuk booking sekarang melalui website: https://ngopidiketinggian.com`;
                     navigator.clipboard.writeText(text);
                     showToast("Teks trip disalin!");
                   }}
@@ -380,7 +392,6 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 </button>
              </div>
           </div>
-
           {expandedIndexes.includes(i) && (
           <div className="mt-4 pt-4 border-t border-art-text/5 space-y-4">
 
@@ -697,35 +708,46 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Durasi</label>
-                  <select 
-                    disabled={ot.isWeekend}
-                    className={`w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none transition-all ${ot.isWeekend ? 'bg-gray-100 opacity-80 cursor-not-allowed' : ''}`} 
-                    value={ot.duration ?? ""} 
-                    onChange={e => { 
-                      const dur = e.target.value;
-                      const nd = [...data]; 
-                      nd[i].duration = dur; 
-                      nd[i].jadwal = calculateDateRange(ot.startDate, dur);
-                      setData(nd); 
-                    }}
-                  >
-                    <option value=""> Durasi </option>
-                    {DURATION_LEVELS.map((lvl: string) => <option key={lvl} value={lvl}>{lvl}</option>)}
-                  </select>
+                  <div className="flex flex-wrap gap-1 p-1 bg-white border border-art-text/20 rounded-xl max-h-24 overflow-y-auto no-scrollbar">
+                    {DURATION_LEVELS.map((lvl: string) => (
+                      <button
+                        key={lvl}
+                        type="button"
+                        disabled={ot.isWeekend}
+                        onClick={() => {
+                          const nd = [...data];
+                          nd[i].duration = lvl;
+                          nd[i].jadwal = calculateDateRange(ot.startDate, lvl);
+                          setData(nd);
+                        }}
+                        className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all flex-1 min-w-[60px] ${ot.duration === lvl ? 'bg-art-text text-white' : 'text-art-text/40 hover:bg-art-bg'}`}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-art-text/40">Jalur (Sesuai Destinasi)</label>
-                  <select 
-                    className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all" 
-                    value={ot.path || ""} 
-                    onChange={e => { const nd = [...data]; nd[i].path = e.target.value; setData(nd); }}
-                  >
-                    <option value="">-- Pilih Jalur --</option>
-                    {config.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.map((p: any) => (
-                      <option key={p.name} value={p.name}>{p.name}</option>
+                  <div className="flex flex-wrap gap-1 p-1 bg-white border border-art-text/20 rounded-xl max-h-24 overflow-y-auto no-scrollbar">
+                    {(config.destinationsData?.find((d: any) => d.name === ot.name)?.paths || []).map((p: any) => (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => { const nd = [...data]; nd[i].path = p.name; setData(nd); }}
+                        className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all flex-1 min-w-[80px] ${ot.path === p.name ? 'bg-art-orange text-white shadow-sm' : 'text-art-text/40 hover:bg-art-bg'}`}
+                      >
+                        {p.name}
+                      </button>
                     ))}
-                    <option value="custom">-- Ketik Manual --</option>
-                  </select>
+                    <button
+                      type="button"
+                      onClick={() => { const nd = [...data]; nd[i].path = "custom"; setData(nd); }}
+                      className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all border-2 border-dashed ${ot.path === 'custom' ? 'bg-art-orange border-art-orange text-white' : 'text-art-text/40 border-art-text/10 hover:bg-art-bg'}`}
+                    >
+                      Ketik Manual
+                    </button>
+                  </div>
                   {ot.path === "custom" && (
                     <input 
                       autoFocus
@@ -845,22 +867,6 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                     <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30">Rp</span>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-art-text/40">Link Post Instagram (Ads Source)</label>
-                  <div className="relative">
-                    <InputWithPaste 
-                      className="w-full border border-art-text/20 p-2 rounded-xl text-[10px] font-bold outline-none focus:border-art-orange transition-all pl-6" 
-                      value={ot.igPostUrl || ''} 
-                      onChange={(e: any) => { 
-                        const nd = [...data]; 
-                        nd[i].igPostUrl = e.target.value; 
-                        setData(nd); 
-                      }} 
-                      placeholder="https://instagram.com/p/..."
-                    />
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-art-text/30"><ShoppingBag size={10} /></span>
-                  </div>
-                </div>
               </div>
 
                </div>
@@ -929,7 +935,28 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                  </div>
                </div>
 
-               {/* Layer 8: Meeting Point + Link Map */}
+                {/* Layer 8: Meeting Point + Link Map */}
+               <div className="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 space-y-2 mb-4">
+                  <label className="text-[10px] font-black uppercase text-pink-600 tracking-widest flex items-center gap-1"><Layout size={10}/> Sumber Iklan (Instagram Post URL)</label>
+                  <div className="flex gap-2">
+                     <InputWithPaste 
+                       className="flex-1 border border-pink-100 p-2.5 rounded-xl text-[11px] font-bold outline-none focus:border-pink-300 transition-all bg-white shadow-sm" 
+                       value={ot.instagramPostUrl || ''} 
+                       onChange={(e: any) => { const nd = [...data]; nd[i].instagramPostUrl = e.target.value; setData(nd); }} 
+                       placeholder="https://www.instagram.com/p/..." 
+                     />
+                     {ot.instagramPostUrl && (
+                       <button 
+                         type="button"
+                         onClick={() => window.open(ot.instagramPostUrl, '_blank')}
+                         className="bg-white text-pink-600 p-2.5 rounded-xl border-2 border-pink-100 hover:bg-pink-50 transition-all shadow-sm"
+                         title="Lihat Postingan"
+                       >
+                         <Send size={16} />
+                       </button>
+                     )}
+                  </div>
+               </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase text-art-text/40">Nama Meeting Point</label>

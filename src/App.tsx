@@ -713,6 +713,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             filterRegion={filterRegion}
             setFilterRegion={setFilterRegion}
             difficultyOptions={difficultyOptions}
+            facilities={config.facilities}
           />
         </div>
       </section>

@@ -46,6 +46,7 @@ export interface OpenTrip {
   desc?: string;
   rundownText?: string;
   rundownPdf?: string;
+  instagramPostUrl?: string;
   groups?: { id: string, name: string, leader: string, members: string }[];
   visibility?: {
     mepo: boolean;

@@ -230,7 +230,14 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                <button type="button" onClick={() => moveDestination(i, 'down')} className="px-2 hover:bg-gray-100 border-r border-art-text/10 disabled:opacity-30" disabled={i === data.length - 1} title="Pindah Bawah"><ChevronDown size={14}/></button>
                <button onClick={() => setShowPoster(dest)} className="px-2 text-art-orange hover:bg-orange-50" title="Buat Poster"><Layout size={14}/></button>
                <button onClick={() => {
-                  const text = `*PRIVATE TRIP ${dest.name?.toUpperCase() || '-'}*\n\n⛰️ *Jalur:* ${dest.paths?.map((p: any) => p.name).join(', ') || '-'}\n💰 *Mulai:* Rp ${Math.min(...(dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.price)) || [0])).toLocaleString('id-ID')}\n👥 *Kuota:* ${dest.kuota || '-'}\n⏳ *Durasi:* ${dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.label)).filter((v: any, i: any, a: any) => a.indexOf(v) === i).join(', ') || '-'}\n\nYuk booking private trip kamu: https://ngopidiketinggian.com/destinasi`;
+                  const formatPrice = (p: number) => {
+                    if (p === 0) return '0';
+                    if (p < 1000) return `${p}K`;
+                    if (p % 1000 === 0) return `${p / 1000}K`;
+                    return p.toLocaleString('id-ID');
+                  };
+                  const minPrice = Math.min(...(dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.price)) || [0]));
+                  const text = `*PRIVATE TRIP ${dest.name?.toUpperCase() || '-'}*\n\n⛰️ *Jalur:* ${dest.paths?.map((p: any) => p.name).join(', ') || '-'}\n💰 *Mulai:* Rp ${formatPrice(minPrice)}\n👥 *Kuota:* ${dest.kuota || '-'}\n⏳ *Durasi:* ${dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.label)).filter((v: any, i: any, a: any) => a.indexOf(v) === i).join(', ') || '-'}\n\nYuk booking private trip kamu: https://ngopidiketinggian.com/destinasi`;
                   navigator.clipboard.writeText(text);
                   showToast("Teks destinasi disalin!");
                }} className="px-2 text-indigo-500 hover:bg-indigo-50" title="Salin Teks"><Clipboard size={14}/></button>
@@ -381,6 +388,32 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                 </div>
               </div>
               
+              <div className="flex flex-col min-w-0">
+                 <div className="flex justify-between items-center mb-1">
+                   <span className="text-[9px] font-bold uppercase text-pink-600">Iklan IG:</span>
+                   <button 
+                     onClick={async () => {
+                       try {
+                         const text = await navigator.clipboard.readText();
+                         if (text.includes('instagram.com')) {
+                           const nd = [...data]; nd[i].instagramPostUrl = text; setData(nd);
+                         }
+                       } catch (err) {}
+                     }}
+                     className="p-1 rounded text-pink-400 hover:bg-pink-50 transition-all"
+                     title="Paste Instagram Link"
+                   >
+                     <Clipboard size={14} />
+                   </button>
+                 </div>
+                 <input 
+                   className="border-2 border-pink-50 p-2 rounded text-[10px] w-full min-w-0 focus:border-pink-200 outline-none" 
+                   value={dest.instagramPostUrl || ''} 
+                   onChange={e => { const nd = [...data]; nd[i].instagramPostUrl = e.target.value; setData(nd); }} 
+                   placeholder="Post URL" 
+                 />
+              </div>
+
               <div className="flex flex-col min-w-0">
                 <span className="text-[9px] font-bold uppercase mb-1">Level:</span>
                 <div className="flex gap-1 bg-white p-1 rounded-xl border border-art-text/10 overflow-x-auto no-scrollbar">

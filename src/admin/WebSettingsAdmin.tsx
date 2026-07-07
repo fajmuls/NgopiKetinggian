@@ -122,11 +122,18 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(ceritaFeatures || []).map((feat: any, idx: number) => (
-                <div key={idx} className="border border-art-text/20 p-4 rounded-lg space-y-2 relative bg-art-bg/20 group">
-                  <button type="button" onClick={() => {
-                    const nf = [...ceritaFeatures]; nf.splice(idx, 1); setCeritaFeatures(nf);
-                  }} className="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
-                  <input className="w-full border p-2 rounded text-xs" value={feat.title} onChange={e => {
+                <div key={idx} className="border border-art-text/20 p-4 rounded-xl space-y-2 relative bg-white shadow-sm group">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const nf = [...ceritaFeatures]; nf.splice(idx, 1); setCeritaFeatures(nf);
+                    }} 
+                    className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-400 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                    title="Hapus Fitur"
+                  >
+                    <Trash2 size={12}/>
+                  </button>
+                  <input className="w-full border-b border-art-text/5 p-2 rounded text-[11px] font-black uppercase tracking-tight outline-none focus:border-art-orange" value={feat.title} onChange={e => {
                     const nf = [...ceritaFeatures]; nf[idx].title = e.target.value; setCeritaFeatures(nf);
                   }} placeholder="Judul Fitur" />
                   <textarea className="w-full border p-2 rounded text-xs h-16" value={feat.desc} onChange={e => {
@@ -146,17 +153,24 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
           </div>
           <div className="space-y-1.5">
              <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">Rasio Video</p>
-             <select 
-                className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" 
-                value={config.ceritaVideoRatio || 'auto'}
-                onChange={e => updateConfig({ ceritaVideoRatio: e.target.value })}
-             >
-                <option value="auto">Auto (Sesuai Video)</option>
-                <option value="16/9">Landscape (16:9)</option>
-                <option value="9/16">Portrait / Shorts (9:16)</option>
-                <option value="3/4">Standard Portrait (3:4)</option>
-                <option value="1/1">Square (1:1)</option>
-             </select>
+             <div className="flex flex-wrap gap-1 p-1 bg-white border-2 border-art-text rounded-xl overflow-x-auto no-scrollbar">
+                {[
+                  { value: 'auto', label: 'Auto' },
+                  { value: '16/9', label: '16:9' },
+                  { value: '9/16', label: '9:16' },
+                  { value: '3/4', label: '3:4' },
+                  { value: '1/1', label: '1:1' }
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => updateConfig({ ceritaVideoRatio: opt.value })}
+                    className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap flex-1 ${config.ceritaVideoRatio === opt.value ? 'bg-art-text text-white' : 'text-art-text/40 hover:bg-art-bg'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+             </div>
              <p className="text-[9px] text-art-text/30 italic">Atur rasio untuk menyesuaikan iframe YouTube.</p>
           </div>
         </div>
@@ -821,44 +835,53 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                   />
                </div>
                <div className="col-span-1 md:col-span-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-[10px] font-black uppercase text-art-text/40 ml-1">Kontak WhatsApp</label>
-                    <button type="button" onClick={() => {
-                       const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone || ''}])];
-                       nw.push({ name: 'Admin ' + (nw.length + 1), phone: '628123456789' });
-                       setData({...data, whatsappContacts: nw});
-                    }} className="text-[9px] bg-art-bg px-2 py-1 flex items-center gap-1 rounded font-bold uppercase tracking-widest hover:bg-art-text hover:text-white transition-all"><Plus size={10} /> Tambah Kontak</button>
-                  </div>
-                  <div className="space-y-2">
-                    {(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone || ''}]).map((wa: any, i: number) => (
-                       <div key={i} className="flex gap-2">
-                          <input 
-                            className="flex-1 border border-art-text/20 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all" 
-                            value={wa.name || ''} 
-                            onChange={e => {
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-[10px] font-black uppercase text-art-text/40 ml-1">Kontak WhatsApp</label>
+                      <button type="button" onClick={() => {
+                        const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone || ''}])];
+                        nw.push({ name: 'Admin ' + (nw.length + 1), phone: '628123456789' });
+                        setData({...data, whatsappContacts: nw});
+                      }} className="text-[9px] bg-art-bg px-2 py-1 flex items-center gap-1 rounded-lg font-bold uppercase tracking-widest hover:bg-art-text hover:text-white transition-all"><Plus size={10} /> Tambah</button>
+                    </div>
+                    <div className="space-y-2">
+                      {(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone || ''}]).map((wa: any, i: number) => (
+                         <div key={i} className="flex gap-2 items-center group relative">
+                            <input 
+                              className="flex-1 border border-art-text/20 p-2.5 rounded-xl text-[11px] font-bold bg-white focus:border-art-orange outline-none transition-all" 
+                              value={wa.name || ''} 
+                              onChange={e => {
+                                 const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
+                                 nw[i] = { ...nw[i], name: e.target.value };
+                                 setData({...data, whatsappContacts: nw});
+                              }} 
+                              placeholder="Nama Kontak"
+                            />
+                            <input 
+                              className="flex-1 border border-art-text/20 p-2.5 rounded-xl text-[11px] font-bold bg-white focus:border-art-orange outline-none transition-all font-mono" 
+                              value={wa.phone || ''} 
+                              onChange={e => {
+                                 const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
+                                 nw[i] = { ...nw[i], phone: e.target.value };
+                                 setData({...data, whatsappContacts: nw});
+                              }} 
+                              placeholder="Nomor WA"
+                            />
+                          <button 
+                            type="button" 
+                            onClick={() => {
                                const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
-                               nw[i] = { ...nw[i], name: e.target.value };
+                               nw.splice(i, 1);
                                setData({...data, whatsappContacts: nw});
                             }} 
-                            placeholder="Nama Kontak (mis. Admin 1)"
-                          />
-                          <input 
-                            className="flex-1 border border-art-text/20 p-2 rounded-xl text-xs font-bold bg-white focus:border-art-orange outline-none transition-all font-mono" 
-                            value={wa.phone || ''} 
-                            onChange={e => {
-                               const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
-                               nw[i] = { ...nw[i], phone: e.target.value };
-                               setData({...data, whatsappContacts: nw});
-                            }} 
-                            placeholder="62812xxx..."
-                          />
-                        <button type="button" onClick={() => {
-                             const nw = [...(data.whatsappContacts || [{name: 'Admin', phone: data.officePhone}])];
-                             nw.splice(i, 1);
-                             setData({...data, whatsappContacts: nw});
-                          }} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 border-2 border-transparent hover:border-red-100 rounded-xl transition-all"><Trash2 size={16} /></button>
-                       </div>
-                    ))}
+                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all opacity-40 hover:opacity-100"
+                            title="Hapus"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                         </div>
+                      ))}
+                    </div>
                   </div>
                   <p className="text-[10px] font-medium leading-relaxed italic text-art-text/40 mt-2 ml-1">
                     Pastikan nomor diawali kode negara (cth: 62). Nama kontak akan ditampilkan di website (Mis: "Admin 1", "Admin Reservasi"), bukan nomornya.
@@ -924,25 +947,26 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
               </div>
               <div className="space-y-3">
                  {(data.socialLinks || []).map((link: any, idx: number) => (
-                   <div key={idx} className="flex gap-3 items-center bg-white p-3 rounded-xl border-2 border-art-text/5 relative">
-                      <select 
-                        value={link.icon} 
-                        onChange={e => {
-                           const nl = [...data.socialLinks];
-                           nl[idx].icon = e.target.value;
-                           setData({...data, socialLinks: nl});
-                        }}
-                        className="bg-art-bg text-[10px] font-black uppercase p-2 rounded-lg border border-art-text/10 outline-none"
-                      >
-                         <option value="instagram">Instagram</option>
-                         <option value="whatsapp">WhatsApp</option>
-                         <option value="telegram">Telegram</option>
-                         <option value="facebook">Facebook</option>
-                         <option value="tiktok">TikTok</option>
-                         <option value="youtube">YouTube</option>
-                      </select>
+                   <div key={idx} className="flex gap-3 items-center bg-white p-3 rounded-2xl border-2 border-art-text/5 relative group">
+                      <div className="flex flex-wrap gap-1 p-1 bg-art-bg/30 rounded-xl max-w-[200px]">
+                         {['instagram', 'whatsapp', 'facebook', 'tiktok', 'youtube'].map(icon => (
+                            <button
+                              key={icon}
+                              type="button"
+                              onClick={() => {
+                                 const nl = [...data.socialLinks];
+                                 nl[idx].icon = icon;
+                                 setData({...data, socialLinks: nl});
+                              }}
+                              className={`p-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${link.icon === icon ? 'bg-art-text text-white shadow-sm' : 'text-art-text/40 hover:bg-white'}`}
+                              title={icon}
+                            >
+                               {icon.slice(0, 2)}
+                            </button>
+                         ))}
+                      </div>
                       <input 
-                        className="flex-1 border-b-2 border-art-text/5 p-2 text-xs font-bold focus:border-art-orange outline-none" 
+                        className="flex-1 border-b-2 border-art-text/5 p-2 text-[11px] font-bold focus:border-art-orange outline-none bg-transparent" 
                         value={link.url}
                         onChange={e => {
                            const nl = [...data.socialLinks];
@@ -957,9 +981,9 @@ export const FooterAdmin = ({ config, updateConfig, showToast }: any) => {
                            nl.splice(idx, 1);
                            setData({...data, socialLinks: nl});
                         }}
-                        className="text-red-400 hover:text-red-600 transition-colors"
+                        className="p-2 text-red-400 hover:text-red-600 opacity-40 group-hover:opacity-100 transition-all hover:bg-red-50 rounded-lg"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                    </div>
                  ))}
@@ -1202,21 +1226,28 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
                }} className="bg-white border border-art-text/10 text-red-500 rounded p-1.5 shadow-sm hover:bg-red-50"><Trash2 size={18} /></button>
                 </div>
                
-               <div className="mb-4 w-full sm:w-72">
-                  <label className="text-[10px] font-black uppercase text-art-orange block mb-1 font-mono tracking-tighter">Format Penghargaan (Sistem)</label>
-                  <select 
-                    className="w-full border p-2 rounded text-xs font-bold bg-white uppercase tracking-tight shadow-sm cursor-pointer border-art-text/20"
-                    value={opt.pricingFormat || 'manual'}
-                    onChange={e => {
-                      const nd = { ...data };
-                      nd.opsi[i].pricingFormat = e.target.value as any;
-                      setData(nd);
-                    }}
-                  >
-                    <option value="manual">Disesuaikan Admin (Manual)</option>
-                    <option value="calculated">Kalkulasi Item (Hari x Qty x Harga)</option>
-                  </select>
-               </div>
+                <div className="mb-4 w-full sm:w-80">
+                   <label className="text-[10px] font-black uppercase text-art-orange block mb-1 font-mono tracking-tighter">Format Perhitungan Biaya</label>
+                   <div className="flex gap-1 p-1 bg-white border border-art-text/20 rounded-xl overflow-hidden shadow-sm">
+                      {[
+                        { value: 'manual', label: 'Manual' },
+                        { value: 'calculated', label: 'Kalkulasi Otomatis' }
+                      ].map(f => (
+                        <button
+                          key={f.value}
+                          type="button"
+                          onClick={() => {
+                            const nd = { ...data };
+                            nd.opsi[i].pricingFormat = f.value as any;
+                            setData(nd);
+                          }}
+                          className={`flex-1 px-2 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${opt.pricingFormat === f.value ? 'bg-art-text text-white' : 'text-art-text/40 hover:bg-art-bg'}`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                   </div>
+                </div>
                <div className="flex flex-col sm:flex-row gap-3 pr-10">
                  <div className="flex-1">
                    <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Nama Opsi</label>

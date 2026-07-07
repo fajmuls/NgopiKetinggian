@@ -14,7 +14,8 @@ export const DestinationSection = ({
   difficultyOptions,
   filterRegion,
   setFilterRegion,
-  regionOptions = ["Semua", "Jawa", "Sumatera", "Lombok", "Bali", "Papua"]
+  regionOptions = ["Semua", "Jawa", "Sumatera", "Lombok", "Bali", "Papua"],
+  facilities
 }: any) => {
   const { t } = useLanguage();
   const [isRegionOpen, setIsRegionOpen] = React.useState(false);
@@ -119,6 +120,7 @@ export const DestinationSection = ({
                   dest={dest} 
                   onBook={onBook} 
                   visibilities={visibilities} 
+                  facilities={facilities}
                 />
               ))}
             </div>

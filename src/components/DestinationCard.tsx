@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
-import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf, generateInvoice } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
@@ -11,13 +11,84 @@ import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
 import { RundownPreviewModal } from './RundownPreviewModal';
 
+const StarRating = ({ rating, size = 16, interactive = false, onRate }: { rating: number, size?: number, interactive?: boolean, onRate?: (r: number) => void }) => {
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          disabled={!interactive}
+          onClick={() => onRate?.(star)}
+          className={`${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : 'cursor-default'}`}
+        >
+          <Star
+            size={size}
+            className={`${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+};
 
-export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destinasi: string, jalur: string, durasi: string, type: 'private' | 'open') => void }> = ({ dest, visibilities, onBook }) => {
+export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destinasi: string, jalur: string, durasi: string, type: 'private' | 'open') => void, facilities?: any }> = ({ dest, visibilities, onBook, facilities }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showWebRundown, setShowWebRundown] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
   const [highlighted, setHighlighted] = useState(false);
   
+  // Reviews state
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReview, setNewReview] = useState({ name: '', rating: 5, comment: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  
+  // Calculator state
+  const [participants, setParticipants] = useState(2);
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [showCalculator, setShowCalculator] = useState(false);
+
+  useEffect(() => {
+    // Fetch reviews from firestore
+    const reviewsRef = collection(db, 'destinations', dest.id, 'reviews');
+    const q = query(reviewsRef, orderBy('date', 'desc'), limit(10));
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setReviews(data);
+    });
+    return () => unsub();
+  }, [dest.id]);
+
+  const avgRating = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    return reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length;
+  }, [reviews]);
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.name || !newReview.comment) {
+      customAlert("Harap isi nama dan komentar.");
+      return;
+    }
+    setIsSubmittingReview(true);
+    try {
+      const reviewsRef = collection(db, 'destinations', dest.id, 'reviews');
+      await addDoc(reviewsRef, {
+        ...newReview,
+        date: serverTimestamp()
+      });
+      setNewReview({ name: '', rating: 5, comment: '' });
+      setShowReviewForm(false);
+      customAlert("Terima kasih atas ulasan Anda!");
+    } catch (err) {
+      console.error(err);
+      customAlert("Gagal mengirim ulasan.");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   useEffect(() => {
     const handler = (e: any) => {
       if (e.detail === dest.id) {
@@ -44,6 +115,19 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   }, [selectedPath, safeDurations, selectedDuration]);
 
   const currentDur = safeDurations[selectedDuration] || safeDurations[0];
+
+  const totalEstimation = useMemo(() => {
+    let base = (currentDur?.price || 0) * participants;
+    // Add addons
+    selectedAddons.forEach(addonId => {
+      // Find addon in facilities.opsi
+      const addon = facilities?.opsi?.find((o: any) => o.name === addonId);
+      if (addon && addon.price) {
+        base += addon.price;
+      }
+    });
+    return base;
+  }, [currentDur, participants, selectedAddons, facilities]);
   
   return (
     <motion.div 
@@ -57,14 +141,19 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
       <div className="relative h-64 overflow-hidden border-b-2 border-art-text">
         <img src={dest.image || undefined} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
         
-        {/* Mountain Custom Logo Removed */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="bg-art-orange text-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm w-fit">{dest.difficulty}</div>
+          {avgRating > 0 && (
+            <div className="bg-white/90 backdrop-blur-sm border-2 border-art-text px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+              <Star size={10} className="text-yellow-500 fill-yellow-500" />
+              <span className="text-[10px] font-black">{avgRating.toFixed(1)}</span>
+              <span className="text-[8px] text-art-text/40 font-bold uppercase tracking-tighter">({reviews.length})</span>
+            </div>
+          )}
         </div>
 
         <div className="absolute top-4 right-4 bg-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
 
-        {/* Quick Action Rundown */}
         {(currentDur?.rundownHtml || currentDur?.rundownPdf) && (
            <div className="absolute bottom-4 right-4 flex gap-2">
               <button 
@@ -143,7 +232,6 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                           </button>
                         ))}
                       </div>
-
                     </div>
 
                     <div>
@@ -159,9 +247,61 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                           </button>
                         ))}
                       </div>
-
                     </div>
 
+                    {/* Cost Calculator Section */}
+                    {dest.enablePrivateTrip !== false && (
+                      <div className="bg-art-orange/5 border-2 border-art-orange/10 rounded-2xl p-5 space-y-4">
+                         <div className="flex items-center justify-between">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-art-orange flex items-center gap-2">
+                               <Calculator size={14} /> Kalkulator Estimasi
+                            </h4>
+                            <button 
+                              onClick={() => setShowCalculator(!showCalculator)}
+                              className="text-[9px] font-black uppercase text-art-text/40 hover:text-art-orange transition-colors"
+                            >
+                              {showCalculator ? 'Sembunyikan' : 'Gunakan'}
+                            </button>
+                         </div>
+                         
+                         {showCalculator && (
+                           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                              <div className="flex items-center justify-between bg-white border-2 border-art-text/10 p-3 rounded-xl shadow-sm">
+                                 <span className="text-[10px] font-black uppercase">Peserta</span>
+                                 <div className="flex items-center gap-3">
+                                    <button onClick={() => setParticipants(Math.max(2, participants - 1))} className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center hover:bg-art-orange hover:text-white transition-colors border-2 border-art-text/5"><Minus size={14}/></button>
+                                    <span className="text-xs font-black min-w-[20px] text-center">{participants}</span>
+                                    <button onClick={() => setParticipants(participants + 1)} className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center hover:bg-art-orange hover:text-white transition-colors border-2 border-art-text/5"><Plus size={14}/></button>
+                                 </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                 <p className="text-[9px] font-black uppercase text-art-text/40">Opsi Tambahan (Add-ons):</p>
+                                 <div className="flex flex-wrap gap-2">
+                                    {facilities?.opsi?.filter((o: any) => o.price).map((o: any) => (
+                                       <button 
+                                          key={o.name}
+                                          onClick={() => {
+                                             setSelectedAddons(prev => prev.includes(o.name) ? prev.filter(n => n !== o.name) : [...prev, o.name]);
+                                          }}
+                                          className={`text-[8px] font-black uppercase px-3 py-2 rounded-lg border-2 transition-all ${selectedAddons.includes(o.name) ? 'bg-art-orange text-white border-art-orange' : 'bg-white border-art-text/5 text-art-text/40 hover:border-art-orange/20'}`}
+                                       >
+                                          {o.name} (+{o.price}k)
+                                       </button>
+                                    ))}
+                                 </div>
+                              </div>
+
+                              <div className="pt-2 border-t border-art-orange/20 flex justify-between items-center">
+                                 <span className="text-[10px] font-black uppercase text-art-text/60">Total Estimasi:</span>
+                                 <span className="text-xl font-black text-art-orange">Rp {totalEstimation}k</span>
+                              </div>
+                           </motion.div>
+                         )}
+                      </div>
+                    )}
+
+                    {/* Trip Info Grid */}
                     <div className="bg-art-bg/50 rounded-2xl border-2 border-art-text/5 p-5 space-y-4">
                        <div className="grid grid-cols-2 gap-4">
                           <div className="flex items-center gap-3">
@@ -200,7 +340,6 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                           </div>
                        </div>
 
-
                        {currentDur.tripContent && (
                           <div className="bg-blue-50 border-2 border-blue-200 p-4 rounded-xl mb-4">
                             <p className="text-[9px] font-black uppercase text-blue-600 mb-1 flex items-center gap-1"><Info size={12} /> Info Penting</p>
@@ -211,13 +350,13 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                        {dest.enablePrivateTrip !== false ? (
                           <div className="bg-art-orange/10 p-4 rounded-xl border border-dashed border-art-orange/30">
                              <div className="flex justify-between items-center mb-1">
-                                <span className="text-[10px] font-black uppercase text-art-orange">Estimasi Biaya</span>
+                                <span className="text-[10px] font-black uppercase text-art-orange">Biaya Per Orang</span>
                                 <div className="flex items-center gap-2">
                                    {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
                                    <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
                                 </div>
                              </div>
-                             <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Per Orang (Min. 2 Pax)</p>
+                             <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Dasar (Min. 2 Pax)</p>
                           </div>
                        ) : (
                           <div className="bg-gray-100 p-4 rounded-xl border-2 border-gray-200 text-center">
@@ -262,6 +401,83 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                             </div>
                           );
                        })()}
+                    </div>
+
+                    {/* Ratings & Reviews Section */}
+                    <div className="space-y-4">
+                       <div className="flex items-center justify-between">
+                          <h4 className="text-[10px] font-black uppercase tracking-widest text-art-text flex items-center gap-2">
+                             <MessageSquare size={14} /> Ulasan Pendaki ({reviews.length})
+                          </h4>
+                          <button 
+                            onClick={() => setShowReviewForm(!showReviewForm)}
+                            className="bg-art-text text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-art-orange transition-colors shadow-sm"
+                          >
+                            {showReviewForm ? 'Batal' : 'Tulis Ulasan'}
+                          </button>
+                       </div>
+
+                       <AnimatePresence>
+                          {showReviewForm && (
+                            <motion.form 
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              onSubmit={handleSubmitReview}
+                              className="bg-art-bg p-4 rounded-xl border border-art-text/5 space-y-3"
+                            >
+                               <div className="space-y-1">
+                                  <label className="text-[8px] font-black uppercase text-art-text/40">Rating Anda</label>
+                                  <StarRating rating={newReview.rating} size={20} interactive onRate={(r) => setNewReview(prev => ({ ...prev, rating: r }))} />
+                               </div>
+                               <input 
+                                  className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-bold outline-none focus:border-art-orange"
+                                  placeholder="Nama Anda..."
+                                  value={newReview.name}
+                                  onChange={e => setNewReview(prev => ({ ...prev, name: e.target.value }))}
+                                  required
+                               />
+                               <textarea 
+                                  className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-medium outline-none focus:border-art-orange h-20"
+                                  placeholder="Ceritakan pengalaman Anda..."
+                                  value={newReview.comment}
+                                  onChange={e => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+                                  required
+                               />
+                               <button 
+                                  type="submit"
+                                  disabled={isSubmittingReview}
+                                  className="w-full bg-art-text text-white py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors disabled:opacity-50"
+                                >
+                                  {isSubmittingReview ? 'Mengirim...' : 'Kirim Ulasan'}
+                               </button>
+                            </motion.form>
+                          )}
+                       </AnimatePresence>
+
+                       <div className="space-y-3">
+                          {reviews.length === 0 ? (
+                            <div className="text-center py-8 opacity-20">
+                               <MessageSquare size={24} className="mx-auto mb-2" />
+                               <p className="text-[9px] font-black uppercase">Belum ada ulasan</p>
+                            </div>
+                          ) : (
+                            reviews.map((rev) => (
+                              <div key={rev.id} className="bg-white border border-art-text/5 p-4 rounded-xl shadow-sm">
+                                 <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                       <p className="text-[10px] font-black uppercase leading-none">{rev.name}</p>
+                                       <StarRating rating={rev.rating} size={10} />
+                                    </div>
+                                    <span className="text-[8px] font-bold text-art-text/30">
+                                       {rev.date?.toDate?.() ? rev.date.toDate().toLocaleDateString('id-ID') : 'Baru saja'}
+                                    </span>
+                                 </div>
+                                 <p className="text-[10px] font-medium text-art-text/70 italic leading-relaxed">"{rev.comment}"</p>
+                              </div>
+                            ))
+                          )}
+                       </div>
                     </div>
 
                     {dest.enablePrivateTrip !== false && (
