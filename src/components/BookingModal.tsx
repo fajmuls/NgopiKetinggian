@@ -745,7 +745,8 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                </div>
              </div>
              
-             <div className="space-y-4">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
                      <label className="block text-[8px] font-black uppercase tracking-[0.2em] text-art-text/40 mb-1.5 ml-1">Nama Pemesan</label>
@@ -990,8 +991,9 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                           )}
                        </div>
                    </div>
+               </div>
 
-
+               <div className="space-y-6">
                     {currentType !== 'open_request' && (
                       <>
                         <div className="relative">
@@ -1163,7 +1165,8 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                   </div>
                </div>
                )}
-             </div>
+              </div>
+            </div>
 
              <Button type="submit" variant="primary" className="w-full py-5 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-3">
                 {currentType === 'open_request' ? 'Request Jadwal' : 'Review & Konfirmasi'} <ExternalLink size={14} />

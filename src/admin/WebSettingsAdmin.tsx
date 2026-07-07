@@ -1356,69 +1356,87 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
                }} className="bg-white border border-art-text/10 text-red-500 rounded p-1.5 shadow-sm hover:bg-red-50"><Trash2 size={18} /></button>
                 </div>
                
-                <div className="mb-4 w-full sm:w-80">
-                   <label className="text-[10px] font-black uppercase text-art-orange block mb-1 font-mono tracking-tighter">Format Perhitungan Biaya</label>
-                   <CustomSelect 
-                     value={opt.pricingFormat || 'manual'}
-                     placeholder="Pilih Format"
-                     options={[
-                       { value: 'manual', label: 'Manual' },
-                       { value: 'calculated', label: 'Kalkulasi Otomatis' }
-                     ]}
-                     onChange={(val: string) => {
-                       const nd = { ...data };
-                       nd.opsi[i].pricingFormat = val as any;
-                       setData(nd);
-                     }}
-                   />
-                </div>
-               <div className="flex flex-col sm:flex-row gap-3 pr-10">
-                 <div className="flex-1">
-                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Nama Opsi</label>
-                   <input className="w-full border p-2 rounded text-xs font-bold" value={opt.name} onChange={e => {
-                      const nd = { ...data }; nd.opsi[i].name = e.target.value; setData(nd);
-                   }} />
-                 </div>
-                 <div className="w-full sm:w-48">
-                   <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1">Info Harga (Slip Desc)</label>
-                   <input className="w-full border p-2 rounded text-xs" value={opt.priceInfo || ''} onChange={e => {
-                      const nd = { ...data }; nd.opsi[i].priceInfo = e.target.value; setData(nd);
-                   }} placeholder="Cth: Rp 10rb/pax" />
-                 </div>
-               </div>
-
-               <div className="pl-6 border-l-2 border-art-orange/20 space-y-3 pt-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase text-art-orange">Sub-Items (Spesifik)</span>
-          <button type="button" onClick={(e) => { e.preventDefault(); addSubItem(i); }} className="text-[9px] bg-art-orange text-white px-2 py-1 rounded uppercase font-bold">+ Tambah Sub</button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left Column: Basic Config */}
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-art-orange block mb-2 font-mono tracking-tighter">Format Perhitungan Biaya</label>
+                    <CustomSelect 
+                      value={opt.pricingFormat || 'manual'}
+                      placeholder="Pilih Format"
+                      options={[
+                        { value: 'manual', label: 'Manual' },
+                        { value: 'calculated', label: 'Kalkulasi Otomatis' }
+                      ]}
+                      onChange={(val: string) => {
+                        const nd = { ...data };
+                        nd.opsi[i].pricingFormat = val as any;
+                        setData(nd);
+                      }}
+                    />
                   </div>
                   
-                  {opt.subItems?.map((sub, sIdx) => (
-                    <div key={sIdx} className="flex gap-2 items-end">
-                      <div className="flex-1">
-                        <input className="w-full border-b p-1 text-[11px] outline-none focus:border-art-orange bg-transparent" value={sub.name} onChange={e => updateSubItem(i, sIdx, 'name', e.target.value)} placeholder="Nama Item" />
-                      </div>
-                      <div className="w-32 relative">
-                        <span className="absolute left-0 bottom-1.5 text-[9px] font-black text-art-text/40 uppercase">Rp</span>
-                        <input 
-                          className="w-full border-b pl-6 p-1 text-[11px] outline-none focus:border-art-orange bg-transparent font-mono" 
-                          value={sub.priceInfo || ''} 
-                          onChange={e => {
-                            const raw = e.target.value.replace(/[^0-9]/g, '');
-                            const num = parseInt(raw);
-                            updateSubItem(i, sIdx, 'priceInfo', raw ? Number(raw).toLocaleString('id-ID') : '');
-                            const nd = { ...data };
-                            nd.opsi[i].subItems[sIdx].price = isNaN(num) ? 0 : num / 1000;
-                            setData(nd);
-                          }} 
-                          placeholder="50.000" 
-                        />
-                      </div>
-                      <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600"><Trash2 size={14}/></button>
+                  <div className="space-y-4 bg-white p-5 rounded-2xl border-2 border-art-text/5 shadow-sm">
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1.5 ml-1">Nama Opsi</label>
+                      <input className="w-full border-2 border-art-text/10 p-3 rounded-xl text-sm font-black outline-none focus:border-art-orange bg-art-bg/20 transition-all" value={opt.name} onChange={e => {
+                         const nd = { ...data }; nd.opsi[i].name = e.target.value; setData(nd);
+                      }} />
                     </div>
-                  ))}
-                  {(!opt.subItems || opt.subItems.length === 0) && <p className="text-[10px] text-art-text/30 italic">Belum ada sub-item.</p>}
-               </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-art-text/40 block mb-1.5 ml-1">Info Harga (Slip Desc)</label>
+                      <input className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-bold outline-none focus:border-art-orange bg-art-bg/20 transition-all" value={opt.priceInfo || ''} onChange={e => {
+                         const nd = { ...data }; nd.opsi[i].priceInfo = e.target.value; setData(nd);
+                      }} placeholder="Cth: Rp 10rb/pax" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Sub-Items */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center bg-art-orange/5 p-3 rounded-xl border border-art-orange/10">
+                    <div className="flex items-center gap-2">
+                       <TrendingUp size={16} className="text-art-orange" />
+                       <span className="text-[10px] font-black uppercase text-art-orange tracking-widest">Sub-Items (Pricing Detail)</span>
+                    </div>
+                    <button type="button" onClick={(e) => { e.preventDefault(); addSubItem(i); }} className="text-[9px] bg-art-orange text-white px-3 py-1.5 rounded-lg uppercase font-black shadow-sm">+ Tambah</button>
+                  </div>
+                  
+                  <div className="space-y-3 bg-white p-4 rounded-2xl border-2 border-art-text/5 shadow-sm max-h-[300px] overflow-y-auto custom-scrollbar">
+                    {opt.subItems?.map((sub, sIdx) => (
+                      <div key={sIdx} className="flex gap-3 items-end pb-3 border-b border-art-text/5 last:border-0 last:pb-0">
+                        <div className="flex-1">
+                          <label className="text-[8px] font-bold text-art-text/30 uppercase block mb-1">Item Name</label>
+                          <input className="w-full border-b-2 border-art-text/5 p-1 text-[11px] font-black outline-none focus:border-art-orange bg-transparent" value={sub.name} onChange={e => updateSubItem(i, sIdx, 'name', e.target.value)} placeholder="Nama Item" />
+                        </div>
+                        <div className="w-32 relative">
+                          <label className="text-[8px] font-bold text-art-text/30 uppercase block mb-1">Price (K)</label>
+                          <span className="absolute left-0 bottom-1.5 text-[9px] font-black text-art-text/40 uppercase">Rp</span>
+                          <input 
+                            className="w-full border-b-2 border-art-text/5 pl-6 p-1 text-[11px] font-mono font-black outline-none focus:border-art-orange bg-transparent" 
+                            value={sub.priceInfo || ''} 
+                            onChange={e => {
+                              const raw = e.target.value.replace(/[^0-9]/g, '');
+                              const num = parseInt(raw);
+                              updateSubItem(i, sIdx, 'priceInfo', raw ? Number(raw).toLocaleString('id-ID') : '');
+                              const nd = { ...data };
+                              nd.opsi[i].subItems[sIdx].price = isNaN(num) ? 0 : num / 1000;
+                              setData(nd);
+                            }} 
+                            placeholder="50.000" 
+                          />
+                        </div>
+                        <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={14}/></button>
+                      </div>
+                    ))}
+                    {(!opt.subItems || opt.subItems.length === 0) && (
+                      <div className="py-8 text-center">
+                        <p className="text-[10px] text-art-text/30 font-bold uppercase tracking-widest italic">Belum ada sub-item.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>

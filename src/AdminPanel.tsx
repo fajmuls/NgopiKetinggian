@@ -5,7 +5,7 @@ import { OpenTripsAdmin } from './admin/OpenTripsAdmin';
 import { TeamPhotosAdmin, LeadersAdmin } from './admin/TeamAndLeadersAdmin';
 import { GalleryAdmin, CeritaAdmin, HomepageAdmin, SplashAdmin, LogoAudioAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin, FooterAdmin, PatchNotesAdmin } from './admin/WebSettingsAdmin';
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
 import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
