@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History, CheckCircle } from 'lucide-react';
 import { useSound } from './hooks/useSound';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -38,6 +38,7 @@ const defaultGalleryPhotos = [
 ];
 
 export default function App() {
+  const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   const [user] = useAuthState(auth);
   const [showSplash, setShowSplash] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -67,6 +68,8 @@ export default function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('appTheme') || 'default';
   });
+
+  const bgmRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -150,8 +153,28 @@ export default function App() {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
+      if (bgmRef.current && config?.homepage?.bgmUrl && config?.homepage?.soundEnabled !== false) {
+        bgmRef.current.volume = (config?.homepage?.soundVolume || 0.8) * 0.5; // lower volume for BGM
+        bgmRef.current.play().catch(e => console.error("Audio auto-play prevented:", e));
+      }
     }
-  }, [showSplash]);
+  }, [showSplash, config?.homepage]);
+
+  // Handle global volume changes for BGM
+  useEffect(() => {
+    const handleVolume = () => {
+      if (bgmRef.current && config?.homepage) {
+        bgmRef.current.volume = (config.homepage.soundVolume || 0.8) * 0.5;
+        if (config.homepage.soundEnabled === false) {
+          bgmRef.current.pause();
+        } else if (!showSplash && bgmRef.current.paused) {
+          bgmRef.current.play().catch(() => {});
+        }
+      }
+    };
+    window.addEventListener('volumeChange', handleVolume);
+    return () => window.removeEventListener('volumeChange', handleVolume);
+  }, [config?.homepage, showSplash]);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -177,8 +200,6 @@ export default function App() {
     return () => unsubscribe();
   }, [user]);
 
-  const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
-  
   // Sync sound volume to localStorage for useSound hook
   useEffect(() => {
     if (config?.homepage?.soundVolume !== undefined) {
@@ -257,6 +278,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
 
   return (
     <>
+      <audio ref={bgmRef} loop src={config.homepage?.bgmUrl} className="hidden" />
       <GlobalDialogProvider />
       <AnimatePresence>
         {showSplash && (

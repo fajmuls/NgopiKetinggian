@@ -37,7 +37,7 @@ export const loginWithGoogle = async () => {
       }
     }
     // Don't throw if we are redirecting
-    if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/unauthorized-domain') {
+    if (error.code === 'auth/unauthorized-domain') {
       throw error;
     }
   }

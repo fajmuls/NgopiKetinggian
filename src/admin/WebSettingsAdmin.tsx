@@ -354,17 +354,17 @@ export const SplashAdmin = ({ config, updateConfig, showToast }: any) => {
 };
 
 
-export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
+export const LogoAudioAdmin = ({ config, updateConfig, showToast }: any) => {
   const [data, setData] = useState({ 
-    ...config.homepage, 
-    heroSlides: config.homepage.heroSlides || [],
-    logo: config.homepage.logo || "https://files.catbox.moe/lubzno.png",
-    logos: config.homepage.logos || [{ id: 'default', name: 'Logo Default', url: config.homepage.logo || "https://files.catbox.moe/lubzno.png" }]
+    logo: config.homepage?.logo || "https://files.catbox.moe/lubzno.png",
+    logos: config.homepage?.logos || [{ id: 'default', name: 'Logo Default', url: config.homepage?.logo || "https://files.catbox.moe/lubzno.png" }],
+    bgmUrl: config.homepage?.bgmUrl || "",
   });
 
-  const handleSave = () => {
-    updateConfig({ homepage: data });
-    showToast('Hero & Slide Tersimpan!');
+  const handleSave = async (e: any) => {
+    e.preventDefault();
+    await updateConfig({ homepage: { ...config.homepage, ...data } });
+    showToast('Pengaturan Logo & Audio Tersimpan!');
   };
 
   const activateLogo = (url: string) => {
@@ -373,18 +373,22 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8 text-left">
-      {/* Branding & Logo Section */}
+    <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8 text-left shadow-sm relative">
+      <div className="flex items-center gap-3 mb-2 pb-4 border-b border-art-text/10">
+        <div className="w-10 h-10 bg-art-orange rounded-xl flex items-center justify-center text-white shadow-sm rotate-3">
+          <ShoppingBag size={20} />
+        </div>
+        <div>
+          <h3 className="font-black text-sm uppercase tracking-widest text-art-text">Manajemen Logo & Audio</h3>
+          <p className="text-[10px] font-bold text-art-text/40 uppercase">Kelola identitas visual dan musik latar</p>
+        </div>
+      </div>
+
       <div className="bg-art-bg/30 p-6 rounded-2xl border-2 border-art-text space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-art-orange rounded-xl flex items-center justify-center text-white shadow-sm rotate-3">
-              <ShoppingBag size={20} />
-            </div>
-            <div>
-              <h3 className="font-black text-sm uppercase tracking-widest text-art-text">Manajemen Branding</h3>
-              <p className="text-[10px] font-bold text-art-text/40 uppercase">Kelola koleksi logo dan pilih yang aktif</p>
-            </div>
+          <div>
+            <h3 className="font-black text-xs uppercase tracking-widest text-art-text">Koleksi Logo</h3>
+            <p className="text-[10px] font-bold text-art-text/40 uppercase">Kelola koleksi logo dan pilih yang aktif</p>
           </div>
           <button 
             onClick={() => setData({...data, logos: [...(data.logos || []), { id: Date.now().toString(), url: "", name: "Logo Baru" }]})}
@@ -480,48 +484,52 @@ export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
         </div>
       </div>
 
-      {/* Sound Settings Section */}
       <div className="bg-art-bg/30 p-6 rounded-2xl border-2 border-art-text space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-art-green rounded-xl flex items-center justify-center text-white shadow-sm rotate-3">
-            <Clock size={20} />
-          </div>
-          <div>
-            <h3 className="font-black text-sm uppercase tracking-widest text-art-text">Pengaturan Efek Suara</h3>
-            <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur volume dan status suara aplikasi</p>
-          </div>
+        <div>
+          <h3 className="font-black text-xs uppercase tracking-widest text-art-text">Audio Latar (BGM)</h3>
+          <p className="text-[10px] font-bold text-art-text/40 uppercase">Musik latar opsional untuk diputar saat pengunjung datang.</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <div className="flex items-center justify-between bg-white p-4 rounded-2xl border-2 border-art-text">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Status Efek Suara</p>
-                <p className="text-[9px] font-bold text-art-text/40 uppercase mt-1">{data.soundEnabled ? 'Suara Aktif' : 'Suara Dimatikan'}</p>
-              </div>
-              <button 
-                onClick={() => setData({...data, soundEnabled: !data.soundEnabled})}
-                className={`w-14 h-8 rounded-full p-1 transition-all ${data.soundEnabled ? 'bg-art-green' : 'bg-gray-300'}`}
-              >
-                <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all ${data.soundEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
-              </button>
-           </div>
-           
-           <div className="bg-white p-4 rounded-2xl border-2 border-art-text">
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-[10px] font-black uppercase tracking-widest text-art-text">Master Volume</p>
-                <span className="text-[10px] font-black text-art-orange px-2 py-1 bg-art-orange/10 rounded-lg">{Math.round((data.soundVolume || 0.8) * 100)}%</span>
-              </div>
-              <input 
-                type="range" min="0" max="1" step="0.01"
-                className="w-full accent-art-orange h-2 bg-art-bg rounded-lg appearance-none cursor-pointer"
-                value={data.soundVolume || 0.8}
-                onChange={e => setData({...data, soundVolume: parseFloat(e.target.value)})}
-              />
-           </div>
+        <div className="space-y-4">
+          <InputWithPaste 
+            className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-mono outline-none focus:border-art-orange"
+            value={data.bgmUrl || ''}
+            onChange={(e: any) => setData({...data, bgmUrl: e.target.value})}
+            placeholder="URL Audio (Contoh: https://example.com/audio.mp3)"
+          />
+          {data.bgmUrl && (
+            <div className="pt-2">
+              <audio controls className="w-full h-10 rounded-full" src={data.bgmUrl}></audio>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="space-y-4 pt-4">
+      <button onClick={handleSave} className="bg-art-orange text-white px-6 py-4 mt-6 rounded-2xl text-xs font-black uppercase tracking-[0.2em] w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">Simpan Logo & Audio</button>
+    </div>
+  );
+};
+
+export const HomepageAdmin = ({ config, updateConfig, showToast }: any) => {
+  const [data, setData] = useState({ 
+    ...config.homepage, 
+    heroSlides: config.homepage.heroSlides || [],
+    logo: config.homepage.logo || "https://files.catbox.moe/lubzno.png",
+    logos: config.homepage.logos || [{ id: 'default', name: 'Logo Default', url: config.homepage.logo || "https://files.catbox.moe/lubzno.png" }]
+  });
+
+  const handleSave = () => {
+    updateConfig({ homepage: data });
+    showToast('Hero & Slide Tersimpan!');
+  };
+
+  const activateLogo = (url: string) => {
+    setData({ ...data, logo: url });
+    showToast('Logo Aktif Diperbarui!');
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-2xl border-2 border-art-text space-y-8 text-left shadow-sm relative">
+      <div className="flex items-center gap-3 mb-2 pb-4 border-b border-art-text/10">
         <h3 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2">
            <Edit2 size={16} className="text-art-orange" /> Edit Teks Hero Utama
         </h3>

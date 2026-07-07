@@ -256,6 +256,12 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                    setData(nd);
                    setExpandedIndexes([0]);
                  }} className="hover:bg-blue-50 text-blue-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest">+ Trip Weekend</button>
+                 <button type="button" onClick={(e) => {
+                   e.preventDefault();
+                   const message = `Halo Owner,\nMohon update jadwal Open Trip selanjutnya agar bisa segera kami upload ke website.\n\nMohon isi format berikut:\n- Gunung: ____________\n- Via / Jalur: ____________\n- Tanggal: ____________\n- Kuota: ____________\n- Harga (Final): ____________\n- Harga (Coret/Normal): ____________\n- Mepo (Meeting Point): ____________\n\nTerima kasih.`;
+                   const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                   window.open(url, '_blank');
+                 }} className="hover:bg-green-50 text-green-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest border-l-2 border-art-text flex items-center gap-1"><MessageCircle size={12}/> Minta Jadwal (WA)</button>
               </div>
 
            <button onClick={handleSave} className="bg-art-orange text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan Database</button>
@@ -318,6 +324,19 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                   </button>
                 )}
                 
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const msg = `Halo Owner,\nMohon konfirmasi untuk data Open Trip berikut:\n- Gunung: ${ot.name || '-'}\n- Via / Jalur: ${ot.path || '-'}\n- Tanggal: ${ot.jadwal || '-'}\n- Kuota: ${ot.kuota || '-'}\n- Harga (Final): Rp ${ot.price?.toLocaleString('id-ID') || '0'}\n- Harga (Coret/Normal): Rp ${ot.originalPrice?.toLocaleString('id-ID') || '0'}\n- Mepo: ${ot.mepo || '-'}\n- Durasi: ${ot.duration || '-'}\n\nApakah data di atas sudah benar dan siap untuk di-publish?`;
+                    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                  }}
+                  className="flex items-center gap-1 text-[9px] font-black uppercase px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-all border border-green-200"
+                >
+                  <MessageCircle size={12}/> Konf. Owner
+                </button>
+
                 <button 
                   disabled={consumed > 0}
                   onClick={() => {

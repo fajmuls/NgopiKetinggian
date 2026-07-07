@@ -494,7 +494,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                </div>
 
                {/* Layanan Tambahan Box */}
-               {opsionalItemsList.length > 0 && (
+               {(opsionalItemsList.length > 0 && currentType !== 'open_request') && (
                  <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
                    <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
                      <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
@@ -1118,7 +1118,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                  </div>
                </div>
 
-               {opsionalItemsList.length > 0 && (
+               {(opsionalItemsList.length > 0 && currentType !== 'open_request') && (
                  <div className="bg-art-bg/30 p-5 rounded-2xl border-2 border-art-text/10">
                    <div className="flex justify-between items-center mb-4 pb-3 border-b border-art-text/5">
                      <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
