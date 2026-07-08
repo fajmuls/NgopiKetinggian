@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.1.1";
+export const WEBSITE_VERSION = "1.1.0";
 
 export interface FacilityOption {
   name: string;
@@ -225,14 +225,6 @@ const getDefaultWebsiteData = () => ({
   },
   version: "1.1.0",
   patchNotes: [
-    {
-      version: "1.1.1",
-      date: "2026-07-07",
-      notes: [
-        "Perbaikan Navigasi Preview Slide 🛠️: Memperbaiki bug di mana perpindahan slide tidak langsung berpindah ke slide target.",
-        "Penyederhanaan Slide Selector 🧹: Mengoptimalkan antarmuka pemilihan slide agar lebih intuitif sesuai kebutuhan layout."
-      ]
-    },
     {
       version: "1.1.0",
       date: "2026-07-07",

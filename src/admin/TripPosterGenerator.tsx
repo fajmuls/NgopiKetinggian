@@ -79,7 +79,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     if (window.innerWidth < 768) {
       setActiveMobileTab('controls');
     }
-  }, [ratio, theme, tripTypeLabel]);
+  }, [ratio, layout, theme, tripTypeLabel]);
 
   // Dynamically observe container dimensions to scale high-res DOM perfectly
   useEffect(() => {
@@ -380,50 +380,50 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
             </div>
 
             {/* IG Multi-Slide Carousel Selector */}
-            {(layout === 'poster' || layout === 'ad') && (
-              <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1">
-                    📸 IG Carousel Slides
-                  </label>
-                  <span className="text-[8px] bg-art-orange/10 text-art-orange px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Multi-Slide</span>
-                </div>
-                <p className="text-[9px] text-gray-400 leading-tight">
-                  Pilih slide yang ingin di-generate & diunduh satu per satu untuk konten carousel feeds Instagram Anda!
-                </p>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {[
-                    { id: 'poster', label: 'Slide 1: Cover' },
-                    { id: 'rundown', label: 'Slide 2: Rundown' },
-                    { id: 'gears', label: 'Slide 3: Fasilitas' },
-                    { id: 'rules', label: 'Slide 4: S&K' },
-                    { id: 'ad', label: 'Slide 5: Promo' }
-                  ].map((s) => {
-                    const isChecked = selectedSlides.includes(s.id);
-                    return (
-                      <button
-                        key={s.id}
-                        onClick={() => {
-                          if (isChecked) {
-                            setSelectedSlides(selectedSlides.filter(x => x !== s.id));
-                          } else {
-                            setSelectedSlides([...selectedSlides, s.id]);
-                          }
-                        }}
-                        className={`py-2 px-2.5 rounded-xl text-[9px] font-black border-2 text-left transition-all flex items-center justify-between ${
-                          isChecked 
-                            ? 'border-art-orange bg-orange-50 text-art-orange' 
-                            : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="truncate">{s.label}</span>
-                        <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border text-[8px] ${isChecked ? 'bg-art-orange border-art-orange text-white' : 'border-gray-300 bg-gray-50 text-transparent'}`}>✓</span>
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1">
+                  📸 IG Carousel Slides
+                </label>
+                <span className="text-[8px] bg-art-orange/10 text-art-orange px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Multi-Slide</span>
               </div>
-            )}
+              <p className="text-[9px] text-gray-400 leading-tight">
+                Pilih slide yang ingin di-generate & diunduh satu per satu secara otomatis untuk konten carousel feeds Instagram Anda!
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {[
+                  { id: 'poster', label: 'Slide 1: Cover' },
+                  { id: 'rundown', label: 'Slide 2: Rundown' },
+                  { id: 'gears', label: 'Slide 3: Fasilitas' },
+                  { id: 'rules', label: 'Slide 4: S&K' },
+                  { id: 'ad', label: 'Slide 5: Promo' },
+                  { id: 'flag', label: 'Slide 6: Bendera' },
+                  { id: 'board', label: 'Slide 7: Papan' }
+                ].map((s) => {
+                  const isChecked = selectedSlides.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => {
+                        if (isChecked) {
+                          setSelectedSlides(selectedSlides.filter(x => x !== s.id));
+                        } else {
+                          setSelectedSlides([...selectedSlides, s.id]);
+                        }
+                      }}
+                      className={`py-2 px-2.5 rounded-xl text-[9px] font-black border-2 text-left transition-all flex items-center justify-between ${
+                        isChecked 
+                          ? 'border-art-orange bg-orange-50 text-art-orange' 
+                          : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="truncate">{s.label}</span>
+                      <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border text-[8px] ${isChecked ? 'bg-art-orange border-art-orange text-white' : 'border-gray-300 bg-gray-50 text-transparent'}`}>✓</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Ratio Selector */}
             <div className="space-y-3">
@@ -687,7 +687,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                 </div>
 
                 {/* Main Row: Prev Button + Canvas Wrapper + Next Button */}
-                <div className="flex items-center gap-4 max-w-full justify-center w-full overflow-x-auto p-4">
+                <div className="flex items-center gap-4 max-w-full justify-center">
                   
                   {/* Prev Button */}
                   <button 
@@ -697,7 +697,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                       const prevIdx = (curIdx - 1 + list.length) % list.length;
                       setLayout(list[prevIdx] as LayoutType);
                     }}
-                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all shadow-lg border border-white/10 shrink-0 hover:scale-105 active:scale-95 z-30"
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all shadow-lg border border-white/10 shrink-0 hover:scale-105 active:scale-95"
                     title="Slide Sebelumnya"
                   >
                     <ChevronLeft size={20} />
@@ -716,10 +716,10 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     {/* High Resolution Render Canvas */}
                     <motion.div 
                       key={layout}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                      initial={{ x: 50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -50, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
                       ref={posterRef}
                       className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col transition-all duration-300`}
                       style={{ 
