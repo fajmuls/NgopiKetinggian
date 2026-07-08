@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Download, Layout, Smartphone, Monitor, Coffee, Calendar, MapPin, 
-  CreditCard, Clock, CheckCircle, Map, Hash, Trash2, Eye, Sparkles, 
-  RotateCcw, Compass, Star, Award, ShieldCheck, Heart, ArrowRight
+  CreditCard, Clock, CheckCircle, Map, Trash2, Eye, Sparkles, 
+  RotateCcw, Compass, Star, ArrowRight, Clipboard, Check
 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
@@ -11,6 +11,7 @@ interface PosterProps {
   trip: any;
   onClose: () => void;
   type: 'open' | 'private';
+  config?: any;
 }
 
 type AspectRatio = '1:1' | '4:3' | '16:9' | '9:16';
@@ -27,13 +28,17 @@ const THEMES = [
   { id: 'retro', color: 'bg-[#f4efe6] border-4 border-[#2b2927]', text: 'text-[#2b2927]', primary: '#d95d39', secondary: '#dfd5c6', accent: '#f0a202' },
 ];
 
-export const TripPosterGenerator = ({ trip, onClose, type: initialType }: PosterProps) => {
+export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }: PosterProps) => {
   const [ratio, setRatio] = useState<AspectRatio>('1:1');
   const [layout, setLayout] = useState<LayoutType>('poster');
   const [theme, setTheme] = useState(THEMES[0]);
   const [bgOpacity, setBgOpacity] = useState(0.45);
   const [tripTypeLabel, setTripTypeLabel] = useState(initialType === 'open' ? 'OPEN TRIP' : 'PRIVATE TRIP');
-  const [customVia, setCustomVia] = useState(trip.path || trip.paths?.[0]?.name || 'Jalur Utama');
+  
+  const rawVia = trip.path || trip.paths?.[0]?.name || 'Jalur Utama';
+  // Strip any duplicate "via" prefix to prevent "Via Via Patak Banteng"
+  const cleanVia = rawVia.replace(/^(via|Via|VIA)\s+/i, '');
+  const [customVia, setCustomVia] = useState(cleanVia);
   const [showDiscountBadge, setShowDiscountBadge] = useState(trip.showDiscountBadge !== false);
   
   // New States for mobile responsiveness and user experience
@@ -41,6 +46,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
   const [activeMobileTab, setActiveMobileTab] = useState<'controls' | 'preview'>('controls');
   const [containerSize, setContainerSize] = useState({ width: 500, height: 500 });
   const [isDownloading, setIsDownloading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const posterRef = useRef<HTMLDivElement>(null);
@@ -107,11 +113,15 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
     setIsDownloading(true);
     
     const originalTransform = posterRef.current.style.transform;
-    posterRef.current.style.transform = 'scale(1)';
+    const originalTransformOrigin = posterRef.current.style.transformOrigin;
+    
+    // Reset transform properties so image-to-html processes the source canvas at full 100% scale
+    posterRef.current.style.transform = 'none';
+    posterRef.current.style.transformOrigin = 'initial';
     
     try {
       // Delay briefly to allow DOM reflow
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 200));
       const dataUrl = await toPng(posterRef.current, { 
         cacheBust: true, 
         pixelRatio: 4, 
@@ -124,7 +134,8 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
     } catch (err) {
       console.error('Failed to download poster', err);
     } finally {
-      posterRef.current.style.transform = originalTransform;
+      posterRef.current.style.transform = `scale(${scale})`;
+      posterRef.current.style.transformOrigin = 'top left';
       setIsDownloading(false);
     }
   };
@@ -156,6 +167,58 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
     .map((line: string) => line.trim())
     .filter((line: string) => line.length > 0)
     .slice(0, 5); // take max 5 items to keep visuals clean
+
+  // Fetch includes and excludes from admin dashboard facilities
+  const inclusionsList = (config?.facilities?.include || [])
+    .map((item: any) => typeof item === 'object' ? (item.isHidden ? null : item.name) : item)
+    .filter(Boolean);
+
+  const exclusionsList = (config?.facilities?.exclude || [])
+    .map((item: any) => typeof item === 'object' ? (item.isHidden ? null : item.name) : item)
+    .filter(Boolean);
+
+  // Active items for UI displays with beautiful fallbacks
+  const posterIncludes = inclusionsList.length > 0 ? inclusionsList.slice(0, 4) : ['Tenda Camp', 'Manual Brew Kopi', 'Makan & Minum', 'Guide APGI'];
+  const posterExcludes = exclusionsList.length > 0 ? exclusionsList.slice(0, 4) : ['Perlengkapan Pribadi', 'Transportasi Mepo', 'Obat-obatan Khusus'];
+
+  // Instagram Caption Template Generator
+  const captionInclusions = posterIncludes.map(item => `✅ ${item}`).join('\n');
+  const captionExclusions = posterExcludes.map(item => `❌ ${item}`).join('\n');
+  const cleanHashtagName = tripName.replace(/\s+/g, '').toLowerCase();
+
+  const autoCaptionText = `⛰️ READY FOR ADVENTURE: ${tripTypeLabel} ${tripName.toUpperCase()} ⛰️
+
+Saatnya keluar dari rutinitas harian dan kembali menyatu dengan megahnya alam! Tim @ngopi.dketinggian mengajak kamu menjelajahi keindahan puncak gunung terbaik Indonesia.
+
+Nikmati petualangan mendaki yang seru, aman, dan penuh tawa dengan fasilitas terlengkap dan pemandu berlisensi resmi APGI.
+
+📋 DETAIL PERJALANAN:
+• Gunung: ${tripName}
+• Jalur Pendakian: Via ${customVia}
+• Durasi: ${tripDuration}
+• Titik Kumpul (Meeting Point): ${tripMepo}
+• Jadwal Keberangkatan: ${tripDate}
+
+💰 HARGA TRIP:
+• ${tripTypeLabel}: ${formatPrice(currentPrice)} ${originalPrice > currentPrice ? `(Normal: ${formatPrice(originalPrice)})` : ''}
+*Sudah termasuk peralatan kelompok, konsumsi nikmat selama camp, pemandu bersertifikasi, dan pastinya seduhan KOPI MANUAL BREW sepuasnya di puncak gunung! ☕
+
+🎁 FASILITAS TERMASUK (INCLUSIONS):
+${captionInclusions}
+
+🚫 TIDAK TERMASUK (EXCLUSIONS):
+${captionExclusions}
+
+👇 CARA PENDAFTARAN INSTAN:
+Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio Instagram kami @ngopi.dketinggian atau hubungi admin WhatsApp kami di kontak tertera.
+
+#ngopidiketinggian #pendakiindonesia #infopendaki #opentrip${cleanHashtagName} #privatetrip${cleanHashtagName} #mountaineering #parapejalan #id_pendaki #indonesiantraveler #pesonaindonesia`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(autoCaptionText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <motion.div 
@@ -316,6 +379,39 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
 
             <hr className="border-gray-100" />
 
+            {/* Auto Caption Instagram Box */}
+            <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-black text-art-text uppercase tracking-wider flex items-center gap-1.5">
+                  📱 Auto Caption Instagram
+                </span>
+                <span className="text-[8px] font-black bg-art-green/10 text-art-green px-1.5 py-0.5 rounded uppercase tracking-wider">Ready</span>
+              </div>
+              <p className="text-[9px] text-gray-400 leading-normal">
+                Caption Instagram dibuat otomatis berdasarkan spesifikasi trip di dashboard admin Anda! Tinggal klik salin & langsung siap diposting.
+              </p>
+              <div className="relative">
+                <textarea 
+                  readOnly
+                  value={autoCaptionText}
+                  className="w-full h-24 bg-white border border-gray-200 rounded-xl p-2.5 text-[9px] font-bold text-gray-600 outline-none resize-none overflow-y-auto custom-scrollbar"
+                />
+                <button
+                  onClick={copyToClipboard}
+                  className={`absolute bottom-2 right-2 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest flex items-center gap-1 shadow transition-all ${
+                    copied 
+                      ? 'bg-art-green text-white shadow-none' 
+                      : 'bg-art-orange hover:bg-black text-white'
+                  }`}
+                >
+                  {copied ? <Check size={10} /> : <Clipboard size={10} />}
+                  {copied ? 'Tersalin' : 'Salin'}
+                </button>
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
             {/* Desktop Direct Generate/Preview Switch */}
             <div className="hidden md:block pt-2">
               {!showPreview ? (
@@ -349,7 +445,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
           {/* Right Panel: Preview Area / Workspace */}
           <div 
             ref={containerRef} 
-            className={`flex-1 bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8 flex items-center justify-center overflow-hidden relative ${activeMobileTab === 'preview' ? 'block' : 'hidden md:block'}`}
+            className={`flex-1 bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8 flex items-center justify-center overflow-auto relative ${activeMobileTab === 'preview' ? 'block' : 'hidden md:block'}`}
           >
             
             {/* Dynamic Rendering based on Preview state */}
@@ -398,16 +494,14 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                 </button>
               </motion.div>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center overflow-auto custom-scrollbar relative">
+              <div className="w-full h-full flex flex-col items-center justify-center overflow-auto p-4 relative min-h-[500px]">
                 
-                {/* Poster Workspace Wrapper with rigid scaling formula */}
+                {/* Poster Workspace Wrapper with dynamic and RIGID bounds scaling layout */}
                 <div 
-                  className="flex items-center justify-center overflow-hidden flex-shrink-0"
+                  className="relative flex-shrink-0 shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-white/10 rounded-3xl"
                   style={{
-                    width: `${baseDim.width}px`,
-                    height: `${baseDim.height}px`,
-                    transform: `scale(${scale})`,
-                    transformOrigin: 'center center',
+                    width: `${baseDim.width * scale}px`,
+                    height: `${baseDim.height * scale}px`,
                     transition: 'all 0.3s ease-in-out'
                   }}
                 >
@@ -415,7 +509,15 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                   <div 
                     ref={posterRef}
                     className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col transition-all duration-300`}
-                    style={{ width: `${baseDim.width}px`, height: `${baseDim.height}px` }}
+                    style={{ 
+                      width: `${baseDim.width}px`, 
+                      height: `${baseDim.height}px`,
+                      transform: `scale(${scale})`,
+                      transformOrigin: 'top left',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0
+                    }}
                   >
                     
                     {/* Background Visual Layer */}
@@ -497,7 +599,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                             <div className="space-y-0.5">
                               <div className="flex items-center gap-1.5 opacity-40">
                                 <CreditCard size={12} />
-                                <span className="text-[8px] font-black uppercase tracking-widest">Investasi</span>
+                                <span className="text-[8px] font-black uppercase tracking-widest font-sans">Harga</span>
                               </div>
                               <div className="flex items-baseline gap-1">
                                 {originalPrice > currentPrice && (
@@ -519,9 +621,9 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                           </div>
                         </div>
 
-                        {/* Discount Sticker */}
+                        {/* Discount Sticker - Checked inside bounds perfectly */}
                         {showDiscountBadge && originalPrice > currentPrice && (
-                          <div className="absolute top-16 right-8 w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center -rotate-12 shadow-2xl" style={{ backgroundColor: theme.primary, borderColor: 'white' }}>
+                          <div className="absolute top-16 right-12 w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20" style={{ backgroundColor: theme.primary, borderColor: 'white' }}>
                             <span className="text-white text-[11px] font-black leading-none">{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%</span>
                             <span className="text-white text-[7px] font-black uppercase leading-none mt-0.5">OFF</span>
                           </div>
@@ -549,7 +651,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                             <div className="bg-black/20 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
                               <p className="text-[7px] font-black uppercase tracking-wider opacity-60 mb-0.5">Destinasi Gunung</p>
                               <h4 className={`text-xl font-black uppercase tracking-tight ${theme.text}`}>{tripName}</h4>
-                              <p className="text-[9px] font-bold opacity-70">Jalur: {customVia} • {tripDuration}</p>
+                              <p className="text-[9px] font-bold opacity-70">Jalur: Via {customVia} • {tripDuration}</p>
                             </div>
 
                             <div className="bg-black/35 p-3.5 rounded-xl border border-white/10 space-y-2">
@@ -568,19 +670,20 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                           {/* Right Column: Pricing & Inclusions */}
                           <div className="space-y-3 flex flex-col justify-between">
                             <div className="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center justify-between">
-                              <div>
-                                <p className="text-[8px] font-black uppercase tracking-widest opacity-60">Fasilitas Included</p>
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1.5 text-[8px] font-bold">
-                                  <div className="flex items-center gap-1"><CheckCircle size={8} className="text-green-400" /> Tenda Camp</div>
-                                  <div className="flex items-center gap-1"><CheckCircle size={8} className="text-green-400" /> Manual Brew Kopi</div>
-                                  <div className="flex items-center gap-1"><CheckCircle size={8} className="text-green-400" /> Makan & Minum</div>
-                                  <div className="flex items-center gap-1"><CheckCircle size={8} className="text-green-400" /> Guide APGI</div>
+                              <div className="w-full">
+                                <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-1.5">Fasilitas Included</p>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[8px] font-bold text-white/95">
+                                  {posterIncludes.map((inc, index) => (
+                                    <div key={index} className="flex items-center gap-1 truncate">
+                                      <CheckCircle size={8} className="text-green-400 shrink-0" /> {inc}
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             </div>
 
                             <div className="bg-white/10 p-3 rounded-xl border-2 border-dashed border-white/20">
-                              <p className="text-[8px] font-black uppercase tracking-widest opacity-60">Investasi Trip</p>
+                              <p className="text-[8px] font-black uppercase tracking-widest opacity-60">Harga Trip</p>
                               <div className="flex items-baseline gap-2 mt-1">
                                 {originalPrice > currentPrice && (
                                   <span className="text-[10px] font-black line-through opacity-30">
@@ -604,78 +707,91 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                       </div>
                     )}
 
-                    {/* LAYOUT C: IKLAN (Loud, energetic, brutalist Instagram ad copy) */}
+                    {/* LAYOUT C: IKLAN (Redesigned with custom dual border layers & direct discount badge integration next to price) */}
                     {layout === 'ad' && (
-                      <div className={`relative z-10 flex flex-col h-full ${ratio === '9:16' ? 'p-[12%]' : 'p-[8%]'} justify-between border-[6px]`} style={{ borderColor: theme.primary }}>
+                      <div className={`relative z-10 flex flex-col h-full ${ratio === '9:16' ? 'p-[12%]' : 'p-[8%]'} justify-between h-full w-full`}>
                         
+                        {/* Elegant custom border structures to prevent overlap & keep layout extremely attractive */}
+                        <div className="absolute inset-4 border-[3px] pointer-events-none z-20" style={{ borderColor: theme.primary }}></div>
+                        <div className="absolute inset-5 border border-dashed pointer-events-none z-20 opacity-40" style={{ borderColor: theme.accent }}></div>
+                        
+                        {/* Absolute positioned neo-brutalist corner frames for maximum design aesthetic */}
+                        <div className="absolute top-2 left-2 w-6 h-6 border-t-4 border-l-4" style={{ borderColor: theme.accent }}></div>
+                        <div className="absolute top-2 right-2 w-6 h-6 border-t-4 border-r-4" style={{ borderColor: theme.accent }}></div>
+                        <div className="absolute bottom-2 left-2 w-6 h-6 border-b-4 border-l-4" style={{ borderColor: theme.accent }}></div>
+                        <div className="absolute bottom-2 right-2 w-6 h-6 border-b-4 border-r-4" style={{ borderColor: theme.accent }}></div>
+
                         {/* Top: Hype Banner */}
-                        <div className="flex justify-between items-center bg-black text-white px-3 py-1 rounded-lg border border-white/10">
+                        <div className="flex justify-between items-center bg-black text-white px-3 py-1 rounded-lg border border-white/10 z-10">
                           <span className="text-[8px] font-black uppercase tracking-[0.2em] text-art-orange animate-pulse">🔥 LIMITED SEAT AVAILABLE!</span>
                           <span className="text-[7px] font-bold uppercase">DAFTAR INSTAN VIA WA</span>
                         </div>
 
                         {/* Title Display */}
-                        <div className="my-auto text-center space-y-2 relative">
-                          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-art-orange">SAATNYA KELUAR DARI RUTINITAS!</p>
-                          <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                        <div className="my-auto text-center space-y-2 relative z-10">
+                          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-art-orange font-sans">SAATNYA KELUAR DARI RUTINITAS!</p>
+                          <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)] font-sans">
                             {tripName}
                           </h3>
-                          <p className="text-xs font-bold text-white/80">Via {customVia} • {tripDuration}</p>
+                          <p className="text-xs font-bold text-white/90">Via {customVia} • {tripDuration}</p>
 
                           {/* High Energy Star Ratings */}
                           <div className="flex justify-center items-center gap-1 text-yellow-400 mt-2">
                             {[1,2,3,4,5].map(s => <Star key={s} size={10} fill="currentColor" />)}
-                            <span className="text-[8px] font-black text-white ml-1 bg-black/40 px-1 py-0.5 rounded">5.0 (APGI RATED)</span>
+                            <span className="text-[8px] font-black text-white ml-1 bg-black/40 px-1.5 py-0.5 rounded">5.0 (APGI RATED)</span>
                           </div>
                         </div>
 
                         {/* High Impact Core Services pills */}
-                        <div className="space-y-1.5 max-w-sm mx-auto w-full">
+                        <div className="space-y-2 max-w-sm mx-auto w-full z-10">
                           <div className="grid grid-cols-2 gap-1.5">
-                            <div className="bg-black/40 border border-white/10 px-2 py-1.5 rounded-xl text-center backdrop-blur-md">
+                            <div className="bg-black/60 border border-white/10 px-2 py-1.5 rounded-xl text-center backdrop-blur-md">
                               <span className="block text-[7px] text-white/50 uppercase">Manual Brew</span>
                               <span className="text-[9px] font-black text-white uppercase">☕ KOPI SEPUASNYA</span>
                             </div>
-                            <div className="bg-black/40 border border-white/10 px-2 py-1.5 rounded-xl text-center backdrop-blur-md">
+                            <div className="bg-black/60 border border-white/10 px-2 py-1.5 rounded-xl text-center backdrop-blur-md">
                               <span className="block text-[7px] text-white/50 uppercase">Alat Lengkap</span>
                               <span className="text-[9px] font-black text-white uppercase">🏕️ ALAT DISEDIAKAN</span>
                             </div>
                           </div>
 
-                          {/* Price Display inside highlighted card */}
-                          <div className="bg-gradient-to-r from-art-orange to-orange-600 p-3 rounded-2xl text-center text-white border-2 border-white shadow-xl">
-                            <p className="text-[8px] font-black uppercase tracking-widest leading-none mb-1">HARGA KHUSUS MINGGU INI</p>
-                            <div className="flex justify-center items-baseline gap-1.5">
-                              {originalPrice > currentPrice && (
-                                <span className="text-[11px] font-black line-through opacity-50">
-                                  {formatPrice(originalPrice)}
+                          {/* Price Display inside highlighted card with nested Discount text right next to the price */}
+                          <div className="bg-gradient-to-r from-art-orange to-orange-600 p-3.5 rounded-2xl text-center text-white border-2 border-white shadow-2xl relative overflow-hidden">
+                            <p className="text-[8px] font-black uppercase tracking-widest leading-none mb-1.5">HARGA KHUSUS MINGGU INI</p>
+                            
+                            <div className="flex flex-col items-center justify-center gap-1">
+                              <div className="flex items-baseline justify-center gap-2 flex-wrap">
+                                {originalPrice > currentPrice && (
+                                  <span className="text-[10px] font-black line-through text-white/65">
+                                    {formatPrice(originalPrice)}
+                                  </span>
+                                )}
+                                <span className="text-2xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                                  {formatPrice(currentPrice)}
                                 </span>
+                              </div>
+                              
+                              {/* Integrated Discount next to/under the price inside the card boundary */}
+                              {showDiscountBadge && originalPrice > currentPrice && (
+                                <div className="bg-yellow-400 text-black px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1 mt-1">
+                                  <span>🏷️ POTONGAN</span>
+                                  <span>{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% OFF</span>
+                                </div>
                               )}
-                              <span className="text-2xl font-black text-white drop-shadow">
-                                {formatPrice(currentPrice)}
-                              </span>
                             </div>
                           </div>
                         </div>
 
                         {/* Bottom CTA Block with Hand Pointer Accent */}
-                        <div className="space-y-2 pt-3 border-t border-white/10">
-                          <div className="flex items-center justify-between text-[8px] font-black uppercase text-white/80">
+                        <div className="space-y-2 pt-3 border-t border-white/10 z-10">
+                          <div className="flex items-center justify-between text-[8px] font-black uppercase text-white/85">
                             <span>👇 BOOKING SEKARANG</span>
                             <span>@ngopi.dketinggian</span>
                           </div>
-                          <div className="bg-white text-black p-2 rounded-xl text-center font-black uppercase text-[9px] tracking-widest shadow-lg flex items-center justify-center gap-1">
+                          <div className="bg-white text-black p-2 rounded-xl text-center font-black uppercase text-[9px] tracking-widest shadow-lg flex items-center justify-center gap-1 hover:bg-art-orange hover:text-white transition-colors cursor-pointer">
                             <span>KLIK LINK DI BIO</span> <ArrowRight size={12} className="text-art-orange animate-bounce" />
                           </div>
                         </div>
-
-                        {/* Extra discount overlay badge */}
-                        {showDiscountBadge && originalPrice > currentPrice && (
-                          <div className="absolute top-16 right-8 w-16 h-16 rounded-full border-4 flex flex-col items-center justify-center -rotate-12 shadow-[0_12px_30px_rgba(0,0,0,0.5)] animate-bounce" style={{ backgroundColor: '#ff5722', borderColor: 'white' }}>
-                            <span className="text-white text-[12px] font-black leading-none">{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%</span>
-                            <span className="text-white text-[7px] font-black uppercase leading-none mt-0.5">POTONGAN</span>
-                          </div>
-                        )}
                       </div>
                     )}
 
@@ -686,11 +802,11 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                 </div>
 
                 {/* Secondary Action Toolbar shown underneath the preview */}
-                <div className="mt-4 flex flex-col sm:flex-row gap-2.5 w-full max-w-sm px-4 relative z-50">
+                <div className="mt-6 flex flex-col sm:flex-row gap-2.5 w-full max-w-sm px-4 relative z-50">
                   <button 
                     onClick={downloadPoster}
                     disabled={isDownloading}
-                    className="flex-1 bg-art-orange hover:bg-black disabled:bg-gray-400 text-white py-3 px-5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 shadow-xl transition-all"
+                    className="flex-1 bg-art-orange hover:bg-black disabled:bg-gray-400 text-white py-3.5 px-5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 shadow-xl transition-all"
                   >
                     <Download size={14} /> {isDownloading ? 'Downloading...' : 'Download HD (PNG)'}
                   </button>
@@ -701,7 +817,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType }: Poster
                         setActiveMobileTab('controls');
                       }
                     }}
-                    className="bg-white/10 hover:bg-white/20 text-white border border-white/10 py-3 px-5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 transition-all"
+                    className="bg-white/10 hover:bg-white/20 text-white border border-white/10 py-3.5 px-5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 transition-all"
                   >
                     <RotateCcw size={14} /> Ubah Desain
                   </button>

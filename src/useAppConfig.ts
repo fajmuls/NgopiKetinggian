@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.7";
+export const WEBSITE_VERSION = "1.0.8";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,19 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.0.7",
+  version: "1.0.8",
   patchNotes: [
+    {
+      version: "1.0.8",
+      date: "2026-07-07",
+      notes: [
+        "Auto Caption Instagram 📱: Ditambahkan generator caption otomatis di panel poster yang mencakup info rute via kustom, jadwal, mepo, inclusions, exclusions, dan hashtag dinamis dengan tombol satu-klik Salin.",
+        "Visual & Layout Iklan (Ad) Baru ✨: Menggunakan dual border inset neo-brutalist dengan penempatan badge diskon aman langsung di samping harga untuk visual yang rapi dan bebas crop.",
+        "Navigasi Scroll Fleksibel 🔄: Memperbaiki area preview poster agar mendukung scroll 4 arah (atas, bawah, kiri, kanan) secara alami jika rasio poster melebihi batas resolusi layar.",
+        "Sinkronisasi Fasilitas Admin 🔌: Bagian inklusi & eksklusi poster sekarang otomatis ditarik dari pengaturan Facilities tab Web Settings di Admin Dashboard Anda.",
+        "Reduksi Redundansi Teks 🛑: Menghapus duplikasi kata 'via' yang sempat ganda pada bagian 'Via' kustom, serta mengubah label istilah 'investasi' menjadi 'harga' di seluruh layout."
+      ]
+    },
     {
       version: "1.0.7",
       date: "2026-07-07",

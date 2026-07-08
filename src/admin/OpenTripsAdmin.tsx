@@ -1113,6 +1113,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
         <TripPosterGenerator 
           trip={showPoster} 
           type="open" 
+          config={config}
           onClose={() => setShowPoster(null)} 
         />
       )}

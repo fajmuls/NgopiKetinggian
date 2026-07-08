@@ -658,6 +658,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
         <TripPosterGenerator 
           trip={showPoster} 
           type="private" 
+          config={config}
           onClose={() => setShowPoster(null)} 
         />
       )}
