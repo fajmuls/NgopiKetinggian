@@ -15,7 +15,7 @@ interface PosterProps {
 }
 
 type AspectRatio = '1:1' | '4:3' | '16:9' | '9:16';
-type LayoutType = 'poster' | 'rundown' | 'ad';
+type LayoutType = 'poster' | 'rundown' | 'ad' | 'gears' | 'rules';
 
 const THEMES = [
   { id: 'dark', color: 'bg-[#111111]', text: 'text-white', primary: '#ff5722', secondary: '#222222', accent: '#ff7a50' },
@@ -40,6 +40,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const cleanVia = rawVia.replace(/^(via|Via|VIA)\s+/i, '');
   const [customVia, setCustomVia] = useState(cleanVia);
   const [showDiscountBadge, setShowDiscountBadge] = useState(trip.showDiscountBadge !== false);
+  const [selectedSlides, setSelectedSlides] = useState<string[]>(['poster', 'rundown', 'gears']);
   
   // New States for mobile responsiveness and user experience
   const [showPreview, setShowPreview] = useState(false);
@@ -136,6 +137,54 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     } finally {
       posterRef.current.style.transform = `scale(${scale})`;
       posterRef.current.style.transformOrigin = 'top left';
+      setIsDownloading(false);
+    }
+  };
+
+  const downloadAllSlides = async () => {
+    if (posterRef.current === null) return;
+    setIsDownloading(true);
+    
+    const originalLayout = layout;
+    
+    try {
+      const slidesToDownload = selectedSlides.filter(s => ['poster', 'rundown', 'ad', 'gears', 'rules'].includes(s));
+      if (slidesToDownload.length === 0) {
+        setIsDownloading(false);
+        return;
+      }
+
+      for (let i = 0; i < slidesToDownload.length; i++) {
+        const sType = slidesToDownload[i];
+        setLayout(sType as LayoutType);
+        
+        // Wait for React state update and DOM repaint
+        await new Promise(resolve => setTimeout(resolve, 700));
+        
+        if (posterRef.current) {
+          posterRef.current.style.transform = 'none';
+          posterRef.current.style.transformOrigin = 'initial';
+          
+          const dataUrl = await toPng(posterRef.current, {
+            cacheBust: true,
+            pixelRatio: 3,
+            quality: 0.95,
+          });
+          
+          const link = document.createElement('a');
+          link.download = `slide-${i + 1}-trip-${tripName.replace(/\s+/g, '-').toLowerCase()}-${sType}-${ratio}.png`;
+          link.href = dataUrl;
+          link.click();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to download all slides sequentially', err);
+    } finally {
+      setLayout(originalLayout);
+      if (posterRef.current) {
+        posterRef.current.style.transform = `scale(${scale})`;
+        posterRef.current.style.transformOrigin = 'top left';
+      }
       setIsDownloading(false);
     }
   };
@@ -265,20 +314,67 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
               <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-1.5">
                 <Layout size={12} className="text-art-orange" /> Tipe Layout
               </label>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-5 gap-1">
                 {[
-                  { id: 'poster', label: 'Poster 🏞️' },
-                  { id: 'rundown', label: 'Info 🗒️' },
-                  { id: 'ad', label: 'Iklan 📣' }
+                  { id: 'poster', label: 'Poster' },
+                  { id: 'rundown', label: 'Info' },
+                  { id: 'ad', label: 'Iklan' },
+                  { id: 'gears', label: 'Alat' },
+                  { id: 'rules', label: 'S&K' }
                 ].map((l) => (
                   <button
                     key={l.id}
                     onClick={() => setLayout(l.id as LayoutType)}
-                    className={`py-3 rounded-xl text-[10px] font-black uppercase border-2 transition-all ${layout === l.id ? 'bg-art-text text-white border-art-text shadow-md' : 'bg-white text-gray-500 border-gray-100 hover:border-gray-200'}`}
+                    className={`py-2 rounded-lg text-[9px] font-black uppercase border-2 transition-all ${layout === l.id ? 'bg-art-text text-white border-art-text shadow-sm' : 'bg-white text-gray-500 border-gray-100 hover:border-gray-200'}`}
+                    title={l.label}
                   >
                     {l.label}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* IG Multi-Slide Carousel Selector */}
+            <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1">
+                  📸 IG Carousel Slides
+                </label>
+                <span className="text-[8px] bg-art-orange/10 text-art-orange px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Multi-Slide</span>
+              </div>
+              <p className="text-[9px] text-gray-400 leading-tight">
+                Pilih slide yang ingin di-generate & diunduh satu per satu secara otomatis untuk konten carousel feeds Instagram Anda!
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {[
+                  { id: 'poster', label: 'Slide 1: Cover' },
+                  { id: 'rundown', label: 'Slide 2: Rundown' },
+                  { id: 'gears', label: 'Slide 3: Fasilitas' },
+                  { id: 'rules', label: 'Slide 4: S&K' },
+                  { id: 'ad', label: 'Slide 5: Promo' }
+                ].map((s) => {
+                  const isChecked = selectedSlides.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => {
+                        if (isChecked) {
+                          setSelectedSlides(selectedSlides.filter(x => x !== s.id));
+                        } else {
+                          setSelectedSlides([...selectedSlides, s.id]);
+                        }
+                      }}
+                      className={`py-2 px-2.5 rounded-xl text-[9px] font-black border-2 text-left transition-all flex items-center justify-between ${
+                        isChecked 
+                          ? 'border-art-orange bg-orange-50 text-art-orange' 
+                          : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="truncate">{s.label}</span>
+                      <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border text-[8px] ${isChecked ? 'bg-art-orange border-art-orange text-white' : 'border-gray-300 bg-gray-50 text-transparent'}`}>✓</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -428,8 +524,19 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     disabled={isDownloading}
                     className="w-full bg-art-text hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95"
                   >
-                    <Download size={16} /> {isDownloading ? 'Downloading...' : 'Download HD Poster'}
+                    <Download size={16} /> {isDownloading ? 'Downloading...' : `Download Slide ${layout.toUpperCase()}`}
                   </button>
+                  
+                  {selectedSlides.length > 0 && (
+                    <button 
+                      onClick={downloadAllSlides}
+                      disabled={isDownloading}
+                      className="w-full bg-art-orange hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 border-2 border-white/20"
+                    >
+                      <Sparkles size={16} /> {isDownloading ? 'Downloading...' : `Download All ${selectedSlides.length} Slides 🎴`}
+                    </button>
+                  )}
+
                   <button 
                     onClick={() => setShowPreview(false)}
                     className="w-full border-2 border-gray-200 hover:border-art-orange bg-white text-gray-500 hover:text-art-orange py-2.5 rounded-xl font-black uppercase tracking-wider text-[9px] flex items-center justify-center gap-1.5 transition-all"
@@ -601,15 +708,20 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                                 <CreditCard size={12} />
                                 <span className="text-[8px] font-black uppercase tracking-widest font-sans">Harga</span>
                               </div>
-                              <div className="flex items-baseline gap-1">
+                              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                                 {originalPrice > currentPrice && (
-                                  <span className="text-[9px] font-black line-through opacity-30">
+                                  <span className="text-[9px] font-black line-through opacity-30 leading-none">
                                     {formatPrice(originalPrice)}
                                   </span>
                                 )}
-                                <p className="text-sm font-black" style={{ color: theme.accent }}>
+                                <span className="text-sm md:text-base font-black leading-none" style={{ color: theme.accent }}>
                                   {formatPrice(currentPrice)}
-                                </p>
+                                </span>
+                                {showDiscountBadge && originalPrice > currentPrice && (
+                                  <span className="bg-yellow-400 text-black px-1 py-0.5 rounded text-[7px] font-black uppercase leading-none animate-pulse">
+                                    {Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% OFF
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -620,14 +732,6 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             <span>linktr.ee/ngopi.dketinggian</span>
                           </div>
                         </div>
-
-                        {/* Discount Sticker - Checked inside bounds perfectly */}
-                        {showDiscountBadge && originalPrice > currentPrice && (
-                          <div className="absolute top-16 right-12 w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center -rotate-12 shadow-2xl z-20" style={{ backgroundColor: theme.primary, borderColor: 'white' }}>
-                            <span className="text-white text-[11px] font-black leading-none">{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%</span>
-                            <span className="text-white text-[7px] font-black uppercase leading-none mt-0.5">OFF</span>
-                          </div>
-                        )}
                       </div>
                     )}
 
@@ -795,6 +899,112 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                       </div>
                     )}
 
+                    {/* LAYOUT D: GEARS (Inclusions, Exclusions & Optional Add-ons) */}
+                    {layout === 'gears' && (
+                      <div className={`relative z-10 flex flex-col h-full ${ratio === '9:16' ? 'p-[10%]' : 'p-[6%]'} justify-between h-full w-full`}>
+                        {/* Header Branding */}
+                        <div className="flex justify-between items-center border-b border-current border-opacity-15 pb-3">
+                          <div className="flex items-center gap-1.5">
+                            <Coffee size={16} style={{ color: theme.accent }} />
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${theme.text}`}>Fasilitas & Perlengkapan</span>
+                          </div>
+                          <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded border border-current" style={{ color: theme.accent }}>{tripTypeLabel}</span>
+                        </div>
+
+                        {/* Content Grid */}
+                        <div className={`my-auto grid ${ratio === '16:9' ? 'grid-cols-2 gap-4' : 'grid-cols-1 gap-4'} items-stretch`}>
+                          
+                          {/* Included Services Block */}
+                          <div className="bg-black/30 p-3.5 rounded-xl border border-white/5 space-y-2">
+                            <p className="text-[8px] font-black uppercase tracking-widest text-emerald-400 border-b border-white/5 pb-1">✅ Fasilitas Termasuk (Inclusions)</p>
+                            <div className="grid grid-cols-2 gap-2 text-[9px] font-bold text-white/90">
+                              {posterIncludes.map((inc, i) => (
+                                <div key={i} className="flex items-center gap-1 truncate">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></div>
+                                  <span className="truncate">{inc}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Excluded Services Block */}
+                          <div className="bg-black/30 p-3.5 rounded-xl border border-white/5 space-y-2">
+                            <p className="text-[8px] font-black uppercase tracking-widest text-red-400 border-b border-white/5 pb-1">❌ Tidak Termasuk (Exclusions)</p>
+                            <div className="grid grid-cols-1 gap-1.5 text-[9px] font-bold text-white/90">
+                              {posterExcludes.map((exc, i) => (
+                                <div key={i} className="flex items-center gap-1.5 truncate">
+                                  <span className="text-red-400 font-extrabold shrink-0">•</span>
+                                  <span className="truncate">{exc}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                        </div>
+
+                        {/* Additional info badge */}
+                        <div className="bg-white/5 p-3 rounded-xl border border-white/10 text-center">
+                          <p className={`text-[8.5px] font-black uppercase tracking-wider ${theme.text}`}>☕ Spesial Seduhan Kopi Manual Brew Gratis Di Puncak Gunung!</p>
+                        </div>
+
+                        {/* Footer Contacts */}
+                        <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest opacity-60 pt-3 border-t border-current border-opacity-10">
+                          <span>Informasi: linktr.ee/ngopi.dketinggian</span>
+                          <span>IG: @ngopi.dketinggian</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* LAYOUT E: RULES (Terms, safety regulations & booking instructions) */}
+                    {layout === 'rules' && (
+                      <div className={`relative z-10 flex flex-col h-full ${ratio === '9:16' ? 'p-[10%]' : 'p-[6%]'} justify-between h-full w-full`}>
+                        {/* Header Branding */}
+                        <div className="flex justify-between items-center border-b border-current border-opacity-15 pb-3">
+                          <div className="flex items-center gap-1.5">
+                            <Compass size={16} style={{ color: theme.accent }} />
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${theme.text}`}>Syarat Ketentuan & Safety</span>
+                          </div>
+                          <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded border border-current" style={{ color: theme.accent }}>Aturan Trip</span>
+                        </div>
+
+                        {/* Rules List */}
+                        <div className="my-auto space-y-3">
+                          <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-3">
+                            <p className="text-[8.5px] font-black uppercase tracking-widest text-amber-400 border-b border-white/5 pb-1">⛰️ Syarat & Keselamatan Pendaki</p>
+                            <div className="space-y-2 text-[9.5px] font-bold text-white/90">
+                              <div className="flex items-start gap-2">
+                                <span className="text-amber-400 shrink-0 font-extrabold">1.</span>
+                                <p className="leading-tight">Peserta wajib sehat jasmani & rohani, tidak ada riwayat penyakit kronis.</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="text-amber-400 shrink-0 font-extrabold">2.</span>
+                                <p className="leading-tight">Membawa perlengkapan pribadi wajib sesuai standar pendakian.</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="text-amber-400 shrink-0 font-extrabold">3.</span>
+                                <p className="leading-tight">Menjaga kelestarian alam: dilarang membuang sampah sembarangan.</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="text-amber-400 shrink-0 font-extrabold">4.</span>
+                                <p className="leading-tight">Patuhi instruksi pemandu (APGI Guide) demi keamanan bersama.</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white/5 p-3.5 rounded-xl border border-white/10 space-y-2 text-center">
+                            <p className="text-[8px] font-black uppercase tracking-widest text-art-orange leading-none">👇 CARA DAFTAR CEPAT & MUDAH</p>
+                            <p className="text-[9px] font-bold leading-snug text-white/80">Hubungi WhatsApp Admin @ngopi.dketinggian, isi formulir data diri, bayar DP pendaftaran, dan Anda siap bertualang!</p>
+                          </div>
+                        </div>
+
+                        {/* Footer Contacts */}
+                        <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest opacity-60 pt-3 border-t border-current border-opacity-10">
+                          <span>WhatsApp: linktr.ee/ngopi.dketinggian</span>
+                          <span>IG: @ngopi.dketinggian</span>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Decor ambient light points inside canvas */}
                     <div className="absolute -bottom-24 -left-24 w-60 h-60 opacity-20 rounded-full blur-[80px]" style={{ backgroundColor: theme.primary }}></div>
                     <div className="absolute -top-24 -right-24 w-60 h-60 opacity-25 rounded-full blur-[80px]" style={{ backgroundColor: theme.accent }}></div>
@@ -808,7 +1018,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     disabled={isDownloading}
                     className="flex-1 bg-art-orange hover:bg-black disabled:bg-gray-400 text-white py-3.5 px-5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 shadow-xl transition-all"
                   >
-                    <Download size={14} /> {isDownloading ? 'Downloading...' : 'Download HD (PNG)'}
+                    <Download size={14} /> {isDownloading ? 'Downloading...' : `Download HD (${layout.toUpperCase()})`}
                   </button>
                   <button 
                     onClick={() => {

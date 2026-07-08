@@ -1022,21 +1022,23 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                               .map((opt: any, i: number) => {
                               const isSelected = selectedOpsional.includes(opt.name);
                               return (
-                                 <div key={i} className="bg-white p-4 rounded-2xl border-2 border-art-text/10 hover:border-art-text/30 transition-all space-y-3 shadow-sm">
-                                    <label className="flex items-start gap-3 cursor-pointer group">
-                                       <input 
-                                         type="checkbox" 
-                                         checked={isSelected}
-                                         onChange={() => handleToggleOption(opt.name)}
-                                         className="w-4 h-4 rounded border-2 border-art-text text-art-orange focus:ring-art-orange mt-0.5 cursor-pointer accent-art-orange"
-                                       />
-                                       <div className="flex flex-col">
-                                          <span className="text-[10px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange transition-colors">{opt.name}</span>
-                                          {opt.priceInfo && (
-                                            <span className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5 tracking-tighter">{opt.priceInfo}</span>
-                                          )}
-                                       </div>
-                                    </label>
+                                 <div key={i} className="bg-white p-4 rounded-2xl border-2 border-art-text/10 hover:border-art-text/30 transition-all space-y-3 shadow-sm w-full">
+                                    <label className="flex items-start gap-3 cursor-pointer group w-full">
+                                        <input 
+                                          type="checkbox" 
+                                          checked={isSelected}
+                                          onChange={() => handleToggleOption(opt.name)}
+                                          className="w-4 h-4 rounded border-2 border-art-text text-art-orange focus:ring-art-orange mt-1 cursor-pointer accent-art-orange shrink-0"
+                                        />
+                                        <div className="flex flex-col w-full">
+                                           <span className="text-[11px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange transition-colors block w-full">{opt.name}</span>
+                                           {opt.priceInfo && (
+                                             <span className="text-[9px] font-bold text-art-orange uppercase mt-1 tracking-tighter block w-full">
+                                               {opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}
+                                             </span>
+                                           )}
+                                        </div>
+                                     </label>
                                     
                                     {isSelected && opt.pricingFormat === 'calculated' && (!opt.subItems || opt.subItems.length === 0) && (
                                        <div className="ml-7 pt-2.5 border-t border-art-text/5 flex items-center justify-between gap-4">

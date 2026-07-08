@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.8";
+export const WEBSITE_VERSION = "1.0.9";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,19 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.0.8",
+  version: "1.0.9",
   patchNotes: [
+    {
+      version: "1.0.9",
+      date: "2026-07-07",
+      notes: [
+        "IG Carousel Multi-Slide Generator 📸: Menambahkan generator layout multi-slide Instagram yang memungkinkan mengunduh hingga 5 slide feeds sekaligus secara berurutan.",
+        "Dua Layout Desain Poster Baru ✨: Menambahkan layout 'Alat' (Gears & Inclusions) dan 'S&K' (Syarat, Ketentuan & Aturan Pendakian) untuk info detail slide Instagram.",
+        "Kustomisasi Harga & Diskon Poster 🏷️: Memperbesar ukuran teks harga paket serta menyejajarkan badge diskon/potongan (misal 8% OFF) tepat di samping harga agar lebih rapi.",
+        "Redesain Layout Opsi Tambahan (Optional Add-on) 🏕️: Menyusun nama opsi dan info harga secara vertikal satu kolom penuh tanpa pembagian kolom ganda untuk keterbacaan yang optimal.",
+        "Sistem Pelacakan Versi & Patch Notes 🔄: Memperbarui database ke versi 1.0.9 beserta patch notes lengkap di Admin Dashboard secara real-time."
+      ]
+    },
     {
       version: "1.0.8",
       date: "2026-07-07",

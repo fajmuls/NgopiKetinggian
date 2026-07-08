@@ -659,20 +659,33 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                   {(config.facilities?.opsi || []).map((opt: any, i: number) => {
                     if (opt.isHidden) return null;
                     return (
-                    <li key={i} className="flex flex-col gap-2 items-start bg-art-bg/30 p-4 rounded-xl border border-art-text/5 hover:border-art-orange hover:bg-art-orange/5 transition-colors">
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-3">
-                          <PlusCircle size={14} className="text-art-orange" />
-                          <span className="text-[11px] md:text-xs font-black uppercase tracking-widest text-art-text">{opt.name}</span>
+                    <li key={i} className="flex flex-col gap-2 items-start bg-art-bg/30 p-5 rounded-2xl border border-art-text/10 hover:border-art-orange hover:bg-art-orange/5 transition-all w-full">
+                      <div className="flex flex-col w-full">
+                        <div className="flex items-center gap-2 mb-1 w-full">
+                          <PlusCircle size={14} className="text-art-orange shrink-0" />
+                          <span className="text-[11px] md:text-xs font-black uppercase tracking-widest text-art-text block w-full">{opt.name}</span>
                         </div>
-                        {opt.priceInfo && <span className="text-[10px] font-black text-white bg-art-orange px-2 py-0.5 rounded-lg">{opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}</span>}
+                        {opt.priceInfo && (
+                          <div className="pl-6 w-full">
+                            <span className="text-[10px] font-black text-art-orange bg-art-orange/10 px-2.5 py-0.5 rounded border border-art-orange/20 inline-block font-bold">
+                              {opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       {opt.subItems && opt.subItems.length > 0 && (
-                        <div className="ml-6 flex flex-wrap gap-2">
+                        <div className="pl-6 w-full mt-2 space-y-2">
                           {opt.subItems.map((sub: any, subIdx: number) => (
-                             <span key={subIdx} className="text-[9px] font-bold text-art-text/60 bg-white px-2 py-1 rounded-md border border-art-text/10 shadow-sm">
-                               {sub.name} {sub.priceInfo ? `- ${sub.priceInfo.toString().toLowerCase().includes('rp') ? sub.priceInfo : `Rp ${sub.priceInfo}`}` : ''}
-                             </span>
+                             <div key={subIdx} className="w-full bg-white p-3 rounded-xl border border-art-text/10 shadow-sm flex flex-col gap-1">
+                               <span className="text-[10px] font-black uppercase tracking-wider text-art-text/80 block w-full">
+                                 {sub.name}
+                               </span>
+                               {sub.priceInfo && (
+                                 <span className="text-[9px] font-bold text-art-orange block">
+                                   {sub.priceInfo.toString().toLowerCase().includes('rp') ? sub.priceInfo : `Rp ${sub.priceInfo}`}
+                                 </span>
+                               )}
+                             </div>
                           ))}
                         </div>
                       )}
