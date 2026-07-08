@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Download, Layout, Smartphone, Monitor, Coffee, Calendar, MapPin, 
   CreditCard, Clock, CheckCircle, Map, Trash2, Eye, Sparkles, 
-  RotateCcw, Compass, Star, ArrowRight, Clipboard, Check
+  RotateCcw, Compass, Star, ArrowRight, Clipboard, Check,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
@@ -15,7 +16,7 @@ interface PosterProps {
 }
 
 type AspectRatio = '1:1' | '4:3' | '16:9' | '9:16';
-type LayoutType = 'poster' | 'rundown' | 'ad' | 'gears' | 'rules';
+type LayoutType = 'poster' | 'rundown' | 'ad' | 'gears' | 'rules' | 'flag' | 'board';
 
 const THEMES = [
   { id: 'dark', color: 'bg-[#111111]', text: 'text-white', primary: '#ff5722', secondary: '#222222', accent: '#ff7a50' },
@@ -29,6 +30,7 @@ const THEMES = [
 ];
 
 export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }: PosterProps) => {
+  const tripName = trip.name || 'Gunung Indonesia';
   const [ratio, setRatio] = useState<AspectRatio>('1:1');
   const [layout, setLayout] = useState<LayoutType>('poster');
   const [theme, setTheme] = useState(THEMES[0]);
@@ -40,7 +42,25 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const cleanVia = rawVia.replace(/^(via|Via|VIA)\s+/i, '');
   const [customVia, setCustomVia] = useState(cleanVia);
   const [showDiscountBadge, setShowDiscountBadge] = useState(trip.showDiscountBadge !== false);
-  const [selectedSlides, setSelectedSlides] = useState<string[]>(['poster', 'rundown', 'gears']);
+  const [selectedSlides, setSelectedSlides] = useState<string[]>([
+    'poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'
+  ]);
+  
+  // Custom text states for Flag and Board layouts
+  const [mountainName, setMountainName] = useState(() => {
+    return tripName.replace(/(Open|Private|Trip|Gunung|Gede|Pangrango)\s*/gi, '').trim() || 'GEDE PANGRANGO';
+  });
+  
+  const [mountainMdpl, setMountainMdpl] = useState(() => {
+    const nameLower = tripName.toLowerCase();
+    if (nameLower.includes('pangrango')) return '3.019 MDPL';
+    if (nameLower.includes('gede')) return '2.958 MDPL';
+    if (nameLower.includes('prau')) return '2.565 MDPL';
+    if (nameLower.includes('merbabu')) return '3.142 MDPL';
+    if (nameLower.includes('rinjani')) return '3.726 MDPL';
+    if (nameLower.includes('semeru')) return '3.676 MDPL';
+    return '2.958 MDPL';
+  });
   
   // New States for mobile responsiveness and user experience
   const [showPreview, setShowPreview] = useState(false);
@@ -51,6 +71,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
 
   const containerRef = useRef<HTMLDivElement>(null);
   const posterRef = useRef<HTMLDivElement>(null);
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
   // Auto Reset preview when crucial visual options change so they click "See Preview" again
   useEffect(() => {
@@ -119,10 +140,18 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     // Reset transform properties so image-to-html processes the source canvas at full 100% scale
     posterRef.current.style.transform = 'none';
     posterRef.current.style.transformOrigin = 'initial';
+
+    // Reset parent wrapper size to full unscaled size to avoid any clipping/cropping
+    const originalParentWidth = canvasWrapperRef.current ? canvasWrapperRef.current.style.width : '';
+    const originalParentHeight = canvasWrapperRef.current ? canvasWrapperRef.current.style.height : '';
+    if (canvasWrapperRef.current) {
+      canvasWrapperRef.current.style.width = `${baseDim.width}px`;
+      canvasWrapperRef.current.style.height = `${baseDim.height}px`;
+    }
     
     try {
       // Delay briefly to allow DOM reflow
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 300));
       const dataUrl = await toPng(posterRef.current, { 
         cacheBust: true, 
         pixelRatio: 4, 
@@ -137,6 +166,10 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     } finally {
       posterRef.current.style.transform = `scale(${scale})`;
       posterRef.current.style.transformOrigin = 'top left';
+      if (canvasWrapperRef.current) {
+        canvasWrapperRef.current.style.width = originalParentWidth;
+        canvasWrapperRef.current.style.height = originalParentHeight;
+      }
       setIsDownloading(false);
     }
   };
@@ -146,9 +179,11 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     setIsDownloading(true);
     
     const originalLayout = layout;
+    const originalParentWidth = canvasWrapperRef.current ? canvasWrapperRef.current.style.width : '';
+    const originalParentHeight = canvasWrapperRef.current ? canvasWrapperRef.current.style.height : '';
     
     try {
-      const slidesToDownload = selectedSlides.filter(s => ['poster', 'rundown', 'ad', 'gears', 'rules'].includes(s));
+      const slidesToDownload = selectedSlides.filter(s => ['poster', 'rundown', 'ad', 'gears', 'rules', 'flag', 'board'].includes(s));
       if (slidesToDownload.length === 0) {
         setIsDownloading(false);
         return;
@@ -159,12 +194,19 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
         setLayout(sType as LayoutType);
         
         // Wait for React state update and DOM repaint
-        await new Promise(resolve => setTimeout(resolve, 700));
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         if (posterRef.current) {
           posterRef.current.style.transform = 'none';
           posterRef.current.style.transformOrigin = 'initial';
           
+          if (canvasWrapperRef.current) {
+            canvasWrapperRef.current.style.width = `${baseDim.width}px`;
+            canvasWrapperRef.current.style.height = `${baseDim.height}px`;
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 300));
+
           const dataUrl = await toPng(posterRef.current, {
             cacheBust: true,
             pixelRatio: 3,
@@ -185,6 +227,10 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
         posterRef.current.style.transform = `scale(${scale})`;
         posterRef.current.style.transformOrigin = 'top left';
       }
+      if (canvasWrapperRef.current) {
+        canvasWrapperRef.current.style.width = originalParentWidth;
+        canvasWrapperRef.current.style.height = originalParentHeight;
+      }
       setIsDownloading(false);
     }
   };
@@ -197,7 +243,6 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     return `Rp ${val.toLocaleString('id-ID')}`;
   };
 
-  const tripName = trip.name || 'Gunung Indonesia';
   const currentPrice = initialType === 'open' 
     ? trip.price 
     : Math.min(...(trip.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.price)) || [0]));
@@ -226,9 +271,9 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     .map((item: any) => typeof item === 'object' ? (item.isHidden ? null : item.name) : item)
     .filter(Boolean);
 
-  // Active items for UI displays with beautiful fallbacks
-  const posterIncludes = inclusionsList.length > 0 ? inclusionsList.slice(0, 4) : ['Tenda Camp', 'Manual Brew Kopi', 'Makan & Minum', 'Guide APGI'];
-  const posterExcludes = exclusionsList.length > 0 ? exclusionsList.slice(0, 4) : ['Perlengkapan Pribadi', 'Transportasi Mepo', 'Obat-obatan Khusus'];
+  // Active items for UI displays with beautiful fallbacks - rendered in full as requested
+  const posterIncludes = inclusionsList.length > 0 ? inclusionsList : ['Tenda Camp', 'Manual Brew Kopi', 'Makan & Minum', 'Guide APGI'];
+  const posterExcludes = exclusionsList.length > 0 ? exclusionsList : ['Perlengkapan Pribadi', 'Transportasi Mepo', 'Obat-obatan Khusus'];
 
   // Instagram Caption Template Generator
   const captionInclusions = posterIncludes.map(item => `✅ ${item}`).join('\n');
@@ -319,8 +364,8 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                   { id: 'poster', label: 'Poster' },
                   { id: 'rundown', label: 'Info' },
                   { id: 'ad', label: 'Iklan' },
-                  { id: 'gears', label: 'Alat' },
-                  { id: 'rules', label: 'S&K' }
+                  { id: 'flag', label: 'Bendera' },
+                  { id: 'board', label: 'Papan' }
                 ].map((l) => (
                   <button
                     key={l.id}
@@ -351,7 +396,9 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                   { id: 'rundown', label: 'Slide 2: Rundown' },
                   { id: 'gears', label: 'Slide 3: Fasilitas' },
                   { id: 'rules', label: 'Slide 4: S&K' },
-                  { id: 'ad', label: 'Slide 5: Promo' }
+                  { id: 'ad', label: 'Slide 5: Promo' },
+                  { id: 'flag', label: 'Slide 6: Bendera' },
+                  { id: 'board', label: 'Slide 7: Papan' }
                 ].map((s) => {
                   const isChecked = selectedSlides.includes(s.id);
                   return (
@@ -425,6 +472,33 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                 placeholder="Via / Jalur..."
               />
             </div>
+
+            {/* Kustomisasi Teks Bendera & Papan */}
+            {['flag', 'board'].includes(layout) && (
+              <div className="space-y-3 bg-orange-50/60 p-4 rounded-2xl border-2 border-art-orange/25">
+                <label className="text-[10px] font-black uppercase text-art-orange tracking-widest flex items-center gap-1.5">
+                  <Compass size={12} /> Kustomisasi Bendera & Papan
+                </label>
+                <div className="space-y-1.5">
+                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Nama Gunung</label>
+                  <input 
+                    className="w-full border-2 border-gray-100 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none bg-white"
+                    value={mountainName}
+                    onChange={e => setMountainName(e.target.value)}
+                    placeholder="Contoh: GEDE PANGRANGO"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Tinggi Gunung (MDPL)</label>
+                  <input 
+                    className="w-full border-2 border-gray-100 p-2.5 rounded-xl text-xs font-bold focus:border-art-orange outline-none bg-white"
+                    value={mountainMdpl}
+                    onChange={e => setMountainMdpl(e.target.value)}
+                    placeholder="Contoh: 2.958 MDPL"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Themes Selector */}
             <div className="space-y-3">
@@ -601,31 +675,63 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                 </button>
               </motion.div>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center overflow-auto p-4 relative min-h-[500px]">
+              <div className="w-full h-full flex flex-col items-center justify-center overflow-auto p-4 relative min-h-[500px] z-10">
                 
-                {/* Poster Workspace Wrapper with dynamic and RIGID bounds scaling layout */}
-                <div 
-                  className="relative flex-shrink-0 shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-white/10 rounded-3xl"
-                  style={{
-                    width: `${baseDim.width * scale}px`,
-                    height: `${baseDim.height * scale}px`,
-                    transition: 'all 0.3s ease-in-out'
-                  }}
-                >
-                  {/* High Resolution Render Canvas */}
+                {/* Visual Slide Header Info */}
+                <div className="mb-4 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15 text-white flex items-center gap-2 shadow-lg text-[9px] font-black uppercase tracking-widest z-20">
+                  <span className="text-art-orange animate-pulse">●</span> 
+                  <span>Preview Slide: {layout === 'poster' ? 'Cover Poster' : layout === 'rundown' ? 'Rencana Perjalanan (Rundown)' : layout === 'ad' ? 'Iklan/Promo' : layout === 'gears' ? 'Alat & Fasilitas' : layout === 'rules' ? 'S&K/Safety Aturan' : layout === 'flag' ? 'Bendera Cetak' : 'Papan Puncak'}</span>
+                  <span className="bg-white/15 px-1.5 py-0.5 rounded text-white/80 font-mono">
+                    {['poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'].indexOf(layout) + 1} / 7
+                  </span>
+                </div>
+
+                {/* Main Row: Prev Button + Canvas Wrapper + Next Button */}
+                <div className="flex items-center gap-4 max-w-full justify-center">
+                  
+                  {/* Prev Button */}
+                  <button 
+                    onClick={() => {
+                      const list = ['poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'];
+                      const curIdx = list.indexOf(layout);
+                      const prevIdx = (curIdx - 1 + list.length) % list.length;
+                      setLayout(list[prevIdx] as LayoutType);
+                    }}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all shadow-lg border border-white/10 shrink-0 hover:scale-105 active:scale-95"
+                    title="Slide Sebelumnya"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+
+                  {/* Poster Workspace Wrapper with dynamic and RIGID bounds scaling layout */}
                   <div 
-                    ref={posterRef}
-                    className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col transition-all duration-300`}
-                    style={{ 
-                      width: `${baseDim.width}px`, 
-                      height: `${baseDim.height}px`,
-                      transform: `scale(${scale})`,
-                      transformOrigin: 'top left',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0
+                    ref={canvasWrapperRef}
+                    className="relative flex-shrink-0 shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-white/10 rounded-[1.5rem] overflow-hidden"
+                    style={{
+                      width: `${baseDim.width * scale}px`,
+                      height: `${baseDim.height * scale}px`,
+                      transition: 'all 0.3s ease-in-out'
                     }}
                   >
+                    {/* High Resolution Render Canvas */}
+                    <motion.div 
+                      key={layout}
+                      initial={{ x: 50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -50, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                      ref={posterRef}
+                      className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col transition-all duration-300`}
+                      style={{ 
+                        width: `${baseDim.width}px`, 
+                        height: `${baseDim.height}px`,
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0
+                      }}
+                    >
                     
                     {/* Background Visual Layer */}
                     <div 
@@ -647,89 +753,99 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     
                     {/* LAYOUT A: POSTER (Cinematic, clean, majestic mountain cover) */}
                     {layout === 'poster' && (
-                      <div className={`relative z-10 flex flex-col h-full ${ratio === '9:16' ? 'p-[12%]' : ratio === '16:9' ? 'p-[5%]' : 'p-[8%]'} justify-between`}>
+                      <div className="relative z-10 flex flex-col h-full w-full justify-between">
                         
-                        {/* Header Branding */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center shadow-lg rotate-6">
-                              <Coffee size={18} className="text-art-orange" />
-                            </div>
-                            <div className={theme.text}>
-                              <h1 className="text-[8px] font-black uppercase tracking-[0.2em] leading-none opacity-85">Ngopi di</h1>
-                              <h2 className="text-xs font-black uppercase tracking-[0.1em] leading-none text-art-orange">Ketinggian</h2>
-                            </div>
+                        {/* Discount Sticker Bubble - Re-added as static, non-blinking circular badge */}
+                        {showDiscountBadge && originalPrice > currentPrice && (
+                          <div className="absolute top-[14%] right-[8%] w-16 h-16 rounded-full border-2 border-white flex flex-col items-center justify-center -rotate-12 shadow-[0_10px_25px_rgba(0,0,0,0.5)] z-20 bg-art-orange animate-none">
+                            <span className="text-white text-sm font-black leading-none">{Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%</span>
+                            <span className="text-white text-[7.5px] font-black uppercase leading-none mt-0.5">OFF</span>
                           </div>
-                          
-                          <div className="inline-block px-2.5 py-0.5 rounded-full border border-current text-[8px] font-black tracking-widest uppercase" style={{ color: theme.accent }}>
-                            {tripTypeLabel}
-                          </div>
-                        </div>
+                        )}
 
-                        {/* Middle: Title Block */}
-                        <div className="my-auto space-y-3">
-                          <p className={`text-[10px] font-black uppercase tracking-[0.4em] opacity-80 ${theme.text}`}>Explore Mountain</p>
-                          <h3 className={`font-black uppercase leading-[0.85] tracking-tighter ${theme.text} ${ratio === '9:16' ? 'text-6xl' : 'text-5xl'}`}>
-                            {tripName}
-                          </h3>
-                          <div className="h-1.5 w-24 rounded-full" style={{ backgroundColor: theme.primary }}></div>
-                          <p className={`text-[9px] font-bold tracking-widest uppercase opacity-70 ${theme.text}`}>Via {customVia}</p>
-                        </div>
-
-                        {/* Bottom Info Row */}
-                        <div className="space-y-4">
-                          <div className={`grid grid-cols-2 ${ratio === '16:9' ? 'grid-cols-4 gap-4' : 'gap-y-4 gap-x-6'} ${theme.text}`}>
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-1.5 opacity-40">
-                                <Calendar size={12} />
-                                <span className="text-[8px] font-black uppercase tracking-widest">Jadwal</span>
+                        <div className={`flex flex-col h-full w-full ${ratio === '9:16' ? 'p-[12%]' : ratio === '16:9' ? 'p-[5%]' : 'p-[8%]'} justify-between flex-1`}>
+                          {/* Header Branding */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center shadow-lg rotate-6">
+                                <Coffee size={18} className="text-art-orange" />
                               </div>
-                              <p className="text-xs font-black">{tripDate}</p>
+                              <div className={theme.text}>
+                                <h1 className="text-[8px] font-black uppercase tracking-[0.2em] leading-none opacity-85">Ngopi di</h1>
+                                <h2 className="text-xs font-black uppercase tracking-[0.1em] leading-none text-art-orange">Ketinggian</h2>
+                              </div>
                             </div>
                             
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-1.5 opacity-40">
-                                <Clock size={12} />
-                                <span className="text-[8px] font-black uppercase tracking-widest">Durasi</span>
-                              </div>
-                              <p className="text-xs font-black uppercase">{tripDuration}</p>
-                            </div>
-
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-1.5 opacity-40">
-                                <MapPin size={12} />
-                                <span className="text-[8px] font-black uppercase tracking-widest">Mepo</span>
-                              </div>
-                              <p className="text-xs font-black truncate">{tripMepo}</p>
-                            </div>
-
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-1.5 opacity-40">
-                                <CreditCard size={12} />
-                                <span className="text-[8px] font-black uppercase tracking-widest font-sans">Harga</span>
-                              </div>
-                              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-                                {originalPrice > currentPrice && (
-                                  <span className="text-[9px] font-black line-through opacity-30 leading-none">
-                                    {formatPrice(originalPrice)}
-                                  </span>
-                                )}
-                                <span className="text-sm md:text-base font-black leading-none" style={{ color: theme.accent }}>
-                                  {formatPrice(currentPrice)}
-                                </span>
-                                {showDiscountBadge && originalPrice > currentPrice && (
-                                  <span className="bg-yellow-400 text-black px-1 py-0.5 rounded text-[7px] font-black uppercase leading-none animate-pulse">
-                                    {Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% OFF
-                                  </span>
-                                )}
-                              </div>
+                            <div className="inline-block px-2.5 py-0.5 rounded-full border border-current text-[8px] font-black tracking-widest uppercase" style={{ color: theme.accent }}>
+                              {tripTypeLabel}
                             </div>
                           </div>
 
-                          {/* Footer links */}
-                          <div className="flex justify-between items-center pt-3 border-t border-current border-opacity-10 text-[9px] font-bold opacity-60">
-                            <span>@ngopi.dketinggian</span>
-                            <span>linktr.ee/ngopi.dketinggian</span>
+                          {/* Middle: Title Block */}
+                          <div className="my-auto space-y-3">
+                            <p className={`text-[10px] font-black uppercase tracking-[0.4em] opacity-80 ${theme.text}`}>Explore Mountain</p>
+                            <h3 className={`font-black uppercase leading-[0.85] tracking-tighter ${theme.text} ${ratio === '9:16' ? 'text-6xl' : 'text-5xl'}`}>
+                              {tripName}
+                            </h3>
+                            <div className="h-1.5 w-24 rounded-full" style={{ backgroundColor: theme.primary }}></div>
+                            <p className={`text-[9px] font-bold tracking-widest uppercase opacity-70 ${theme.text}`}>Via {customVia}</p>
+                          </div>
+
+                          {/* Bottom Info Row */}
+                          <div className="space-y-4">
+                            <div className={`grid grid-cols-2 ${ratio === '16:9' ? 'grid-cols-4 gap-4' : 'gap-y-4 gap-x-6'} ${theme.text}`}>
+                              <div className="space-y-0.5">
+                                <div className="flex items-center gap-1.5 opacity-40">
+                                  <Calendar size={12} />
+                                  <span className="text-[8px] font-black uppercase tracking-widest">Jadwal</span>
+                                </div>
+                                <p className="text-xs font-black">{tripDate}</p>
+                              </div>
+                              
+                              <div className="space-y-0.5">
+                                <div className="flex items-center gap-1.5 opacity-40">
+                                  <Clock size={12} />
+                                  <span className="text-[8px] font-black uppercase tracking-widest">Durasi</span>
+                                </div>
+                                <p className="text-xs font-black uppercase">{tripDuration}</p>
+                              </div>
+
+                              <div className="space-y-0.5">
+                                <div className="flex items-center gap-1.5 opacity-40">
+                                  <MapPin size={12} />
+                                  <span className="text-[8px] font-black uppercase tracking-widest">Mepo</span>
+                                </div>
+                                <p className="text-xs font-black truncate">{tripMepo}</p>
+                              </div>
+
+                              <div className="space-y-0.5">
+                                <div className="flex items-center gap-1.5 opacity-40">
+                                  <CreditCard size={12} />
+                                  <span className="text-[8px] font-black uppercase tracking-widest font-sans">Harga</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                  {originalPrice > currentPrice && (
+                                    <span className="text-[9px] font-black line-through opacity-30 leading-none">
+                                      {formatPrice(originalPrice)}
+                                    </span>
+                                  )}
+                                  <span className="text-sm md:text-base font-black leading-none" style={{ color: theme.accent }}>
+                                    {formatPrice(currentPrice)}
+                                  </span>
+                                  {showDiscountBadge && originalPrice > currentPrice && (
+                                    <span className="bg-yellow-400 text-black px-1.5 py-0.5 rounded text-[8px] font-black uppercase leading-none">
+                                      {Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% OFF
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Footer links */}
+                            <div className="flex justify-between items-center pt-3 border-t border-current border-opacity-10 text-[9px] font-bold opacity-60">
+                              <span>@ngopi.dketinggian</span>
+                              <span>linktr.ee/ngopi.dketinggian</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1005,11 +1121,127 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                       </div>
                     )}
 
+                    {/* LAYOUT F: BENDERA (Community Flag Layout) */}
+                    {layout === 'flag' && (
+                      <div className="relative z-10 flex flex-col h-full p-[10%] justify-between items-center text-center w-full bg-black/40">
+                        {/* Flag Frame Borders */}
+                        <div className="absolute inset-4 border-2 border-dashed opacity-30" style={{ borderColor: theme.accent }}></div>
+                        <div className="absolute inset-6 border pointer-events-none opacity-10" style={{ borderColor: theme.text }}></div>
+
+                        {/* Top: Branding logo */}
+                        <div className="flex flex-col items-center gap-1">
+                          <Compass size={28} className="animate-none" style={{ color: theme.accent }} />
+                          <span className={`text-[9px] font-black uppercase tracking-[0.3em] ${theme.text}`}>EXPEDITION TEAM</span>
+                        </div>
+
+                        {/* Middle: Huge Majestic Mountain Title & MDPL */}
+                        <div className="my-auto space-y-4">
+                          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-art-orange">SUMMIT PROJECT</p>
+                          <h3 className={`font-black uppercase leading-none tracking-tight ${theme.text} text-5xl md:text-6xl drop-shadow-md`}>
+                            {mountainName.toUpperCase()}
+                          </h3>
+                          <div className="h-1 w-32 bg-white/20 mx-auto rounded-full flex items-center justify-center">
+                            <div className="h-1 w-12 rounded-full" style={{ backgroundColor: theme.primary }}></div>
+                          </div>
+                          <p className={`text-2xl font-black tracking-widest ${theme.text}`} style={{ color: theme.accent }}>
+                            {mountainMdpl}
+                          </p>
+                        </div>
+
+                        {/* Bottom: Community Credential */}
+                        <div className="space-y-1 z-10">
+                          <p className="text-[10px] font-black tracking-[0.25em] text-white uppercase leading-none">NGOPI DI KETINGGIAN</p>
+                          <p className="text-[7px] font-black uppercase tracking-[0.15em] opacity-40">Est. 2026 • Premium Mountain Experience</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* LAYOUT G: PAPAN (Summit Sign Board / Papan Puncak Foto) */}
+                    {layout === 'board' && (
+                      <div className="relative z-10 flex flex-col h-full p-[8%] justify-between items-center text-center w-full bg-amber-950/40 rounded-2xl overflow-hidden">
+                        
+                        {/* Wooden Plank Board Styling */}
+                        <div className="absolute inset-2 border-4 border-amber-900 rounded-2xl bg-amber-950/90 shadow-2xl flex flex-col justify-between p-6 overflow-hidden">
+                          {/* Wood Grain Lines */}
+                          <div className="absolute inset-0 opacity-10 bg-gradient-to-b from-transparent via-amber-500/10 to-transparent pointer-events-none"></div>
+                          {/* Horizontal Plank Dividers */}
+                          <div className="absolute left-0 right-0 top-1/3 h-[2px] bg-amber-900/50"></div>
+                          <div className="absolute left-0 right-0 top-2/3 h-[2px] bg-amber-900/50"></div>
+
+                          {/* Corner Bolts/Rivets */}
+                          <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
+                          <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
+                          <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
+                          <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
+
+                          {/* Board Header */}
+                          <div className="flex justify-between items-center border-b border-yellow-600/30 pb-2 z-10 w-full">
+                            <span className="text-[7.5px] font-black uppercase tracking-[0.2em] text-yellow-500">Puncak Sejati</span>
+                            <div className="flex items-center gap-1 text-yellow-500">
+                              <Compass size={10} />
+                              <span className="text-[7px] font-bold">SAVER AREA</span>
+                            </div>
+                          </div>
+
+                          {/* Main Board Content */}
+                          <div className="my-auto space-y-2 z-10">
+                            <h4 className="text-yellow-600 text-[10px] font-black uppercase tracking-[0.3em]">WELCOME TO</h4>
+                            <h3 className="font-extrabold uppercase text-yellow-50 text-3xl md:text-4xl tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-serif">
+                              ⛰️ {mountainName.toUpperCase()} ⛰️
+                            </h3>
+                            <div className="inline-block bg-yellow-500 text-black px-4 py-1.5 rounded-lg text-lg md:text-xl font-black tracking-widest shadow-md">
+                              {mountainMdpl}
+                            </div>
+                            <p className="text-yellow-500/80 text-[8px] font-black tracking-[0.15em] uppercase">
+                              Jalur Pendakian Resmi Via {customVia}
+                            </p>
+                          </div>
+
+                          {/* Board Footer */}
+                          <div className="flex justify-between items-center pt-2 border-t border-yellow-600/30 text-[7px] font-black uppercase text-yellow-600/80 z-10 w-full">
+                            <span>Tgl: {tripDate}</span>
+                            <span>@ngopi.dketinggian</span>
+                          </div>
+                        </div>
+
+                      </div>
+                    )}
+
                     {/* Decor ambient light points inside canvas */}
                     <div className="absolute -bottom-24 -left-24 w-60 h-60 opacity-20 rounded-full blur-[80px]" style={{ backgroundColor: theme.primary }}></div>
                     <div className="absolute -top-24 -right-24 w-60 h-60 opacity-25 rounded-full blur-[80px]" style={{ backgroundColor: theme.accent }}></div>
-                  </div>
+                  </motion.div>
                 </div>
+
+                {/* Right Button */}
+                <button 
+                  onClick={() => {
+                    const list = ['poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'];
+                    const curIdx = list.indexOf(layout);
+                    const nextIdx = (curIdx + 1) % list.length;
+                    setLayout(list[nextIdx] as LayoutType);
+                  }}
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all shadow-lg border border-white/10 shrink-0 hover:scale-105 active:scale-95"
+                  title="Slide Selanjutnya"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+
+              {/* Dots Indicator */}
+              <div className="flex items-center gap-1.5 mt-5 z-20">
+                {['poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'].map((s, idx) => {
+                  const isActive = layout === s;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => setLayout(s as LayoutType)}
+                      className={`h-2 rounded-full transition-all duration-300 ${isActive ? 'w-6 bg-art-orange shadow-md' : 'w-2 bg-white/30 hover:bg-white/60'}`}
+                      title={`Slide ${idx + 1}`}
+                    />
+                  );
+                })}
+              </div>
 
                 {/* Secondary Action Toolbar shown underneath the preview */}
                 <div className="mt-6 flex flex-col sm:flex-row gap-2.5 w-full max-w-sm px-4 relative z-50">

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.0.9";
+export const WEBSITE_VERSION = "1.1.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,19 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.0.9",
+  version: "1.1.0",
   patchNotes: [
+    {
+      version: "1.1.0",
+      date: "2026-07-07",
+      notes: [
+        "Interactive Carousel Slide Navigation 🎴: Menambahkan swipeable/navigasi slide menggunakan tombol Chevron (kiri & kanan) serta dot indikator di panel preview poster untuk berpindah antar slide Instagram feeds (7 slide) secara interaktif.",
+        "Layout Baru: Bendera Komunitas (Community Flag) 🚩: Mengimplementasikan template desain Bendera Cetak beresolusi tinggi dengan logo ekspedisi, nama gunung kustom, MDPL kustom, dan slogan komunitas untuk kebutuhan dokumentasi.",
+        "Layout Baru: Papan Puncak (Summit Sign Board) ⛰️: Mengimplementasikan template desain Papan Puncak berbahan kayu realistis lengkap dengan nama gunung kustom, MDPL kustom, dan footer tanggal keberangkatan otomatis.",
+        "Bubble Diskon Solid & Non-pulsing 🏷️: Mengembalikan bubble stiker diskon circular/bulat yang miring (-rotate-12) di sudut kanan atas poster tanpa animasi kelip-kelip (non-pulsing) agar tidak menutupi informasi penting.",
+        "Form Kustomisasi Gunung & MDPL 📝: Menambahkan input kustom nama gunung dan ketinggian (MDPL) di panel kontrol poster secara kondisional ketika layout Bendera atau Papan diaktifkan."
+      ]
+    },
     {
       version: "1.0.9",
       date: "2026-07-07",
