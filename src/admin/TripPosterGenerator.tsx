@@ -79,7 +79,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     if (window.innerWidth < 768) {
       setActiveMobileTab('controls');
     }
-  }, [ratio, layout, theme, tripTypeLabel]);
+  }, [ratio, theme, tripTypeLabel]);
 
   // Dynamically observe container dimensions to scale high-res DOM perfectly
   useEffect(() => {
