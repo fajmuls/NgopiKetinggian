@@ -45,7 +45,8 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
 
   // Clean Jalur/Via prefix to prevent double "Via Via"
   const rawJalur = (jalur || '').trim();
-  const cleanJalur = rawJalur.replace(/^(via|Via|VIA)\s+/i, '');
+  const cleanJalur = rawJalur.replace(/^(via|Via|VIA)\s+/i, '').trim();
+  const displayJalur = cleanJalur ? `VIA ${cleanJalur}` : '';
 
   // Header
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -55,7 +56,7 @@ export const generateRundownPdf = async (durInfo: any, destinasi: string, jalur:
   doc.setFontSize(24);
   doc.text('ITINERARY / RUNDOWN', 20, 20);
   doc.setFontSize(12);
-  doc.text(`${destinasi.toUpperCase()} VIA ${cleanJalur.toUpperCase()}`, 20, 30);
+  doc.text(`${destinasi.toUpperCase()} ${displayJalur.toUpperCase()}`, 20, 30);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`Durasi: ${durasi}`, 150, 30);
@@ -159,8 +160,9 @@ export const generateInvoice = async (booking: any) => {
   doc.text(`DESTINASI:`, 25, 115);
   doc.setFont('helvetica', 'bold');
   const rawInvoiceJalur = (booking.jalur || '').trim();
-  const cleanInvoiceJalur = rawInvoiceJalur.replace(/^(via|Via|VIA)\s+/i, '');
-  doc.text(`${(booking.destinasi || '').toUpperCase()} (VIA ${cleanInvoiceJalur.toUpperCase()})`, 65, 115);
+  const cleanInvoiceJalur = rawInvoiceJalur.replace(/^(via|Via|VIA)\s+/i, '').trim();
+  const displayInvoiceJalur = cleanInvoiceJalur ? `VIA ${cleanInvoiceJalur}` : '';
+  doc.text(`${(booking.destinasi || '').toUpperCase()} (${displayInvoiceJalur.toUpperCase()})`, 65, 115);
   doc.setFont('helvetica', 'normal');
   doc.text(`JADWAL:`, 25, 122);
   doc.text(`${booking.jadwal || ''}`, 65, 122);

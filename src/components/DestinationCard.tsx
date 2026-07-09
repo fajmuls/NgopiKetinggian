@@ -48,6 +48,12 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   const { selectedItems, toggleItem } = useCompare();
   const isSelectedForCompare = selectedItems.some(i => i.id === dest.id);
   
+  const formatVia = (path: string) => {
+    if (!path) return '';
+    const clean = path.replace(/^(via|Via|VIA)\s+/i, '').trim();
+    return `VIA ${clean}`;
+  };
+
   const [user] = useAuthState(auth);
   const [avgRating, setAvgRating] = useState(0);
   const [reviewsCount, setReviewsCount] = useState(0);
@@ -250,36 +256,38 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
           </button>
         </div>
 
-        <div className="absolute bottom-4 left-4 flex gap-2">
-          <button onClick={() => handleShare('whatsapp')} className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center hover:scale-110 transition-transform shadow-md"><MessageCircle size={14}/></button>
-          <button onClick={() => handleShare('twitter')} className="w-8 h-8 bg-sky-400 text-white rounded-lg flex items-center justify-center hover:scale-110 transition-transform shadow-md"><Share2 size={14}/></button>
-        </div>
+        <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
+          <div className="flex gap-2">
+             <button onClick={() => handleShare('whatsapp')} className="w-10 h-10 bg-green-500/90 backdrop-blur-sm text-white rounded-xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg border border-white/20"><MessageCircle size={18}/></button>
+             <button onClick={() => handleShare('twitter')} className="w-10 h-10 bg-sky-400/90 backdrop-blur-sm text-white rounded-xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg border border-white/20"><Share2 size={18}/></button>
+          </div>
 
-        {((currentDur?.rundownHtml || currentDur?.rundownPdf) && dest.rundownMode !== 'hidden') && (
-           <div className="absolute bottom-4 right-4 flex gap-2">
-              <button 
-                 onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
-                 className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
-                 title="Lihat Rundown (Web)"
-              >
-                 <Eye size={18} />
-              </button>
-              <button 
-                 onClick={(e) => { 
-                    e.stopPropagation(); 
-                    if (currentDur.rundownPdf) {
-                       window.open(currentDur.rundownPdf, '_blank');
-                    } else {
-                       generateRundownPdf(currentDur, dest.name, currentPath.name, currentDur.label);
-                    }
-                 }}
-                 className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
-                 title="Download Itinerary (PDF)"
-              >
-                 <Download size={18} />
-              </button>
-           </div>
-        )}
+          {((currentDur?.rundownHtml || currentDur?.rundownPdf) && dest.rundownMode !== 'hidden') && (
+             <div className="flex gap-2">
+                <button 
+                   onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
+                   className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
+                   title="Lihat Rundown (Web)"
+                >
+                   <Eye size={18} />
+                </button>
+                <button 
+                   onClick={(e) => { 
+                      e.stopPropagation(); 
+                      if (currentDur.rundownPdf) {
+                         window.open(currentDur.rundownPdf, '_blank');
+                      } else {
+                         generateRundownPdf(currentDur, dest.name, currentPath.name, currentDur.label);
+                      }
+                   }}
+                   className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
+                   title="Download Itinerary (PDF)"
+                >
+                   <Download size={18} />
+                </button>
+             </div>
+          )}
+        </div>
       </div>
 
       <div className="p-5 md:p-6">
@@ -331,7 +339,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                             onClick={() => { playClick(); setSelectedPath(idx); }}
                             className={`text-[9px] font-black uppercase px-4 py-2.5 rounded-xl border-2 transition-all ${selectedPath === idx ? 'bg-art-text text-white border-art-text shadow-[4px_4px_0px_0px_#1a1a1a]' : 'bg-white text-art-text border-blue-100 hover:border-art-orange shadow-sm'}`}
                           >
-                            {p.name}
+                            {formatVia(p.name)}
                           </button>
                         ))}
                       </div>

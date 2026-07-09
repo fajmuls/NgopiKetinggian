@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.9.2";
+export const WEBSITE_VERSION = "1.9.3";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,18 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.9.2",
+  version: "1.9.3",
   patchNotes: [
+    {
+      version: "1.9.3",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan Naming VIA: Menghapus redundansi pada penamaan jalur pendakian (VIA) di seluruh platform (Kartu, PDF, Poster).",
+        "Fitur Cuaca Open Trip: Menambahkan widget ramalan cuaca real-time pada setiap kartu Open Trip berdasarkan lokasi gunung.",
+        "Redesain Destination Card: Menyatukan tombol Share dan WhatsApp ke dalam grid navigasi bawah untuk tampilan yang lebih rapi dan selaras.",
+        "Sinkronisasi Data: Memastikan informasi VIA tampil konsisten saat memuat data dari Firestore."
+      ]
+    },
     {
       version: "1.9.2",
       date: "2026-07-09",

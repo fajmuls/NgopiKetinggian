@@ -10,6 +10,7 @@ import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
 import { RundownPreviewModal } from './RundownPreviewModal';
+import { WeatherWidget } from './WeatherWidget';
 import { useCompare } from '../CompareContext';
 
 
@@ -79,6 +80,12 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
 
   const leaders = Array.isArray(ot.leaders) ? ot.leaders : (ot.leader ? [ot.leader] : []);
   
+  const formatVia = (path: string) => {
+    if (!path) return '';
+    const clean = path.replace(/^(via|Via|VIA)\s+/i, '').trim();
+    return `VIA ${clean}`;
+  };
+
   const durInfo = config?.destinationsData?.find((d: any) => d.name === ot.name)?.paths?.find((p: any) => p.name === ot.path)?.durations?.find((dur: any) => dur.label === ot.duration);
 
   const handleShare = (platform: 'whatsapp' | 'twitter') => {
@@ -237,20 +244,21 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                )}
             </div>
 
-         <div className="absolute bottom-3 left-3 flex gap-2">
-            <button onClick={() => handleShare('whatsapp')} className="w-6 h-6 bg-green-500 text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md"><MessageCircle size={10}/></button>
-            <button onClick={() => handleShare('twitter')} className="w-6 h-6 bg-sky-400 text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md"><Share2 size={10}/></button>
-         </div>
-
-         <div className={`absolute bottom-3 right-3 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
-            {getSisaKuota(ot)} Pax Left
+         <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            <div className="flex gap-1 mr-1">
+               <button onClick={() => handleShare('whatsapp')} className="w-6 h-6 bg-green-500/90 backdrop-blur-sm text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md border border-white/20"><MessageCircle size={10}/></button>
+               <button onClick={() => handleShare('twitter')} className="w-6 h-6 bg-sky-400/90 backdrop-blur-sm text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md border border-white/20"><Share2 size={10}/></button>
+            </div>
+            <div className={`backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
+               {getSisaKuota(ot)} Pax Left
+            </div>
          </div>
       </div>
       <div className="p-5 flex-1 flex flex-col">
          <div className="flex justify-between items-center mb-1">
             <span className="text-[9px] font-black uppercase tracking-widest text-art-text/40">{ot.region}</span>
             <span className="text-[8px] font-black text-art-green flex items-center gap-1 uppercase bg-art-green/5 px-2 py-0.5 rounded-full border border-art-green/10">
-               <Globe size={10}/> {ot.path}
+               <Globe size={10}/> {formatVia(ot.path)}
             </span>
          </div>
          <div className="flex justify-between items-start mb-1">
@@ -271,7 +279,9 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden mb-6 border-t border-dashed border-art-text/10 pt-4"
               >
-                 <p className="text-[10px] font-medium text-art-text/60 italic leading-relaxed whitespace-pre-wrap mb-4">{ot.desc || "Bergabunglah dengan trip kami dan nikmati pengalaman mendaki yang tak terlupakan."}</p>
+                 <WeatherWidget location={ot.name} />
+                 
+                 <p className="text-[10px] font-medium text-art-text/60 italic leading-relaxed whitespace-pre-wrap mb-4 mt-4">{ot.desc || "Bergabunglah dengan trip kami dan nikmati pengalaman mendaki yang tak terlupakan."}</p>
                  
                  <div className="flex flex-col gap-1.5 pt-3 border-t border-art-text/5">
                     <div className="flex items-center gap-2">
