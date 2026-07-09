@@ -60,6 +60,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const [posterDesign, setPosterDesign] = useState<number>(1);
   const [infoDesign, setInfoDesign] = useState<number>(1);
   const [adDesign, setAdDesign] = useState<number>(1);
+  const [hideRundown, setHideRundown] = useState(false);
   const [flagShowLogo, setFlagShowLogo] = useState(true);
   const [flagLogoOpacity, setFlagLogoOpacity] = useState(0.8);
   const [flagBgType, setFlagBgType] = useState<'image' | 'color'>('image');
@@ -284,9 +285,13 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
       for (let i = 0; i < slidesToDownload.length; i++) {
         const sType = slidesToDownload[i];
         setDownloadProgress(Math.round(((i) / slidesToDownload.length) * 100));
-        setLayout(sType as LayoutType);
         
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // Fix: Update both layout and currentSlide so the renderer picks the right slide
+        setLayout(sType as LayoutType);
+        const slideIdx = selectedSlides.indexOf(sType);
+        if (slideIdx !== -1) setCurrentSlide(slideIdx);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         if (posterRef.current && canvasWrapperRef.current) {
           posterRef.current.style.transform = 'none';
@@ -512,7 +517,18 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
             
             {['rundown', 'gears', 'rules'].includes(selectedSlides[currentSlide] || layout) && (
               <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100 mt-3">
-                <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Opsi Desain Info</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Opsi Desain Info</label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={hideRundown} 
+                      onChange={(e) => setHideRundown(e.target.checked)}
+                      className="accent-art-orange w-3 h-3"
+                    />
+                    <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Sembunyikan Rundown</span>
+                  </label>
+                </div>
                 <div className="grid grid-cols-5 gap-1 pt-1">
                   {[1,2,3,4,5].map((d) => (
                     <button
@@ -1128,7 +1144,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                               <p className="text-[9px] font-bold text-white/80">Jalur: Via {customVia} • {tripDuration}</p>
                             </div>
 
-                            <div className={`p-3.5 space-y-2 ${infoDesign === 2 ? 'bg-white/5 border border-white/20 rounded-xl backdrop-blur-md' : infoDesign === 3 ? 'bg-black/40 border border-white/10 rounded-xl' : infoDesign === 4 ? 'bg-transparent border-t-2 border-white/20' : infoDesign === 5 ? 'bg-black/60 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)] rounded-xl' : 'bg-black/35 rounded-xl border border-white/10'}`}>
+                            <div className={`p-3.5 space-y-2 ${infoDesign === 2 ? 'bg-white/5 border border-white/20 rounded-xl backdrop-blur-md' : infoDesign === 3 ? 'bg-black/40 border border-white/10 rounded-xl' : infoDesign === 4 ? 'bg-transparent border-t-2 border-white/20' : infoDesign === 5 ? 'bg-black/60 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)] rounded-xl' : 'bg-black/35 rounded-xl border border-white/10'} ${hideRundown ? 'hidden' : ''}`}>
                               <p className="text-[8px] font-black uppercase tracking-widest text-art-orange border-b border-white/5 pb-1">Rencana Kegiatan</p>
                               <div className="space-y-2 text-[9px] font-bold leading-relaxed">
                                 {rundownLines.map((line: string, i: number) => (
@@ -1145,7 +1161,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           <div className="space-y-3 flex flex-col justify-between">
                             <div className={`p-3 flex items-center justify-between ${infoDesign === 2 ? 'bg-white/10 border border-white/20 rounded-xl backdrop-blur-md' : infoDesign === 3 ? 'bg-art-orange/10 border border-art-orange/30 rounded-xl' : infoDesign === 4 ? 'bg-transparent border-y-2 border-white/20' : infoDesign === 5 ? 'bg-black/60 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)] rounded-xl' : 'bg-white/5 border border-white/10 rounded-xl'}`}>
                               <div className="w-full">
-                                <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Highlights Petualangan</p>
+                                <p className="text-[9px] font-black uppercase tracking-widest opacity-90 mb-2">Highlights Petualangan</p>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[9px] font-bold text-white/95">
                                   {posterIncludes.slice(0, 8).map((inc, index) => (
                                     <div key={index} className="flex items-center gap-1.5 truncate">
@@ -1157,7 +1173,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             </div>
 
                             <div className="bg-white/10 p-3 rounded-xl border-2 border-dashed border-white/20">
-                              <p className="text-[8px] font-black uppercase tracking-widest opacity-60">SRP / Harga</p>
+                              <p className="text-[8px] font-black uppercase tracking-widest opacity-90">SRP / Harga</p>
                               <div className="flex items-baseline gap-2 mt-1">
                                 {originalPrice > currentPrice && (
                                   <span className="text-[10px] font-black line-through opacity-30">
@@ -1440,26 +1456,26 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             <h3 className={`text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] ${
                               flagDesign === 5 ? 'text-transparent bg-clip-text bg-gradient-to-r from-white via-art-orange to-white' : 'text-white'
                             }`}>
-                              {mountainName}
+                              {(mountainName.toLowerCase().startsWith('gunung') ? mountainName : 'GUNUNG ' + mountainName).toUpperCase()}
                             </h3>
                           )}
                         </div>
 
-                        {/* Center Logo - LARGE & CIRCULAR */}
+                        {/* Center Logo - REDESIGNED: SHRUNK & NO CIRCLE */}
                         <div 
                           className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-500 ${
-                            flagDesign === 2 ? 'translate-y-[-10%]' : 
-                            flagDesign === 4 ? 'scale-125' : 'scale-110'
+                            flagDesign === 2 ? 'translate-y-[-5%]' : 
+                            flagDesign === 4 ? 'scale-110' : 'scale-100'
                           }`}
                           style={{ opacity: flagShowLogo ? flagLogoOpacity : 0 }}
                         >
-                          <div className={`w-[75%] aspect-square rounded-full overflow-hidden border-8 border-white/10 flex items-center justify-center p-6 bg-white/5 backdrop-blur-sm shadow-2xl ${
-                            flagDesign === 3 ? 'border-art-orange/20' : ''
+                          <div className={`w-[45%] aspect-square flex items-center justify-center p-4 ${
+                            flagDesign === 3 ? 'opacity-90' : ''
                           }`}>
                             <img 
                               src="https://files.catbox.moe/lubzno.png" 
-                              alt="Large App Logo" 
-                              className={`w-full h-full object-contain filter ${
+                              alt="Shrunk App Logo" 
+                              className={`w-full h-full object-contain filter drop-shadow-2xl ${
                                   flagDesign === 3 ? 'grayscale brightness-200' : ''
                               }`}
                             />
@@ -1504,18 +1520,18 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                         
                         {/* Background Mountain Image for Board - TRANSPARENT OVERLAY */}
                         <div className="absolute inset-0 z-0 overflow-hidden">
-                           <img src={trip.image || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop"} className="w-full h-full object-cover opacity-20 grayscale-[30%]" alt="Bg" />
-                           <div className="absolute inset-0 bg-black/10"></div>
+                           <img src={trip.image || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop"} className="w-full h-full object-cover opacity-40 grayscale-[20%]" alt="Bg" />
+                           <div className="absolute inset-0 bg-black/20"></div>
                         </div>
 
                         {/* THE BOARD FRAME */}
                         <div className={`absolute inset-2 border-4 rounded-2xl shadow-2xl flex flex-col justify-between p-6 overflow-hidden z-10 ${
-                          boardDesign === 1 ? 'border-amber-900 bg-amber-950/90' : 
-                          boardDesign === 2 ? 'border-zinc-700 bg-zinc-900' : 
-                          boardDesign === 3 ? 'border-stone-400 bg-stone-100' : 
+                          boardDesign === 1 ? 'border-amber-900 bg-amber-950/70' : 
+                          boardDesign === 2 ? 'border-zinc-700 bg-zinc-900/60' : 
+                          boardDesign === 3 ? 'border-stone-400 bg-stone-100/70' : 
                           boardDesign === 4 ? 'border-white/10 bg-blue-950/40' : 
-                          boardDesign === 5 ? 'border-red-900 bg-red-950/90' : 
-                          'border-amber-900 bg-amber-950/90'
+                          boardDesign === 5 ? 'border-red-900 bg-red-950/70' : 
+                          'border-amber-900 bg-amber-950/70'
                         }`}>
                           
                           {/* Design-Specific Accents */}
@@ -1550,7 +1566,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           <div className={`absolute bottom-2 right-2 w-3 h-3 rounded-full border shadow-inner flex items-center justify-center text-[5px] font-bold ${boardDesign === 3 ? 'bg-stone-400 border-stone-500 text-stone-700' : 'bg-yellow-600/80 border-yellow-800 text-yellow-900'}`}>+</div>
 
                           {/* Board Header */}
-                          <div className={`flex justify-between items-center border-b pb-2 z-10 w-full ${boardDesign === 3 ? 'border-stone-300 text-stone-500' : boardDesign === 4 ? 'border-white/10 text-blue-300' : 'border-yellow-600/30 text-yellow-500'}`}>
+                          <div className={`flex justify-between items-center border-b pb-2 z-10 w-full ${boardDesign === 3 ? 'border-stone-300 text-stone-700' : boardDesign === 4 ? 'border-white/10 text-blue-300' : 'border-yellow-600/30 text-yellow-500'}`}>
                             <span className="text-[8px] font-black uppercase tracking-[0.3em]">{boardDesign === 3 ? 'NATIONAL PARK' : boardDesign === 4 ? 'SKYLINE EXPEDITION' : 'PUNCAK SEJATI'}</span>
                             <div className="flex items-center gap-1">
                               <Compass size={11} />
@@ -1562,7 +1578,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           <div className="my-auto space-y-4 z-10">
                             <h4 className={`text-sm md:text-base font-black uppercase tracking-[0.5em] drop-shadow-sm ${boardDesign === 3 ? 'text-stone-400' : boardDesign === 4 ? 'text-blue-200' : 'text-yellow-600'}`}>WELCOME TO</h4>
                             {boardShowMountain && (
-                              <h3 className={`font-black uppercase text-7xl md:text-9xl lg:text-[10rem] tracking-tighter drop-shadow-[0_8px_20px_rgba(0,0,0,0.95)] ${
+                              <h3 className={`font-black uppercase text-8xl md:text-9xl lg:text-[12rem] tracking-tighter drop-shadow-[0_8px_20px_rgba(0,0,0,0.95)] ${
                                 boardDesign === 3 ? 'text-stone-800' : 
                                 boardDesign === 4 ? 'text-white bg-clip-text bg-gradient-to-b from-white to-blue-200' :
                                 'text-yellow-50'
@@ -1574,7 +1590,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                                 {boardDesign === 2 ? mountainName.toUpperCase() : (mountainName.toLowerCase().startsWith('gunung') ? mountainName : 'GUNUNG ' + mountainName).toUpperCase()}
                               </h3>
                             )}
-                            <div className={`inline-block px-12 py-6 rounded-[2rem] text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter shadow-2xl border-4 ${
+                            <div className={`inline-block px-14 py-8 rounded-[2.5rem] text-7xl md:text-9xl lg:text-[10rem] font-black tracking-tighter shadow-2xl border-4 ${
                               boardDesign === 3 ? 'bg-stone-800 text-stone-100 border-stone-600' : 
                               boardDesign === 4 ? 'bg-art-orange text-white border-white/20' : 
                               boardDesign === 2 ? 'bg-white text-black border-zinc-400' :
@@ -1589,7 +1605,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
                           {/* Board Footer */}
                           <div className={`flex justify-between items-center pt-2 border-t text-[8px] font-black uppercase z-10 w-full ${
-                            boardDesign === 3 ? 'border-stone-300 text-stone-400' : boardDesign === 4 ? 'border-white/10 text-blue-400' : 'border-yellow-600/30 text-yellow-600/80'
+                            boardDesign === 3 ? 'border-stone-400 text-stone-600' : boardDesign === 4 ? 'border-white/10 text-blue-400' : 'border-yellow-600/30 text-yellow-500'
                           }`}>
                             <span>Est. 2026</span>
                             <span>{tripDate}</span>
