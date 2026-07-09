@@ -305,6 +305,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
              const nd = [...data];
              nd[i].status = 'draft';
              setData(nd);
+             updateConfig({ openTrips: nd });
            }}
            className="w-full sm:w-auto bg-yellow-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-colors"
         >
@@ -317,6 +318,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                  const nd = [...data];
                  nd[i].status = 'published';
                  setData(nd);
+                 updateConfig({ openTrips: nd });
                }}
                className="w-full sm:w-auto bg-art-green text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-colors"
             >
@@ -327,6 +329,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                  const nd = [...data];
                  nd[i].status = 'selesai';
                  setData(nd);
+                 updateConfig({ openTrips: nd });
                }}
                className="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-colors"
             >
