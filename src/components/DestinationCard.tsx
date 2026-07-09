@@ -34,93 +34,43 @@ const StarRating = ({ rating, size = 16, interactive = false, onRate }: { rating
   );
 };
 
+import { RatingSystem } from './RatingSystem';
+
 export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (destinasi: string, jalur: string, durasi: string, type: 'private' | 'open') => void, facilities?: any }> = ({ dest, visibilities, onBook, facilities }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showWebRundown, setShowWebRundown] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
   const [highlighted, setHighlighted] = useState(false);
   const { selectedItems, toggleItem } = useCompare();
   const isSelectedForCompare = selectedItems.some(i => i.id === dest.id);
   
   const [user] = useAuthState(auth);
-  // Reviews state
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [newReview, setNewReview] = useState({ name: '', rating: 5, comment: '' });
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [hasCompletedClimb, setHasCompletedClimb] = useState(false);
-  const [checkingCompletedClimb, setCheckingCompletedClimb] = useState(false);
+  const [avgRating, setAvgRating] = useState(0);
+  const [reviewsCount, setReviewsCount] = useState(0);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'mountainReviews'),
+      where('mountainId', '==', dest.name.toLowerCase().replace(/\s+/g, '-'))
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(doc => doc.data());
+      setReviewsCount(data.length);
+      if (data.length > 0) {
+        const sum = data.reduce((acc, curr) => acc + curr.rating, 0);
+        setAvgRating(sum / data.length);
+      } else {
+        setAvgRating(0);
+      }
+    });
+    return () => unsub();
+  }, [dest.name]);
   
   // Calculator state
   const [participants, setParticipants] = useState(2);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [showCalculator, setShowCalculator] = useState(false);
-
-  useEffect(() => {
-    // Fetch reviews from firestore
-    const reviewsRef = collection(db, 'destinations', dest.id, 'reviews');
-    const q = query(reviewsRef, orderBy('date', 'desc'), limit(10));
-    const unsub = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setReviews(data);
-    });
-    return () => unsub();
-  }, [dest.id]);
-
-  const avgRating = useMemo(() => {
-    if (reviews.length === 0) return 0;
-    return reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length;
-  }, [reviews]);
-
-  useEffect(() => {
-    if (!user) {
-      setHasCompletedClimb(false);
-      return;
-    }
-    setCheckingCompletedClimb(true);
-    const bookingsRef = collection(db, 'bookings');
-    const q = query(
-      bookingsRef,
-      where('userId', '==', user.uid),
-      where('destinasi', '==', dest.name),
-      where('status', '==', 'selesai')
-    );
-    getDocs(q).then((snap) => {
-      setHasCompletedClimb(!snap.empty);
-    }).catch((err) => {
-      console.error("Gagal memeriksa status pendakian:", err);
-      setHasCompletedClimb(false);
-    }).finally(() => {
-      setCheckingCompletedClimb(false);
-    });
-  }, [user, dest.name]);
-
-  const handleSubmitReview = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const displayName = user?.displayName || newReview.name || 'Pendaki';
-    if (!displayName || !newReview.comment) {
-      customAlert("Harap isi ulasan terlebih dahulu.");
-      return;
-    }
-    setIsSubmittingReview(true);
-    try {
-      const reviewsRef = collection(db, 'destinations', dest.id, 'reviews');
-      await addDoc(reviewsRef, {
-        name: displayName,
-        rating: newReview.rating,
-        comment: newReview.comment,
-        date: serverTimestamp()
-      });
-      setNewReview({ name: '', rating: 5, comment: '' });
-      setShowReviewForm(false);
-      customAlert("Terima kasih atas ulasan Anda!");
-    } catch (err) {
-      console.error(err);
-      customAlert("Gagal mengirim ulasan.");
-    } finally {
-      setIsSubmittingReview(false);
-    }
-  };
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -182,6 +132,17 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
       className={`group bg-white border-2 rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 relative ${highlighted ? 'border-art-orange shadow-[12px_12px_0px_0px_#ff6b00] ring-4 ring-art-orange/50 ring-offset-4' : 'border-art-text'}`}
     >
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={currentDur?.rundownHtml || currentDur?.rundownText || "Itinerary belum tersedia."} title={`${dest.name} - ${currentDur?.label}`} />
+      
+      <AnimatePresence>
+        {showRatingModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-full max-w-md">
+              <RatingSystem mountainName={dest.name} onClose={() => setShowRatingModal(false)} />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="relative h-64 overflow-hidden border-b-2 border-art-text">
         <img src={dest.image || undefined} alt={dest.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
         
@@ -196,13 +157,19 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
             <div className="bg-white/90 backdrop-blur-sm border-2 border-art-text px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
               <Star size={10} className="text-yellow-500 fill-yellow-500" />
               <span className="text-[10px] font-black">{avgRating.toFixed(1)}</span>
-              <span className="text-[8px] text-art-text/40 font-bold uppercase tracking-tighter">({reviews.length})</span>
+              <span className="text-[8px] text-art-text/40 font-bold uppercase tracking-tighter">({reviewsCount})</span>
             </div>
           )}
         </div>
 
         <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
           <div className="bg-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
+          <button 
+            onClick={(e) => { e.stopPropagation(); playClick(); setShowRatingModal(true); }}
+            className="bg-white/90 backdrop-blur-sm border-2 border-art-text px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm hover:scale-105 transition-transform"
+          >
+            <RatingSystem mountainName={dest.name} showOnlyRating={true} />
+          </button>
           <button 
             onClick={(e) => { e.stopPropagation(); toggleItem({ id: dest.id, name: dest.name, image: dest.image, price: currentDur.price, difficulty: dest.difficulty, region: dest.region || dest.locationTag, duration: currentDur.label, type: 'private' }); }}
             className={`p-2 rounded-xl border-2 transition-all shadow-sm ${isSelectedForCompare ? 'bg-art-text text-white border-art-text' : 'bg-white/90 text-art-text border-art-text/10 hover:border-art-text'}`}
@@ -509,100 +476,18 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                       <div className="space-y-4">
                          <div className="flex items-center justify-between">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-art-text flex items-center gap-2">
-                               <MessageSquare size={14} /> Ulasan Pendaki ({reviews.length})
+                               <MessageSquare size={14} /> Rating & Ulasan Pendaki
                             </h4>
                             <button 
-                              onClick={() => setShowReviewForm(!showReviewForm)}
+                              onClick={() => setShowRatingModal(true)}
                               className="bg-art-text text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-art-orange transition-colors shadow-sm"
                             >
-                              {showReviewForm ? 'Batal' : 'Tulis Ulasan'}
+                              Tulis / Lihat Semua
                             </button>
                          </div>
-
-                         <AnimatePresence>
-                            {showReviewForm && (
-                              <motion.div 
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="bg-art-bg p-4 rounded-xl border border-art-text/5 space-y-3"
-                              >
-                                {!user ? (
-                                  <div className="text-center py-4 space-y-3">
-                                    <AlertCircle size={20} className="mx-auto text-art-orange animate-pulse" />
-                                    <p className="text-[10px] font-black uppercase text-art-text">Anda Harus Login Terlebih Dahulu</p>
-                                    <p className="text-[8px] text-art-text/50 uppercase leading-normal">Silakan login menggunakan Google untuk mulai memberikan rating & ulasan.</p>
-                                    <button 
-                                      type="button" 
-                                      onClick={() => loginWithGoogle().catch(() => {})} 
-                                      className="w-full bg-art-text text-white py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors"
-                                    >
-                                      Login dengan Google
-                                    </button>
-                                  </div>
-                                ) : checkingCompletedClimb ? (
-                                  <p className="text-[8px] font-black uppercase text-center text-art-text/40 py-4 animate-pulse">Memeriksa kelayakan ulasan...</p>
-                                ) : !hasCompletedClimb ? (
-                                  <div className="text-center py-4 space-y-2">
-                                    <AlertCircle size={20} className="mx-auto text-art-orange" />
-                                    <p className="text-[10px] font-black uppercase text-art-text">Akses Terbatas</p>
-                                    <p className="text-[8px] text-art-text/50 px-4 leading-normal uppercase">Hanya pendaki yang telah menyelesaikan perjalanan (booking status: selesai) ke Gunung ini yang dapat memberikan ulasan.</p>
-                                  </div>
-                                ) : (
-                                  <form onSubmit={handleSubmitReview} className="space-y-3">
-                                     <div className="space-y-1">
-                                        <label className="text-[8px] font-black uppercase text-art-text/40">Rating Anda</label>
-                                        <StarRating rating={newReview.rating} size={20} interactive onRate={(r) => setNewReview(prev => ({ ...prev, rating: r }))} />
-                                     </div>
-                                     <input 
-                                        className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-black text-art-text/50 bg-white/50 outline-none cursor-not-allowed"
-                                        placeholder="Nama Anda..."
-                                        value={user?.displayName || ''}
-                                        disabled
-                                        required
-                                     />
-                                     <textarea 
-                                        className="w-full border border-art-text/10 p-2 rounded-lg text-[10px] font-medium outline-none focus:border-art-orange h-20"
-                                        placeholder="Ceritakan pengalaman Anda mendaki gunung ini..."
-                                        value={newReview.comment}
-                                        onChange={e => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
-                                        required
-                                     />
-                                     <button 
-                                        type="submit"
-                                        disabled={isSubmittingReview}
-                                        className="w-full bg-art-text text-white py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-art-orange transition-colors disabled:opacity-50"
-                                      >
-                                        {isSubmittingReview ? 'Mengirim...' : 'Kirim Ulasan'}
-                                     </button>
-                                  </form>
-                                )}
-                              </motion.div>
-                            )}
-                         </AnimatePresence>
-
-                         <div className="space-y-3">
-                            {reviews.length === 0 ? (
-                              <div className="text-center py-8 opacity-20">
-                                 <MessageSquare size={24} className="mx-auto mb-2" />
-                                 <p className="text-[9px] font-black uppercase">Belum ada ulasan</p>
-                              </div>
-                            ) : (
-                              reviews.map((rev) => (
-                                <div key={rev.id} className="bg-white border border-art-text/5 p-4 rounded-xl shadow-sm">
-                                   <div className="flex justify-between items-start mb-2">
-                                      <div>
-                                         <p className="text-[10px] font-black uppercase leading-none">{rev.name}</p>
-                                         <StarRating rating={rev.rating} size={10} />
-                                      </div>
-                                      <span className="text-[8px] font-bold text-art-text/30">
-                                         {rev.date?.toDate?.() ? rev.date.toDate().toLocaleDateString('id-ID') : 'Baru saja'}
-                                      </span>
-                                   </div>
-                                   <p className="text-[10px] font-medium text-art-text/70 italic leading-relaxed">"{rev.comment}"</p>
-                                </div>
-                              ))
-                            )}
+                         <div className="bg-art-bg/30 p-4 rounded-xl border border-art-text/5">
+                            <RatingSystem mountainName={dest.name} showOnlyRating={true} />
+                            <p className="text-[9px] text-art-text/50 mt-2 font-medium">Klik tombol di atas untuk memberikan ulasan atau melihat detail rating dari pendaki lain.</p>
                          </div>
                       </div>
                     )}

@@ -39,6 +39,8 @@ const defaultGalleryPhotos = [
   { src: "https://images.unsplash.com/photo-1498855926480-d98e83099315?q=80&w=2070&auto=format&fit=crop", desc: "Istirahat di camp" }
 ];
 
+import { TestimonialsModal } from './components/TestimonialsModal';
+
 export default function App() {
   const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   const [user] = useAuthState(auth);
@@ -46,6 +48,7 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isTestimonialsOpen, setIsTestimonialsOpen] = useState(false);
   const [bookingPrefill, setBookingPrefill] = useState<any>(undefined);
   const [bookingType, setBookingType] = useState<'open' | 'private'>('open');
   const [filterDifficulty, setFilterDifficulty] = useState('Semua');
@@ -384,6 +387,10 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         showToast={showToastMsg}
         bookings={userBookings}
       />
+      <TestimonialsModal 
+        isOpen={isTestimonialsOpen} 
+        onClose={() => setIsTestimonialsOpen(false)} 
+      />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} setIsHistoryOpen={setIsHistoryOpen} />
       <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
@@ -396,6 +403,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         onLogout={logout}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
+        onOpenTestimonials={() => setIsTestimonialsOpen(true)}
         onOpenBooking={() => handleOpenBooking()}
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}

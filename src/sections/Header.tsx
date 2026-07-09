@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User, ChevronRight, ShoppingBag, Mountain } from 'lucide-react';
+import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User, ChevronRight, ShoppingBag, Mountain, Star } from 'lucide-react';
 
 export const Header = ({ 
   config,
@@ -9,6 +9,7 @@ export const Header = ({
   onLogout, 
   onOpenSettings, 
   onOpenHistory,
+  onOpenTestimonials,
   onOpenBooking,
   searchQuery,
   onSearchChange,
@@ -32,7 +33,12 @@ export const Header = ({
             </div>
           </div>
 
-          <div className="hidden md:flex items-center flex-1 max-w-lg mx-8 relative">
+          <div className="hidden md:flex items-center gap-8 ml-8">
+            <button onClick={() => { const el = document.getElementById('destinasi'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} className="text-[10px] font-black uppercase tracking-widest text-art-text/60 hover:text-art-text transition-colors">Destinasi</button>
+            <button onClick={onOpenTestimonials} className="text-[10px] font-black uppercase tracking-widest text-art-text/60 hover:text-art-orange transition-colors flex items-center gap-1.5"><Star size={14} className="text-yellow-400" fill="currentColor" /> Testimoni</button>
+          </div>
+
+          <div className="hidden md:flex items-center flex-1 max-w-sm mx-8 relative">
             <div className="w-full relative group">
               <input 
                 type="text" 
@@ -172,6 +178,9 @@ export const Header = ({
                 </div>
 
                 <div className="flex flex-col gap-2">
+                  <button onClick={() => { onOpenTestimonials(); setIsMenuOpen(false); }} className="w-full py-3 text-[10px] font-black uppercase tracking-widest bg-art-orange/10 text-art-orange border-2 border-art-orange/20 rounded-xl flex items-center justify-center gap-2 mb-1">
+                    <Star size={14} fill="currentColor" /> Testimoni Pendaki
+                  </button>
                   <div className="grid grid-cols-2 gap-2">
                     {user ? (
                       <>

@@ -12,7 +12,7 @@ import {
   CreditCard, Clock, CheckCircle, Map, Trash2, Eye, Sparkles, 
   RotateCcw, Compass, Star, ArrowRight, Clipboard, Check,
   ChevronLeft, ChevronRight, FileText, Maximize, RotateCw, Plus, Minus,
-  Image as ImageIcon, ChevronDown
+  Image as ImageIcon, ChevronDown, Ticket, Tent, ShoppingBag
 } from 'lucide-react';
 
 interface PosterProps {
@@ -119,11 +119,12 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
 
   // Auto Reset preview when crucial visual options change so they click "See Preview" again
   useEffect(() => {
+    if (isDownloading) return; // Prevent resetting during batch download
     setShowPreview(false);
     if (window.innerWidth < 768) {
       setActiveMobileTab('controls');
     }
-  }, [ratio, layout, theme, tripTypeLabel]);
+  }, [ratio, layout, theme, tripTypeLabel, isDownloading]);
 
   // Dynamically observe container dimensions to scale high-res DOM perfectly
   useEffect(() => {
@@ -954,9 +955,9 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             {/* High Resolution Render Canvas */}
                             <motion.div 
                               key={selectedSlides[currentSlide] || layout}
-                              initial={{ opacity: 0, scale: 0.98 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ duration: 0.3 }}
+                              initial={isDownloading ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
+                              animate={isDownloading ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
+                              transition={isDownloading ? { duration: 0 } : { duration: 0.3 }}
                               ref={posterRef}
                               className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col`}
                               style={{ 
@@ -1027,7 +1028,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             posterDesign === 5 ? 'text-center bg-black/30 backdrop-blur-md p-8 rounded-3xl border border-white/10' : ''
                           }`}>
                             <p className={`text-[10px] font-black uppercase tracking-[0.4em] opacity-80 ${theme.text} ${posterDesign === 4 ? 'font-mono' : ''}`}>Explore Mountain</p>
-                            <h3 className={`font-black uppercase leading-[0.85] tracking-tighter ${theme.text} ${ratio === '9:16' ? 'text-6xl' : 'text-5xl'} ${
+                            <h3 className={`font-black uppercase leading-[0.8] tracking-tighter ${theme.text} ${ratio === '9:16' ? 'text-8xl md:text-9xl' : 'text-7xl md:text-8xl'} ${
                               posterDesign === 2 ? 'font-sans italic' : 
                               posterDesign === 3 ? 'font-serif' : 
                               posterDesign === 4 ? 'font-mono' : 
@@ -1077,7 +1078,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                                       {formatPrice(originalPrice)}
                                     </span>
                                   )}
-                                  <span className="text-sm md:text-base font-black leading-none" style={{ color: theme.accent }}>
+                                  <span className="text-base md:text-lg font-black leading-none" style={{ color: theme.accent }}>
                                     {formatPrice(currentPrice)}
                                   </span>
                                   {showDiscountBadge && originalPrice > currentPrice && (
@@ -1118,7 +1119,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           <div className="space-y-3">
                             <div className={`p-3 rounded-xl backdrop-blur-sm ${infoDesign === 2 ? 'bg-white/10 border border-white/20' : infoDesign === 3 ? 'bg-art-orange/20 border-l-4 border-art-orange' : infoDesign === 4 ? 'bg-transparent border-b-2 border-white/20 rounded-none' : infoDesign === 5 ? 'bg-black/40 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)]' : 'bg-black/20 border border-white/5'}`}>
                               <p className="text-[7px] font-black uppercase tracking-wider opacity-60 mb-0.5">Destinasi Gunung</p>
-                              <h4 className={`text-xl font-black uppercase tracking-tight ${theme.text}`}>{tripName}</h4>
+                              <h4 className={`text-2xl md:text-3xl font-black uppercase tracking-tight ${theme.text}`}>{tripName}</h4>
                               <p className="text-[9px] font-bold opacity-70">Jalur: Via {customVia} • {tripDuration}</p>
                             </div>
 
@@ -1139,11 +1140,11 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           <div className="space-y-3 flex flex-col justify-between">
                             <div className={`p-3 flex items-center justify-between ${infoDesign === 2 ? 'bg-white/10 border border-white/20 rounded-xl backdrop-blur-md' : infoDesign === 3 ? 'bg-art-orange/10 border border-art-orange/30 rounded-xl' : infoDesign === 4 ? 'bg-transparent border-y-2 border-white/20' : infoDesign === 5 ? 'bg-black/60 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)] rounded-xl' : 'bg-white/5 border border-white/10 rounded-xl'}`}>
                               <div className="w-full">
-                                <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-1.5">Fasilitas Utama</p>
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[8px] font-bold text-white/95">
-                                  {posterIncludes.slice(0, 6).map((inc, index) => (
-                                    <div key={index} className="flex items-center gap-1 truncate">
-                                      <CheckCircle size={8} className="text-green-400 shrink-0" /> {inc.split('(')[0].split('&')[0].trim()}
+                                <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Highlights Petualangan</p>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[9px] font-bold text-white/95">
+                                  {posterIncludes.slice(0, 8).map((inc, index) => (
+                                    <div key={index} className="flex items-center gap-1.5 truncate">
+                                      <CheckCircle size={10} className="text-art-orange shrink-0" /> {inc.split('(')[0].split('&')[0].trim()}
                                     </div>
                                   ))}
                                 </div>
@@ -1158,7 +1159,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                                     {formatPrice(originalPrice)}
                                   </span>
                                 )}
-                                <p className="text-2xl font-black" style={{ color: theme.accent }}>
+                                <p className="text-3xl md:text-4xl font-black" style={{ color: theme.accent }}>
                                   {formatPrice(currentPrice)}
                                 </p>
                               </div>
@@ -1217,33 +1218,36 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
                         {/* Top: Hype Banner */}
                         <div className={`flex justify-between items-center bg-black text-white px-4 py-2 rounded-xl border border-white/10 z-10 ${adDesign === 3 ? 'bg-art-orange' : ''}`}>
-                          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white animate-pulse">🔥 SPOT TERBATAS!</span>
-                          <span className="text-[8px] font-black uppercase opacity-60">BOOK VIA WHATSAPP</span>
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white animate-pulse">🔥 PROMO TERBATAS!</span>
+                          <span className="text-[8px] font-black opacity-60">HUBUNGI WHATSAPP</span>
                         </div>
 
                         {/* Title Display */}
                         <div className={`my-auto text-center space-y-3 relative z-10 ${adDesign === 4 ? 'text-left' : ''}`}>
-                          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-art-orange font-mono">ADVENTURE AWAITS</p>
-                          <h3 className={`text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.8] text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.8)] ${
-                            adDesign === 2 ? 'font-serif' : 
-                            adDesign === 4 ? 'font-mono italic' : 'font-sans'
+                          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-art-orange font-mono">EXPLORE INDONESIA</p>
+                          <h3 className={`text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.75] text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.8)] ${
+                            adDesign === 2 ? 'font-serif italic' : 
+                            adDesign === 4 ? 'font-mono' : 'font-sans'
                           }`}>
                             {tripName}
                           </h3>
                           <div className={`flex items-center gap-3 ${adDesign === 4 ? 'justify-start' : 'justify-center'}`}>
-                            <div className="h-px w-8 bg-white/40"></div>
-                            <p className="text-sm font-black text-white italic">Via {customVia} • {tripDuration}</p>
-                            <div className="h-px w-8 bg-white/40"></div>
+                            <div className="h-0.5 w-12 bg-art-orange"></div>
+                            <p className="text-lg font-black text-white">Via {customVia} • {tripDuration}</p>
+                            <div className="h-0.5 w-12 bg-art-orange"></div>
                           </div>
                         </div>
 
                         {/* High Impact Core Services pills */}
                         <div className="space-y-4 max-w-sm mx-auto w-full z-10">
-                          <div className={`grid grid-cols-2 gap-2 ${adDesign === 5 ? 'grid-cols-4' : ''}`}>
+                          <div className={`grid grid-cols-2 gap-3 ${adDesign === 5 ? 'grid-cols-4' : ''}`}>
                             {posterIncludes.slice(0, adDesign === 5 ? 4 : 2).map((inc, i) => (
-                              <div key={i} className="bg-white/5 border border-white/10 px-3 py-2.5 rounded-2xl text-center backdrop-blur-xl">
-                                <span className="block text-[10px] font-black text-white uppercase truncate">
-                                  {i === 0 ? '☕' : i === 1 ? '🏕️' : i === 2 ? '🎒' : '🍲'} {inc.split('(')[0].split(' ')[0]}
+                              <div key={i} className="bg-white/10 border border-white/20 px-4 py-3 rounded-2xl text-center backdrop-blur-2xl shadow-xl flex flex-col items-center gap-1">
+                                <div className="text-art-orange">
+                                  {i === 0 ? <Ticket size={16} /> : i === 1 ? <Tent size={16} /> : i === 2 ? <ShoppingBag size={16} /> : <Coffee size={16} />}
+                                </div>
+                                <span className="block text-[8px] font-black text-white uppercase truncate">
+                                  {inc.split('(')[0].split(' ')[0]}
                                 </span>
                               </div>
                             ))}
@@ -1494,8 +1498,14 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                         'bg-amber-950/40'
                       }`}>
                         
+                        {/* Background Mountain Image for Board */}
+                        <div className="absolute inset-0 z-0">
+                           <img src={trip.image || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop"} className="w-full h-full object-cover opacity-30 grayscale-[50%]" alt="Bg" />
+                           <div className="absolute inset-0 bg-black/40"></div>
+                        </div>
+
                         {/* THE BOARD FRAME */}
-                        <div className={`absolute inset-2 border-4 rounded-2xl shadow-2xl flex flex-col justify-between p-6 overflow-hidden ${
+                        <div className={`absolute inset-2 border-4 rounded-2xl shadow-2xl flex flex-col justify-between p-6 overflow-hidden z-10 ${
                           boardDesign === 1 ? 'border-amber-900 bg-amber-950/90' : 
                           boardDesign === 2 ? 'border-zinc-700 bg-zinc-900' : 
                           boardDesign === 3 ? 'border-stone-400 bg-stone-100' : 
@@ -1554,7 +1564,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           <div className="my-auto space-y-4 z-10">
                             <h4 className={`text-xs md:text-sm font-black uppercase tracking-[0.4em] drop-shadow-sm ${boardDesign === 3 ? 'text-stone-400' : boardDesign === 4 ? 'text-blue-200' : 'text-yellow-600'}`}>WELCOME TO</h4>
                             {boardShowMountain && (
-                              <h3 className={`font-black uppercase text-4xl md:text-7xl tracking-tighter drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] ${
+                              <h3 className={`font-black uppercase text-5xl md:text-8xl tracking-tighter drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)] ${
                                 boardDesign === 3 ? 'text-stone-800' : 
                                 boardDesign === 4 ? 'text-white bg-clip-text bg-gradient-to-b from-white to-blue-200' :
                                 'text-yellow-50'
@@ -1566,7 +1576,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                                 {boardDesign === 2 ? mountainName.toUpperCase() : (mountainName.toLowerCase().startsWith('gunung') ? mountainName : 'GUNUNG ' + mountainName).toUpperCase()}
                               </h3>
                             )}
-                            <div className={`inline-block px-8 py-3 rounded-xl text-3xl md:text-5xl font-black tracking-tighter shadow-2xl border-2 ${
+                            <div className={`inline-block px-10 py-4 rounded-2xl text-4xl md:text-7xl font-black tracking-tighter shadow-2xl border-4 ${
                               boardDesign === 3 ? 'bg-stone-800 text-stone-100 border-stone-600' : 
                               boardDesign === 4 ? 'bg-art-orange text-white border-white/20' : 
                               boardDesign === 2 ? 'bg-white text-black border-zinc-400' :

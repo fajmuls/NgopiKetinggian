@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.6.0";
+export const WEBSITE_VERSION = "1.8.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,34 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.6.0",
+  version: "1.8.0",
   patchNotes: [
+    {
+      version: "1.8.0",
+      date: "2026-07-09",
+      notes: [
+        "Implementasi menu Testimoni & Cerita Pendaki (Testimonials Menu) yang terpusat.",
+        "Integrasi Sistem Rating & Ulasan (Rating System) yang lebih robust di setiap kartu destinasi.",
+        "Peningkatan visual Papan (Board): Penambahan background foto gunung asli dari destinasi terkait.",
+        "Optimasi Tipografi Poster: Memperbesar font nama gunung dan harga untuk visibilitas maksimal.",
+        "Pembaruan Ikon Ad/Iklan: Mengganti emoji dengan ikon profesional (Ticket, Tent, Bag, Coffee).",
+        "Penyesuaian tata letak header untuk akses cepat ke menu Testimoni."
+      ]
+    },
+    {
+      version: "1.7.0",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan sistem download berurutan (Sequential Download) agar lebih stabil.",
+        "Peningkatan desain Poster (1-5): Tipografi lebih berani dan variasi gaya lebih kontras.",
+        "Diferensiasi visual Info vs Iklan: Info fokus pada detail, Iklan fokus pada promosi cepat.",
+        "Reduksi repetisi harga pada slide Info agar lebih profesional.",
+        "Peningkatan Papan Puncak: Penambahan grafis gunung transparan dan font MDPL yang lebih besar.",
+        "Peningkatan Bendera: Logo bulat transparan yang lebih proporsional.",
+        "Penghapusan animasi pada preview saat mode download untuk hasil yang konsisten.",
+        "Implementasi sistem Rating & Testimoni pada setiap destinasi gunung."
+      ]
+    },
     {
       version: "1.6.0",
       date: "2026-07-09",

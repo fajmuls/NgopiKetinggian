@@ -13,9 +13,12 @@ import { RundownPreviewModal } from './RundownPreviewModal';
 import { useCompare } from '../CompareContext';
 
 
+import { RatingSystem } from './RatingSystem';
+
 export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: string, dur: string, type: 'open', jadwal: string) => void, getSisaKuota: (ot: any) => number, visibilities: any, allLeaders: any[], config: any }> = ({ ot, onJoin, getSisaKuota, visibilities, allLeaders, config }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showWebRundown, setShowWebRundown] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
   const { playClick, playHover } = useSound();
   const { selectedItems, toggleItem } = useCompare();
@@ -60,6 +63,17 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
   return (
     <motion.div id={`ot-card-${ot.id || ot.name}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={`bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative ${highlighted ? 'ring-4 ring-art-orange ring-offset-4 ring-offset-art-bg animate-pulse' : ''}`}>
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={ot.rundownHtml || ot.rundownText || durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
+      
+      <AnimatePresence>
+        {showRatingModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-full max-w-md">
+              <RatingSystem mountainName={ot.name} onClose={() => setShowRatingModal(false)} />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
         <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
          
@@ -132,7 +146,15 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                <Globe size={10}/> {ot.path}
             </span>
          </div>
-         <h3 className="text-2xl tracking-tighter font-black uppercase text-art-text mb-4 leading-tight group-hover:text-art-green transition-colors">{ot.name}</h3>
+         <div className="flex justify-between items-start mb-1">
+            <h3 className="text-2xl tracking-tighter font-black uppercase text-art-text mb-4 leading-tight group-hover:text-art-green transition-colors flex-1">{ot.name}</h3>
+            <button 
+               onClick={(e) => { e.stopPropagation(); playClick(); setShowRatingModal(true); }}
+               className="mt-1 flex flex-col items-end hover:scale-105 transition-transform"
+            >
+               <RatingSystem mountainName={ot.name} showOnlyRating={true} />
+            </button>
+         </div>
          
          <AnimatePresence>
             {showDetails && (
