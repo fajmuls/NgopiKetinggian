@@ -223,8 +223,19 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.1.0",
+  version: "1.1.1",
   patchNotes: [
+    {
+      version: "1.1.1",
+      date: "2026-07-08",
+      notes: [
+        "Sistem Testimonial & Ulasan (Cerita): Menambahkan slider testimoni dari pendaki yang telah menyelesaikan trip di section Cerita pada beranda, beserta akumulasi rating dan ulasan per destinasi gunung.",
+        "Struktur Baru Poster Digital: Memisahkan poster menjadi kategori (Kreator, Info, Iklan, Bendera, Papan) dengan manajemen slide yang cerdas (contoh: Info otomatis max 5 slide, Iklan 3 slide).",
+        "Perbaikan Visual Iklan: Iklan kini menggunakan fasilitas aktual (dinamis) dari dashboard, bukan lagi teks statis (seperti ngopi sepuasnya).",
+        "Kustomisasi Desain Bendera & Papan: Menambahkan opsi 5 desain untuk Bendera dan Papan, kustomisasi teks deskripsi Papan, serta penyempurnaan background layout.",
+        "Optimalisasi Panel Preview: Menyematkan fitur scroll lock agar layar tidak bergeser saat preview poster, memperbaiki render resolusi yang terpotong, dan memindahkan tombol action ke panel bawah agar tidak menutupi area desain."
+      ]
+    },
     {
       version: "1.1.0",
       date: "2026-07-07",

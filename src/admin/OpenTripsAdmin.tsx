@@ -299,33 +299,41 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
              </div>
              
              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                {!isPublished ? (
-                  <button 
-                    disabled={!ot.name || !ot.jadwal || !ot.price}
-                    onClick={() => {
-                        const nd = [...data];
-                        nd[i].status = 'published';
-                        setData(nd);
-                        showToast("Trip diterbitkan!");
-                    }}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-1.5 text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-art-green text-white rounded-xl hover:shadow-md transition-all disabled:opacity-30"
-                  >
-                    <Send size={14}/> Terbitkan
-                  </button>
-                ) : (
-                  <button 
-                    disabled={consumed > 0}
-                    onClick={() => {
-                        const nd = [...data];
-                        nd[i].status = 'draft';
-                        setData(nd);
-                        showToast("Trip ditarik ke draft.");
-                    }}
-                    className="flex-1 md:flex-none text-[10px] font-black uppercase px-4 py-3 md:py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all disabled:opacity-30 border border-gray-300"
-                  >
-                    Tarik ke Draft
-                  </button>
-                )}
+                {!isPublished || ot.status === 'selesai' ? (
+        <button
+           onClick={() => {
+             const nd = [...data];
+             nd[i].status = 'draft';
+             setData(nd);
+           }}
+           className="w-full sm:w-auto bg-yellow-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-colors"
+        >
+           Jadikan Draft
+        </button>
+    ) : (
+        <div className="flex flex-col sm:flex-row gap-2">
+            <button
+               onClick={() => {
+                 const nd = [...data];
+                 nd[i].status = 'published';
+                 setData(nd);
+               }}
+               className="w-full sm:w-auto bg-art-green text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-colors"
+            >
+               Publikasi
+            </button>
+            <button
+               onClick={() => {
+                 const nd = [...data];
+                 nd[i].status = 'selesai';
+                 setData(nd);
+               }}
+               className="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-colors"
+            >
+               Selesai
+            </button>
+        </div>
+    )}
                 
                 <button
                   type="button"

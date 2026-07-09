@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Map, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Edit2 } from 'lucide-react';
+import { Star, X, Map, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Edit2 } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
@@ -9,13 +9,15 @@ import { generateRundownPdf, generateInvoice } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
+import { ReviewModal } from './ReviewModal';
 
 
 export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { isOpen: boolean, onClose: () => void, showToast: (m: string, t?: any) => void, bookings: any[] }) => {
   const { playClick, playHover, playBack, playPop } = useSound();
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'proses' | 'lunas'>('proses');
+  const [activeTab, setActiveTab] = useState<'proses' | 'lunas'>('proses'); 
+  const [reviewBooking, setReviewBooking] = useState<any>(null);
 
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'proses') {
@@ -340,6 +342,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
            <p className="text-[9px] font-black text-art-text/30 uppercase tracking-[0.3em]">Ngopi di Ketinggian • Adventure & Brew</p>
         </div>
       </motion.div>
+      <ReviewModal isOpen={!!reviewBooking} onClose={() => setReviewBooking(null)} booking={reviewBooking} user={user} />
     </div>
   );
 };

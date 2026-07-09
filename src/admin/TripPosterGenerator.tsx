@@ -33,6 +33,12 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const tripName = trip.name || 'Gunung Indonesia';
   const [ratio, setRatio] = useState<AspectRatio>('1:1');
   const [layout, setLayout] = useState<LayoutType>('poster');
+  type PostCategory = 'kreator' | 'info' | 'iklan' | 'bendera' | 'papan';
+  const [postCategory, setPostCategory] = useState<PostCategory>('kreator');
+  const [flagDesign, setFlagDesign] = useState<number>(1);
+  const [boardDesign, setBoardDesign] = useState<number>(1);
+  const [boardDescription, setBoardDescription] = useState('Semoga langkah ini menjadi awal dari petualangan hebat lainnya.');
+  const [zoomScale, setZoomScale] = useState(1);
   const [theme, setTheme] = useState(THEMES[0]);
   const [bgOpacity, setBgOpacity] = useState(0.45);
   const [tripTypeLabel, setTripTypeLabel] = useState(initialType === 'open' ? 'OPEN TRIP' : 'PRIVATE TRIP');
@@ -42,9 +48,32 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const cleanVia = rawVia.replace(/^(via|Via|VIA)\s+/i, '');
   const [customVia, setCustomVia] = useState(cleanVia);
   const [showDiscountBadge, setShowDiscountBadge] = useState(trip.showDiscountBadge !== false);
-  const [selectedSlides, setSelectedSlides] = useState<string[]>([
-    'poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'
-  ]);
+  const [selectedSlides, setSelectedSlides] = useState<string[]>(['poster']);
+  
+  useEffect(() => {
+    switch (postCategory) {
+      case 'kreator':
+        setSelectedSlides(['poster']);
+        setLayout('poster');
+        break;
+      case 'info':
+        setSelectedSlides(['poster', 'rundown', 'gears', 'rules', 'ad']);
+        setLayout('poster');
+        break;
+      case 'iklan':
+        setSelectedSlides(['ad', 'rundown', 'gears']);
+        setLayout('ad');
+        break;
+      case 'bendera':
+        setSelectedSlides(['flag']);
+        setLayout('flag');
+        break;
+      case 'papan':
+        setSelectedSlides(['board']);
+        setLayout('board');
+        break;
+    }
+  }, [postCategory]);
   
   // Custom text states for Flag and Board layouts
   const [mountainName, setMountainName] = useState(() => {
@@ -379,52 +408,29 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
               </div>
             </div>
 
-            {/* IG Multi-Slide Carousel Selector */}
-            <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
-              <div className="flex justify-between items-center">
-                <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1">
-                  📸 IG Carousel Slides
-                </label>
-                <span className="text-[8px] bg-art-orange/10 text-art-orange px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Multi-Slide</span>
-              </div>
-              <p className="text-[9px] text-gray-400 leading-tight">
-                Pilih slide yang ingin di-generate & diunduh satu per satu secara otomatis untuk konten carousel feeds Instagram Anda!
-              </p>
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                {[
-                  { id: 'poster', label: 'Slide 1: Cover' },
-                  { id: 'rundown', label: 'Slide 2: Rundown' },
-                  { id: 'gears', label: 'Slide 3: Fasilitas' },
-                  { id: 'rules', label: 'Slide 4: S&K' },
-                  { id: 'ad', label: 'Slide 5: Promo' },
-                  { id: 'flag', label: 'Slide 6: Bendera' },
-                  { id: 'board', label: 'Slide 7: Papan' }
-                ].map((s) => {
-                  const isChecked = selectedSlides.includes(s.id);
-                  return (
+            {/* Additional Controls */}
+            {(postCategory === 'bendera' || postCategory === 'papan') && (
+              <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+                <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Opsi Desain {postCategory}</label>
+                <div className="grid grid-cols-5 gap-1 pt-1">
+                  {[1,2,3,4,5].map((d) => (
                     <button
-                      key={s.id}
-                      onClick={() => {
-                        if (isChecked) {
-                          setSelectedSlides(selectedSlides.filter(x => x !== s.id));
-                        } else {
-                          setSelectedSlides([...selectedSlides, s.id]);
-                        }
-                      }}
-                      className={`py-2 px-2.5 rounded-xl text-[9px] font-black border-2 text-left transition-all flex items-center justify-between ${
-                        isChecked 
-                          ? 'border-art-orange bg-orange-50 text-art-orange' 
-                          : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300'
-                      }`}
+                      key={d}
+                      onClick={() => postCategory === 'bendera' ? setFlagDesign(d) : setBoardDesign(d)}
+                      className={`py-2 rounded-xl text-[9px] font-black border-2 transition-all ${(postCategory === 'bendera' ? flagDesign === d : boardDesign === d) ? 'border-art-orange bg-orange-50 text-art-orange' : 'border-gray-200 bg-white text-gray-400'}`}
                     >
-                      <span className="truncate">{s.label}</span>
-                      <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border text-[8px] ${isChecked ? 'bg-art-orange border-art-orange text-white' : 'border-gray-300 bg-gray-50 text-transparent'}`}>✓</span>
+                      D{d}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
+                {postCategory === 'papan' && (
+                  <div className="pt-2">
+                     <label className="text-[10px] font-black uppercase text-gray-400 block mb-1">Deskripsi Papan</label>
+                     <textarea className="w-full text-xs p-2 border rounded-xl" rows={3} value={boardDescription} onChange={e => setBoardDescription(e.target.value)} />
+                  </div>
+                )}
               </div>
-            </div>
-
+            )}
             {/* Ratio Selector */}
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-1.5">
@@ -625,8 +631,9 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
           {/* Right Panel: Preview Area / Workspace */}
           <div 
-            ref={containerRef} 
-            className={`flex-1 bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8 flex items-center justify-center overflow-auto relative ${activeMobileTab === 'preview' ? 'block' : 'hidden md:block'}`}
+             ref={containerRef} 
+             className={`flex-1 bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col items-center justify-center overflow-hidden relative ${activeMobileTab === 'preview' ? 'block' : 'hidden md:block'}`}
+             style={{ touchAction: 'none' }}
           >
             
             {/* Dynamic Rendering based on Preview state */}
@@ -678,39 +685,20 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
               <div className="w-full h-full flex flex-col items-center justify-center overflow-auto p-4 relative min-h-[500px] z-10">
                 
                 {/* Visual Slide Header Info */}
-                <div className="mb-4 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15 text-white flex items-center gap-2 shadow-lg text-[9px] font-black uppercase tracking-widest z-20">
-                  <span className="text-art-orange animate-pulse">●</span> 
-                  <span>Preview Slide: {layout === 'poster' ? 'Cover Poster' : layout === 'rundown' ? 'Rencana Perjalanan (Rundown)' : layout === 'ad' ? 'Iklan/Promo' : layout === 'gears' ? 'Alat & Fasilitas' : layout === 'rules' ? 'S&K/Safety Aturan' : layout === 'flag' ? 'Bendera Cetak' : 'Papan Puncak'}</span>
-                  <span className="bg-white/15 px-1.5 py-0.5 rounded text-white/80 font-mono">
-                    {['poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'].indexOf(layout) + 1} / 7
-                  </span>
-                </div>
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/15 text-white shadow-lg text-[9px] font-black uppercase tracking-widest z-50 flex items-center gap-2">
+      <span className="text-art-orange animate-pulse">●</span> PREVIEW: {postCategory.toUpperCase()} MODE
+   </div>
 
-                {/* Main Row: Prev Button + Canvas Wrapper + Next Button */}
-                <div className="flex items-center gap-4 max-w-full justify-center">
-                  
-                  {/* Prev Button */}
-                  <button 
-                    onClick={() => {
-                      const list = ['poster', 'rundown', 'gears', 'rules', 'ad', 'flag', 'board'];
-                      const curIdx = list.indexOf(layout);
-                      const prevIdx = (curIdx - 1 + list.length) % list.length;
-                      setLayout(list[prevIdx] as LayoutType);
-                    }}
-                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all shadow-lg border border-white/10 shrink-0 hover:scale-105 active:scale-95"
-                    title="Slide Sebelumnya"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-
+                {/* Main Row: Just the scalable canvas wrapper in an overflow-auto box */}
+                <div className="flex-1 w-full h-full overflow-auto flex items-center justify-center custom-scrollbar" style={{ touchAction: 'pan-x pan-y' }}>
                   {/* Poster Workspace Wrapper with dynamic and RIGID bounds scaling layout */}
                   <div 
                     ref={canvasWrapperRef}
-                    className="relative flex-shrink-0 shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-white/10 rounded-[1.5rem] overflow-hidden"
+                    className="relative flex-shrink-0 shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-white/10 rounded-[1.5rem] overflow-hidden transition-transform duration-300 origin-center"
                     style={{
                       width: `${baseDim.width * scale}px`,
                       height: `${baseDim.height * scale}px`,
-                      transition: 'all 0.3s ease-in-out'
+                      transform: `scale(${zoomScale})`
                     }}
                   >
                     {/* High Resolution Render Canvas */}
@@ -965,14 +953,12 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                         {/* High Impact Core Services pills */}
                         <div className="space-y-2 max-w-sm mx-auto w-full z-10">
                           <div className="grid grid-cols-2 gap-1.5">
-                            <div className="bg-black/60 border border-white/10 px-2 py-1.5 rounded-xl text-center backdrop-blur-md">
-                              <span className="block text-[7px] text-white/50 uppercase">Manual Brew</span>
-                              <span className="text-[9px] font-black text-white uppercase">☕ KOPI SEPUASNYA</span>
-                            </div>
-                            <div className="bg-black/60 border border-white/10 px-2 py-1.5 rounded-xl text-center backdrop-blur-md">
-                              <span className="block text-[7px] text-white/50 uppercase">Alat Lengkap</span>
-                              <span className="text-[9px] font-black text-white uppercase">🏕️ ALAT DISEDIAKAN</span>
-                            </div>
+                            {posterIncludes.slice(0, 2).map((inc, i) => (
+                              <div key={i} className="bg-black/60 border border-white/10 px-2 py-1.5 rounded-xl text-center backdrop-blur-md">
+                                <span className="block text-[7px] text-white/50 uppercase">Fasilitas</span>
+                                <span className="text-[9px] font-black text-white uppercase overflow-hidden text-ellipsis whitespace-nowrap">{i === 0 ? '☕' : '🏕️'} {inc}</span>
+                              </div>
+                            ))}
                           </div>
 
                           {/* Price Display inside highlighted card with nested Discount text right next to the price */}
@@ -1123,35 +1109,49 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
                     {/* LAYOUT F: BENDERA (Community Flag Layout) */}
                     {layout === 'flag' && (
-                      <div className="relative z-10 flex flex-col h-full p-[10%] justify-between items-center text-center w-full bg-black/40">
+                      <div className={`relative z-10 flex flex-col h-full p-[10%] justify-between items-center text-center w-full bg-black/40 ${flagDesign === 2 ? 'bg-gradient-to-t from-black to-transparent' : flagDesign === 3 ? 'bg-art-text' : flagDesign === 4 ? 'bg-transparent border-[12px] border-white' : ''}`}>
                         {/* Flag Frame Borders */}
-                        <div className="absolute inset-4 border-2 border-dashed opacity-30" style={{ borderColor: theme.accent }}></div>
-                        <div className="absolute inset-6 border pointer-events-none opacity-10" style={{ borderColor: theme.text }}></div>
-
-                        {/* Top: Branding logo */}
-                        <div className="flex flex-col items-center gap-1">
-                          <Compass size={28} className="animate-none" style={{ color: theme.accent }} />
-                          <span className={`text-[9px] font-black uppercase tracking-[0.3em] ${theme.text}`}>EXPEDITION TEAM</span>
-                        </div>
-
-                        {/* Middle: Huge Majestic Mountain Title & MDPL */}
-                        <div className="my-auto space-y-4">
-                          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-art-orange">SUMMIT PROJECT</p>
-                          <h3 className={`font-black uppercase leading-none tracking-tight ${theme.text} text-5xl md:text-6xl drop-shadow-md`}>
-                            {mountainName.toUpperCase()}
+                        {flagDesign === 1 && (
+                          <>
+                            <div className="absolute inset-4 border-2 border-dashed opacity-30" style={{ borderColor: theme.accent }}></div>
+                            <div className="absolute inset-6 border pointer-events-none opacity-10" style={{ borderColor: theme.text }}></div>
+                          </>
+                        )}
+                        
+                        {/* Top: Association & Title */}
+                        <div className="space-y-3 z-10">
+                          {flagDesign !== 3 && <div className="w-16 h-16 bg-white/10 rounded-full mx-auto backdrop-blur-md flex items-center justify-center shadow-lg border border-white/20 mb-4">
+                            <Compass size={32} className="text-white opacity-90" />
+                          </div>}
+                          <p className={`text-xs font-black uppercase tracking-[0.4em] drop-shadow-md ${flagDesign === 3 ? 'text-art-orange' : 'text-white'}`}>OFFICIAL EXPEDITION</p>
+                          <h3 className={`text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)] font-sans ${flagDesign === 5 ? 'text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400' : 'text-white'}`}>
+                            {mountainName}
                           </h3>
-                          <div className="h-1 w-32 bg-white/20 mx-auto rounded-full flex items-center justify-center">
-                            <div className="h-1 w-12 rounded-full" style={{ backgroundColor: theme.primary }}></div>
-                          </div>
-                          <p className={`text-2xl font-black tracking-widest ${theme.text}`} style={{ color: theme.accent }}>
-                            {mountainMdpl}
-                          </p>
                         </div>
 
-                        {/* Bottom: Community Credential */}
-                        <div className="space-y-1 z-10">
-                          <p className="text-[10px] font-black tracking-[0.25em] text-white uppercase leading-none">NGOPI DI KETINGGIAN</p>
-                          <p className="text-[7px] font-black uppercase tracking-[0.15em] opacity-40">Est. 2026 • Premium Mountain Experience</p>
+                        {/* Center Logo Semi Transparent */}
+                        <div className={`absolute inset-0 flex items-center justify-center pointer-events-none ${flagDesign === 4 ? 'opacity-10' : 'opacity-20'}`}>
+                          <Map size={ratio === '9:16' ? 200 : 300} className="text-white" />
+                        </div>
+
+                        {/* Bottom: Elevation & Branding */}
+                        <div className="space-y-3 z-10 w-full px-8">
+                          <div className="flex items-center justify-center gap-4">
+                            <div className="h-px bg-white/30 flex-1"></div>
+                            <span className="text-xl md:text-3xl font-black text-art-orange drop-shadow-lg">{mountainMdpl}</span>
+                            <div className="h-px bg-white/30 flex-1"></div>
+                          </div>
+                          
+                          <div className="pt-2 flex justify-between items-end w-full">
+                            <div className="text-left">
+                              <span className="block text-[8px] font-black uppercase text-white/50 tracking-widest mb-1">Organized By</span>
+                              <span className="text-sm font-black uppercase text-white tracking-widest">NGOPI DI KETINGGIAN</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="block text-[8px] font-black uppercase text-white/50 tracking-widest mb-1">Est</span>
+                              <span className="text-sm font-black uppercase text-white tracking-widest font-mono">2024</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}

@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Calendar, Users, ChevronRight, Tent, Mountain, CheckCircle2, User, Camera, X, PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History, CheckCircle } from 'lucide-react';
+import { Star, X, Mountain, Coffee, ChevronRight, CheckCircle2,  PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History, CheckCircle } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
@@ -183,6 +183,7 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [userBookings, setUserBookings] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -442,22 +443,53 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 {config.homepage?.ceritaParagraph1 || "Selama lebih dari 10 tahun..."}
               </p>
               
+              {/* Testimonials / Cerita Slider */}
+              <div className="mt-8 mb-10 overflow-hidden relative w-full bg-white/40 border border-art-text/10 p-6 rounded-3xl shadow-sm backdrop-blur-md">
+                 <h4 className="text-sm font-black uppercase tracking-widest text-art-text mb-4 flex items-center gap-2">
+                    <Star size={16} className="text-yellow-500" fill="currentColor" /> Cerita Pendaki
+                 </h4>
+                 {reviews.filter(r => r.status !== 'hidden').length > 0 ? (
+                    <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
+                       {reviews.filter(r => r.status !== 'hidden').map((r, idx) => (
+                         <div key={idx} className="min-w-[280px] w-[280px] bg-white border-2 border-art-text/10 rounded-2xl p-5 shrink-0 snap-center shadow-sm">
+                            <div className="flex justify-between items-start mb-3">
+                               <div>
+                                  <span className="block text-xs font-black uppercase text-art-text truncate w-32">{r.userName}</span>
+                                  <span className="block text-[9px] font-bold uppercase text-art-orange tracking-widest">{r.mountainName}</span>
+                               </div>
+                               <div className="flex gap-0.5 text-yellow-400">
+                                  {[1,2,3,4,5].map(s => (
+                                     <Star key={s} size={10} fill={s <= r.rating ? "currentColor" : "none"} className={s <= r.rating ? "" : "text-gray-300"} />
+                                  ))}
+                               </div>
+                            </div>
+                            <p className="text-xs text-art-text/80 italic font-medium line-clamp-4">"{r.review}"</p>
+                         </div>
+                       ))}
+                    </div>
+                 ) : (
+                    <p className="text-xs text-art-text/50 font-bold italic">Belum ada cerita yang dibagikan.</p>
+                 )}
+              </div>
+              
               {/* Dynamic Stats Row */}
-              <div className="mt-12 grid grid-cols-3 gap-6 pt-10 border-t-2 border-art-text/10 bg-white/50 backdrop-blur-sm rounded-3xl p-6 shadow-sm mb-10">
+              <div className="grid grid-cols-3 gap-6 pt-10 border-t-2 border-art-text/10 bg-white/50 backdrop-blur-sm rounded-3xl p-6 shadow-sm mb-10">
                 <div className="text-center group hover:scale-105 transition-transform">
                   <p className="text-2xl md:text-4xl font-black text-art-text tracking-tighter mb-1">{config.homepage?.statHikers || '100+'}</p>
                   <p className="text-[8px] md:text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em]">Happy Hikers</p>
                 </div>
                 <div className="text-center border-x-2 border-art-text/10 group hover:scale-105 transition-transform">
-                  <p className="text-2xl md:text-4xl font-black text-art-text tracking-tighter mb-1">{config.homepage?.statSatisfaction || '99%'}</p>
-                  <p className="text-[8px] md:text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em]">Satisfaction</p>
+                  <p className="text-2xl md:text-4xl font-black text-art-text tracking-tighter mb-1">
+                     {reviews.length > 0 ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1) + '/5' : (config.homepage?.statSatisfaction || '99%')}
+                  </p>
+                  <p className="text-[8px] md:text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em]">Rating</p>
                 </div>
                 <div className="text-center group hover:scale-105 transition-transform">
                   <p className="text-2xl md:text-4xl font-black text-art-text tracking-tighter mb-1">{config.homepage?.statTrips || '50+'}</p>
                   <p className="text-[8px] md:text-[10px] font-black uppercase text-art-text/40 tracking-[0.2em]">Destinations</p>
                 </div>
               </div>
-
+              
               <div className="space-y-6 border-l-2 border-art-text/10 pl-6">
                 {(config.homepage?.ceritaFeatures || []).map((item: any, i: number) => (
                   <div key={i} className="flex gap-4 items-start" onMouseEnter={playHover}>
