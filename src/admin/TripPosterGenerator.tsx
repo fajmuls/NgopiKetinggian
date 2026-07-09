@@ -51,6 +51,8 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const [selectedSlides, setSelectedSlides] = useState<string[]>(['poster']);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [posterDesign, setPosterDesign] = useState<number>(1);
+  const [infoDesign, setInfoDesign] = useState<number>(1);
+  const [adDesign, setAdDesign] = useState<number>(1);
   const [flagShowLogo, setFlagShowLogo] = useState(true);
   const [flagShowMountain, setFlagShowMountain] = useState(true);
   const [boardShowMountain, setBoardShowMountain] = useState(true);
@@ -174,9 +176,16 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     // Reset parent wrapper size to full unscaled size to avoid any clipping/cropping
     const originalParentWidth = canvasWrapperRef.current ? canvasWrapperRef.current.style.width : '';
     const originalParentHeight = canvasWrapperRef.current ? canvasWrapperRef.current.style.height : '';
+    const originalParentPosition = canvasWrapperRef.current ? canvasWrapperRef.current.style.position : '';
+    const originalParentZIndex = canvasWrapperRef.current ? canvasWrapperRef.current.style.zIndex : '';
+    
     if (canvasWrapperRef.current) {
       canvasWrapperRef.current.style.width = `${baseDim.width}px`;
       canvasWrapperRef.current.style.height = `${baseDim.height}px`;
+      canvasWrapperRef.current.style.position = 'fixed';
+      canvasWrapperRef.current.style.left = '0';
+      canvasWrapperRef.current.style.top = '0';
+      canvasWrapperRef.current.style.zIndex = '-9999';
     }
     
     try {
@@ -199,6 +208,10 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
       if (canvasWrapperRef.current) {
         canvasWrapperRef.current.style.width = originalParentWidth;
         canvasWrapperRef.current.style.height = originalParentHeight;
+        canvasWrapperRef.current.style.position = originalParentPosition;
+        canvasWrapperRef.current.style.left = '';
+        canvasWrapperRef.current.style.top = '';
+        canvasWrapperRef.current.style.zIndex = originalParentZIndex;
       }
       setIsDownloading(false);
     }
@@ -260,6 +273,10 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
       if (canvasWrapperRef.current) {
         canvasWrapperRef.current.style.width = originalParentWidth;
         canvasWrapperRef.current.style.height = originalParentHeight;
+        canvasWrapperRef.current.style.position = originalParentPosition;
+        canvasWrapperRef.current.style.left = '';
+        canvasWrapperRef.current.style.top = '';
+        canvasWrapperRef.current.style.zIndex = originalParentZIndex;
       }
       setIsDownloading(false);
     }
@@ -427,6 +444,41 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
               </div>
             )}
             
+            
+            {['rundown', 'gears', 'rules'].includes(selectedSlides[currentSlide] || layout) && (
+              <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100 mt-3">
+                <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Opsi Desain Info</label>
+                <div className="grid grid-cols-5 gap-1 pt-1">
+                  {[1,2,3,4,5].map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setInfoDesign(d)}
+                      className={`py-2 rounded-xl text-[9px] font-black border-2 transition-all ${infoDesign === d ? 'border-art-orange bg-orange-50 text-art-orange' : 'border-gray-200 bg-white text-gray-400'}`}
+                    >
+                      D{d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {(selectedSlides[currentSlide] || layout) === 'ad' && (
+              <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100 mt-3">
+                <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Opsi Desain Promo</label>
+                <div className="grid grid-cols-5 gap-1 pt-1">
+                  {[1,2,3,4,5].map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setAdDesign(d)}
+                      className={`py-2 rounded-xl text-[9px] font-black border-2 transition-all ${adDesign === d ? 'border-art-orange bg-orange-50 text-art-orange' : 'border-gray-200 bg-white text-gray-400'}`}
+                    >
+                      D{d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {(layout === 'rundown' || layout === 'ad') && (
                <div className="space-y-3 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
                   <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Pilih Slide</label>
@@ -925,13 +977,13 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           
                           {/* Left Column: Mountain Specs & Rundown */}
                           <div className="space-y-3">
-                            <div className="bg-black/20 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+                            <div className={`p-3 rounded-xl backdrop-blur-sm ${infoDesign === 2 ? 'bg-white/10 border border-white/20' : infoDesign === 3 ? 'bg-art-orange/20 border-l-4 border-art-orange' : infoDesign === 4 ? 'bg-transparent border-b-2 border-white/20 rounded-none' : infoDesign === 5 ? 'bg-black/40 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)]' : 'bg-black/20 border border-white/5'}`}>
                               <p className="text-[7px] font-black uppercase tracking-wider opacity-60 mb-0.5">Destinasi Gunung</p>
                               <h4 className={`text-xl font-black uppercase tracking-tight ${theme.text}`}>{tripName}</h4>
                               <p className="text-[9px] font-bold opacity-70">Jalur: Via {customVia} • {tripDuration}</p>
                             </div>
 
-                            <div className="bg-black/35 p-3.5 rounded-xl border border-white/10 space-y-2">
+                            <div className={`p-3.5 space-y-2 ${infoDesign === 2 ? 'bg-white/5 border border-white/20 rounded-xl backdrop-blur-md' : infoDesign === 3 ? 'bg-black/40 border border-white/10 rounded-xl' : infoDesign === 4 ? 'bg-transparent border-t-2 border-white/20' : infoDesign === 5 ? 'bg-black/60 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)] rounded-xl' : 'bg-black/35 rounded-xl border border-white/10'}`}>
                               <p className="text-[8px] font-black uppercase tracking-widest text-art-orange border-b border-white/5 pb-1">Rencana Kegiatan</p>
                               <div className="space-y-2 text-[9px] font-bold leading-relaxed text-white/90">
                                 {rundownLines.map((line: string, i: number) => (
@@ -946,7 +998,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
                           {/* Right Column: Pricing & Inclusions */}
                           <div className="space-y-3 flex flex-col justify-between">
-                            <div className="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+                            <div className={`p-3 flex items-center justify-between ${infoDesign === 2 ? 'bg-white/10 border border-white/20 rounded-xl backdrop-blur-md' : infoDesign === 3 ? 'bg-art-orange/10 border border-art-orange/30 rounded-xl' : infoDesign === 4 ? 'bg-transparent border-y-2 border-white/20' : infoDesign === 5 ? 'bg-black/60 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)] rounded-xl' : 'bg-white/5 border border-white/10 rounded-xl'}`}>
                               <div className="w-full">
                                 <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-1.5">Fasilitas Included</p>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[8px] font-bold text-white/95">
@@ -988,12 +1040,38 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     {(selectedSlides[currentSlide] || layout) === 'ad' && (
                       <div className={`relative z-10 flex flex-col h-full ${ratio === '9:16' ? 'p-[12%]' : 'p-[8%]'} justify-between h-full w-full`}>
                         
-                        {/* Elegant custom border structures to prevent overlap & keep layout extremely attractive */}
-                        <div className="absolute inset-4 border-[3px] pointer-events-none z-20" style={{ borderColor: theme.primary }}></div>
-                        <div className="absolute inset-5 border border-dashed pointer-events-none z-20 opacity-40" style={{ borderColor: theme.accent }}></div>
-                        
-                        {/* Absolute positioned neo-brutalist corner frames for maximum design aesthetic */}
-                        <div className="absolute top-2 left-2 w-6 h-6 border-t-4 border-l-4" style={{ borderColor: theme.accent }}></div>
+                        {/* Custom Design Variations based on adDesign */}
+                        {adDesign === 1 && (
+                            <>
+                                <div className="absolute inset-4 border-[3px] pointer-events-none z-20" style={{ borderColor: theme.primary }}></div>
+                                <div className="absolute inset-5 border border-dashed pointer-events-none z-20 opacity-40" style={{ borderColor: theme.accent }}></div>
+                            </>
+                        )}
+                        {adDesign === 2 && (
+                            <div className="absolute inset-6 border-4 pointer-events-none z-20 shadow-[0_0_20px_rgba(255,255,255,0.2)]" style={{ borderColor: 'white', borderRadius: '2rem' }}></div>
+                        )}
+                        {adDesign === 3 && (
+                            <div className="absolute inset-0 border-[16px] pointer-events-none z-20" style={{ borderColor: theme.primary }}></div>
+                        )}
+                        {adDesign === 4 && (
+                            <>
+                                <div className="absolute top-0 bottom-0 left-8 border-l-4 pointer-events-none z-20 opacity-30" style={{ borderColor: theme.accent }}></div>
+                                <div className="absolute top-0 bottom-0 right-8 border-r-4 pointer-events-none z-20 opacity-30" style={{ borderColor: theme.accent }}></div>
+                            </>
+                        )}
+                        {adDesign === 5 && (
+                            <div className="absolute inset-2 border-[1px] pointer-events-none z-20 rounded-[2.5rem]" style={{ borderColor: theme.accent, boxShadow: 'inset 0 0 50px rgba(0,0,0,0.5)' }}></div>
+                        )}
+
+                        {/* Corners (Only on adDesign 1 and 3) */}
+                        {(adDesign === 1 || adDesign === 3) && (
+                            <>
+                                <div className="absolute top-2 left-2 w-6 h-6 border-t-4 border-l-4" style={{ borderColor: theme.accent }}></div>
+                                <div className="absolute top-2 right-2 w-6 h-6 border-t-4 border-r-4" style={{ borderColor: theme.accent }}></div>
+                                <div className="absolute bottom-2 left-2 w-6 h-6 border-b-4 border-l-4" style={{ borderColor: theme.accent }}></div>
+                                <div className="absolute bottom-2 right-2 w-6 h-6 border-b-4 border-r-4" style={{ borderColor: theme.accent }}></div>
+                            </>
+                        )}
                         <div className="absolute top-2 right-2 w-6 h-6 border-t-4 border-r-4" style={{ borderColor: theme.accent }}></div>
                         <div className="absolute bottom-2 left-2 w-6 h-6 border-b-4 border-l-4" style={{ borderColor: theme.accent }}></div>
                         <div className="absolute bottom-2 right-2 w-6 h-6 border-b-4 border-r-4" style={{ borderColor: theme.accent }}></div>
@@ -1190,7 +1268,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                         {/* Top: Association & Title */}
                         <div className="space-y-3 z-10">
                           {flagShowLogo && <div className="w-16 h-16 bg-white/10 rounded-full mx-auto backdrop-blur-md flex items-center justify-center shadow-lg border border-white/20 mb-4">
-                            <Compass size={32} className="text-white opacity-90" />
+                            <img src="https://files.catbox.moe/lubzno.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" />
                           </div>}
                           <p className={`text-xs font-black uppercase tracking-[0.4em] drop-shadow-md ${flagDesign === 3 ? 'text-art-orange' : 'text-white'}`}>OFFICIAL EXPEDITION</p>
                           {flagShowMountain && <h3 className={`text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)] font-sans ${flagDesign === 5 ? 'text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400' : 'text-white'}`}>
