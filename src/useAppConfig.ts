@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.9.0";
+export const WEBSITE_VERSION = "1.9.1";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,20 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.8.2",
+  version: "1.9.1",
   patchNotes: [
+    {
+      version: "1.9.1",
+      date: "2026-07-09",
+      notes: [
+        "Pembaruan UI Leader: Memindahkan bagian 'Pengalaman Leader' ke bagian profil Trip Leader di homepage agar lebih kontekstual.",
+        "Sistem Badge Review: Menambahkan badge jumlah pendakian pada user yang memberikan ulasan (mendaki 3x = badge 3x daki).",
+        "Fitur Edit Review: Pengguna kini dapat mengedit ulasan yang telah dikirimkan.",
+        "Logika Review Fleksibel: Pengguna yang sudah pernah mendaki dapat memberikan ulasan berkali-kali untuk trip yang berbeda.",
+        "Perbaikan UI Private Trip: Menghilangkan duplikasi tampilan bintang rating pada kartu trip private.",
+        "Optimasi Firestore: Memperbaiki error snapshot listener dengan menyederhanakan query pada koleksi mountainReviews."
+      ]
+    },
     {
       version: "1.9.0",
       date: "2026-07-09",

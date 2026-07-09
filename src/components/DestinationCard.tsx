@@ -153,13 +153,6 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
               Disc {Math.round(((currentDur.originalPrice - currentDur.price) / currentDur.originalPrice) * 100)}%
             </div>
           )}
-          {visibilities?.showOverallReview !== false && avgRating > 0 && (
-            <div className="bg-white/90 backdrop-blur-sm border-2 border-art-text px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-              <Star size={10} className="text-yellow-500 fill-yellow-500" />
-              <span className="text-[10px] font-black">{avgRating.toFixed(1)}</span>
-              <span className="text-[8px] text-art-text/40 font-bold uppercase tracking-tighter">({reviewsCount})</span>
-            </div>
-          )}
         </div>
 
         <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
