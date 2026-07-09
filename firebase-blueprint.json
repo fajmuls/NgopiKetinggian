@@ -58,38 +58,6 @@
     "/openTrips/data": {
       "schema": "object",
       "description": "List of scheduled open trips"
-    },
-    "/mountainReviews/{reviewId}": {
-      "schema": {
-        "type": "object",
-        "properties": {
-          "mountainId": { "type": "string" },
-          "mountainName": { "type": "string" },
-          "userId": { "type": "string" },
-          "userName": { "type": "string" },
-          "userAvatar": { "type": "string" },
-          "rating": { "type": "number" },
-          "review": { "type": "string" },
-          "photos": { 
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "createdAt": { "type": "timestamp" },
-          "status": { "type": "string" }
-        },
-        "required": ["mountainId", "mountainName", "userId", "userName", "rating", "createdAt", "status"]
-      },
-      "description": "Stores user ratings and testimonials for mountains"
     }
-  },
-  "indexes": [
-    {
-      "collectionGroup": "mountainReviews",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "mountainId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    }
-  ]
+  }
 }

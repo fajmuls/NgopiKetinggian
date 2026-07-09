@@ -69,119 +69,6 @@ export const ImageUploader = ({ value, onChange, placeholder = "URL Gambar" }: {
 
 
 
-export const MountainReviewsAdmin = ({ showToast }: any) => {
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const q = query(collection(db, 'mountainReviews'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
-      setReviews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
-
-  const handleDelete = (id: string) => {
-    customConfirm("Hapus testimoni ini secara permanen?", async () => {
-       await deleteDoc(doc(db, 'mountainReviews', id));
-       showToast("Testimoni dihapus", "success");
-    });
-  };
-
-  const toggleStatus = async (id: string, currentStatus: string) => {
-     const nextStatus = currentStatus === 'hidden' ? 'published' : 'hidden';
-     await updateDoc(doc(db, 'mountainReviews', id), { status: nextStatus });
-     showToast(nextStatus === 'hidden' ? "Testimoni disembunyikan" : "Testimoni diterbitkan", "info");
-  };
-
-  return (
-     <div className="space-y-4">
-        <div className="flex items-center gap-3 mb-4">
-           <div className="w-8 h-8 bg-art-orange text-white rounded-lg flex items-center justify-center">
-              <MessageCircle size={16} />
-           </div>
-           <div>
-              <h3 className="text-xs font-black uppercase text-art-text tracking-widest">Daftar Testimoni & Cerita</h3>
-              <p className="text-[9px] font-bold text-art-text/40 uppercase">Kelola testimoni yang masuk dari pendaki</p>
-           </div>
-        </div>
-        
-        {loading ? (
-           <div className="flex justify-center py-10">
-              <div className="w-6 h-6 border-2 border-art-orange border-t-transparent rounded-full animate-spin"></div>
-           </div>
-        ) : (
-           <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-              {reviews.map(r => (
-                 <div key={r.id} className={`p-4 border-2 rounded-2xl bg-white transition-all ${r.status === 'hidden' ? 'opacity-50 grayscale border-dashed border-gray-300' : 'border-art-text/10 hover:border-art-text/20'}`}>
-                    <div className="flex justify-between items-start">
-                       <div className="flex gap-3">
-                          <div className="w-10 h-10 rounded-xl border-2 border-art-text/10 bg-art-bg/30 overflow-hidden flex items-center justify-center shrink-0">
-                             {r.userAvatar ? <img src={r.userAvatar} className="w-full h-full object-cover" alt="" /> : <User size={20} className="text-art-text/20" />}
-                          </div>
-                          <div>
-                             <p className="text-[11px] font-black uppercase text-art-text">{r.userName}</p>
-                             <div className="flex items-center gap-2">
-                                <span className="text-[9px] font-bold text-art-orange uppercase tracking-tighter flex items-center gap-1">
-                                   <MapPin size={10} /> {r.mountainName}
-                                </span>
-                                <span className="text-[9px] text-art-text/40">•</span>
-                                <span className="text-[9px] font-bold text-yellow-500">{r.rating} ⭐</span>
-                             </div>
-                          </div>
-                       </div>
-                       <div className="flex gap-1">
-                          <button 
-                            onClick={() => toggleStatus(r.id, r.status)} 
-                            className={`p-2 rounded-lg transition-colors ${r.status === 'hidden' ? 'bg-gray-100 text-gray-400' : 'bg-art-bg text-art-text hover:bg-art-text hover:text-white'}`}
-                            title={r.status === 'hidden' ? "Tampilkan" : "Sembunyikan"}
-                          >
-                             {r.status === 'hidden' ? <EyeOff size={14} /> : <Eye size={14} />}
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(r.id)} 
-                            className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
-                            title="Hapus Permanen"
-                          >
-                             <Trash2 size={14} />
-                          </button>
-                       </div>
-                    </div>
-                    
-                    <div className="mt-3 relative pl-3 border-l-2 border-art-orange/20">
-                       <p className="text-[11px] font-medium text-art-text/80 leading-relaxed italic">"{r.review}"</p>
-                    </div>
-
-                    {r.photos && r.photos.length > 0 && (
-                       <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar pb-1">
-                          {r.photos.map((p: string, i: number) => (
-                             <div key={i} className="relative group/img shrink-0">
-                                <img src={p} className="w-20 h-20 object-cover rounded-xl border border-art-text/10 shadow-sm" alt="" />
-                                <button 
-                                  onClick={() => window.open(p, '_blank')}
-                                  className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center rounded-xl transition-opacity"
-                                >
-                                   <Eye size={16} className="text-white" />
-                                </button>
-                             </div>
-                          ))}
-                       </div>
-                    )}
-                 </div>
-              ))}
-              {reviews.length === 0 && (
-                 <div className="text-center py-20 border-2 border-dashed border-art-text/5 rounded-3xl">
-                    <MessageCircle size={40} className="mx-auto text-art-text/10 mb-4" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-art-text/20">Belum ada testimoni masuk.</p>
-                 </div>
-              )}
-           </div>
-        )}
-     </div>
-  );
-};
-
 export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: any) => {
   const [url, setUrl] = useState(config.ceritaVideoUrl);
   const [ceritaTitle, setCeritaTitle] = useState(config.homepage?.ceritaTitle || '');
@@ -189,7 +76,6 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
   const [ceritaParagraph1, setCeritaParagraph1] = useState(config.homepage?.ceritaParagraph1 || '');
   const [ceritaParagraph2, setCeritaParagraph2] = useState(config.homepage?.ceritaParagraph2 || '');
   const [ceritaFeatures, setCeritaFeatures] = useState(config.homepage?.ceritaFeatures || []);
-  const [activeTab, setActiveTab] = useState<'content' | 'reviews'>('content');
 
   const handleSave = () => {
     updateConfig({ 
@@ -208,125 +94,116 @@ export const CeritaAdmin = ({ config, updateConfig, showToast, defaultVideo }: a
 
   return (
      <div className="space-y-6">
-        <div className="flex gap-2 bg-art-bg/30 p-1.5 rounded-2xl w-fit">
-           <button onClick={() => setActiveTab('content')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'content' ? 'bg-art-text text-white shadow-sm' : 'text-art-text/40 hover:text-art-text'}`}>Konten Cerita</button>
-           <button onClick={() => setActiveTab('reviews')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'reviews' ? 'bg-art-text text-white shadow-sm' : 'text-art-text/40 hover:text-art-text'}`}>Daftar Testimoni</button>
+       <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-art-text/10 pb-6">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+               <FileText size={20} className="drop-shadow-sm" />
+             </div>
+             <div>
+               <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Cerita Kami</h3>
+               <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur konten cerita pada homepage</p>
+             </div>
+          </div>
+          <button onClick={handleSave} className="w-full sm:w-auto bg-art-orange text-white px-6 py-4 sm:py-3 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan</button>
+        </div>
+        
+        <div className="space-y-4 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input className="w-full border p-2 rounded text-xs" value={ceritaTitle} onChange={e => setCeritaTitle(e.target.value)} placeholder="Judul Cerita (Secangkir Cerita)" />
+            <input className="w-full border p-2 rounded text-xs" value={ceritaSub} onChange={e => setCeritaSub(e.target.value)} placeholder="Sub-judul (di Atas Awan)" />
+          </div>
+          <textarea className="w-full border p-2 rounded text-xs h-24" value={ceritaParagraph1} onChange={e => setCeritaParagraph1(e.target.value)} placeholder="Paragraf 1"></textarea>
+          <textarea className="w-full border p-2 rounded text-xs h-24" value={ceritaParagraph2} onChange={e => setCeritaParagraph2(e.target.value)} placeholder="Paragraf 2"></textarea>
+        
+          <div className="pt-4 space-y-4">
+            <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+              <h4 className="font-bold text-xs uppercase">Edit Fitur Cerita</h4>
+              <button type="button" onClick={() => setCeritaFeatures([...ceritaFeatures, { title: '', desc: '' }])} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Fitur</button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(ceritaFeatures || []).map((feat: any, idx: number) => (
+                <div key={idx} className="border border-art-text/20 p-4 rounded-xl space-y-2 relative bg-white shadow-sm group">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const nf = [...ceritaFeatures]; nf.splice(idx, 1); setCeritaFeatures(nf);
+                    }} 
+                    className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-400 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                    title="Hapus Fitur"
+                  >
+                    <Trash2 size={12}/>
+                  </button>
+                  <input className="w-full border-b border-art-text/5 p-2 rounded text-[11px] font-black uppercase tracking-tight outline-none focus:border-art-orange" value={feat.title} onChange={e => {
+                    const nf = [...ceritaFeatures]; nf[idx].title = e.target.value; setCeritaFeatures(nf);
+                  }} placeholder="Judul Fitur" />
+                  <textarea className="w-full border p-2 rounded text-xs h-16" value={feat.desc} onChange={e => {
+                    const nf = [...ceritaFeatures]; nf[idx].desc = e.target.value; setCeritaFeatures(nf);
+                  }} placeholder="Deskripsi Fitur"></textarea>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {activeTab === 'content' ? (
-           <div className="bg-gradient-to-br from-orange-50 to-white border-2 border-art-text rounded-3xl p-6 shadow-[8px_8px_0px_0px_#1a1a1a]">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-art-text/10 pb-6">
-              <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
-                   <FileText size={20} className="drop-shadow-sm" />
-                 </div>
-                 <div>
-                   <h3 className="text-lg font-black uppercase text-art-text tracking-tight leading-tight">Cerita Kami</h3>
-                   <p className="text-[10px] font-bold text-art-text/40 uppercase">Atur konten cerita pada homepage</p>
-                 </div>
-              </div>
-              <button onClick={handleSave} className="w-full sm:w-auto bg-art-orange text-white px-6 py-4 sm:py-3 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">Simpan</button>
-            </div>
-            
-            <div className="space-y-4 pt-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input className="w-full border p-2 rounded text-xs" value={ceritaTitle} onChange={e => setCeritaTitle(e.target.value)} placeholder="Judul Cerita (Secangkir Cerita)" />
-                <input className="w-full border p-2 rounded text-xs" value={ceritaSub} onChange={e => setCeritaSub(e.target.value)} placeholder="Sub-judul (di Atas Awan)" />
-              </div>
-              <textarea className="w-full border p-2 rounded text-xs h-24" value={ceritaParagraph1} onChange={e => setCeritaParagraph1(e.target.value)} placeholder="Paragraf 1"></textarea>
-              <textarea className="w-full border p-2 rounded text-xs h-24" value={ceritaParagraph2} onChange={e => setCeritaParagraph2(e.target.value)} placeholder="Paragraf 2"></textarea>
-            
-              <div className="pt-4 space-y-4">
-                <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                  <h4 className="font-bold text-xs uppercase">Edit Fitur Cerita</h4>
-                  <button type="button" onClick={() => setCeritaFeatures([...ceritaFeatures, { title: '', desc: '' }])} className="text-xs bg-art-text text-white px-2 py-1 rounded">+ Fitur</button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {(ceritaFeatures || []).map((feat: any, idx: number) => (
-                    <div key={idx} className="border border-art-text/20 p-4 rounded-xl space-y-2 relative bg-white shadow-sm group">
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          const nf = [...ceritaFeatures]; nf.splice(idx, 1); setCeritaFeatures(nf);
-                        }} 
-                        className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-400 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
-                        title="Hapus Fitur"
-                      >
-                        <Trash2 size={12}/>
-                      </button>
-                      <input className="w-full border-b border-art-text/5 p-2 rounded text-[11px] font-black uppercase tracking-tight outline-none focus:border-art-orange" value={feat.title} onChange={e => {
-                        const nf = [...ceritaFeatures]; nf[idx].title = e.target.value; setCeritaFeatures(nf);
-                      }} placeholder="Judul Fitur" />
-                      <textarea className="w-full border p-2 rounded text-xs h-16" value={feat.desc} onChange={e => {
-                        const nf = [...ceritaFeatures]; nf[idx].desc = e.target.value; setCeritaFeatures(nf);
-                      }} placeholder="Deskripsi Fitur"></textarea>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-art-text/10">
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (YouTube Embed/MP4)</p>
+            <InputWithPaste className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={(e: any) => setUrl(e.target.value)} placeholder="https://www.youtube.com/embed/..." />
+            <p className="text-[9px] text-art-text/30 italic">Penting: Untuk YouTube, gunakan format <b>/embed/VIDEO_ID</b> agar bisa diputar di web.</p>
+          </div>
+          <div className="space-y-1.5">
+             <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">Rasio Video</p>
+             <CustomSelect 
+               value={config.ceritaVideoRatio || 'auto'}
+               placeholder="Pilih Rasio"
+               options={[
+                 { value: 'auto', label: 'Auto' },
+                 { value: '16/9', label: '16:9' },
+                 { value: '9/16', label: '9:16' },
+                 { value: '3/4', label: '3:4' },
+                 { value: '1/1', label: '1:1' }
+               ]}
+               onChange={(val: string) => updateConfig({ ceritaVideoRatio: val })}
+             />
+             <p className="text-[9px] text-art-text/30 italic">Atur rasio untuk menyesuaikan iframe YouTube.</p>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-art-text/10">
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">URL Video (YouTube Embed/MP4)</p>
-                <InputWithPaste className="border-2 border-art-text p-3 rounded-xl w-full text-xs font-mono" value={url} onChange={(e: any) => setUrl(e.target.value)} placeholder="https://www.youtube.com/embed/..." />
-                <p className="text-[9px] text-art-text/30 italic">Penting: Untuk YouTube, gunakan format <b>/embed/VIDEO_ID</b> agar bisa diputar di web.</p>
-              </div>
-              <div className="space-y-1.5">
-                 <p className="text-[10px] font-black uppercase text-art-text/40 tracking-widest">Rasio Video</p>
-                 <CustomSelect 
-                   value={config.ceritaVideoRatio || 'auto'}
-                   placeholder="Pilih Rasio"
-                   options={[
-                     { value: 'auto', label: 'Auto' },
-                     { value: '16/9', label: '16:9' },
-                     { value: '9/16', label: '9:16' },
-                     { value: '3/4', label: '3:4' },
-                     { value: '1/1', label: '1:1' }
-                   ]}
-                   onChange={(val: string) => updateConfig({ ceritaVideoRatio: val })}
-                 />
-                 <p className="text-[9px] text-art-text/30 italic">Atur rasio untuk menyesuaikan iframe YouTube.</p>
-              </div>
-            </div>
-
-            <div className="flex gap-2 w-fit mt-6">
-              <button onClick={() => {
-                customConfirm("Beneran mau reset cerita ke default?", () => {
-                  setUrl(defaultVideo);
-                  updateConfig({ ceritaVideoUrl: defaultVideo });
-                  showToast('Direset ke Default!');
-                });
-              }} className="bg-red-100 text-red-600 px-4 py-3 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
-              <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
-            </div>
-            
-            {/* Video Preview */}
-            {url && (
-              <div className="mt-4 border-2 border-art-text/20 p-4 rounded-lg bg-gray-50 flex flex-col max-w-sm">
-                <p className="text-xs font-bold mb-2 uppercase">Preview Video</p>
-                {url.includes('youtube.com') || url.includes('youtu.be') ? (
-                  <iframe 
-                    src={url}
-                    style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
-                    className={`w-full ${!config.ceritaVideoRatio || config.ceritaVideoRatio === 'auto' ? 'aspect-[4/5]' : ''} object-cover rounded shadow`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video 
-                    autoPlay loop muted playsInline controls
-                    style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
-                    src={url} 
-                    className={`w-full ${!config.ceritaVideoRatio || config.ceritaVideoRatio === 'auto' ? 'aspect-[4/5]' : ''} object-cover rounded shadow bg-black`}
-                  />
-                )}
-              </div>
+        <div className="flex gap-2 w-fit mt-6">
+          <button onClick={() => {
+            customConfirm("Beneran mau reset cerita ke default?", () => {
+              setUrl(defaultVideo);
+              updateConfig({ ceritaVideoUrl: defaultVideo });
+              showToast('Direset ke Default!');
+            });
+          }} className="bg-red-100 text-red-600 px-4 py-3 rounded text-xs font-bold uppercase tracking-widest hidden sm:block">Reset Default</button>
+          <button onClick={handleSave} className="bg-art-orange text-white px-4 py-3 rounded text-xs font-bold uppercase tracking-widest">Simpan Perubahan</button>
+        </div>
+        
+        {/* Video Preview */}
+        {url && (
+          <div className="mt-4 border-2 border-art-text/20 p-4 rounded-lg bg-gray-50 flex flex-col max-w-sm">
+            <p className="text-xs font-bold mb-2 uppercase">Preview Video</p>
+            {url.includes('youtube.com') || url.includes('youtu.be') ? (
+              <iframe 
+                src={url}
+                style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
+                className={`w-full ${!config.ceritaVideoRatio || config.ceritaVideoRatio === 'auto' ? 'aspect-[4/5]' : ''} object-cover rounded shadow`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video 
+                autoPlay loop muted playsInline controls
+                style={config.ceritaVideoRatio && config.ceritaVideoRatio !== 'auto' ? { aspectRatio: config.ceritaVideoRatio } : {}}
+                src={url} 
+                className={`w-full ${!config.ceritaVideoRatio || config.ceritaVideoRatio === 'auto' ? 'aspect-[4/5]' : ''} object-cover rounded shadow bg-black`}
+              />
             )}
-           </div>
-        ) : (
-           <MountainReviewsAdmin showToast={showToast} />
+          </div>
         )}
+       </div>
     </div>
   )
 };

@@ -1,9 +1,9 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { Star, X, Mountain, Coffee, ChevronRight, CheckCircle2,  PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History, CheckCircle, User } from 'lucide-react';
+import { Star, X, Mountain, Coffee, ChevronRight, CheckCircle2,  PlusCircle, LogIn, LogOut, MoreVertical, Search, Settings, Mic, TrendingUp, BellRing, MapPin, ChevronDown, ExternalLink, AlertCircle, ShoppingBag, Send, Globe, FileText, Download, Info, Clock, Receipt, CreditCard, Trash2, Eye, Menu, History, CheckCircle } from 'lucide-react';
 import { useSound } from './hooks/useSound';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { auth, db, loginWithGoogle, logout } from './firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, deleteDoc, doc, updateDoc, limit } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
 import Lightbox from "yet-another-react-lightbox";
@@ -187,24 +187,6 @@ export default function App() {
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [dbStatus, setDbStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
-
-  useEffect(() => {
-    // Public fetch for mountain reviews
-    const q = query(
-      collection(db, 'mountainReviews'),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setReviews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setDbStatus('connected');
-    }, (error) => {
-      console.error("Reviews fetch error:", error);
-      setDbStatus('error');
-    });
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -417,7 +399,6 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
       <Header 
         config={config}
         user={user}
-        dbStatus={dbStatus}
         onLogin={loginWithGoogle}
         onLogout={logout}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -478,39 +459,19 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                  {reviews.filter(r => r.status !== 'hidden').length > 0 ? (
                     <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
                        {reviews.filter(r => r.status !== 'hidden').map((r, idx) => (
-                         <div key={idx} className="min-w-[300px] w-[300px] bg-white border-2 border-art-text/10 rounded-3xl p-5 shrink-0 snap-center shadow-sm flex flex-col gap-3 group/rev hover:border-art-orange/30 transition-all">
-                            <div className="flex justify-between items-start">
-                               <div className="flex gap-3 items-center">
-                                  <div className="w-10 h-10 rounded-xl bg-art-bg/30 border border-art-text/5 overflow-hidden flex items-center justify-center shrink-0">
-                                     {r.userAvatar ? <img src={r.userAvatar} alt="" className="w-full h-full object-cover" /> : <User size={20} className="text-art-text/20" />}
-                                  </div>
-                                  <div>
-                                     <span className="block text-xs font-black uppercase text-art-text truncate w-32 group-hover/rev:text-art-orange transition-colors">{r.userName}</span>
-                                     <span className="block text-[9px] font-bold uppercase text-art-orange tracking-widest">{r.mountainName}</span>
-                                  </div>
+                         <div key={idx} className="min-w-[280px] w-[280px] bg-white border-2 border-art-text/10 rounded-2xl p-5 shrink-0 snap-center shadow-sm">
+                            <div className="flex justify-between items-start mb-3">
+                               <div>
+                                  <span className="block text-xs font-black uppercase text-art-text truncate w-32">{r.userName}</span>
+                                  <span className="block text-[9px] font-bold uppercase text-art-orange tracking-widest">{r.mountainName}</span>
                                </div>
                                <div className="flex gap-0.5 text-yellow-400">
                                   {[1,2,3,4,5].map(s => (
-                                     <Star key={s} size={10} fill={s <= r.rating ? "currentColor" : "none"} className={s <= r.rating ? "" : "text-gray-200"} />
+                                     <Star key={s} size={10} fill={s <= r.rating ? "currentColor" : "none"} className={s <= r.rating ? "" : "text-gray-300"} />
                                   ))}
                                </div>
                             </div>
-                            <p className="text-xs text-art-text/80 italic font-medium line-clamp-3">"{r.review}"</p>
-                            
-                            {r.photos && r.photos.length > 0 && (
-                               <div className="flex gap-1.5 mt-1">
-                                  {r.photos.slice(0, 3).map((p: string, pIdx: number) => (
-                                     <div key={pIdx} className="w-12 h-12 rounded-lg border border-art-text/10 overflow-hidden shrink-0">
-                                        <img src={p} alt="" className="w-full h-full object-cover" />
-                                     </div>
-                                  ))}
-                                  {r.photos.length > 3 && (
-                                     <div className="w-12 h-12 rounded-lg bg-art-bg flex items-center justify-center text-[10px] font-black text-art-text/40 border border-art-text/10 shrink-0">
-                                        +{r.photos.length - 3}
-                                     </div>
-                                  )}
-                               </div>
-                            )}
+                            <p className="text-xs text-art-text/80 italic font-medium line-clamp-4">"{r.review}"</p>
                          </div>
                        ))}
                     </div>

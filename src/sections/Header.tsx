@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User, ChevronRight, ShoppingBag, Mountain, Star, Activity, AlertTriangle } from 'lucide-react';
-import { WEBSITE_VERSION } from '../useAppConfig';
+import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User, ChevronRight, ShoppingBag, Mountain, Star } from 'lucide-react';
 
 export const Header = ({ 
   config,
@@ -17,8 +16,7 @@ export const Header = ({
   searchResults,
   onExecuteSearch,
   showSearchDropdown,
-  setShowSearchDropdown,
-  dbStatus = 'connected'
+  setShowSearchDropdown
 }: any) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -26,21 +24,12 @@ export const Header = ({
     <header className="fixed top-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-md border-b-2 border-art-text">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
-          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden transition-transform group-hover:rotate-0">
+          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[4px_4px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden">
               <img src={config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col">
               <h1 className="text-sm sm:text-lg font-black leading-none tracking-tighter uppercase text-art-text">Ngopi Di<br/><span className="text-art-orange">Ketinggian</span></h1>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                 <span className="text-[8px] font-black text-art-text/30 tracking-widest uppercase">v{WEBSITE_VERSION}</span>
-                 <div className="flex items-center gap-1">
-                    <div className={`w-1.5 h-1.5 rounded-full ${dbStatus === 'connected' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : dbStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 'bg-red-500 animate-bounce'}`} />
-                    <span className="text-[7px] font-black text-art-text/20 uppercase tracking-tighter">
-                       {dbStatus === 'connected' ? 'LIVE' : dbStatus === 'connecting' ? 'SYNC' : 'ERROR'}
-                    </span>
-                 </div>
-              </div>
             </div>
           </div>
 
