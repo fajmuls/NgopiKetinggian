@@ -392,6 +392,18 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 </div>
               ) : null}
             </motion.div>
+
+            {/* Build Version Label */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5 }}
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
+            >
+              <div className="px-3 py-1 bg-art-text/5 border border-art-text/10 rounded-full text-[8px] font-black uppercase tracking-widest text-art-text/40">
+                Build: {config.version || '3.0.0'}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -437,6 +449,9 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         onExecuteSearch={executeSearch}
         showSearchDropdown={showSearchDropdown}
         setShowSearchDropdown={setShowSearchDropdown}
+        theme={theme}
+        setTheme={setTheme}
+        userPoints={userBookings.filter(b => b.status === 'selesai' || b.status === 'lunas').length * 100}
       />
 
       {/* Hero Section */}
@@ -798,6 +813,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             visibilities={config.visibilities}
             tripLeaders={config.tripLeaders}
             config={config}
+            loading={loading}
           />
 
           {/* PRIVATE TRIP SECTION */}
@@ -811,6 +827,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
             setFilterRegion={setFilterRegion}
             difficultyOptions={difficultyOptions}
             facilities={config.facilities}
+            loading={loading}
           />
         </div>
       </section>

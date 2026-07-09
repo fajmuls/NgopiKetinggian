@@ -2,10 +2,12 @@ import React from 'react';
 import { OpenTripCard } from '../components/OpenTripCard';
 import { Calendar, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../hooks/useLanguage';
+import { CardSkeleton } from '../components/Skeleton';
 
-export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tripLeaders, config }: any) => {
+export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tripLeaders, config, loading }: any) => {
   const { t, lang } = useLanguage();
-  if (openTrips.length === 0) return null;
+  
+  if (!loading && openTrips.length === 0) return null;
 
   return (
     <section id="trips" className="py-24 bg-art-bg/20">
@@ -31,17 +33,21 @@ export const TripSection = ({ openTrips, onJoin, getSisaKuota, visibilities, tri
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {openTrips.map((ot: any) => (
-            <OpenTripCard 
-              key={ot.id} 
-              ot={ot} 
-              onJoin={onJoin} 
-              getSisaKuota={getSisaKuota} 
-              visibilities={visibilities} 
-              allLeaders={tripLeaders} 
-              config={config}
-            />
-          ))}
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
+          ) : (
+            openTrips.map((ot: any) => (
+              <OpenTripCard 
+                key={ot.id} 
+                ot={ot} 
+                onJoin={onJoin} 
+                getSisaKuota={getSisaKuota} 
+                visibilities={visibilities} 
+                allLeaders={tripLeaders} 
+                config={config}
+              />
+            ))
+          )}
         </div>
       </div>
     </section>

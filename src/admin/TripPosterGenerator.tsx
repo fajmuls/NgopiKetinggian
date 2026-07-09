@@ -1611,6 +1611,15 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             <span>{tripDate}</span>
                             <span>{boardDesign === 4 ? 'NGOPI DI KETINGGIAN' : '@ngopi.dketinggian'}</span>
                           </div>
+
+                          {/* Seal of Quality - NEW Visual Accent */}
+                          <div className="absolute -bottom-10 -right-10 w-40 h-40 opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity z-0">
+                             <div className="w-full h-full border-4 border-white/40 rounded-full flex items-center justify-center p-6">
+                               <div className="border-2 border-white/20 rounded-full w-full h-full flex items-center justify-center">
+                                 <span className="text-[7px] font-black uppercase tracking-tighter text-white/40 rotate-[-30deg] text-center">AUTHENTIC<br/>ADVENTURE<br/>EST. 2026</span>
+                               </div>
+                             </div>
+                          </div>
                         </div>
 
                       </div>

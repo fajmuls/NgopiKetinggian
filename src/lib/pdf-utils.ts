@@ -248,3 +248,87 @@ export const generateInvoice = async (booking: any) => {
 
   doc.save(`Invoice_${(booking.nama || 'User').replace(/\s/g, '_')}_${(booking.id || '').substring(0, 5)}.pdf`);
 };
+
+export const generateETicket = async (booking: any) => {
+  const doc = new jsPDF();
+  const primaryColor = [26, 26, 26];
+  const accentColor = [255, 107, 0];
+  
+  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.rect(0, 0, 210, 297, 'F');
+  
+  // Try adding Logo Watermark
+  await new Promise<void>((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      doc.setGState(new (doc as any).GState({ opacity: 0.2 }));
+      doc.addImage(img, 'PNG', 45, 80, 120, 120);
+      doc.setGState(new (doc as any).GState({ opacity: 1 }));
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = 'https://files.catbox.moe/lubzno.png';
+  });
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(28);
+  doc.text('OFFICIAL E-TICKET', 105, 40, { align: 'center' });
+  
+  doc.setDrawColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.setLineWidth(1);
+  doc.line(40, 48, 170, 48);
+  
+  doc.setFontSize(10);
+  doc.text('NGOPI DI KETINGGIAN • ADVENTURE & BREW', 105, 58, { align: 'center' });
+
+  // Ticket Box
+  doc.setFillColor(255, 255, 255, 0.05);
+  doc.roundedRect(20, 70, 170, 150, 10, 10, 'F');
+  doc.setDrawColor(255, 255, 255, 0.2);
+  doc.roundedRect(20, 70, 170, 150, 10, 10, 'D');
+
+  const drawField = (label: string, value: string, y: number) => {
+    doc.setFontSize(9);
+    doc.setTextColor(200, 200, 200);
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, 30, y);
+    doc.setFontSize(14);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text(value.toUpperCase(), 30, y + 8);
+  };
+
+  drawField('NAMA PENDAKI', booking.nama || 'USER', 85);
+  drawField('DESTINASI', booking.destinasi || 'N/A', 110);
+  drawField('JALUR / VIA', booking.jalur || 'N/A', 135);
+  drawField('JADWAL KEBERANGKATAN', booking.jadwal || 'N/A', 160);
+  drawField('JUMLAH PESERTA', `${booking.peserta || 1} ORANG`, 185);
+  drawField('ID BOOKING', `#${(booking.id || '').substring(0, 12).toUpperCase()}`, 210);
+
+  // Status Badge
+  doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.roundedRect(140, 80, 40, 15, 3, 3, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text('CONFIRMED', 160, 90, { align: 'center' });
+
+  // QR Placeholder (Artistic)
+  doc.setDrawColor(255, 255, 255, 0.3);
+  doc.rect(145, 180, 35, 35);
+  doc.setFontSize(7);
+  doc.setTextColor(255, 255, 255, 0.5);
+  doc.text('VALID TICKET', 162.5, 220, { align: 'center' });
+
+  // Important Notes
+  doc.setTextColor(255, 255, 255, 0.6);
+  doc.setFontSize(9);
+  doc.text('CATATAN PENTING:', 25, 240);
+  doc.setFontSize(8);
+  doc.text('1. Tunjukkan E-Ticket ini kepada petugas basecamp atau trip leader.', 25, 250);
+  doc.text('2. Pastikan membawa kartu identitas asli (KTP/SIM) sesuai nama di tiket.', 25, 255);
+  doc.text('3. Harap datang di titik kumpul 30 menit sebelum jadwal keberangkatan.', 25, 260);
+
+  doc.save(`E-Ticket_${(booking.nama || 'User').replace(/\s/g, '_')}_${(booking.id || '').substring(0, 5)}.pdf`);
+};

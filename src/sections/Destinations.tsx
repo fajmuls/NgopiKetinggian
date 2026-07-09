@@ -4,6 +4,7 @@ import { Mountain, Search, ChevronDown } from 'lucide-react';
 
 import { DIFFICULTY_LEVELS } from '../useAppConfig';
 import { useLanguage } from '../hooks/useLanguage';
+import { CardSkeleton } from '../components/Skeleton';
 
 export const DestinationSection = ({ 
   destinations, 
@@ -15,12 +16,13 @@ export const DestinationSection = ({
   filterRegion,
   setFilterRegion,
   regionOptions = ["Semua", "Jawa", "Sumatera", "Lombok", "Bali", "Papua"],
-  facilities
+  facilities,
+  loading
 }: any) => {
   const { t } = useLanguage();
   const [isRegionOpen, setIsRegionOpen] = React.useState(false);
   const [isDiffOpen, setIsDiffOpen] = React.useState(false);
-
+  
   const regions = React.useMemo(() => {
     const list = destinations.map((d: any) => d.region).filter(Boolean);
     return ["Semua", ...Array.from(new Set(list))];
@@ -112,7 +114,11 @@ export const DestinationSection = ({
             </div>
           </div>
 
-          {destinations.length > 0 ? (
+          {loading ? (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+             </div>
+          ) : destinations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {destinations.map((dest: any) => (
                 <DestinationCard 

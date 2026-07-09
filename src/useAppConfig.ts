@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "2.0.0";
+export const WEBSITE_VERSION = "3.1.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,33 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "2.0.0",
+  version: "3.1.0",
   patchNotes: [
+    {
+      version: "3.1.0",
+      date: "2026-07-09",
+      notes: [
+        "User Experience Upgrade: Implementasi sistem Skeleton Loading untuk transisi halaman yang lebih halus.",
+        "Loyalty Program (MDP Points): Pengguna kini mendapatkan 100 poin untuk setiap trip yang diselesaikan, dapat dipantau di Header & Riwayat Booking.",
+        "Sistem E-Ticket Digital: Pengunduhan E-Ticket resmi (PDF) dengan desain eksklusif untuk pesanan yang telah lunas.",
+        "Ulasan Berbasis Foto: Pengguna kini dapat mengunggah foto momen perjalanan saat memberikan ulasan petualangan.",
+        "Peningkatan Dashboard (My Trips): Antarmuka riwayat pesanan yang lebih informatif dengan akses cepat ke Kuitansi, E-Ticket, dan Itinerary.",
+        "Optimasi Dark Mode: Penyesuaian variabel warna di seluruh komponen untuk konsistensi pengalaman visual malam hari."
+      ]
+    },
+    {
+      version: "3.0.0",
+      date: "2026-07-09",
+      notes: [
+        "Update SEMUANYA: Optimalisasi besar-besaran pada arsitektur UI dan performa poster generator.",
+        "Poster Generator Pro: Perbaikan bug unduhan PNG, akurasi slide satu, dan redesain layout Papan & Bendera.",
+        "Layout Papan Baru: Latar belakang gunung kini transparan namun tetap terlihat elegan, dengan tipografi yang lebih besar dan tegas.",
+        "Redesain Bendera: Menghapus elemen pengganggu, memposisikan ulang logo, dan memastikan penamaan 'GUNUNG' yang konsisten.",
+        "Kontrol Rundown: Menambahkan opsi untuk menyembunyikan rundown pada slide informasi poster.",
+        "High-Contrast Fonts: Mengganti font gelap menjadi terang pada area dengan latar belakang kontras untuk keterbacaan maksimal.",
+        "Versioning System 3.0: Implementasi sistem update terintegrasi dengan patch notes dinamis di dashboard admin."
+      ]
+    },
     {
       version: "2.0.0",
       date: "2026-07-09",

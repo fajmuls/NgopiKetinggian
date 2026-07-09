@@ -4,10 +4,10 @@ import { DestinationsAdmin } from './admin/DestinationsAdmin';
 import { OpenTripsAdmin } from './admin/OpenTripsAdmin';
 import { TeamPhotosAdmin, LeadersAdmin } from './admin/TeamAndLeadersAdmin';
 import { GalleryAdmin, CeritaAdmin, HomepageAdmin, SplashAdmin, LogoAudioAdmin, CleanupPhotosAdmin, FacilitiesAdmin, PromoCodesAdmin, FooterAdmin, PatchNotesAdmin } from './admin/WebSettingsAdmin';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from './lib/storage-utils';
-import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye } from 'lucide-react';
+import { X, Trash2, Plus, GripVertical, Users, Calendar, MapPin, Coffee, Mountain, Info, AlertCircle, FileText, Download, CheckCircle, Send, Globe, Map, Edit2, ChevronDown, Clock, TrendingUp, CreditCard, User, Clipboard, ChevronRight, ShoppingBag, MessageCircle, Eye, CheckCircle2 } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from './firebase';
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -16,6 +16,7 @@ import { AppConfig, FacilityOption, DIFFICULTY_LEVELS, DURATION_LEVELS, OpenTrip
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf } from './lib/pdf-utils';
 import { useSound } from './hooks/useSound';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 import { customConfirm, customAlert } from './GlobalDialog';
 
@@ -38,10 +39,48 @@ export const AdminPanelModal = ({
 }) => {
   const { playClick, playBack } = useSound();
   const [activeCategory, setActiveCategory] = useState<'booking' | 'trip' | 'website'>('booking');
-  const [activeTab, setActiveTab] = useState<string>('bookings');
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [openTripPrefill, setOpenTripPrefill] = useState<any>(null);
   const [bookings, setBookings] = useState<any[]>([]);
   const [user] = useAuthState(auth);
+
+  // Stats
+  const stats = {
+    totalBookings: bookings.length,
+    pendingBookings: bookings.filter(b => b.status === 'pending').length,
+    confirmedBookings: bookings.filter(b => b.status === 'confirmed' || b.status === 'lunas').length,
+    openTrips: config.openTrips?.length || 0,
+    destinations: config.destinationsData?.length || 0,
+    activePromo: config.promoCodes?.length || 0,
+    totalRevenue: bookings.reduce((acc, b) => b.status === 'lunas' ? acc + (b.totalPrice || 0) : acc, 0)
+  };
+
+  // Chart Data Preparation
+  const bookingHistoryData = useMemo(() => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toISOString().split('T')[0];
+    }).reverse();
+
+    return last7Days.map(date => {
+      const count = bookings.filter(b => b.createdAt?.seconds && new Date(b.createdAt.seconds * 1000).toISOString().split('T')[0] === date).length;
+      return { date: date.split('-').slice(1).join('/'), count };
+    });
+  }, [bookings]);
+
+  const destPopularityData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    bookings.forEach(b => {
+      counts[b.destinasi] = (counts[b.destinasi] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [bookings]);
+
+  const COLORS = ['#FF5722', '#4CAF50', '#2196F3', '#9C27B0', '#FFC107'];
 
   useEffect(() => {
     if (isOpen) {
@@ -204,6 +243,7 @@ export const AdminPanelModal = ({
             <div className="flex sm:flex-col gap-1.5 w-max sm:w-full">
               {activeCategory === 'booking' && (
                 <>
+                  <button onClick={() => setActiveTab('dashboard')} className={`text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'dashboard' ? 'bg-art-text text-white' : 'hover:bg-art-text/10'}`}>Overview</button>
                   <button onClick={() => setActiveTab('bookings')} className={`relative text-left px-3 py-2 rounded text-xs font-bold uppercase tracking-widest ${activeTab === 'bookings' ? 'bg-art-green text-white' : 'hover:bg-art-text/10'}`}>
                     Daftar Booking {pendingCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1.5 rounded-full animate-pulse">{pendingCount}</span>}
                   </button>
@@ -247,6 +287,104 @@ export const AdminPanelModal = ({
           
           {/* Content */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-art-bg/50">
+            {activeTab === 'dashboard' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[
+                    { label: 'Total Bookings', value: stats.totalBookings, icon: Clipboard, color: 'text-blue-500', bg: 'bg-blue-50' },
+                    { label: 'Pending', value: stats.pendingBookings, icon: Clock, color: 'text-art-orange', bg: 'bg-orange-50' },
+                    { label: 'Confirmed', value: stats.confirmedBookings, icon: CheckCircle, color: 'text-art-green', bg: 'bg-green-50' },
+                    { label: 'Open Trips', value: stats.openTrips, icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-50' },
+                    { label: 'Destinations', value: stats.destinations, icon: MapPin, color: 'text-red-500', bg: 'bg-red-50' },
+                    { label: 'Revenue (Lunas)', value: `Rp ${stats.totalRevenue.toLocaleString('id-ID')}`, icon: CreditCard, color: 'text-emerald-500', bg: 'bg-emerald-50' }
+                  ].map((s, i) => (
+                    <motion.div 
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className={`p-6 rounded-3xl border-2 border-art-text bg-white shadow-[4px_4px_0px_0px_#1a1a1a] flex flex-col justify-between`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className={`p-2 rounded-xl ${s.bg} border border-art-text/10`}>
+                          <s.icon className={s.color} size={20} />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-art-text/40">{s.label}</p>
+                        <h4 className="text-2xl font-black text-art-text">{s.value}</h4>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Booking Trends */}
+                  <div className="bg-white p-6 rounded-[2rem] border-2 border-art-text shadow-[6px_6px_0px_0px_#1a1a1a]">
+                    <div className="flex items-center gap-2 mb-6">
+                      <TrendingUp size={18} className="text-art-orange" />
+                      <h4 className="text-xs font-black uppercase tracking-widest text-art-text">Tren Booking (7 Hari)</h4>
+                    </div>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={bookingHistoryData}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                          <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700 }} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700 }} />
+                          <Tooltip 
+                            contentStyle={{ borderRadius: '16px', border: '2px solid #1a1a1a', fontWeight: 900, textTransform: 'uppercase', fontSize: '10px' }}
+                          />
+                          <Line type="monotone" dataKey="count" stroke="#FF5722" strokeWidth={4} dot={{ r: 6, fill: '#FF5722', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Popular Destinations */}
+                  <div className="bg-white p-6 rounded-[2rem] border-2 border-art-text shadow-[6px_6px_0px_0px_#1a1a1a]">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Mountain size={18} className="text-art-green" />
+                      <h4 className="text-xs font-black uppercase tracking-widest text-art-text">Destinasi Terpopuler</h4>
+                    </div>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={destPopularityData} layout="vertical">
+                          <XAxis type="number" hide />
+                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 800 }} width={80} />
+                          <Tooltip 
+                            cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                            contentStyle={{ borderRadius: '16px', border: '2px solid #1a1a1a', fontWeight: 900, textTransform: 'uppercase', fontSize: '10px' }}
+                          />
+                          <Bar dataKey="count" radius={[0, 10, 10, 0]}>
+                            {destPopularityData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-8 rounded-[2.5rem] border-2 border-art-text shadow-[8px_8px_0px_0px_#1a1a1a] space-y-4">
+                   <div className="flex items-center gap-3 mb-2">
+                     <div className="w-10 h-10 bg-art-orange text-white rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_#1a1a1a]">
+                       <TrendingUp size={20} />
+                     </div>
+                     <div>
+                       <h3 className="text-lg font-black uppercase text-art-text tracking-tight">Quick Actions</h3>
+                       <p className="text-[10px] font-bold text-art-text/40 uppercase">Akses cepat fitur terpenting</p>
+                     </div>
+                   </div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+                      <button onClick={() => setActiveTab('bookings')} className="p-4 bg-art-bg rounded-2xl border-2 border-art-text hover:bg-art-text hover:text-white transition-all text-xs font-black uppercase tracking-widest text-center">Manage Bookings</button>
+                      <button onClick={() => { setActiveCategory('trip'); setActiveTab('openTrips'); }} className="p-4 bg-art-bg rounded-2xl border-2 border-art-text hover:bg-art-text hover:text-white transition-all text-xs font-black uppercase tracking-widest text-center">Update Open Trip</button>
+                      <button onClick={() => { setActiveCategory('website'); setActiveTab('homepage'); }} className="p-4 bg-art-bg rounded-2xl border-2 border-art-text hover:bg-art-text hover:text-white transition-all text-xs font-black uppercase tracking-widest text-center">Edit Branding</button>
+                      <button onClick={() => { setActiveCategory('website'); setActiveTab('patchNotes'); }} className="p-4 bg-art-bg rounded-2xl border-2 border-art-text hover:bg-art-text hover:text-white transition-all text-xs font-black uppercase tracking-widest text-center">Write Patch Notes</button>
+                   </div>
+                </div>
+              </div>
+            )}
             {activeTab === 'bookings' && <BookingsAdmin bookings={bookings} showToast={showToast} config={config} updateConfig={updateConfig} onNavigateToOpenTrip={(prefillData: any) => { setOpenTripPrefill(prefillData); setActiveCategory('trip'); setActiveTab('openTrips'); }} />}
 
             {activeTab === 'openTrips' && <OpenTripsAdmin config={config} updateConfig={updateConfig} showToast={showToast} prefillData={openTripPrefill} clearPrefill={() => setOpenTripPrefill(null)} />}

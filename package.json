@@ -25,6 +25,7 @@
     "react-firebase-hooks": "^5.1.1",
     "react-use": "^17.6.0",
     "react-zoom-pan-pinch": "^4.0.3",
+    "recharts": "^3.9.2",
     "yet-another-react-lightbox": "^3.31.0"
   },
   "devDependencies": {

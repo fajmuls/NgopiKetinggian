@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User, ChevronRight, ShoppingBag, Mountain, Star } from 'lucide-react';
+import { Coffee, Map, Search, Mic, MapPin, X, Menu, LogIn, LogOut, History, User, ChevronRight, ShoppingBag, Mountain, Star, Moon, Sun, Award } from 'lucide-react';
 
 export const Header = ({ 
   config,
@@ -16,12 +16,20 @@ export const Header = ({
   searchResults,
   onExecuteSearch,
   showSearchDropdown,
-  setShowSearchDropdown
+  setShowSearchDropdown,
+  theme,
+  setTheme,
+  userPoints = 0
 }: any) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'default' : 'dark';
+    setTheme(nextTheme);
+  };
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-md border-b-2 border-art-text">
+    <header className="fixed top-0 left-0 right-0 z-[100] bg-white/90 dark:bg-black/90 backdrop-blur-md border-b-2 border-art-text transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -93,27 +101,44 @@ export const Header = ({
             </AnimatePresence>
           </div>
 
-          <div className="hidden md:flex items-center gap-6">
-            {user ? (
-              <div className="flex items-center gap-3">
-                <button onClick={onOpenHistory} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-art-text/60 hover:text-art-text transition-colors">
-                  <History size={16} /> History
-                </button>
-                <div className="w-[1px] h-6 bg-art-text/10 mx-1"></div>
-                <button onClick={onOpenSettings} className="flex items-center gap-2 px-4 py-2 bg-art-text text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(255,107,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
-                  <User size={16} /> Profile
-                </button>
-              </div>
-            ) : (
-              <button onClick={onLogin} className="flex items-center gap-2 px-6 py-2.5 bg-art-text text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(255,107,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
-                <LogIn size={16} /> Login Google
-              </button>
-            )}
-          </div>
+          <div className="flex items-center gap-4 sm:gap-6">
+            {/* Dark Mode Toggle */}
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-xl border-2 border-art-text hover:bg-art-bg transition-all"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-art-text" />}
+            </button>
 
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2">
-            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+            <div className="hidden md:flex items-center gap-6">
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-end mr-2">
+                    <div className="flex items-center gap-1 bg-art-orange/10 px-2 py-1 rounded-lg border border-art-orange/20">
+                      <Award size={12} className="text-art-orange" />
+                      <span className="text-[10px] font-black text-art-orange">{userPoints} PTS</span>
+                    </div>
+                  </div>
+                  <button onClick={onOpenHistory} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-art-text/60 hover:text-art-text transition-colors">
+                    <History size={16} /> History
+                  </button>
+                  <div className="w-[1px] h-6 bg-art-text/10 mx-1"></div>
+                  <button onClick={onOpenSettings} className="flex items-center gap-2 px-4 py-2 bg-art-text text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(255,107,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
+                    <User size={16} /> Profile
+                  </button>
+                </div>
+              ) : (
+                <button onClick={onLogin} className="flex items-center gap-2 px-6 py-2.5 bg-art-text text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(255,107,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
+                  <LogIn size={16} /> Login Google
+                </button>
+              )}
+            </div>
+
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 text-art-text">
+              {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
         </div>
       </div>
 

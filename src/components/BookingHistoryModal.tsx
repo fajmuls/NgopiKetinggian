@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Star, X, Map, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Edit2 } from 'lucide-react';
+import { Star, X, Map, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Edit2, Award } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
 import { jsPDF } from 'jspdf';
-import { generateRundownPdf, generateInvoice } from '../lib/pdf-utils';
+import { generateRundownPdf, generateInvoice, generateETicket } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
@@ -18,6 +18,10 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'proses' | 'lunas'>('proses'); 
   const [reviewBooking, setReviewBooking] = useState<any>(null);
+
+  const userPoints = useMemo(() => {
+    return bookings.filter(b => b.status === 'selesai' || b.status === 'lunas').length * 100;
+  }, [bookings]);
 
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'proses') {
@@ -40,7 +44,13 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                <p className="text-[10px] font-bold text-art-text/40 uppercase tracking-widest mt-1">Pantau status & detail pesananmu</p>
              </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-1.5 bg-art-orange/10 px-3 py-1.5 rounded-xl border border-art-orange/20">
+              <Award size={16} className="text-art-orange" />
+              <span className="text-xs font-black text-art-orange">{userPoints} PTS</span>
+            </div>
+            <button onClick={onClose} className="p-2 hover:text-art-orange transition-colors"><X size={24} /></button>
+          </div>
         </div>
 
         <div className="bg-white border-b-2 border-art-text/10 px-6 py-2 flex gap-4 shrink-0">
@@ -264,16 +274,32 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                                   </button>
                                 )}
                                 {(b.status === 'lunas' || b.status === 'selesai') ? (
-                                  <button 
-                                    onClick={() => { playClick(); generateInvoice(b); }}
-                                    className="w-full flex items-center justify-center gap-2 bg-art-green text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 transition-colors shadow-sm"
-                                  >
-                                    <Download size={14} /> Download Kuitansi
-                                  </button>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <button 
+                                      onClick={() => { playClick(); generateInvoice(b); }}
+                                      className="flex items-center justify-center gap-2 bg-art-green text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 transition-colors shadow-sm"
+                                    >
+                                      <Download size={14} /> Kuitansi
+                                    </button>
+                                    <button 
+                                      onClick={() => { playClick(); generateETicket(b); }}
+                                      className="flex items-center justify-center gap-2 bg-art-text text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-art-text/80 transition-colors shadow-sm"
+                                    >
+                                      <Smartphone size={14} /> E-Ticket
+                                    </button>
+                                    {b.status === 'selesai' && (
+                                      <button 
+                                        onClick={() => { playClick(); setReviewBooking(b); }}
+                                        className="col-span-2 flex items-center justify-center gap-2 bg-art-orange text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-orange-600 transition-colors shadow-sm"
+                                      >
+                                        <Star size={14} fill="currentColor" /> Beri Ulasan
+                                      </button>
+                                    )}
+                                  </div>
                                 ) : (
                                   <div className="bg-art-bg border border-art-text/10 p-3 rounded-xl flex items-start gap-2">
                                     <Info size={12} className="text-art-text/30 mt-0.5" />
-                                    <p className="text-[9px] font-bold text-art-text/40 leading-relaxed italic uppercase tracking-tighter">Kuitansi dapat diunduh jika status sudah "Lunas".</p>
+                                    <p className="text-[9px] font-bold text-art-text/40 leading-relaxed italic uppercase tracking-tighter">Kuitansi & E-Ticket dapat diunduh jika status sudah "Lunas".</p>
                                   </div>
                                 )}
 

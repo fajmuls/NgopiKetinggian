@@ -31,6 +31,15 @@
   --theme-section: #d19ba0;
 }
 
+[data-theme="dark"] {
+  --theme-bg: #121212;
+  --theme-text: #f0f0f0;
+  --theme-title: #ff6b00;
+  --theme-green: #4ade80;
+  --theme-orange: #f97316;
+  --theme-section: #1e1e1e;
+}
+
 [data-theme="wasabi"] {
   --theme-bg: #fdfdf9;
   --theme-text: #5a542b;
