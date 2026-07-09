@@ -24,6 +24,7 @@
     "react-dom": "^19.0.0",
     "react-firebase-hooks": "^5.1.1",
     "react-use": "^17.6.0",
+    "react-zoom-pan-pinch": "^4.0.3",
     "yet-another-react-lightbox": "^3.31.0"
   },
   "devDependencies": {

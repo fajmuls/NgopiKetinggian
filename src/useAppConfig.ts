@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.3.0";
+export const WEBSITE_VERSION = "1.4.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,19 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.3.0",
+  version: "1.4.0",
   patchNotes: [
+    {
+      version: "1.4.0",
+      date: "2024-03-23",
+      notes: [
+        "Integrasi library 'react-zoom-pan-pinch' pada preview modal (Zoom, Pan, Reset).",
+        "Peningkatan variasi desain Papan (Board) dengan 5 gaya unik (Kayu, Logam, Batu, Modern, Vintage).",
+        "Fitur unduh dalam format PDF (Single & Bundle/Full Package).",
+        "Indikator progress bar saat proses rendering dan pengunduhan.",
+        "Refaktor preview modal dengan container object-fit: contain untuk visibilitas penuh."
+      ]
+    },
     {
       version: "1.3.0",
       date: "2024-03-22",

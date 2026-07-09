@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { customAlert } from '../GlobalDialog';
+import { toPng } from 'html-to-image';
+import { jsPDF } from 'jspdf';
+import { 
+  TransformWrapper, 
+  TransformComponent, 
+} from 'react-zoom-pan-pinch';
 import { 
   X, Download, Layout, Smartphone, Monitor, Coffee, Calendar, MapPin, 
   CreditCard, Clock, CheckCircle, Map, Trash2, Eye, Sparkles, 
   RotateCcw, Compass, Star, ArrowRight, Clipboard, Check,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, FileText, Maximize, RotateCw, Plus, Minus
 } from 'lucide-react';
-import { toPng } from 'html-to-image';
 
 interface PosterProps {
   trip: any;
@@ -101,11 +107,13 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const [activeMobileTab, setActiveMobileTab] = useState<'controls' | 'preview'>('controls');
   const [containerSize, setContainerSize] = useState({ width: 500, height: 500 });
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   const [copied, setCopied] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const posterRef = useRef<HTMLDivElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const transformWrapperRef = useRef<any>(null);
 
   // Auto Reset preview when crucial visual options change so they click "See Preview" again
   useEffect(() => {
@@ -167,18 +175,13 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   // Adjusted scale for the preview container to ensure it always fits visually with a bit of "breathing room"
   const previewScale = scale * 0.95;
 
-  const downloadPoster = async () => {
+  const downloadPoster = async (format: 'png' | 'pdf' = 'png') => {
     if (posterRef.current === null) return;
     setIsDownloading(true);
+    setDownloadProgress(20);
     
     const originalTransform = posterRef.current.style.transform;
     const originalTransformOrigin = posterRef.current.style.transformOrigin;
-    
-    // Reset transform properties so image-to-html processes the source canvas at full 100% scale
-    posterRef.current.style.transform = 'none';
-    posterRef.current.style.transformOrigin = 'initial';
-
-    // Reset parent wrapper size to full unscaled size to avoid any clipping/cropping
     const originalParentWidth = canvasWrapperRef.current ? canvasWrapperRef.current.style.width : '';
     const originalParentHeight = canvasWrapperRef.current ? canvasWrapperRef.current.style.height : '';
     const originalParentPosition = canvasWrapperRef.current ? canvasWrapperRef.current.style.position : '';
@@ -194,19 +197,37 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     }
     
     try {
-      // Delay briefly to allow DOM reflow
-      await new Promise(resolve => setTimeout(resolve, 300));
+      setDownloadProgress(50);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const dataUrl = await toPng(posterRef.current, { 
         cacheBust: true, 
         pixelRatio: 4, 
         quality: 1,
       });
-      const link = document.createElement('a');
-      link.download = `ngopi-trip-${tripName.replace(/\s+/g, '-').toLowerCase()}-${layout}-${ratio}.png`;
-      link.href = dataUrl;
-      link.click();
+
+      setDownloadProgress(80);
+
+      if (format === 'pdf') {
+        const pdf = new jsPDF({
+          orientation: baseDim.width > baseDim.height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [baseDim.width, baseDim.height]
+        });
+        pdf.addImage(dataUrl, 'PNG', 0, 0, baseDim.width, baseDim.height);
+        pdf.save(`ngopi-trip-${tripName.replace(/\s+/g, '-').toLowerCase()}-${layout}-${Date.now()}.pdf`);
+      } else {
+        const link = document.createElement('a');
+        link.download = `ngopi-trip-${tripName.replace(/\s+/g, '-').toLowerCase()}-${layout}-${ratio}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
+      
+      setDownloadProgress(100);
+      customAlert(`${format.toUpperCase()} Berhasil Diunduh!`);
     } catch (err) {
       console.error('Failed to download poster', err);
+      customAlert('Gagal mengunduh poster.');
     } finally {
       posterRef.current.style.transform = `scale(${previewScale})`;
       posterRef.current.style.transformOrigin = 'top left';
@@ -218,11 +239,14 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
         canvasWrapperRef.current.style.top = '';
         canvasWrapperRef.current.style.zIndex = originalParentZIndex;
       }
-      setIsDownloading(false);
+      setTimeout(() => {
+        setIsDownloading(false);
+        setDownloadProgress(0);
+      }, 500);
     }
   };
 
-  const downloadAllSlides = async () => {
+  const downloadAllSlides = async (format: 'png' | 'pdf' = 'png') => {
     if (posterRef.current === null) return;
     setIsDownloading(true);
     
@@ -234,43 +258,66 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     
     try {
       const slidesToDownload = selectedSlides.filter(s => ['poster', 'rundown', 'ad', 'gears', 'rules', 'flag', 'board'].includes(s));
+      
       if (slidesToDownload.length === 0) {
+        customAlert('Pilih setidaknya satu slide untuk diunduh.');
         setIsDownloading(false);
         return;
       }
 
+      let pdf: any = null;
+      if (format === 'pdf') {
+        pdf = new jsPDF({
+          orientation: baseDim.width > baseDim.height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [baseDim.width, baseDim.height]
+        });
+      }
+
       for (let i = 0; i < slidesToDownload.length; i++) {
         const sType = slidesToDownload[i];
+        setDownloadProgress(Math.round(((i) / slidesToDownload.length) * 100));
         setLayout(sType as LayoutType);
         
-        // Wait for React state update and DOM repaint
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        if (posterRef.current) {
+        if (posterRef.current && canvasWrapperRef.current) {
           posterRef.current.style.transform = 'none';
           posterRef.current.style.transformOrigin = 'initial';
+          canvasWrapperRef.current.style.width = `${baseDim.width}px`;
+          canvasWrapperRef.current.style.height = `${baseDim.height}px`;
+          canvasWrapperRef.current.style.position = 'fixed';
+          canvasWrapperRef.current.style.zIndex = '-9999';
           
-          if (canvasWrapperRef.current) {
-            canvasWrapperRef.current.style.width = `${baseDim.width}px`;
-            canvasWrapperRef.current.style.height = `${baseDim.height}px`;
-          }
+          await new Promise(resolve => setTimeout(resolve, 400));
           
-          await new Promise(resolve => setTimeout(resolve, 300));
-
           const dataUrl = await toPng(posterRef.current, {
             cacheBust: true,
             pixelRatio: 3,
             quality: 0.95,
           });
           
-          const link = document.createElement('a');
-          link.download = `slide-${i + 1}-trip-${tripName.replace(/\s+/g, '-').toLowerCase()}-${sType}-${ratio}.png`;
-          link.href = dataUrl;
-          link.click();
+          if (format === 'pdf') {
+            if (i > 0) pdf.addPage([baseDim.width, baseDim.height], baseDim.width > baseDim.height ? 'landscape' : 'portrait');
+            pdf.addImage(dataUrl, 'PNG', 0, 0, baseDim.width, baseDim.height);
+          } else {
+            const link = document.createElement('a');
+            link.download = `slide-${i + 1}-trip-${tripName.replace(/\s+/g, '-').toLowerCase()}-${sType}-${ratio}.png`;
+            link.href = dataUrl;
+            link.click();
+          }
         }
       }
+
+      if (format === 'pdf') {
+        pdf.save(`ngopi-trip-${tripName.replace(/\s+/g, '-').toLowerCase()}-full-package-${Date.now()}.pdf`);
+      }
+      
+      setDownloadProgress(100);
+      customAlert(`Berhasil Mengunduh ${slidesToDownload.length} Slide!`);
     } catch (err) {
       console.error('Failed to download all slides sequentially', err);
+      customAlert('Gagal mengunduh semua slide.');
     } finally {
       setLayout(originalLayout);
       if (posterRef.current) {
@@ -285,7 +332,10 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
         canvasWrapperRef.current.style.top = '';
         canvasWrapperRef.current.style.zIndex = originalParentZIndex;
       }
-      setIsDownloading(false);
+      setTimeout(() => {
+        setIsDownloading(false);
+        setDownloadProgress(0);
+      }, 500);
     }
   };
 
@@ -849,36 +899,72 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
    </div>
 
                 {/* Main Row: Just the scalable canvas wrapper in an overflow-auto box */}
-                <div className="flex-1 w-full h-full overflow-auto flex items-center justify-center custom-scrollbar" style={{ touchAction: 'pan-y' }}>
-                  {/* Poster Workspace Wrapper with dynamic and RIGID bounds scaling layout */}
-                  <div 
-                    ref={canvasWrapperRef}
-                    className="relative flex-shrink-0 shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-white/10 rounded-[1.5rem] overflow-hidden transition-transform duration-300 origin-center"
-                    style={{
-                      width: `${baseDim.width * previewScale}px`,
-                      height: `${baseDim.height * previewScale}px`,
-                      transform: `scale(${zoomScale}) rotate(${rotation}deg)`
-                    }}
+                <div className="flex-1 w-full h-full flex flex-col items-center justify-center relative">
+                  
+                  <TransformWrapper
+                    ref={transformWrapperRef}
+                    initialScale={1}
+                    minScale={0.5}
+                    maxScale={5}
+                    centerOnInit={true}
+                    limitToBounds={false}
                   >
-                    {/* High Resolution Render Canvas */}
-                    <motion.div 
-                      key={selectedSlides[currentSlide] || layout}
-                      initial={{ x: 50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: -50, opacity: 0 }}
-                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      ref={posterRef}
-                      className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col`}
-                      style={{ 
-                        width: `${baseDim.width}px`, 
-                        height: `${baseDim.height}px`,
-                        transform: `scale(${previewScale})`,
-                        transformOrigin: 'top left',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0
-                      }}
-                    >
+                    {({ zoomIn, zoomOut, resetTransform }) => (
+                      <>
+                        {/* Control Floating Panel */}
+                        <div className="absolute bottom-6 right-6 z-50 flex flex-col gap-2">
+                          <button onClick={() => zoomIn()} className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white shadow-xl transition-all">
+                            <Plus size={20} />
+                          </button>
+                          <button onClick={() => zoomOut()} className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white shadow-xl transition-all">
+                            <Minus size={20} />
+                          </button>
+                          <button onClick={() => resetTransform()} className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white shadow-xl transition-all">
+                            <RotateCcw size={20} />
+                          </button>
+                        </div>
+
+                        <TransformComponent
+                          wrapperStyle={{
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                          }}
+                          contentStyle={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                          }}
+                        >
+                          {/* Poster Workspace Wrapper with dynamic and RIGID bounds scaling layout */}
+                          <div 
+                            ref={canvasWrapperRef}
+                            className="relative flex-shrink-0 shadow-[0_40px_80px_rgba(0,0,0,0.9)] border border-white/10 rounded-[1.5rem] overflow-hidden"
+                            style={{
+                              width: `${baseDim.width * previewScale}px`,
+                              height: `${baseDim.height * previewScale}px`,
+                            }}
+                          >
+                            {/* High Resolution Render Canvas */}
+                            <motion.div 
+                              key={selectedSlides[currentSlide] || layout}
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.3 }}
+                              ref={posterRef}
+                              className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col`}
+                              style={{ 
+                                width: `${baseDim.width}px`, 
+                                height: `${baseDim.height}px`,
+                                transform: `scale(${previewScale})`,
+                                transformOrigin: 'top left',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0
+                              }}
+                            >
                     
                     {/* Background Visual Layer */}
                     <div 
@@ -1376,49 +1462,91 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
                     {/* LAYOUT G: PAPAN (Summit Sign Board / Papan Puncak Foto) */}
                     {(selectedSlides[currentSlide] || layout) === 'board' && (
-                      <div className="relative z-10 flex flex-col h-full p-[8%] justify-between items-center text-center w-full bg-amber-950/40 rounded-2xl overflow-hidden">
+                      <div className={`relative z-10 flex flex-col h-full p-[8%] justify-between items-center text-center w-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 ${
+                        boardDesign === 2 ? 'bg-zinc-800' : 
+                        boardDesign === 3 ? 'bg-stone-300' : 
+                        boardDesign === 4 ? 'bg-gradient-to-br from-blue-900 to-blue-700' : 
+                        boardDesign === 5 ? 'bg-red-950' : 
+                        'bg-amber-950/40'
+                      }`}>
                         
-                        {/* Wooden Plank Board Styling */}
-                        <div className="absolute inset-2 border-4 border-amber-900 rounded-2xl bg-amber-950/90 shadow-2xl flex flex-col justify-between p-6 overflow-hidden">
-                          {/* Wood Grain Lines */}
-                          <div className="absolute inset-0 opacity-10 bg-gradient-to-b from-transparent via-amber-500/10 to-transparent pointer-events-none"></div>
-                          {/* Horizontal Plank Dividers */}
-                          <div className="absolute left-0 right-0 top-1/3 h-[2px] bg-amber-900/50"></div>
-                          <div className="absolute left-0 right-0 top-2/3 h-[2px] bg-amber-900/50"></div>
+                        {/* THE BOARD FRAME */}
+                        <div className={`absolute inset-2 border-4 rounded-2xl shadow-2xl flex flex-col justify-between p-6 overflow-hidden ${
+                          boardDesign === 1 ? 'border-amber-900 bg-amber-950/90' : 
+                          boardDesign === 2 ? 'border-zinc-700 bg-zinc-900' : 
+                          boardDesign === 3 ? 'border-stone-400 bg-stone-100' : 
+                          boardDesign === 4 ? 'border-white/20 bg-blue-950/80' : 
+                          boardDesign === 5 ? 'border-red-900 bg-red-950/90' : 
+                          'border-amber-900 bg-amber-950/90'
+                        }`}>
+                          
+                          {/* Design-Specific Accents */}
+                          {boardDesign === 1 && (
+                            <>
+                              <div className="absolute inset-0 opacity-10 bg-gradient-to-b from-transparent via-amber-500/10 to-transparent pointer-events-none"></div>
+                              <div className="absolute left-0 right-0 top-1/3 h-[2px] bg-amber-900/50"></div>
+                              <div className="absolute left-0 right-0 top-2/3 h-[2px] bg-amber-900/50"></div>
+                            </>
+                          )}
+
+                          {boardDesign === 2 && (
+                            <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')]"></div>
+                          )}
+
+                          {boardDesign === 3 && (
+                            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]"></div>
+                          )}
+
+                          {boardDesign === 5 && (
+                             <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/rough-cloth.png')]"></div>
+                          )}
 
                           {/* Corner Bolts/Rivets */}
-                          <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
-                          <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
-                          <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
-                          <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-yellow-600/80 border border-yellow-800 shadow-inner flex items-center justify-center text-[5px] text-yellow-900 font-bold">+</div>
+                          <div className={`absolute top-2 left-2 w-3 h-3 rounded-full border shadow-inner flex items-center justify-center text-[5px] font-bold ${boardDesign === 3 ? 'bg-stone-400 border-stone-500 text-stone-700' : 'bg-yellow-600/80 border-yellow-800 text-yellow-900'}`}>+</div>
+                          <div className={`absolute top-2 right-2 w-3 h-3 rounded-full border shadow-inner flex items-center justify-center text-[5px] font-bold ${boardDesign === 3 ? 'bg-stone-400 border-stone-500 text-stone-700' : 'bg-yellow-600/80 border-yellow-800 text-yellow-900'}`}>+</div>
+                          <div className={`absolute bottom-2 left-2 w-3 h-3 rounded-full border shadow-inner flex items-center justify-center text-[5px] font-bold ${boardDesign === 3 ? 'bg-stone-400 border-stone-500 text-stone-700' : 'bg-yellow-600/80 border-yellow-800 text-yellow-900'}`}>+</div>
+                          <div className={`absolute bottom-2 right-2 w-3 h-3 rounded-full border shadow-inner flex items-center justify-center text-[5px] font-bold ${boardDesign === 3 ? 'bg-stone-400 border-stone-500 text-stone-700' : 'bg-yellow-600/80 border-yellow-800 text-yellow-900'}`}>+</div>
 
                           {/* Board Header */}
-                          <div className="flex justify-between items-center border-b border-yellow-600/30 pb-2 z-10 w-full">
-                            <span className="text-[7.5px] font-black uppercase tracking-[0.2em] text-yellow-500">Puncak Sejati</span>
-                            <div className="flex items-center gap-1 text-yellow-500">
+                          <div className={`flex justify-between items-center border-b pb-2 z-10 w-full ${boardDesign === 3 ? 'border-stone-300 text-stone-500' : 'border-yellow-600/30 text-yellow-500'}`}>
+                            <span className="text-[7.5px] font-black uppercase tracking-[0.2em]">{boardDesign === 3 ? 'National Park' : 'Puncak Sejati'}</span>
+                            <div className="flex items-center gap-1">
                               <Compass size={10} />
-                              <span className="text-[7px] font-bold">SAVER AREA</span>
+                              <span className="text-[7px] font-bold uppercase">{boardDesign === 2 ? 'Stealth Mode' : 'SAVER AREA'}</span>
                             </div>
                           </div>
 
                           {/* Main Board Content */}
                           <div className="my-auto space-y-2 z-10">
-                            <h4 className="text-yellow-600 text-[10px] font-black uppercase tracking-[0.3em]">WELCOME TO</h4>
-                            {boardShowMountain && <h3 className="font-extrabold uppercase text-yellow-50 text-3xl md:text-4xl tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-serif">
-                              ⛰️ {(mountainName.toLowerCase().startsWith('gunung') ? mountainName : 'GUNUNG ' + mountainName).toUpperCase()} ⛰️
-                            </h3>}
-                            <div className="inline-block bg-yellow-500 text-black px-4 py-1.5 rounded-lg text-lg md:text-xl font-black tracking-widest shadow-md">
+                            <h4 className={`text-[10px] font-black uppercase tracking-[0.3em] ${boardDesign === 3 ? 'text-stone-400' : boardDesign === 4 ? 'text-blue-200' : 'text-yellow-600'}`}>WELCOME TO</h4>
+                            {boardShowMountain && (
+                              <h3 className={`font-extrabold uppercase text-3xl md:text-5xl tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
+                                boardDesign === 3 ? 'text-stone-800' : 
+                                boardDesign === 4 ? 'text-white' :
+                                'text-yellow-50'
+                              } ${boardDesign === 2 ? 'font-mono tracking-widest' : boardDesign === 4 ? 'font-sans font-black italic' : 'font-serif'}`}>
+                                {boardDesign === 2 ? mountainName.toUpperCase() : `⛰️ ${(mountainName.toLowerCase().startsWith('gunung') ? mountainName : 'GUNUNG ' + mountainName).toUpperCase()} ⛰️`}
+                              </h3>
+                            )}
+                            <div className={`inline-block px-5 py-2 rounded-lg text-xl md:text-2xl font-black tracking-widest shadow-lg ${
+                              boardDesign === 3 ? 'bg-stone-800 text-stone-100' : 
+                              boardDesign === 4 ? 'bg-art-orange text-white' : 
+                              boardDesign === 2 ? 'bg-white text-black' :
+                              'bg-yellow-500 text-black'
+                            }`}>
                               {mountainMdpl}
                             </div>
-                            <p className="text-yellow-500/80 text-[8px] font-black tracking-[0.15em] uppercase">
+                            <p className={`text-[8px] font-black tracking-[0.15em] uppercase ${boardDesign === 3 ? 'text-stone-500' : boardDesign === 4 ? 'text-blue-300' : 'text-yellow-500/80'}`}>
                               Jalur Pendakian Resmi Via {customVia}
                             </p>
                           </div>
 
                           {/* Board Footer */}
-                          <div className="flex justify-between items-center pt-2 border-t border-yellow-600/30 text-[7px] font-black uppercase text-yellow-600/80 z-10 w-full">
+                          <div className={`flex justify-between items-center pt-2 border-t text-[7px] font-black uppercase z-10 w-full ${
+                            boardDesign === 3 ? 'border-stone-300 text-stone-400' : 'border-yellow-600/30 text-yellow-600/80'
+                          }`}>
                             <span>Tgl: {tripDate}</span>
-                            <span>@ngopi.dketinggian</span>
+                            <span>{boardDesign === 4 ? 'NGOPI DI KETINGGIAN' : '@ngopi.dketinggian'}</span>
                           </div>
                         </div>
 
@@ -1430,10 +1558,15 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     <div className="absolute -top-24 -right-24 w-60 h-60 opacity-25 rounded-full blur-[80px]" style={{ backgroundColor: theme.accent }}></div>
                   </motion.div>
                 </div>
-              </div>
-              {/* Slide Navigation & Dots */}
-              {selectedSlides.length > 1 && (
-                <div className="flex items-center gap-4 mt-5 z-20">
+              </TransformComponent>
+            </>
+          )}
+        </TransformWrapper>
+      </div>
+
+        {/* Slide Navigation & Dots */}
+        {selectedSlides.length > 1 && (
+          <div className="flex items-center gap-4 mt-5 z-20">
                   <button 
                     onClick={() => setCurrentSlide((prev) => (prev > 0 ? prev - 1 : selectedSlides.length - 1))}
                     className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all shadow-lg border border-white/10 shrink-0 hover:scale-105 active:scale-95"
@@ -1461,14 +1594,65 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                 </div>
               )}
 {/* Secondary Action Toolbar shown underneath the preview */}
-                <div className="mt-6 flex flex-col sm:flex-row gap-2.5 w-full max-w-sm px-4 relative z-50">
-                  <button 
-                    onClick={downloadPoster}
-                    disabled={isDownloading}
-                    className="flex-1 bg-art-orange hover:bg-black disabled:bg-gray-400 text-white py-3.5 px-5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 shadow-xl transition-all"
-                  >
-                    <Download size={14} /> {isDownloading ? 'Downloading...' : `Download HD (${layout.toUpperCase()})`}
-                  </button>
+                <div className="mt-8 w-full max-w-sm px-4 relative z-50 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-white/10"></div>
+                    <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">Download Options</span>
+                    <div className="flex-1 h-px bg-white/10"></div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      onClick={() => downloadPoster('png')}
+                      disabled={isDownloading}
+                      className="flex-1 bg-white hover:bg-gray-100 disabled:bg-gray-600 text-black py-4 px-5 rounded-2xl font-black uppercase tracking-wider text-[10px] flex flex-col items-center justify-center gap-1 shadow-xl transition-all"
+                    >
+                      <Download size={16} /> 
+                      <span>PNG Image</span>
+                    </button>
+                    <button 
+                      onClick={() => downloadPoster('pdf')}
+                      disabled={isDownloading}
+                      className="flex-1 bg-white hover:bg-gray-100 disabled:bg-gray-600 text-black py-4 px-5 rounded-2xl font-black uppercase tracking-wider text-[10px] flex flex-col items-center justify-center gap-1 shadow-xl transition-all"
+                    >
+                      <FileText size={16} className="text-red-600" /> 
+                      <span>PDF Document</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      onClick={() => downloadAllSlides('png')}
+                      disabled={isDownloading}
+                      className="flex-1 bg-art-orange hover:bg-orange-600 disabled:bg-gray-600 text-white py-3.5 px-5 rounded-2xl font-black uppercase tracking-wider text-[9px] flex items-center justify-center gap-2 shadow-xl transition-all"
+                    >
+                      <Sparkles size={14} /> All (PNG)
+                    </button>
+                    <button 
+                      onClick={() => downloadAllSlides('pdf')}
+                      disabled={isDownloading}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white py-3.5 px-5 rounded-2xl font-black uppercase tracking-wider text-[9px] flex items-center justify-center gap-2 shadow-xl transition-all"
+                    >
+                      <FileText size={14} /> Full Package (PDF)
+                    </button>
+                  </div>
+
+                  {isDownloading && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-[10px] font-black uppercase text-white/60">
+                        <span>Memproses Render HD...</span>
+                        <span>{downloadProgress}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${downloadProgress}%` }}
+                          className="h-full bg-art-orange"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <button 
                     onClick={() => {
                       setShowPreview(false);
@@ -1476,26 +1660,15 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                         setActiveMobileTab('controls');
                       }
                     }}
-                    className="bg-white/10 hover:bg-white/20 text-white border border-white/10 py-3.5 px-5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 transition-all"
+                    className="w-full bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 py-3 px-5 rounded-2xl font-black uppercase tracking-wider text-[10px] flex items-center justify-center gap-1.5 transition-all"
                   >
-                    <RotateCcw size={14} /> Ubah Desain
+                    <RotateCcw size={14} /> Kembali Edit Desain
                   </button>
                 </div>
               </div>
             )}
             
-            {/* Image Viewer Controls (Zoom/Rotate) */}
-            <div className="absolute top-20 right-6 flex flex-col gap-2 z-50">
-               <button onClick={() => setZoomScale(z => Math.min(z + 0.2, 3))} className="w-10 h-10 rounded-full bg-black/60 text-white backdrop-blur-md flex items-center justify-center shadow-lg border border-white/10 hover:bg-black/80 transition-all">
-                  <span className="text-xl font-bold">+</span>
-               </button>
-               <button onClick={() => setZoomScale(z => Math.max(z - 0.2, 0.5))} className="w-10 h-10 rounded-full bg-black/60 text-white backdrop-blur-md flex items-center justify-center shadow-lg border border-white/10 hover:bg-black/80 transition-all">
-                  <span className="text-xl font-bold">-</span>
-               </button>
-               <button onClick={() => setRotation(r => r + 90)} className="w-10 h-10 rounded-full bg-black/60 text-white backdrop-blur-md flex items-center justify-center shadow-lg border border-white/10 hover:bg-black/80 transition-all">
-                  <RotateCcw size={16} />
-               </button>
-            </div>
+            {/* Image Viewer Controls removed as they are now inside TransformWrapper overlay */}
             
             {/* Status indicator tag */}
             <div className="absolute top-6 left-6 bg-white/15 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-lg pointer-events-none z-50">
