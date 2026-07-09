@@ -223,19 +223,10 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.1.2",
+  version: "1.1.1",
   patchNotes: [
     {
-      version: "1.1.2",
-      date: "2026-07-09",
-      notes: [
-        "Perbaikan Poster Digital: Resolusi poster kini responsif, tidak terpotong (zoom control berfungsi penuh), slide navigation lebih intuitif di bawah, dan rating iklan otomatis disesuaikan.",
-        "Perbaikan Sistem Trip: Tombol publish/draft trip terbuka kini berfungsi dan langsung menyimpan ke cloud.",
-        "Perbaikan Ulasan: Rating bintang kini tampil secara akurat di bagian cerita dan testimoni pengguna."
-      ]
-    },
-    {
-      version: "1.1.2",
+      version: "1.1.1",
       date: "2026-07-08",
       notes: [
         "Sistem Testimonial & Ulasan (Cerita): Menambahkan slider testimoni dari pendaki yang telah menyelesaikan trip di section Cerita pada beranda, beserta akumulasi rating dan ulasan per destinasi gunung.",

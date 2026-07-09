@@ -301,12 +301,7 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                 {!isPublished || ot.status === 'selesai' ? (
         <button
-           onClick={() => {
-             const nd = [...data];
-             nd[i].status = 'draft';
-             setData(nd);
-             updateConfig({ openTrips: nd });
-           }}
+           onClick={() => { const nd = [...data]; nd[i].status = 'draft'; setData(nd); updateConfig({ openTrips: nd }); showToast('Disimpan sebagai Draft!'); }}
            className="w-full sm:w-auto bg-yellow-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-colors"
         >
            Jadikan Draft
@@ -314,23 +309,13 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
     ) : (
         <div className="flex flex-col sm:flex-row gap-2">
             <button
-               onClick={() => {
-                 const nd = [...data];
-                 nd[i].status = 'published';
-                 setData(nd);
-                 updateConfig({ openTrips: nd });
-               }}
+               onClick={() => { const nd = [...data]; nd[i].status = 'published'; setData(nd); updateConfig({ openTrips: nd }); showToast('Dipublikasi!'); }}
                className="w-full sm:w-auto bg-art-green text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-colors"
             >
                Publikasi
             </button>
             <button
-               onClick={() => {
-                 const nd = [...data];
-                 nd[i].status = 'selesai';
-                 setData(nd);
-                 updateConfig({ openTrips: nd });
-               }}
+               onClick={() => { const nd = [...data]; nd[i].status = 'selesai'; setData(nd); updateConfig({ openTrips: nd }); showToast('Selesai (Diarsipkan)!'); }}
                className="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-colors"
             >
                Selesai

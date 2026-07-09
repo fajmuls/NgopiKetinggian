@@ -53,7 +53,7 @@ export const ReviewModal = ({ isOpen, onClose, booking, user }: any) => {
              <label className="text-[10px] font-black uppercase tracking-widest text-art-text/40 mb-2 block">Rating Bintang</label>
              <div className="flex gap-2">
                {[1,2,3,4,5].map(s => (
-                 <button key={s} onClick={() => setRating(s)} className={`p-1 transition-all ${rating >= s ? 'text-yellow-400' : 'text-gray-300'}`}>
+                 <button key={s} onClick={() => setRating(s)} className={`p-1 transition-all \${rating >= s ? 'text-yellow-400' : 'text-gray-300'}`}>
                     <Star size={32} fill="currentColor" />
                  </button>
                ))}
