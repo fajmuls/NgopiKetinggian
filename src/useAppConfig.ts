@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.4.0";
+export const WEBSITE_VERSION = "1.6.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,31 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.4.0",
+  version: "1.6.0",
   patchNotes: [
+    {
+      version: "1.6.0",
+      date: "2026-07-09",
+      notes: [
+        "Perombakan total desain Poster (1-5) dengan variasi font dan layout unik.",
+        "Pembedaan gaya visual antara layout Info dan Iklan (Ads).",
+        "Penyederhanaan tampilan fasilitas agar lebih bersih dan tidak terpotong.",
+        "Update desain Bendera: Logo bulat transparan dan tahun establishment 2026.",
+        "Update desain Papan: Background gradasi gunung, font MDPL ikonik, dan tahun 2026.",
+        "Optimasi label harga: Mengganti teks clickbait menjadi 'Harga Terkini'."
+      ]
+    },
+    {
+      version: "1.5.0",
+      date: "2024-03-24",
+      notes: [
+        "Konsolidasi menu unduhan ke dalam satu tombol 'Download Options'.",
+        "Refaktor Preview Modal: Menghilangkan frame/box yang menyebabkan gambar terpotong.",
+        "Optimasi TransformWrapper untuk memastikan gambar selalu terlihat utuh (fit-to-screen).",
+        "Perbaikan bug pada rendering bayangan (shadow) yang mengganggu visibilitas di beberapa perangkat.",
+        "Peningkatan performa zooming dan panning pada preview poster."
+      ]
+    },
     {
       version: "1.4.0",
       date: "2024-03-23",
