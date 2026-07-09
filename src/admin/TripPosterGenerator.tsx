@@ -109,6 +109,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const [activeMobileTab, setActiveMobileTab] = useState<'controls' | 'preview'>('controls');
   const [containerSize, setContainerSize] = useState({ width: 500, height: 500 });
   const [isDownloading, setIsDownloading] = useState(false);
+  const isInternalChange = useRef(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [copied, setCopied] = useState(false);
 
@@ -119,12 +120,12 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
 
   // Auto Reset preview when crucial visual options change so they click "See Preview" again
   useEffect(() => {
-    if (isDownloading) return; // Prevent resetting during batch download
+    if (isDownloading || isInternalChange.current) return; 
     setShowPreview(false);
     if (window.innerWidth < 768) {
       setActiveMobileTab('controls');
     }
-  }, [ratio, layout, theme, tripTypeLabel, isDownloading]);
+  }, [ratio, layout, theme, tripTypeLabel]);
 
   // Dynamically observe container dimensions to scale high-res DOM perfectly
   useEffect(() => {
@@ -181,6 +182,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const downloadPoster = async (format: 'png' | 'pdf' = 'png') => {
     if (posterRef.current === null) return;
     setIsDownloading(true);
+    isInternalChange.current = true;
     setDownloadProgress(20);
     
     const originalTransform = posterRef.current.style.transform;
@@ -244,6 +246,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
       }
       setTimeout(() => {
         setIsDownloading(false);
+        isInternalChange.current = false;
         setDownloadProgress(0);
       }, 500);
     }
@@ -252,6 +255,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const downloadAllSlides = async (format: 'png' | 'pdf' = 'png') => {
     if (posterRef.current === null) return;
     setIsDownloading(true);
+    isInternalChange.current = true;
     
     const originalLayout = layout;
     const originalParentWidth = canvasWrapperRef.current ? canvasWrapperRef.current.style.width : '';
@@ -337,6 +341,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
       }
       setTimeout(() => {
         setIsDownloading(false);
+        isInternalChange.current = false;
         setDownloadProgress(0);
       }, 500);
     }
@@ -1118,18 +1123,18 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           {/* Left Column: Mountain Specs & Rundown */}
                           <div className="space-y-3">
                             <div className={`p-3 rounded-xl backdrop-blur-sm ${infoDesign === 2 ? 'bg-white/10 border border-white/20' : infoDesign === 3 ? 'bg-art-orange/20 border-l-4 border-art-orange' : infoDesign === 4 ? 'bg-transparent border-b-2 border-white/20 rounded-none' : infoDesign === 5 ? 'bg-black/40 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)]' : 'bg-black/20 border border-white/5'}`}>
-                              <p className="text-[7px] font-black uppercase tracking-wider opacity-60 mb-0.5">Destinasi Gunung</p>
-                              <h4 className={`text-2xl md:text-3xl font-black uppercase tracking-tight ${theme.text}`}>{tripName}</h4>
-                              <p className="text-[9px] font-bold opacity-70">Jalur: Via {customVia} • {tripDuration}</p>
+                              <p className="text-[7px] font-black uppercase tracking-wider text-white/60 mb-0.5">Destinasi Gunung</p>
+                              <h4 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">{tripName}</h4>
+                              <p className="text-[9px] font-bold text-white/80">Jalur: Via {customVia} • {tripDuration}</p>
                             </div>
 
                             <div className={`p-3.5 space-y-2 ${infoDesign === 2 ? 'bg-white/5 border border-white/20 rounded-xl backdrop-blur-md' : infoDesign === 3 ? 'bg-black/40 border border-white/10 rounded-xl' : infoDesign === 4 ? 'bg-transparent border-t-2 border-white/20' : infoDesign === 5 ? 'bg-black/60 border border-art-orange shadow-[0_0_15px_rgba(255,87,34,0.3)] rounded-xl' : 'bg-black/35 rounded-xl border border-white/10'}`}>
                               <p className="text-[8px] font-black uppercase tracking-widest text-art-orange border-b border-white/5 pb-1">Rencana Kegiatan</p>
-                              <div className="space-y-2 text-[9px] font-bold leading-relaxed text-white/90">
+                              <div className="space-y-2 text-[9px] font-bold leading-relaxed">
                                 {rundownLines.map((line: string, i: number) => (
                                   <div key={i} className="flex items-start gap-2">
                                     <span className="w-4 h-4 bg-art-orange text-white text-[8px] font-black rounded-full flex items-center justify-center shrink-0">{i+1}</span>
-                                    <p className="text-white/80">{line}</p>
+                                    <p className="text-white">{line}</p>
                                   </div>
                                 ))}
                               </div>
@@ -1222,21 +1227,20 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           <span className="text-[8px] font-black opacity-60">HUBUNGI WHATSAPP</span>
                         </div>
 
-                        {/* Title Display */}
-                        <div className={`my-auto text-center space-y-3 relative z-10 ${adDesign === 4 ? 'text-left' : ''}`}>
-                          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-art-orange font-mono">EXPLORE INDONESIA</p>
-                          <h3 className={`text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.75] text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.8)] ${
-                            adDesign === 2 ? 'font-serif italic' : 
-                            adDesign === 4 ? 'font-mono' : 'font-sans'
-                          }`}>
-                            {tripName}
-                          </h3>
-                          <div className={`flex items-center gap-3 ${adDesign === 4 ? 'justify-start' : 'justify-center'}`}>
-                            <div className="h-0.5 w-12 bg-art-orange"></div>
-                            <p className="text-lg font-black text-white">Via {customVia} • {tripDuration}</p>
-                            <div className="h-0.5 w-12 bg-art-orange"></div>
+                          <div className={`my-auto text-center space-y-3 relative z-10 ${adDesign === 4 ? 'text-left' : ''}`}>
+                            <p className="text-[12px] font-black uppercase tracking-[0.6em] text-art-orange font-mono">EXPLORE INDONESIA</p>
+                            <h3 className={`text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-[0.75] text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.8)] ${
+                              adDesign === 2 ? 'font-serif italic' : 
+                              adDesign === 4 ? 'font-mono' : 'font-sans'
+                            }`}>
+                              {tripName}
+                            </h3>
+                            <div className={`flex items-center gap-3 ${adDesign === 4 ? 'justify-start' : 'justify-center'}`}>
+                              <div className="h-0.5 w-12 bg-art-orange"></div>
+                              <p className="text-lg md:text-xl font-black text-white">Via {customVia} • {tripDuration}</p>
+                              <div className="h-0.5 w-12 bg-art-orange"></div>
+                            </div>
                           </div>
-                        </div>
 
                         {/* High Impact Core Services pills */}
                         <div className="space-y-4 max-w-sm mx-auto w-full z-10">
@@ -1449,7 +1453,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           }`}
                           style={{ opacity: flagShowLogo ? flagLogoOpacity : 0 }}
                         >
-                          <div className={`w-[55%] aspect-square rounded-full overflow-hidden border-8 border-white/10 flex items-center justify-center p-4 bg-white/5 backdrop-blur-sm shadow-2xl ${
+                          <div className={`w-[75%] aspect-square rounded-full overflow-hidden border-8 border-white/10 flex items-center justify-center p-6 bg-white/5 backdrop-blur-sm shadow-2xl ${
                             flagDesign === 3 ? 'border-art-orange/20' : ''
                           }`}>
                             <img 
@@ -1495,13 +1499,13 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                         boardDesign === 3 ? 'bg-stone-300' : 
                         boardDesign === 4 ? 'bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-950' : 
                         boardDesign === 5 ? 'bg-red-950' : 
-                        'bg-amber-950/40'
+                        'bg-amber-950'
                       }`}>
                         
-                        {/* Background Mountain Image for Board */}
-                        <div className="absolute inset-0 z-0">
-                           <img src={trip.image || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop"} className="w-full h-full object-cover opacity-30 grayscale-[50%]" alt="Bg" />
-                           <div className="absolute inset-0 bg-black/40"></div>
+                        {/* Background Mountain Image for Board - TRANSPARENT OVERLAY */}
+                        <div className="absolute inset-0 z-0 overflow-hidden">
+                           <img src={trip.image || "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop"} className="w-full h-full object-cover opacity-20 grayscale-[30%]" alt="Bg" />
+                           <div className="absolute inset-0 bg-black/10"></div>
                         </div>
 
                         {/* THE BOARD FRAME */}
@@ -1514,13 +1518,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                           'border-amber-900 bg-amber-950/90'
                         }`}>
                           
-                          {/* Design-Specific Accents & Background Mountain Graphics */}
-                          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
-                            <svg viewBox="0 0 1000 400" className="absolute bottom-0 w-full h-auto fill-current text-white/10">
-                              <path d="M0,400 L200,100 L400,250 L600,50 L800,300 L1000,150 L1000,400 Z" />
-                            </svg>
-                          </div>
-
+                          {/* Design-Specific Accents */}
                           {boardDesign === 1 && (
                             <>
                               <div className="absolute inset-0 opacity-10 bg-gradient-to-b from-transparent via-amber-500/10 to-transparent pointer-events-none"></div>
@@ -1562,9 +1560,9 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
                           {/* Main Board Content */}
                           <div className="my-auto space-y-4 z-10">
-                            <h4 className={`text-xs md:text-sm font-black uppercase tracking-[0.4em] drop-shadow-sm ${boardDesign === 3 ? 'text-stone-400' : boardDesign === 4 ? 'text-blue-200' : 'text-yellow-600'}`}>WELCOME TO</h4>
+                            <h4 className={`text-sm md:text-base font-black uppercase tracking-[0.5em] drop-shadow-sm ${boardDesign === 3 ? 'text-stone-400' : boardDesign === 4 ? 'text-blue-200' : 'text-yellow-600'}`}>WELCOME TO</h4>
                             {boardShowMountain && (
-                              <h3 className={`font-black uppercase text-5xl md:text-8xl tracking-tighter drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)] ${
+                              <h3 className={`font-black uppercase text-7xl md:text-9xl lg:text-[10rem] tracking-tighter drop-shadow-[0_8px_20px_rgba(0,0,0,0.95)] ${
                                 boardDesign === 3 ? 'text-stone-800' : 
                                 boardDesign === 4 ? 'text-white bg-clip-text bg-gradient-to-b from-white to-blue-200' :
                                 'text-yellow-50'
@@ -1576,7 +1574,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                                 {boardDesign === 2 ? mountainName.toUpperCase() : (mountainName.toLowerCase().startsWith('gunung') ? mountainName : 'GUNUNG ' + mountainName).toUpperCase()}
                               </h3>
                             )}
-                            <div className={`inline-block px-10 py-4 rounded-2xl text-4xl md:text-7xl font-black tracking-tighter shadow-2xl border-4 ${
+                            <div className={`inline-block px-12 py-6 rounded-[2rem] text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter shadow-2xl border-4 ${
                               boardDesign === 3 ? 'bg-stone-800 text-stone-100 border-stone-600' : 
                               boardDesign === 4 ? 'bg-art-orange text-white border-white/20' : 
                               boardDesign === 2 ? 'bg-white text-black border-zinc-400' :
@@ -1584,7 +1582,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             }`}>
                               {mountainMdpl}
                             </div>
-                            <p className={`text-[10px] font-black tracking-[0.2em] uppercase drop-shadow-md ${boardDesign === 3 ? 'text-stone-500' : boardDesign === 4 ? 'text-blue-300' : 'text-yellow-500'}`}>
+                            <p className={`text-[12px] md:text-sm font-black tracking-[0.3em] uppercase drop-shadow-md ${boardDesign === 3 ? 'text-stone-500' : boardDesign === 4 ? 'text-blue-300' : 'text-yellow-500'}`}>
                               Jalur Pendakian Resmi Via {customVia}
                             </p>
                           </div>

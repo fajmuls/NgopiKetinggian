@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.8.0";
+export const WEBSITE_VERSION = "1.8.2";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,30 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.8.0",
+  version: "1.8.2",
   patchNotes: [
+    {
+      version: "1.8.2",
+      date: "2026-07-09",
+      notes: [
+        "Peningkatan visual Papan Puncak (Board): Nama gunung dan MDPL diperbesar secara signifikan.",
+        "Perbaikan sistem layering Papan: Latar belakang warna solid kini dipadukan dengan foto gunung transparan untuk estetika yang lebih bersih.",
+        "Pembersihan UI Papan: Menghapus ikon gunung overlay yang mengganggu.",
+        "Optimasi Layout Bendera (Flag): Memperbesar logo dalam bingkai lingkaran agar lebih proporsional.",
+        "Peningkatan Legibilitas (Info & Iklan): Mengubah skema warna font menjadi kontras tinggi (putih/terang) pada area gelap agar mudah dibaca.",
+        "Penyesuaian tipografi pada layout poster untuk visibilitas maksimal di perangkat mobile."
+      ]
+    },
+    {
+      version: "1.8.1",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan error 'Permission Denied' pada Firestore untuk koleksi Testimoni dan Booking.",
+        "Optimasi Firestore Security Rules untuk keamanan dan aksesibilitas data.",
+        "Perbaikan bug 'Auto-Reset UI' pada Poster Generator saat proses unduh slide.",
+        "Peningkatan stabilitas pengecekan status admin pada menu pengaturan."
+      ]
+    },
     {
       version: "1.8.0",
       date: "2026-07-09",
