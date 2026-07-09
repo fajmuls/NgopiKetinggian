@@ -258,12 +258,145 @@ export const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: a
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-art-text/40">Deskripsi / Bio</label>
                   <textarea 
-                    rows={4}
+                    rows={2}
                     className="w-full border-2 border-art-text/10 p-3 rounded-xl text-xs font-medium outline-none focus:border-art-orange resize-none" 
                     value={leader.description} 
                     onChange={e => setData(prev => prev.map((item, idx) => idx === i ? { ...item, description: e.target.value } : item))} 
                     placeholder="Tuliskan pengalaman atau moto hidup..." 
                   />
+                </div>
+
+                <div className="pt-4 border-t border-art-text/5 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="text-[11px] font-black uppercase tracking-tight text-art-text">Riwayat & Pengalaman Mendaki</h4>
+                      <p className="text-[9px] font-bold text-art-text/40 uppercase">List gunung yang pernah didaki</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        const nd = [...data];
+                        nd[i] = { 
+                          ...nd[i], 
+                          experiences: [...(nd[i].experiences || []), { mountain: "", years: "", description: "", photos: [""] }] 
+                        };
+                        setData(nd);
+                      }}
+                      className="bg-art-text text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Plus size={12} /> Tambah Pengalaman
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(leader.experiences || []).map((exp: any, expIdx: number) => (
+                      <div key={expIdx} className="p-4 rounded-2xl bg-art-bg/30 border border-art-text/10 relative group/exp">
+                        <button 
+                          onClick={() => {
+                            const nd = [...data];
+                            const ne = [...nd[i].experiences];
+                            ne.splice(expIdx, 1);
+                            nd[i].experiences = ne;
+                            setData(nd);
+                          }}
+                          className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-500 rounded-lg opacity-0 group-hover/exp:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-art-text/30">Nama Gunung</label>
+                            <input 
+                              className="w-full border-2 border-white p-2 rounded-lg text-[11px] font-bold outline-none focus:border-art-orange"
+                              value={exp.mountain}
+                              onChange={e => {
+                                const nd = [...data];
+                                nd[i].experiences[expIdx].mountain = e.target.value;
+                                setData(nd);
+                              }}
+                              placeholder="Contoh: Mt. Rinjani"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-art-text/30">Tahun / Waktu</label>
+                            <input 
+                              className="w-full border-2 border-white p-2 rounded-lg text-[11px] font-bold outline-none focus:border-art-orange"
+                              value={exp.years}
+                              onChange={e => {
+                                const nd = [...data];
+                                nd[i].experiences[expIdx].years = e.target.value;
+                                setData(nd);
+                              }}
+                              placeholder="Contoh: 2023 / 5 Tahun"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1 mb-3">
+                          <label className="text-[9px] font-black uppercase text-art-text/30">Aktivitas / Detail</label>
+                          <input 
+                            className="w-full border-2 border-white p-2 rounded-lg text-[11px] font-medium outline-none focus:border-art-orange"
+                            value={exp.description}
+                            onChange={e => {
+                              const nd = [...data];
+                              nd[i].experiences[expIdx].description = e.target.value;
+                              setData(nd);
+                            }}
+                            placeholder="Contoh: Ekspedisi Solo Mendaki Puncak..."
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <label className="text-[9px] font-black uppercase text-art-text/30">Foto Dokumentasi (URL)</label>
+                            <button 
+                              onClick={() => {
+                                const nd = [...data];
+                                nd[i].experiences[expIdx].photos = [...(nd[i].experiences[expIdx].photos || []), ""];
+                                setData(nd);
+                              }}
+                              className="text-[8px] font-black uppercase text-art-orange hover:underline"
+                            >
+                              + Foto
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 gap-2">
+                            {(exp.photos || []).map((photo: string, pIdx: number) => (
+                              <div key={pIdx} className="flex gap-2">
+                                <InputWithPaste 
+                                  className="flex-1 border-2 border-white p-2 rounded-lg text-[10px] font-mono outline-none focus:border-art-orange"
+                                  value={photo}
+                                  onChange={(e: any) => {
+                                    const nd = [...data];
+                                    nd[i].experiences[expIdx].photos[pIdx] = e.target.value;
+                                    setData(nd);
+                                  }}
+                                  placeholder="URL Foto"
+                                />
+                                <button 
+                                  onClick={() => {
+                                    const nd = [...data];
+                                    const np = [...nd[i].experiences[expIdx].photos];
+                                    np.splice(pIdx, 1);
+                                    nd[i].experiences[expIdx].photos = np;
+                                    setData(nd);
+                                  }}
+                                  className="p-2 text-red-400 hover:text-red-500"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {(leader.experiences || []).length === 0 && (
+                      <div className="py-8 border-2 border-dashed border-art-text/5 rounded-2xl text-center">
+                        <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest italic">Belum ada riwayat pengalaman daki</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-1">

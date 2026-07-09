@@ -59,6 +59,8 @@ export const AdminPanelModal = ({
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, (snap) => {
       setBookings(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (error) => {
+      console.error("Admin bookings fetch error:", error);
     });
     return () => unsub();
   }, [isOpen, user]);

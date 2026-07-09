@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.8.2";
+export const WEBSITE_VERSION = "1.9.0";
 
 export interface FacilityOption {
   name: string;
@@ -225,6 +225,17 @@ const getDefaultWebsiteData = () => ({
   },
   version: "1.8.2",
   patchNotes: [
+    {
+      version: "1.9.0",
+      date: "2026-07-09",
+      notes: [
+        "Fitur Baru: Pengalaman Trip Leader - Admin kini dapat menambahkan riwayat pendakian, pengalaman, dan foto dokumentasi pada setiap profil Trip Leader.",
+        "Integrasi Ulasan & Cerita: Menghubungkan sistem ulasan ke database Cloud Firestore agar cerita pendaki tersimpan secara permanen.",
+        "Peningkatan Keamanan Firestore: Memperbarui aturan akses (Security Rules) untuk koleksi ulasan.",
+        "Perbaikan Bug: Menangani 'Uncaught Error' pada snapshot listener saat memuat data booking di panel admin.",
+        "Pembaruan UI: Menampilkan pengalaman Leader 'di Atas Awan' pada bagian Cerita di halaman utama."
+      ]
+    },
     {
       version: "1.8.2",
       date: "2026-07-09",

@@ -83,6 +83,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn() && incoming().rating >= 1 && incoming().rating <= 5;
+      allow update, delete: if isAdmin();
+    }
+
     match /mountainReviews/{reviewId} {
       allow read: if true;
       allow create: if isSignedIn() && incoming().userId == request.auth.uid;

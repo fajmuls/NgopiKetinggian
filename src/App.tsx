@@ -49,6 +49,7 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTestimonialsOpen, setIsTestimonialsOpen] = useState(false);
+  const [ceritaTab, setCeritaTab] = useState<'pendaki' | 'leader'>('pendaki');
   const [bookingPrefill, setBookingPrefill] = useState<any>(undefined);
   const [bookingType, setBookingType] = useState<'open' | 'private'>('open');
   const [filterDifficulty, setFilterDifficulty] = useState('Semua');
@@ -187,6 +188,17 @@ export default function App() {
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setReviews(data);
+    }, (error) => {
+      console.error("App reviews fetch error:", error);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -453,30 +465,89 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               
               {/* Testimonials / Cerita Slider */}
               <div className="mt-8 mb-10 overflow-hidden relative w-full bg-white/40 border border-art-text/10 p-6 rounded-3xl shadow-sm backdrop-blur-md">
-                 <h4 className="text-sm font-black uppercase tracking-widest text-art-text mb-4 flex items-center gap-2">
-                    <Star size={16} className="text-yellow-500" fill="currentColor" /> Cerita Pendaki
-                 </h4>
-                 {reviews.filter(r => r.status !== 'hidden').length > 0 ? (
-                    <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
-                       {reviews.filter(r => r.status !== 'hidden').map((r, idx) => (
-                         <div key={idx} className="min-w-[280px] w-[280px] bg-white border-2 border-art-text/10 rounded-2xl p-5 shrink-0 snap-center shadow-sm">
-                            <div className="flex justify-between items-start mb-3">
-                               <div>
-                                  <span className="block text-xs font-black uppercase text-art-text truncate w-32">{r.userName}</span>
-                                  <span className="block text-[9px] font-bold uppercase text-art-orange tracking-widest">{r.mountainName}</span>
-                               </div>
-                               <div className="flex gap-0.5 text-yellow-400">
-                                  {[1,2,3,4,5].map(s => (
-                                     <Star key={s} size={10} fill={s <= r.rating ? "currentColor" : "none"} className={s <= r.rating ? "" : "text-gray-300"} />
-                                  ))}
-                               </div>
+                 <div className="flex items-center justify-between mb-4 border-b border-art-text/5 pb-3">
+                   <h4 className="text-sm font-black uppercase tracking-widest text-art-text flex items-center gap-2">
+                      <Star size={16} className="text-yellow-500" fill="currentColor" /> {ceritaTab === 'pendaki' ? 'Cerita Pendaki' : 'Pengalaman Leader'}
+                   </h4>
+                   <div className="flex bg-art-text/5 p-1 rounded-xl">
+                      <button 
+                        onClick={() => setCeritaTab('pendaki')}
+                        className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${ceritaTab === 'pendaki' ? 'bg-art-text text-white shadow-md' : 'text-art-text/40 hover:text-art-text'}`}
+                      >
+                        Pendaki
+                      </button>
+                      <button 
+                        onClick={() => setCeritaTab('leader')}
+                        className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${ceritaTab === 'leader' ? 'bg-art-text text-white shadow-md' : 'text-art-text/40 hover:text-art-text'}`}
+                      >
+                        Leader
+                      </button>
+                   </div>
+                 </div>
+
+                 {ceritaTab === 'pendaki' ? (
+                   <>
+                    {reviews.filter(r => r.status !== 'hidden').length > 0 ? (
+                        <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
+                          {reviews.filter(r => r.status !== 'hidden').map((r, idx) => (
+                            <div key={idx} className="min-w-[280px] w-[280px] bg-white border-2 border-art-text/10 rounded-2xl p-5 shrink-0 snap-center shadow-sm">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                      <span className="block text-xs font-black uppercase text-art-text truncate w-32">{r.userName}</span>
+                                      <span className="block text-[9px] font-bold uppercase text-art-orange tracking-widest">{r.mountainName}</span>
+                                  </div>
+                                  <div className="flex gap-0.5 text-yellow-400">
+                                      {[1,2,3,4,5].map(s => (
+                                        <Star key={s} size={10} fill={s <= r.rating ? "currentColor" : "none"} className={s <= r.rating ? "" : "text-gray-300"} />
+                                      ))}
+                                  </div>
+                                </div>
+                                <p className="text-xs text-art-text/80 italic font-medium line-clamp-4">"{r.review}"</p>
                             </div>
-                            <p className="text-xs text-art-text/80 italic font-medium line-clamp-4">"{r.review}"</p>
-                         </div>
-                       ))}
-                    </div>
+                          ))}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-art-text/50 font-bold italic">Belum ada cerita yang dibagikan.</p>
+                    )}
+                   </>
                  ) : (
-                    <p className="text-xs text-art-text/50 font-bold italic">Belum ada cerita yang dibagikan.</p>
+                   <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
+                      {currentTripLeaders.flatMap((l: any) => (l.experiences || []).map((exp: any, eIdx: number) => ({ ...exp, leaderName: l.name, leaderAvatar: l.avatar, eIdx }))).length > 0 ? (
+                        currentTripLeaders.flatMap((l: any) => (l.experiences || []).map((exp: any, eIdx: number) => ({ ...exp, leaderName: l.name, leaderAvatar: l.avatar, eIdx }))).map((exp, idx) => (
+                          <div key={idx} className="min-w-[300px] w-[300px] bg-white border-2 border-art-text/10 rounded-2xl p-0 shrink-0 snap-center shadow-sm overflow-hidden flex flex-col">
+                             {exp.photos && exp.photos[0] && (
+                               <div className="w-full h-32 relative">
+                                 <img src={exp.photos[0]} alt={exp.mountain} className="w-full h-full object-cover" />
+                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                 <div className="absolute bottom-2 left-3 right-3 flex justify-between items-end">
+                                   <span className="text-[10px] font-black uppercase text-white tracking-widest truncate">{exp.mountain}</span>
+                                   <span className="text-[8px] font-bold text-art-orange bg-white px-2 py-0.5 rounded-full">{exp.years}</span>
+                                 </div>
+                               </div>
+                             )}
+                             <div className="p-4">
+                               <div className="flex items-center gap-2 mb-3">
+                                 <img src={exp.leaderAvatar} alt={exp.leaderName} className="w-6 h-6 rounded-full object-cover border border-art-text/10" />
+                                 <span className="text-[9px] font-black uppercase text-art-text/60">{exp.leaderName}</span>
+                               </div>
+                               <p className="text-xs text-art-text font-medium line-clamp-3 mb-2">{exp.description}</p>
+                               {exp.photos && exp.photos.length > 1 && (
+                                 <div className="flex gap-1 mt-auto">
+                                   {exp.photos.slice(1, 4).map((ph: string, pi: number) => (
+                                     <img key={pi} src={ph} className="w-8 h-8 rounded-lg object-cover border border-art-text/5" />
+                                   ))}
+                                   {exp.photos.length > 4 && (
+                                     <div className="w-8 h-8 rounded-lg bg-art-bg flex items-center justify-center text-[8px] font-bold text-art-text/40">+{exp.photos.length - 4}</div>
+                                   )}
+                                 </div>
+                               )}
+                             </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-art-text/50 font-bold italic">Belum ada pengalaman leader yang dibagikan.</p>
+                      )}
+                   </div>
                  )}
               </div>
               
