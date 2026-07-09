@@ -99,6 +99,21 @@ export const TestimonialsModal: React.FC<TestimonialsModalProps> = ({ isOpen, on
                     </p>
                     <span className="absolute -bottom-6 -right-2 text-4xl text-art-orange/10 font-serif">"</span>
                   </div>
+
+                  {r.photos && r.photos.length > 0 && (
+                    <div className={`grid gap-2 mt-2 ${r.photos.length === 1 ? 'grid-cols-1' : r.photos.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                      {r.photos.map((photo: string, pIdx: number) => (
+                        <div key={pIdx} className="aspect-square rounded-xl overflow-hidden border border-art-text/10 bg-art-bg group/photo">
+                          <img 
+                            src={photo} 
+                            alt={`Photo ${pIdx + 1}`} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover/photo:scale-110 cursor-zoom-in"
+                            onClick={() => window.open(photo, '_blank')}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>

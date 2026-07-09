@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.8.5";
+export const WEBSITE_VERSION = "1.9.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,19 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.8.5",
+  version: "1.9.0",
   patchNotes: [
+    {
+      version: "1.9.0",
+      date: "2026-07-09",
+      notes: [
+        "Fitur Baru: 'Segelas Cerita' (Travel History) kini mendukung unggahan foto petualangan.",
+        "Integrasi galeri foto di setiap ulasan dan testimoni pendaki.",
+        "Konsolidasi database ulasan gunung ke koleksi 'mountainReviews' untuk konsistensi data.",
+        "Peningkatan sistem koneksi Firestore untuk stabilitas sinkronisasi data.",
+        "Penambahan indikator status koneksi database pada panel navigasi."
+      ]
+    },
     {
       version: "1.8.5",
       date: "2026-07-09",

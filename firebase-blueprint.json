@@ -70,6 +70,10 @@
           "userAvatar": { "type": "string" },
           "rating": { "type": "number" },
           "review": { "type": "string" },
+          "photos": { 
+            "type": "array",
+            "items": { "type": "string" }
+          },
           "createdAt": { "type": "timestamp" },
           "status": { "type": "string" }
         },
