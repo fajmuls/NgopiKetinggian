@@ -54,6 +54,8 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const [infoDesign, setInfoDesign] = useState<number>(1);
   const [adDesign, setAdDesign] = useState<number>(1);
   const [flagShowLogo, setFlagShowLogo] = useState(true);
+  const [flagLogoOpacity, setFlagLogoOpacity] = useState(0.8);
+  const [flagBgType, setFlagBgType] = useState<'image' | 'color'>('image');
   const [flagShowMountain, setFlagShowMountain] = useState(true);
   const [boardShowMountain, setBoardShowMountain] = useState(true);
   
@@ -157,10 +159,13 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
 
   const baseDim = getBaseDimensions();
   // Safe scale factor with extra padding for previews
-  const padding = window.innerWidth < 768 ? 16 : 32;
+  const padding = window.innerWidth < 768 ? 32 : 64;
   const scaleX = (containerSize.width - padding) / baseDim.width;
   const scaleY = (containerSize.height - padding) / baseDim.height;
-  const scale = Math.min(scaleX, scaleY, 1); // Clamp scale to a max of 1
+  const scale = Math.min(scaleX, scaleY, 1); 
+  
+  // Adjusted scale for the preview container to ensure it always fits visually with a bit of "breathing room"
+  const previewScale = scale * 0.95;
 
   const downloadPoster = async () => {
     if (posterRef.current === null) return;
@@ -203,7 +208,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     } catch (err) {
       console.error('Failed to download poster', err);
     } finally {
-      posterRef.current.style.transform = `scale(${scale})`;
+      posterRef.current.style.transform = `scale(${previewScale})`;
       posterRef.current.style.transformOrigin = 'top left';
       if (canvasWrapperRef.current) {
         canvasWrapperRef.current.style.width = originalParentWidth;
@@ -224,6 +229,8 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     const originalLayout = layout;
     const originalParentWidth = canvasWrapperRef.current ? canvasWrapperRef.current.style.width : '';
     const originalParentHeight = canvasWrapperRef.current ? canvasWrapperRef.current.style.height : '';
+    const originalParentPosition = canvasWrapperRef.current ? canvasWrapperRef.current.style.position : '';
+    const originalParentZIndex = canvasWrapperRef.current ? canvasWrapperRef.current.style.zIndex : '';
     
     try {
       const slidesToDownload = selectedSlides.filter(s => ['poster', 'rundown', 'ad', 'gears', 'rules', 'flag', 'board'].includes(s));
@@ -267,7 +274,7 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     } finally {
       setLayout(originalLayout);
       if (posterRef.current) {
-        posterRef.current.style.transform = `scale(${scale})`;
+        posterRef.current.style.transform = `scale(${previewScale})`;
         posterRef.current.style.transformOrigin = 'top left';
       }
       if (canvasWrapperRef.current) {
@@ -515,15 +522,46 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     </button>
                   ))}
                 </div>
-                <div className="flex flex-col gap-2 pt-2">
-                   <label className="flex items-center gap-2 text-xs font-bold text-gray-600 cursor-pointer">
-                      <input type="checkbox" checked={flagShowLogo} onChange={e => setFlagShowLogo(e.target.checked)} className="accent-art-orange" />
-                      Tampilkan Logo Utama
-                   </label>
-                   <label className="flex items-center gap-2 text-xs font-bold text-gray-600 cursor-pointer">
-                      <input type="checkbox" checked={flagShowMountain} onChange={e => setFlagShowMountain(e.target.checked)} className="accent-art-orange" />
-                      Tampilkan Nama Gunung/MDPL
-                   </label>
+                
+                <div className="space-y-3 pt-2">
+                   <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Tipe Background</label>
+                      <div className="flex gap-1">
+                        {['image', 'color'].map(bt => (
+                          <button 
+                            key={bt}
+                            onClick={() => setFlagBgType(bt as 'image' | 'color')}
+                            className={`flex-1 py-1.5 rounded-lg text-[8px] font-black uppercase border transition-all ${flagBgType === bt ? 'bg-art-text text-white border-art-text' : 'bg-white text-gray-400 border-gray-100'}`}
+                          >
+                            {bt === 'image' ? 'Foto Gunung' : 'Warna Solid'}
+                          </button>
+                        ))}
+                      </div>
+                   </div>
+
+                   <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Transparansi Logo</label>
+                        <span className="text-[9px] font-black text-art-orange">{Math.round(flagLogoOpacity * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="1" step="0.05" 
+                        value={flagLogoOpacity} 
+                        onChange={e => setFlagLogoOpacity(parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-art-orange"
+                      />
+                   </div>
+
+                   <div className="flex flex-col gap-2">
+                      <label className="flex items-center gap-2 text-xs font-bold text-gray-600 cursor-pointer">
+                          <input type="checkbox" checked={flagShowLogo} onChange={e => setFlagShowLogo(e.target.checked)} className="accent-art-orange" />
+                          Tampilkan Logo Utama
+                      </label>
+                      <label className="flex items-center gap-2 text-xs font-bold text-gray-600 cursor-pointer">
+                          <input type="checkbox" checked={flagShowMountain} onChange={e => setFlagShowMountain(e.target.checked)} className="accent-art-orange" />
+                          Tampilkan Nama Gunung/MDPL
+                      </label>
+                   </div>
                 </div>
               </div>
             )}
@@ -817,8 +855,8 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     ref={canvasWrapperRef}
                     className="relative flex-shrink-0 shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-white/10 rounded-[1.5rem] overflow-hidden transition-transform duration-300 origin-center"
                     style={{
-                      width: `${baseDim.width * scale}px`,
-                      height: `${baseDim.height * scale}px`,
+                      width: `${baseDim.width * previewScale}px`,
+                      height: `${baseDim.height * previewScale}px`,
                       transform: `scale(${zoomScale}) rotate(${rotation}deg)`
                     }}
                   >
@@ -830,11 +868,11 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                       exit={{ x: -50, opacity: 0 }}
                       transition={{ type: "spring", stiffness: 350, damping: 28 }}
                       ref={posterRef}
-                      className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col transition-all duration-300`}
+                      className={`w-full h-full ${theme.color} relative overflow-hidden flex flex-col`}
                       style={{ 
                         width: `${baseDim.width}px`, 
                         height: `${baseDim.height}px`,
-                        transform: `scale(${scale})`,
+                        transform: `scale(${previewScale})`,
                         transformOrigin: 'top left',
                         position: 'absolute',
                         top: 0,
@@ -844,10 +882,11 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     
                     {/* Background Visual Layer */}
                     <div 
-                      className="absolute inset-0 bg-cover bg-center transition-opacity duration-300" 
+                      className="absolute inset-0 bg-cover bg-center transition-all duration-500" 
                       style={{ 
-                        backgroundImage: trip.image ? `url(${trip.image})` : 'none',
-                        opacity: bgOpacity 
+                        backgroundImage: (layout === 'flag' && flagBgType === 'color') ? 'none' : (trip.image ? `url(${trip.image})` : 'none'),
+                        backgroundColor: (layout === 'flag' && flagBgType === 'color') ? theme.primary : 'transparent',
+                        opacity: layout === 'flag' && flagBgType === 'color' ? 1 : bgOpacity 
                       }}
                     ></div>
 
@@ -1256,47 +1295,79 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
 
                     {/* LAYOUT F: BENDERA (Community Flag Layout) */}
                     {(selectedSlides[currentSlide] || layout) === 'flag' && (
-                      <div className={`relative z-10 flex flex-col h-full p-[10%] justify-between items-center text-center w-full bg-black/40 ${flagDesign === 2 ? 'bg-gradient-to-t from-black to-transparent' : flagDesign === 3 ? 'bg-art-text' : flagDesign === 4 ? 'bg-transparent border-[12px] border-white' : ''}`}>
+                      <div className={`relative z-10 flex flex-col h-full p-[10%] justify-between items-center text-center w-full ${
+                        flagDesign === 2 ? 'bg-gradient-to-t from-black/80 to-transparent' : 
+                        flagDesign === 3 ? 'bg-black/60' : 
+                        flagDesign === 4 ? 'bg-transparent' : 
+                        flagDesign === 5 ? 'bg-gradient-to-br from-black/40 via-transparent to-black/40' : 
+                        'bg-black/40'
+                      }`}>
+                        
                         {/* Flag Frame Borders */}
                         {flagDesign === 1 && (
                           <>
-                            <div className="absolute inset-4 border-2 border-dashed opacity-30" style={{ borderColor: theme.accent }}></div>
-                            <div className="absolute inset-6 border pointer-events-none opacity-10" style={{ borderColor: theme.text }}></div>
+                            <div className="absolute inset-4 border-4 border-double opacity-40 rounded-lg" style={{ borderColor: theme.accent }}></div>
+                            <div className="absolute inset-8 border border-dashed pointer-events-none opacity-20" style={{ borderColor: 'white' }}></div>
                           </>
+                        )}
+
+                        {flagDesign === 4 && (
+                           <div className="absolute inset-0 border-[20px] border-white/10 pointer-events-none"></div>
+                        )}
+
+                        {flagDesign === 5 && (
+                           <div className="absolute inset-4 border-2 border-art-orange/30 rounded-[3rem] pointer-events-none"></div>
                         )}
                         
                         {/* Top: Association & Title */}
-                        <div className="space-y-3 z-10">
-                          {flagShowLogo && <div className="w-16 h-16 bg-white/10 rounded-full mx-auto backdrop-blur-md flex items-center justify-center shadow-lg border border-white/20 mb-4">
-                            <img src="https://files.catbox.moe/lubzno.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" />
-                          </div>}
-                          <p className={`text-xs font-black uppercase tracking-[0.4em] drop-shadow-md ${flagDesign === 3 ? 'text-art-orange' : 'text-white'}`}>OFFICIAL EXPEDITION</p>
-                          {flagShowMountain && <h3 className={`text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)] font-sans ${flagDesign === 5 ? 'text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400' : 'text-white'}`}>
-                            {mountainName}
-                          </h3>}
+                        <div className={`space-y-2 z-10 ${flagDesign === 2 ? 'order-2' : 'order-1'}`}>
+                          <p className={`text-[10px] md:text-xs font-black uppercase tracking-[0.5em] drop-shadow-md ${flagDesign === 3 ? 'text-art-orange' : 'text-white/80'}`}>OFFICIAL EXPEDITION</p>
+                          {flagShowMountain && (
+                            <h3 className={`text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] ${
+                              flagDesign === 5 ? 'text-transparent bg-clip-text bg-gradient-to-r from-white via-art-orange to-white' : 'text-white'
+                            }`}>
+                              {mountainName}
+                            </h3>
+                          )}
                         </div>
 
-                        {/* Center Logo Semi Transparent */}
-                        <div className={`absolute inset-0 flex items-center justify-center pointer-events-none ${flagDesign === 4 ? 'opacity-10' : 'opacity-20'}`}>
-                          <Map size={ratio === '9:16' ? 200 : 300} className="text-white" />
+                        {/* Center Logo - LARGE & TRANSPARENT */}
+                        <div 
+                          className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-500 ${
+                            flagDesign === 2 ? 'translate-y-[-10%]' : 
+                            flagDesign === 4 ? 'scale-110' : ''
+                          }`}
+                          style={{ opacity: flagShowLogo ? flagLogoOpacity : 0 }}
+                        >
+                          <img 
+                            src="https://files.catbox.moe/lubzno.png" 
+                            alt="Large App Logo" 
+                            className={`w-[50%] h-[50%] object-contain filter drop-shadow-[0_0_30px_rgba(0,0,0,0.5)] ${
+                                flagDesign === 3 ? 'grayscale brightness-200' : ''
+                            }`}
+                          />
                         </div>
 
                         {/* Bottom: Elevation & Branding */}
-                        <div className="space-y-3 z-10 w-full px-8">
-                          <div className="flex items-center justify-center gap-4">
-                            <div className="h-px bg-white/30 flex-1"></div>
-                            {flagShowMountain && <span className="text-xl md:text-3xl font-black text-art-orange drop-shadow-lg">{mountainMdpl}</span>}
-                            <div className="h-px bg-white/30 flex-1"></div>
+                        <div className={`space-y-4 z-10 w-full px-8 ${flagDesign === 2 ? 'order-1' : 'order-2'}`}>
+                          <div className="flex items-center justify-center gap-6">
+                            <div className={`h-px flex-1 ${flagDesign === 3 ? 'bg-art-orange/40' : 'bg-white/40'}`}></div>
+                            {flagShowMountain && (
+                              <span className={`text-2xl md:text-4xl font-black drop-shadow-xl ${flagDesign === 5 ? 'text-white' : 'text-art-orange'}`}>
+                                {mountainMdpl}
+                              </span>
+                            )}
+                            <div className={`h-px flex-1 ${flagDesign === 3 ? 'bg-art-orange/40' : 'bg-white/40'}`}></div>
                           </div>
                           
-                          <div className="pt-2 flex justify-between items-end w-full">
+                          <div className={`pt-4 flex justify-between items-end w-full border-t border-white/10 ${flagDesign === 4 ? 'border-none' : ''}`}>
                             <div className="text-left">
-                              <span className="block text-[8px] font-black uppercase text-white/50 tracking-widest mb-1">Organized By</span>
-                              <span className="text-sm font-black uppercase text-white tracking-widest">NGOPI DI KETINGGIAN</span>
+                              <span className="block text-[9px] font-black uppercase text-white/40 tracking-widest mb-1">Organized By</span>
+                              <span className={`text-sm md:text-base font-black uppercase tracking-[0.2em] ${flagDesign === 3 ? 'text-art-orange' : 'text-white'}`}>NGOPI DI KETINGGIAN</span>
                             </div>
                             <div className="text-right">
-                              <span className="block text-[8px] font-black uppercase text-white/50 tracking-widest mb-1">Est</span>
-                              <span className="text-sm font-black uppercase text-white tracking-widest font-mono">2024</span>
+                              <span className="block text-[9px] font-black uppercase text-white/40 tracking-widest mb-1">Establishment</span>
+                              <span className={`text-sm md:text-base font-black uppercase tracking-widest font-mono ${flagDesign === 3 ? 'text-art-orange' : 'text-white'}`}>2024</span>
                             </div>
                           </div>
                         </div>

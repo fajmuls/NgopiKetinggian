@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.2.0";
+export const WEBSITE_VERSION = "1.3.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,29 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.1.1",
+  version: "1.3.0",
   patchNotes: [
+    {
+      version: "1.3.0",
+      date: "2024-03-22",
+      notes: [
+        "Revamp total layout Bendera (Flag) dengan Logo Aplikasi besar di tengah.",
+        "Kontrol transparansi logo dan pilihan background (Foto/Warna) pada Bendera.",
+        "Perbaikan Preview Poster agar tidak terpotong (fit-to-screen scaling).",
+        "Optimasi status trip: Hanya Draft & Terbit (Selesai dihapus dari admin utama).",
+        "5 desain unik & berbeda untuk setiap tipe layout (Poster, Info, Iklan, Bendera, Papan).",
+        "Peningkatan resolusi hasil render download."
+      ]
+    },
+    {
+      version: "1.2.0",
+      date: "2026-07-08",
+      notes: [
+        "Pembaruan desain unik (1-5) untuk setiap kategori layout.",
+        "Penggantian ikon peta dengan logo aplikasi pada layout Bendera.",
+        "Perbaikan logika render html-to-image untuk mencegah gambar terpotong."
+      ]
+    },
     {
       version: "1.1.1",
       date: "2026-07-08",

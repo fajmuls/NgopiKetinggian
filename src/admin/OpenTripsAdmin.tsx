@@ -302,14 +302,16 @@ export const OpenTripsAdmin = ({ config, updateConfig, showToast, prefillData, c
                 <button
                    onClick={() => {
                      const nd = [...data];
-                     nd[i].status = isPublished ? 'draft' : 'published';
+                     const newStatus = isPublished ? 'draft' : 'published';
+                     nd[i].status = newStatus;
                      setData(nd);
+                     // Directly sync to Firestore
                      updateConfig({ openTrips: nd });
-                     showToast(isPublished ? 'Disimpan sebagai Draft!' : 'Dipublikasi!');
+                     showToast(newStatus === 'published' ? 'Trip telah TERBIT/LIVE!' : 'Trip disimpan sebagai DRAFT.');
                    }}
-                   className={`w-full sm:w-auto ${isPublished ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-art-green hover:bg-green-600'} text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors`}
+                   className={`w-full sm:w-auto ${isPublished ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-art-green hover:bg-green-600'} text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)]`}
                 >
-                   {isPublished ? 'Jadikan Draft' : 'Publikasi Trip'}
+                   {isPublished ? 'Jadikan Draft' : 'Terbitkan Trip'}
                 </button>
                 
                 <button
