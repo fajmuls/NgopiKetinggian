@@ -79,25 +79,20 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /admins/{adminId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     match /mountainReviews/{reviewId} {
       allow read: if true;
-      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow create: if isSignedIn();
       allow update, delete: if isAdmin();
     }
 
     match /bookings/{bookingId} {
-      allow read: if (isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin())) || resource.data.wa != null;
-      allow list: if isAdmin() || (isSignedIn() && request.query.filters.userId == request.auth.uid);
-      allow create: if isValidBooking(incoming())
-                    && incoming().createdAt == request.time;
-      
-      allow update: if (isAdmin() || (isValidBooking(incoming()) && incoming().diff(existing()).affectedKeys().hasAny(['status', 'requestCancel'])))
-                    && (isAdmin() || incoming().createdAt == existing().createdAt);
-                    
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
       allow delete: if isAdmin();
     }
   }

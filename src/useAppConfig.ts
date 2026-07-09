@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.8.2";
+export const WEBSITE_VERSION = "1.8.5";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,35 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.8.2",
+  version: "1.8.5",
   patchNotes: [
+    {
+      version: "1.8.5",
+      date: "2026-07-09",
+      notes: [
+        "Finalisasi perbaikan error 'Permission Denied' pada seluruh koleksi utama.",
+        "Optimalisasi Firestore Security Rules untuk menjamin kelancaran akses data publik.",
+        "Verifikasi ulang composite indexes untuk query ulasan dan testimonial.",
+        "Pembaruan dokumentasi internal sistem keamanan database."
+      ]
+    },
+    {
+      version: "1.8.4",
+      date: "2026-07-09",
+      notes: [
+        "Penjelasan teknis mengenai error WebSocket Vite (normal di dev environment).",
+        "Penyelesaian error 'Missing Index' pada Firestore melalui pembaruan blueprint.",
+        "Sinkronisasi final aturan keamanan Firestore untuk Testimoni & Booking."
+      ]
+    },
+    {
+      version: "1.8.3",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan error 'Composite Index' pada Firestore untuk pengurutan ulasan gunung.",
+        "Optimasi blueprint database untuk performa query testimoni yang lebih baik."
+      ]
+    },
     {
       version: "1.8.2",
       date: "2026-07-09",
