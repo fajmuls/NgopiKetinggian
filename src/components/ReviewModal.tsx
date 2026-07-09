@@ -41,7 +41,7 @@ export const ReviewModal = ({ isOpen, onClose, booking, user }: any) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left text-art-text">
+    <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left text-art-text">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-lg rounded-3xl border-4 border-art-text relative shadow-2xl overflow-hidden p-6">
         <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:text-art-orange transition-colors"><X size={20} /></button>
         

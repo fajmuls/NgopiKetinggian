@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.9.3";
+export const WEBSITE_VERSION = "2.0.0";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,20 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.9.3",
+  version: "2.0.0",
   patchNotes: [
+    {
+      version: "2.0.0",
+      date: "2026-07-09",
+      notes: [
+        "Sistem Burger Menu Baru: Menyatukan navigasi Share, Rundown, WhatsApp, dan Kalkulator ke dalam menu tiga titik di pojok kanan kartu untuk tampilan yang lebih bersih.",
+        "Update Pengalaman Leader: Menampilkan riwayat pendaki langsung di profil Trip Leader pada halaman utama.",
+        "Perbaikan Visual Poster: Menambahkan label 'SRP' dan format harga ribuan yang lebih jelas agar tidak menyesatkan.",
+        "Kontras Teks Tinggi: Meningkatkan ketajaman font pada detail trip agar lebih mudah dibaca.",
+        "Peningkatan Layering: Memperbaiki z-index pada modal ulasan agar tidak tertimpa elemen lain.",
+        "Versi & Patch Notes 2.0: Implementasi pelacakan versi mayor untuk perubahan arsitektur UI."
+      ]
+    },
     {
       version: "1.9.3",
       date: "2026-07-09",

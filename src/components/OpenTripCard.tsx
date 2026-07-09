@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, GitCompare, Share2, History } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, GitCompare, Share2, History, MoreVertical, MoreHorizontal } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
@@ -21,6 +21,18 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
   const [showWebRundown, setShowWebRundown] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const actionsMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+        setShowActionsMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [pastParticipants, setPastParticipants] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
@@ -169,7 +181,7 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
       
       <AnimatePresence>
         {showRatingModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-full max-w-md">
               <RatingSystem mountainName={ot.name} onClose={() => setShowRatingModal(false)} />
             </motion.div>
@@ -206,49 +218,87 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                 </div>
               )}
             </div>
-         </div>
-
-         <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-               <button 
-                  onClick={(e) => { e.stopPropagation(); toggleItem({ id: ot.id, name: ot.name, image: ot.image, price: ot.price, difficulty: ot.difficulty, region: ot.region, duration: ot.duration, type: 'open' }); }}
-                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all shadow-md ${isSelectedForCompare ? 'bg-art-text text-white border-art-text' : 'bg-white/90 text-art-text border-art-text/10 hover:border-art-text'}`}
-                  title="Bandingkan Trip"
-               >
-                  <GitCompare size={14} />
-               </button>
-               {(v.rundown !== false && ot.rundownMode !== 'hidden') && (
-                 <>
-                   <button 
-                      onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
-                      className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-md group/btn"
-                      title="Lihat Rundown (Web)"
-                   >
-                      <Eye size={14} />
-                   </button>
-                   <button 
-                      onClick={(e) => { 
-                         e.stopPropagation(); 
-                         playClick();
-                         if (ot.rundownPdf) {
-                            window.open(ot.rundownPdf, '_blank');
-                         } else {
-                            generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
-                         }
-                      }}
-                      className="w-8 h-8 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-full flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-md"
-                      title="Download Itinerary (PDF)"
-                   >
-                      <Download size={14} />
-                   </button>
-                 </>
-               )}
+         </div>         <div className="absolute top-3 right-3 flex flex-col gap-2 z-30 items-end">
+               <div className="flex gap-2">
+                 <button 
+                    onClick={(e) => { e.stopPropagation(); toggleItem({ id: ot.id, name: ot.name, image: ot.image, price: ot.price, difficulty: ot.difficulty, region: ot.region, duration: ot.duration, type: 'open' }); }}
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all shadow-md ${isSelectedForCompare ? 'bg-art-text text-white border-art-text' : 'bg-white/90 text-art-text border-art-text/10 hover:border-art-text'}`}
+                    title="Bandingkan Trip"
+                 >
+                    <GitCompare size={14} />
+                 </button>
+                 
+                 <div className="relative" ref={actionsMenuRef}>
+                    <button 
+                       onClick={(e) => { e.stopPropagation(); setShowActionsMenu(!showActionsMenu); }}
+                       className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border-2 border-art-text/10 text-art-text hover:border-art-orange transition-all shadow-md flex items-center justify-center"
+                    >
+                       <MoreVertical size={14} />
+                    </button>
+                    
+                    <AnimatePresence>
+                       {showActionsMenu && (
+                          <motion.div 
+                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                             animate={{ opacity: 1, y: 0, scale: 1 }}
+                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                             className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border-2 border-art-text overflow-hidden z-[100]"
+                          >
+                             <div className="p-2 space-y-1">
+                                {(v.rundown !== false && ot.rundownMode !== 'hidden') && (
+                                   <>
+                                      <button 
+                                         onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); setShowActionsMenu(false); }}
+                                         className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                      >
+                                         <Eye size={14} /> Lihat Rundown
+                                      </button>
+                                      <button 
+                                         onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            if (ot.rundownPdf) {
+                                               window.open(ot.rundownPdf, '_blank');
+                                            } else {
+                                               generateRundownPdf({ rundownHtml: ot.rundownText || durInfo?.rundownHtml }, ot.name, ot.path, ot.duration);
+                                            }
+                                            setShowActionsMenu(false);
+                                         }}
+                                         className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                      >
+                                         <Download size={14} /> Download PDF
+                                      </button>
+                                   </>
+                                )}
+                                <div className="h-[1px] bg-art-text/10 my-1"></div>
+                                <button 
+                                   onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleShare('whatsapp');
+                                      setShowActionsMenu(false);
+                                   }}
+                                   className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                >
+                                   <MessageCircle size={14} /> WhatsApp Share
+                                </button>
+                                <button 
+                                   onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleShare('twitter');
+                                      setShowActionsMenu(false);
+                                   }}
+                                   className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                >
+                                   <Share2 size={14} /> Twitter Share
+                                </button>
+                             </div>
+                          </motion.div>
+                       )}
+                    </AnimatePresence>
+                 </div>
+               </div>
             </div>
 
          <div className="absolute bottom-3 right-3 flex items-center gap-2">
-            <div className="flex gap-1 mr-1">
-               <button onClick={() => handleShare('whatsapp')} className="w-6 h-6 bg-green-500/90 backdrop-blur-sm text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md border border-white/20"><MessageCircle size={10}/></button>
-               <button onClick={() => handleShare('twitter')} className="w-6 h-6 bg-sky-400/90 backdrop-blur-sm text-white rounded-md flex items-center justify-center hover:scale-110 transition-transform shadow-md border border-white/20"><Share2 size={10}/></button>
-            </div>
             <div className={`backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
                {getSisaKuota(ot)} Pax Left
             </div>
@@ -281,7 +331,7 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
               >
                  <WeatherWidget location={ot.name} />
                  
-                 <p className="text-[10px] font-medium text-art-text/60 italic leading-relaxed whitespace-pre-wrap mb-4 mt-4">{ot.desc || "Bergabunglah dengan trip kami dan nikmati pengalaman mendaki yang tak terlupakan."}</p>
+                 <p className="text-[10px] font-medium text-art-text/90 italic leading-relaxed whitespace-pre-wrap mb-4 mt-4">{ot.desc || "Bergabunglah dengan trip kami dan nikmati pengalaman mendaki yang tak terlupakan."}</p>
                  
                  <div className="flex flex-col gap-1.5 pt-3 border-t border-art-text/5">
                     <div className="flex items-center gap-2">

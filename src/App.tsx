@@ -600,7 +600,19 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-widest text-art-text">{leader.name}</h3>
                 <p className="text-[10px] uppercase tracking-widest font-bold text-art-orange mt-2 mb-4">{leader.age}</p>
-                <p className="text-xs text-art-text/70 mb-4 h-12 flex items-center justify-center">{leader.description}</p>
+                <p className="text-xs text-art-text/70 mb-2 h-12 flex items-center justify-center">{leader.description}</p>
+                {leader.experiences && leader.experiences.length > 0 && (
+                  <div className="w-full mb-4 px-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-art-text/40 mb-2 text-left">Pengalaman Mendaki:</p>
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {leader.experiences.map((exp: any, idx: number) => (
+                        <span key={idx} className="text-[8px] font-bold bg-white border border-art-text/10 px-2 py-0.5 rounded-full text-art-text/60" title={exp.description}>
+                          {exp.mountain} {exp.years ? `(${exp.years})` : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {leader.voiceLine ? (
                   <audio controls className="w-full h-8 mt-auto rounded-full" src={leader.voiceLine}></audio>
                 ) : (

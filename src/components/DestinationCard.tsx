@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator, Share2, GitCompare, History } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator, Share2, GitCompare, History, MoreVertical, MoreHorizontal } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth, loginWithGoogle } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, onSnapshot, query, orderBy, limit, where } from 'firebase/firestore';
@@ -80,6 +80,18 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   const [participants, setParticipants] = useState(2);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const actionsMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+        setShowActionsMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -155,7 +167,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
       
       <AnimatePresence>
         {showRatingModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-full max-w-md">
               <RatingSystem mountainName={dest.name} onClose={() => setShowRatingModal(false)} />
             </motion.div>
@@ -239,7 +251,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
           )}
         </div>
 
-        <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+        <div className="absolute top-4 right-4 flex flex-col gap-2 items-end z-30">
           <div className="bg-white border-2 border-art-text px-3 py-1 font-black text-[9px] tracking-widest uppercase rounded-lg shadow-sm">{dest.region || dest.locationTag}</div>
           <button 
             onClick={(e) => { e.stopPropagation(); playClick(); setShowRatingModal(true); }}
@@ -247,46 +259,90 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
           >
             <RatingSystem mountainName={dest.name} showOnlyRating={true} />
           </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); toggleItem({ id: dest.id, name: dest.name, image: dest.image, price: currentDur.price, difficulty: dest.difficulty, region: dest.region || dest.locationTag, duration: currentDur.label, type: 'private' }); }}
-            className={`p-2 rounded-xl border-2 transition-all shadow-sm ${isSelectedForCompare ? 'bg-art-text text-white border-art-text' : 'bg-white/90 text-art-text border-art-text/10 hover:border-art-text'}`}
-            title="Bandingkan Trip"
-          >
-            <GitCompare size={14} />
-          </button>
-        </div>
-
-        <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
+          
           <div className="flex gap-2">
-             <button onClick={() => handleShare('whatsapp')} className="w-10 h-10 bg-green-500/90 backdrop-blur-sm text-white rounded-xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg border border-white/20"><MessageCircle size={18}/></button>
-             <button onClick={() => handleShare('twitter')} className="w-10 h-10 bg-sky-400/90 backdrop-blur-sm text-white rounded-xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg border border-white/20"><Share2 size={18}/></button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); toggleItem({ id: dest.id, name: dest.name, image: dest.image, price: currentDur.price, difficulty: dest.difficulty, region: dest.region || dest.locationTag, duration: currentDur.label, type: 'private' }); }}
+              className={`p-2 rounded-xl border-2 transition-all shadow-sm ${isSelectedForCompare ? 'bg-art-text text-white border-art-text' : 'bg-white/90 text-art-text border-art-text/10 hover:border-art-text'}`}
+              title="Bandingkan Trip"
+            >
+              <GitCompare size={14} />
+            </button>
+            
+            <div className="relative" ref={actionsMenuRef}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowActionsMenu(!showActionsMenu); }}
+                className="p-2 rounded-xl bg-white/90 backdrop-blur-sm border-2 border-art-text/10 text-art-text hover:border-art-orange transition-all shadow-sm"
+              >
+                <MoreVertical size={14} />
+              </button>
+              
+              <AnimatePresence>
+                {showActionsMenu && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border-2 border-art-text overflow-hidden z-[100]"
+                  >
+                    <div className="p-2 space-y-1">
+                      {((currentDur?.rundownHtml || currentDur?.rundownPdf) && dest.rundownMode !== 'hidden') && (
+                        <>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); setShowActionsMenu(false); }}
+                            className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                          >
+                            <Eye size={14} /> Lihat Rundown
+                          </button>
+                          <button 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (currentDur.rundownPdf) {
+                                window.open(currentDur.rundownPdf, '_blank');
+                              } else {
+                                generateRundownPdf(currentDur, dest.name, currentPath.name, currentDur.label);
+                              }
+                              setShowActionsMenu(false); 
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                          >
+                            <Download size={14} /> Download PDF
+                          </button>
+                        </>
+                      )}
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setShowCalculator(true); setShowActionsMenu(false); }}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                      >
+                        <Calculator size={14} /> Kalkulator Biaya
+                      </button>
+                      <div className="h-[1px] bg-art-text/10 my-1"></div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShare('whatsapp');
+                          setShowActionsMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                      >
+                        <MessageCircle size={14} /> WhatsApp Share
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShare('twitter');
+                          setShowActionsMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                      >
+                        <Share2 size={14} /> Twitter Share
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-
-          {((currentDur?.rundownHtml || currentDur?.rundownPdf) && dest.rundownMode !== 'hidden') && (
-             <div className="flex gap-2">
-                <button 
-                   onClick={(e) => { e.stopPropagation(); playClick(); setShowWebRundown(true); }}
-                   className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-green hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
-                   title="Lihat Rundown (Web)"
-                >
-                   <Eye size={18} />
-                </button>
-                <button 
-                   onClick={(e) => { 
-                      e.stopPropagation(); 
-                      if (currentDur.rundownPdf) {
-                         window.open(currentDur.rundownPdf, '_blank');
-                      } else {
-                         generateRundownPdf(currentDur, dest.name, currentPath.name, currentDur.label);
-                      }
-                   }}
-                   className="w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-art-text rounded-xl flex items-center justify-center text-art-text hover:bg-art-orange hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
-                   title="Download Itinerary (PDF)"
-                >
-                   <Download size={18} />
-                </button>
-             </div>
-          )}
         </div>
       </div>
 
@@ -327,7 +383,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                >
                  <WeatherWidget location={dest.name} />
                  
-                 <p className="text-[11px] font-medium text-art-text/60 italic leading-loose bg-art-bg/20 p-4 rounded-xl border border-art-text/5">{dest.desc}</p>
+                 <p className="text-[11px] font-medium text-art-text/90 italic leading-loose bg-art-bg/20 p-4 rounded-xl border border-art-text/5">{dest.desc}</p>
 
                   <div className="space-y-4">
                     <div>

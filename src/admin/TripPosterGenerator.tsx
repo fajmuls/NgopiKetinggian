@@ -350,8 +350,8 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
   const formatPrice = (p: number | string) => {
     const val = parseInt(String(p)) || 0;
     if (val === 0) return 'Rp 0';
-    if (val < 1000) return `Rp ${val}K`;
-    if (val % 1000 === 0) return `Rp ${val / 1000}K`;
+    // If val is entered as 500 in admin, it means 500,000 (500K)
+    if (val < 1000) return `Rp ${val}.000`; 
     return `Rp ${val.toLocaleString('id-ID')}`;
   };
 
@@ -989,8 +989,8 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                     {/* Gradient Overlay for superior readability */}
                     <div className={`absolute inset-0 bg-gradient-to-t ${
                       theme.id === 'light' || theme.id === 'retro' 
-                        ? 'from-white/35 via-transparent to-white/10' 
-                        : 'from-[#0b0c10]/85 via-black/40 to-[#0b0c10]/40'
+                        ? 'from-white/95 via-white/60 to-transparent' 
+                        : 'from-[#0b0c10]/95 via-black/60 to-transparent'
                     }`}></div>
                     
                     {/* DESIGN ELEMENTS: CHOOSE BY LAYOUT */}
@@ -1033,7 +1033,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             posterDesign === 5 ? 'text-center bg-black/30 backdrop-blur-md p-8 rounded-3xl border border-white/10' : ''
                           }`}>
                             <p className={`text-[10px] font-black uppercase tracking-[0.4em] opacity-80 ${theme.text} ${posterDesign === 4 ? 'font-mono' : ''}`}>Explore Mountain</p>
-                            <h3 className={`font-black uppercase leading-[0.8] tracking-tighter ${theme.text} ${ratio === '9:16' ? 'text-8xl md:text-9xl' : 'text-7xl md:text-8xl'} ${
+                            <h3 className={`font-black uppercase leading-[0.8] tracking-tighter drop-shadow-2xl ${theme.text} ${ratio === '9:16' ? 'text-8xl md:text-9xl' : 'text-7xl md:text-8xl'} ${
                               posterDesign === 2 ? 'font-sans italic' : 
                               posterDesign === 3 ? 'font-serif' : 
                               posterDesign === 4 ? 'font-mono' : 
@@ -1075,7 +1075,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-1.5 opacity-40">
                                   <CreditCard size={12} />
-                                  <span className="text-[8px] font-black uppercase tracking-widest font-sans">Harga Terkini</span>
+                                  <span className="text-[8px] font-black uppercase tracking-widest font-sans">SRP / Harga</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                                   {originalPrice > currentPrice && (
@@ -1157,7 +1157,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             </div>
 
                             <div className="bg-white/10 p-3 rounded-xl border-2 border-dashed border-white/20">
-                              <p className="text-[8px] font-black uppercase tracking-widest opacity-60">Harga Terkini</p>
+                              <p className="text-[8px] font-black uppercase tracking-widest opacity-60">SRP / Harga</p>
                               <div className="flex items-baseline gap-2 mt-1">
                                 {originalPrice > currentPrice && (
                                   <span className="text-[10px] font-black line-through opacity-30">
@@ -1263,7 +1263,7 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                             adDesign === 3 ? 'bg-indigo-600 border-indigo-400' : 
                             'bg-art-orange border-white'
                           }`}>
-                            <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-2 opacity-80">HARGA TERKINI</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-2 opacity-80">SRP / HARGA TERKINI</p>
                             
                             <div className="flex flex-col items-center justify-center gap-1">
                               <div className="flex items-baseline justify-center gap-3 flex-wrap">
