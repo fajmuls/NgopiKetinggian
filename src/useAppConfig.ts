@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore';
 
-export const WEBSITE_VERSION = "1.9.1";
+export const WEBSITE_VERSION = "1.9.2";
 
 export interface FacilityOption {
   name: string;
@@ -223,8 +223,19 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "1.9.1",
+  version: "1.9.2",
   patchNotes: [
+    {
+      version: "1.9.2",
+      date: "2026-07-09",
+      notes: [
+        "Riwayat Trip & Ekspedisi: Menambahkan fitur Riwayat Trip pada kartu destinasi dan open trip untuk melihat dokumentasi ekspedisi yang telah selesai.",
+        "Daftar Peserta Masa Lalu: Pengguna kini dapat melihat siapa saja yang bergabung dalam trip yang sudah expired/berakhir.",
+        "UI Pengalaman Leader: Memperhalus tampilan 'Riwayat Mendaki' pada profil Trip Leader di homepage.",
+        "Optimalisasi Tampilan Fasilitas: Menyesuaikan ukuran font pada 'Optional Add-on' agar seragam dengan daftar Include/Exclude namun tetap memiliki aksen unik.",
+        "Perbaikan Layout: Memperbaiki spacing dan kerangka visual pada bagian 'Kenalan dengan Leader'."
+      ]
+    },
     {
       version: "1.9.1",
       date: "2026-07-09",

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, GitCompare, Share2 } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, GitCompare, Share2, History } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
-import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf, generateInvoice } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
@@ -19,10 +19,41 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
   const [showDetails, setShowDetails] = useState(false);
   const [showWebRundown, setShowWebRundown] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [pastParticipants, setPastParticipants] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
   const { playClick, playHover } = useSound();
   const { selectedItems, toggleItem } = useCompare();
   const isSelectedForCompare = selectedItems.some(i => i.id === ot.id);
+
+  // Parse date to check if expired
+  const parseDate = (dateStr: string) => {
+    try {
+      const parts = dateStr.split(' - ')[1] || dateStr.split(' - ')[0];
+      if (!parts) return new Date();
+      const [day, month, year] = parts.split(' ');
+      const monthMap: any = {
+        'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
+        'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
+      };
+      return new Date(parseInt(year), monthMap[month] || 0, parseInt(day));
+    } catch (e) { return new Date(); }
+  };
+
+  const tripEndDate = parseDate(ot.jadwal);
+  const isExpired = tripEndDate < new Date();
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const q = query(collection(db, 'bookings'), where('tripId', '==', ot.id), where('status', '==', 'success'));
+      const snap = await getDocs(q);
+      setPastParticipants(snap.docs.map(doc => doc.data()));
+    } catch (e) { console.error(e); } finally { setLoadingHistory(false); }
+  };
+
+  useEffect(() => { if (showHistory) fetchHistory(); }, [showHistory]);
 
   useEffect(() => {
     const handleHighlight = (e: CustomEvent) => {
@@ -64,6 +95,71 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
     <motion.div id={`ot-card-${ot.id || ot.name}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={`bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative ${highlighted ? 'ring-4 ring-art-orange ring-offset-4 ring-offset-art-bg animate-pulse' : ''}`}>
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={ot.rundownHtml || ot.rundownText || durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
       
+      {showHistory && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-art-text/60 backdrop-blur-md" onClick={() => setShowHistory(false)} />
+           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-lg bg-white rounded-[32px] overflow-hidden shadow-2xl">
+              <div className="bg-art-text p-6 text-white">
+                 <div className="flex justify-between items-start">
+                    <div>
+                       <div className="flex items-center gap-2 mb-1">
+                          <History size={16} className="text-art-orange" />
+                          <h3 className="text-lg font-black uppercase tracking-tight">Riwayat Trip</h3>
+                       </div>
+                       <p className="text-xs font-bold text-white/40 uppercase tracking-widest">{ot.name} • {ot.jadwal}</p>
+                    </div>
+                    <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-white/10 rounded-xl transition-colors"><X size={20} /></button>
+                 </div>
+              </div>
+              <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                 <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="bg-art-bg/30 p-4 rounded-2xl border border-art-text/5 text-center">
+                          <span className="block text-[9px] font-black uppercase text-art-text/30 mb-1">Peserta</span>
+                          <span className="text-xl font-black text-art-text">{pastParticipants.length}</span>
+                       </div>
+                       <div className="bg-art-bg/30 p-4 rounded-2xl border border-art-text/5 text-center">
+                          <span className="block text-[9px] font-black uppercase text-art-text/30 mb-1">Status</span>
+                          <span className="text-xl font-black text-green-600">SELESAI</span>
+                       </div>
+                    </div>
+                    <div className="space-y-4">
+                       <h4 className="text-[11px] font-black uppercase tracking-widest text-art-text flex items-center gap-2"><Users size={14} className="text-art-orange" /> Jejak Pendaki</h4>
+                       {loadingHistory ? (
+                          <div className="py-12 flex flex-col items-center justify-center gap-3">
+                             <div className="w-8 h-8 border-4 border-art-orange border-t-transparent rounded-full animate-spin" />
+                             <p className="text-[10px] font-black uppercase text-art-text/20 tracking-widest">Memuat...</p>
+                          </div>
+                       ) : pastParticipants.length > 0 ? (
+                          <div className="grid grid-cols-1 gap-2">
+                             {pastParticipants.map((p, i) => (
+                                <div key={i} className="flex items-center justify-between p-3 bg-art-bg/20 border border-art-text/5 rounded-2xl">
+                                   <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-full bg-white border border-art-text/10 flex items-center justify-center text-art-text/30"><User size={16} /></div>
+                                      <div>
+                                         <span className="block text-xs font-black uppercase text-art-text">{p.userName}</span>
+                                         <span className="block text-[9px] font-bold text-art-text/40 uppercase tracking-tighter">{p.tripTitle}</span>
+                                      </div>
+                                   </div>
+                                   <div className="flex flex-col items-end">
+                                      <span className="text-[8px] font-black text-art-orange uppercase tracking-widest">Verified</span>
+                                      <span className="text-[7px] font-bold text-art-text/20 uppercase">{p.createdAt?.seconds ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</span>
+                                   </div>
+                                </div>
+                             ))}
+                          </div>
+                       ) : (
+                          <div className="py-12 text-center border-2 border-dashed border-art-text/5 rounded-3xl">
+                             <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest italic">Belum ada riwayat pendaki</p>
+                          </div>
+                       )}
+                    </div>
+                 </div>
+              </div>
+           </motion.div>
+        </div>
+      )}
+      
       <AnimatePresence>
         {showRatingModal && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -76,6 +172,17 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
 
       <div className="h-48 relative overflow-hidden border-b-2 border-art-text">
         <img src={ot.image || undefined} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        
+        {isExpired && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-6 z-[15] opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setShowHistory(true); }}
+              className="bg-white text-art-text px-4 py-2 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2 shadow-2xl hover:scale-105 active:scale-95 transition-all"
+            >
+              <History size={14} /> Lihat Riwayat
+            </button>
+          </div>
+        )}
          
          {/* Mountain Custom Logo */}
          <div className="absolute top-3 left-3 flex flex-row items-center gap-2 z-10">

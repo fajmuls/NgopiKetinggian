@@ -723,7 +723,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
               transition={{ delay: 0.2 }}
               className="bg-art-bg p-1 rounded-3xl border-2 border-art-text shadow-[16px_16px_0px_0px_#1a1a1a] overflow-hidden group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[20px_20px_0px_0px_#1a1a1a] transition-all"
             >
-               <div className="bg-art-bg/20 rounded-[1.25rem] p-8 h-full text-art-text">
+               <div className="bg-white rounded-[1.25rem] p-8 h-full text-art-text">
                  <div className="flex justify-between items-start mb-8">
                     <h3 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
                       <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shadow-lg"><PlusCircle size={20} className="text-indigo-500" /></div>
@@ -731,39 +731,28 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                     </h3>
                     <div className="px-3 py-1 bg-indigo-100/50 rounded-full border border-indigo-200 text-[8px] font-black uppercase tracking-widest text-indigo-500">Add-On</div>
                  </div>
-                 <p className="text-[10px] font-black uppercase tracking-widest text-art-text/80 mb-6 leading-relaxed italic border-b border-art-text/10 pb-4">
-                    Upgrade kenyamanan Anda dengan layanan tambahan premium.
-                 </p>
                  <ul className="space-y-4">
                   {(config.facilities?.opsi || []).map((opt: any, i: number) => {
                     if (opt.isHidden) return null;
                     return (
-                    <li key={i} className="flex flex-col gap-2 items-start bg-art-bg/30 p-5 rounded-2xl border border-art-text/10 hover:border-art-orange hover:bg-art-orange/5 transition-all w-full">
-                      <div className="flex flex-col w-full">
-                        <div className="flex items-center gap-2 mb-1 w-full">
-                          <PlusCircle size={14} className="text-art-orange shrink-0" />
-                          <span className="text-[11px] md:text-xs font-black uppercase tracking-widest text-art-text block w-full">{opt.name}</span>
-                        </div>
-                        {opt.priceInfo && (
-                          <div className="pl-6 w-full">
-                            <span className="text-[10px] font-black text-art-orange bg-art-orange/10 px-2.5 py-0.5 rounded border border-art-orange/20 inline-block font-bold">
+                    <li key={i} className="flex flex-col gap-2 items-start group/li">
+                      <div className="flex items-start gap-4 w-full">
+                        <div className="w-4 h-4 mt-0.5 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0 group-hover/li:scale-125 transition-transform"><PlusCircle size={10} className="text-indigo-500" /></div>
+                        <div className="flex-1">
+                          <span className="text-xs md:text-sm font-bold uppercase tracking-wide text-art-text/80">{opt.name}</span>
+                          {opt.priceInfo && (
+                            <span className="text-[9px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 ml-2">
                               {opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}
                             </span>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                       {opt.subItems && opt.subItems.length > 0 && (
-                        <div className="pl-6 w-full mt-2 space-y-2">
+                        <div className="pl-8 w-full mt-2 space-y-2">
                           {opt.subItems.map((sub: any, subIdx: number) => (
-                             <div key={subIdx} className="w-full bg-white p-3 rounded-xl border border-art-text/10 shadow-sm flex flex-col gap-1">
-                               <span className="text-[10px] font-black uppercase tracking-wider text-art-text/80 block w-full">
-                                 {sub.name}
-                               </span>
-                               {sub.priceInfo && (
-                                 <span className="text-[9px] font-bold text-art-orange block">
-                                   {sub.priceInfo.toString().toLowerCase().includes('rp') ? sub.priceInfo : `Rp ${sub.priceInfo}`}
-                                 </span>
-                               )}
+                             <div key={subIdx} className="flex items-center justify-between text-[10px] font-bold text-art-text/40 uppercase">
+                               <span>• {sub.name}</span>
+                               {sub.priceInfo && <span className="text-indigo-400">{sub.priceInfo.toString().toLowerCase().includes('rp') ? sub.priceInfo : `Rp ${sub.priceInfo}`}</span>}
                              </div>
                           ))}
                         </div>

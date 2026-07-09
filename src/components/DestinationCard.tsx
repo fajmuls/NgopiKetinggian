@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator, Share2, GitCompare } from 'lucide-react';
+import { X, Calendar, MapPin, Coffee, Mountain, Users, MessageCircle, AlertCircle, ShoppingBag, Eye, Download, FileText, Globe, CheckCircle, Smartphone, LogOut, Clock, TrendingUp, CreditCard, CheckCircle2, Trash2, Tent, Info, Send, User, ChevronRight, BellRing, ChevronDown, ExternalLink, Star, MessageSquare, Plus, Minus, Calculator, Share2, GitCompare, History } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth, loginWithGoogle } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, onSnapshot, query, orderBy, limit, where } from 'firebase/firestore';
@@ -40,6 +40,9 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
   const [showDetails, setShowDetails] = useState(false);
   const [showWebRundown, setShowWebRundown] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [pastParticipants, setPastParticipants] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [selectedPath, setSelectedPath] = useState(0);
   const [highlighted, setHighlighted] = useState(false);
   const { selectedItems, toggleItem } = useCompare();
@@ -82,6 +85,17 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
     window.addEventListener('highlight-dest', handler);
     return () => window.removeEventListener('highlight-dest', handler);
   }, [dest.id]);
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const q = query(collection(db, 'bookings'), where('mountainId', '==', dest.name.toLowerCase().replace(/\s+/g, '-')), where('status', '==', 'success'));
+      const snap = await getDocs(q);
+      setPastParticipants(snap.docs.map(doc => doc.data()));
+    } catch (e) { console.error(e); } finally { setLoadingHistory(false); }
+  };
+
+  useEffect(() => { if (showHistory) fetchHistory(); }, [showHistory]);
 
   const safePaths = useMemo(() => dest.paths && dest.paths.length > 0 ? dest.paths : [{ name: "Jalur Utama", durations: dest.durations || [{ label: "1H (Tektok)", price: 0, originalPrice: 0 }] }], [dest.paths, dest.durations]);
   const currentPath = safePaths[selectedPath] || safePaths[0];
@@ -139,6 +153,70 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-full max-w-md">
               <RatingSystem mountainName={dest.name} onClose={() => setShowRatingModal(false)} />
             </motion.div>
+          </div>
+        )}
+        {showHistory && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-art-text/60 backdrop-blur-md" onClick={() => setShowHistory(false)} />
+             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-lg bg-white rounded-[32px] overflow-hidden shadow-2xl">
+                <div className="bg-art-text p-6 text-white">
+                   <div className="flex justify-between items-start">
+                      <div>
+                         <div className="flex items-center gap-2 mb-1">
+                            <History size={16} className="text-art-orange" />
+                            <h3 className="text-lg font-black uppercase tracking-tight">Riwayat Ekspedisi</h3>
+                         </div>
+                         <p className="text-xs font-bold text-white/40 uppercase tracking-widest">{dest.name} • Private Trip</p>
+                      </div>
+                      <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-white/10 rounded-xl transition-colors"><X size={20} /></button>
+                   </div>
+                </div>
+                <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                   <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                         <div className="bg-art-bg/30 p-4 rounded-2xl border border-art-text/5 text-center">
+                            <span className="block text-[9px] font-black uppercase text-art-text/30 mb-1">Total Pendaki</span>
+                            <span className="text-xl font-black text-art-text">{pastParticipants.length}</span>
+                         </div>
+                         <div className="bg-art-bg/30 p-4 rounded-2xl border border-art-text/5 text-center">
+                            <span className="block text-[9px] font-black uppercase text-art-text/30 mb-1">Trip Status</span>
+                            <span className="text-xl font-black text-green-600">VERIFIED</span>
+                         </div>
+                      </div>
+                      <div className="space-y-4">
+                         <h4 className="text-[11px] font-black uppercase tracking-widest text-art-text flex items-center gap-2"><Users size={14} className="text-art-orange" /> Jejak Pendaki</h4>
+                         {loadingHistory ? (
+                            <div className="py-12 flex flex-col items-center justify-center gap-3">
+                               <div className="w-8 h-8 border-4 border-art-orange border-t-transparent rounded-full animate-spin" />
+                               <p className="text-[10px] font-black uppercase text-art-text/20 tracking-widest">Memuat...</p>
+                            </div>
+                         ) : pastParticipants.length > 0 ? (
+                            <div className="grid grid-cols-1 gap-2">
+                               {pastParticipants.map((p, i) => (
+                                  <div key={i} className="flex items-center justify-between p-3 bg-art-bg/20 border border-art-text/5 rounded-2xl">
+                                     <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-white border border-art-text/10 flex items-center justify-center text-art-text/30"><User size={16} /></div>
+                                        <div>
+                                           <span className="block text-xs font-black uppercase text-art-text">{p.userName}</span>
+                                           <span className="block text-[9px] font-bold text-art-text/40 uppercase tracking-tighter">{p.tripTitle}</span>
+                                        </div>
+                                     </div>
+                                     <div className="flex flex-col items-end">
+                                        <span className="text-[8px] font-black text-art-orange uppercase tracking-widest">Success</span>
+                                        <span className="text-[7px] font-bold text-art-text/20 uppercase">{p.createdAt?.seconds ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</span>
+                                     </div>
+                                  </div>
+                               ))}
+                            </div>
+                         ) : (
+                            <div className="py-12 text-center border-2 border-dashed border-art-text/5 rounded-3xl">
+                               <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest italic">Belum ada riwayat pendaki terverifikasi</p>
+                            </div>
+                         )}
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
           </div>
         )}
       </AnimatePresence>
