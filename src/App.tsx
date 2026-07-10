@@ -43,7 +43,7 @@ import { TestimonialsModal } from './components/TestimonialsModal';
 import { LeaderExperienceModal } from './components/LeaderExperienceModal';
 
 export default function App() {
-  const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
+  const { config, updateConfig, revertToDefault, loading, isDbSeeded } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   const [selectedLeaderExp, setSelectedLeaderExp] = useState<{ name: string; experiences: any[] } | null>(null);
   const [isLeaderExpModalOpen, setIsLeaderExpModalOpen] = useState(false);
   const [user] = useAuthState(auth);
@@ -449,7 +449,7 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         onClose={() => setIsTestimonialsOpen(false)} 
       />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} setIsHistoryOpen={setIsHistoryOpen} />
-      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
+      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} isDbSeeded={isDbSeeded} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}

@@ -203,16 +203,9 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
             </button>
           </div>
         )}
-
-         <div className="absolute bottom-3 right-3 flex items-center gap-2">
-            <div className={`backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
-               {getSisaKuota(ot)} Pax Left
-            </div>
-         </div>
-      </div>
          
          {/* Mountain Custom Logo */}
-         <div className="absolute top-3 left-3 flex flex-row items-center gap-2 z-30">
+         <div className="absolute top-3 left-3 flex flex-row items-center gap-2 z-10">
             <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center -rotate-6 shadow-[3px_3px_0px_0px_#ff6b00] border-2 border-art-text overflow-hidden shrink-0">
               <img src={ot.logo || config?.homepage?.logo || "https://files.catbox.moe/lubzno.png"} alt="Mountain Logo" className="w-full h-full object-cover" />
             </div>
@@ -226,9 +219,7 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                 </div>
               )}
             </div>
-         </div>
-
-         <div className="absolute top-3 right-3 flex flex-col gap-2 z-30 items-end">
+         </div>         <div className="absolute top-3 right-3 flex flex-col gap-2 z-30 items-end">
                <div className="flex gap-2">
                  <button 
                     onClick={(e) => { e.stopPropagation(); toggleItem({ id: ot.id, name: ot.name, image: ot.image, price: ot.price, difficulty: ot.difficulty, region: ot.region, duration: ot.duration, type: 'open' }); }}
@@ -307,6 +298,13 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                  </div>
                </div>
             </div>
+
+         <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            <div className={`backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 transition-colors ${getSisaKuota(ot) <= 3 ? 'bg-red-500' : 'bg-art-green/80'}`}>
+               {getSisaKuota(ot)} Pax Left
+            </div>
+         </div>
+      </div>
       <div className="p-5 flex-1 flex flex-col">
          <div className="flex justify-between items-center mb-1">
             <span className="text-[9px] font-black uppercase tracking-widest text-art-text/40">{ot.region}</span>

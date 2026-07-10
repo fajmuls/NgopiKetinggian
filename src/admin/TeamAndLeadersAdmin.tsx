@@ -90,7 +90,7 @@ export const TeamPhotosAdmin = ({ config, updateConfig, showToast }: any) => {
           <div key={i} className="space-y-2 relative group">
             <button onClick={() => {
               const np = [...photos]; np.splice(i, 1); setPhotos(np);
-            }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md z-10 hover:bg-red-600 transition-colors border border-white"><Trash2 size={12}/></button>
+            }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12}/></button>
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border border-art-text/10">
               {url && <img src={url} className="w-full h-full object-cover" />}
             </div>
@@ -110,11 +110,6 @@ export const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: a
   const [leaderTitle, setLeaderTitle] = useState(config.homepage?.leaderTitle || '');
   const [leaderSub, setLeaderSub] = useState(config.homepage?.leaderSub || '');
   const [leaderParagraph, setLeaderParagraph] = useState(config.homepage?.leaderParagraph || '');
-
-  const availableMountains = Array.from(new Set([
-    ...(config.destinationsData || []).map((d: any) => d.name),
-    ...(config.openTrips || []).map((ot: any) => ot.name)
-  ])).filter(Boolean).sort();
 
   const moveLeader = (index: number, direction: 'up' | 'down') => {
     const list = [...data];
@@ -293,47 +288,36 @@ export const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: a
                   </div>
 
                   <div className="space-y-4">
-                    {(leader.experiences || []).map((exp: any, expIdx: number) => {
-                      const opts = [...availableMountains];
-                      if (exp.mountain && !opts.includes(exp.mountain)) {
-                        opts.push(exp.mountain);
-                        opts.sort();
-                      }
+                    {(leader.experiences || []).map((exp: any, expIdx: number) => (
+                      <div key={expIdx} className="p-4 rounded-2xl bg-art-bg/30 border border-art-text/10 relative group/exp">
+                        <button 
+                          onClick={() => {
+                            const nd = [...data];
+                            const ne = [...nd[i].experiences];
+                            ne.splice(expIdx, 1);
+                            nd[i].experiences = ne;
+                            setData(nd);
+                          }}
+                          className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-500 rounded-lg opacity-0 group-hover/exp:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                        >
+                          <Trash2 size={12} />
+                        </button>
 
-                      return (
-                        <div key={expIdx} className="p-4 rounded-2xl bg-art-bg/30 border border-art-text/10 relative group/exp">
-                          <button 
-                            onClick={() => {
-                              const nd = [...data];
-                              const ne = [...nd[i].experiences];
-                              ne.splice(expIdx, 1);
-                              nd[i].experiences = ne;
-                              setData(nd);
-                            }}
-                            className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white border border-red-200 shadow-sm rounded-lg transition-all z-10"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                            <div className="space-y-1">
-                              <label className="text-[9px] font-black uppercase text-art-text/30">Nama Gunung</label>
-                              <select 
-                                className={`w-full border-2 p-2 rounded-lg text-[11px] font-bold outline-none focus:border-art-orange bg-white ${!exp.mountain ? 'border-red-300 bg-red-50/10' : 'border-white'}`}
-                                value={exp.mountain || ""}
-                                onChange={e => {
-                                  const nd = [...data];
-                                  nd[i].experiences[expIdx].mountain = e.target.value;
-                                  setData(nd);
-                                }}
-                              >
-                                <option value="">-- Pilih Gunung --</option>
-                                {opts.map((mnt, mIdx) => (
-                                  <option key={mIdx} value={mnt}>{mnt}</option>
-                                ))}
-                              </select>
-                              {!exp.mountain && <span className="text-[8px] text-red-500 font-black uppercase mt-1 block">⚠️ Nama Gunung Wajib Diisi</span>}
-                            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-art-text/30">Nama Gunung</label>
+                            <input 
+                              className={`w-full border-2 p-2 rounded-lg text-[11px] font-bold outline-none focus:border-art-orange ${!exp.mountain ? 'border-red-300 bg-red-50/10' : 'border-white'}`}
+                              value={exp.mountain}
+                              onChange={e => {
+                                const nd = [...data];
+                                nd[i].experiences[expIdx].mountain = e.target.value;
+                                setData(nd);
+                              }}
+                              placeholder="Contoh: Mt. Rinjani"
+                            />
+                            {!exp.mountain && <span className="text-[8px] text-red-500 font-black uppercase mt-1 block">⚠️ Nama Gunung Wajib Diisi</span>}
+                          </div>
                           <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-art-text/30">Tahun / Waktu</label>
                             <input 
@@ -407,8 +391,7 @@ export const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: a
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
                     {(leader.experiences || []).length === 0 && (
                       <div className="py-8 border-2 border-dashed border-art-text/5 rounded-2xl text-center">
                         <p className="text-[10px] font-bold text-art-text/20 uppercase tracking-widest italic">Belum ada riwayat pengalaman daki</p>
