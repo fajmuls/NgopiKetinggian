@@ -12,6 +12,7 @@ import { Button } from './Button';
 import { RundownPreviewModal } from './RundownPreviewModal';
 import { WeatherWidget } from './WeatherWidget';
 import { useCompare } from '../CompareContext';
+import { formatPrice } from '../useAppConfig';
 
 
 import { RatingSystem } from './RatingSystem';
@@ -111,7 +112,7 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
   };
 
   return (
-    <motion.div id={`ot-card-${ot.id || ot.name}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={`bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative ${highlighted ? 'ring-4 ring-art-orange ring-offset-4 ring-offset-art-bg animate-pulse' : ''}`}>
+    <motion.div id={`ot-card-${ot.id || ot.name}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={`bg-white rounded-2xl border-2 border-art-text overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all flex flex-col group relative ${showActionsMenu ? 'z-[60]' : 'z-10'} ${highlighted ? 'ring-4 ring-art-orange ring-offset-4 ring-offset-art-bg animate-pulse' : ''}`}>
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={ot.rundownHtml || ot.rundownText || durInfo?.rundownHtml || durInfo?.rundownText || "Itinerary belum tersedia."} title={`${ot.name} - ${ot.duration}`} />
       
       {showHistory && (
@@ -242,16 +243,16 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
                              animate={{ opacity: 1, y: 0, scale: 1 }}
                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                             className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border-2 border-art-text overflow-hidden z-[100]"
+                             className="absolute right-0 mt-1 w-36 bg-white rounded-xl shadow-xl border-2 border-art-text overflow-hidden z-[100]"
                           >
-                             <div className="p-2 space-y-1">
+                             <div className="p-1.5 space-y-0.5">
                                 {(v.rundown !== false && ot.rundownMode !== 'hidden') && (
                                    <>
                                       <button 
                                          onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); setShowActionsMenu(false); }}
-                                         className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                         className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                                       >
-                                         <Eye size={14} /> Lihat Rundown
+                                         <Eye size={12} /> Lihat Rundown
                                       </button>
                                       <button 
                                          onClick={(e) => { 
@@ -263,22 +264,22 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                                             }
                                             setShowActionsMenu(false);
                                          }}
-                                         className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                         className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                                       >
-                                         <Download size={14} /> Download PDF
+                                         <Download size={12} /> Download PDF
                                       </button>
                                    </>
                                 )}
-                                <div className="h-[1px] bg-art-text/10 my-1"></div>
+                                <div className="h-[1px] bg-art-text/10 my-0.5"></div>
                                 <button 
                                    onClick={(e) => {
                                       e.stopPropagation();
                                       handleShare('whatsapp');
                                       setShowActionsMenu(false);
                                    }}
-                                   className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                   className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                                 >
-                                   <MessageCircle size={14} /> WhatsApp Share
+                                   <MessageCircle size={12} /> WA Share
                                 </button>
                                 <button 
                                    onClick={(e) => {
@@ -286,9 +287,9 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
                                       handleShare('twitter');
                                       setShowActionsMenu(false);
                                    }}
-                                   className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                                   className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                                 >
-                                   <Share2 size={14} /> Twitter Share
+                                   <Share2 size={12} /> Tweet Share
                                 </button>
                              </div>
                           </motion.div>
@@ -437,9 +438,9 @@ export const OpenTripCard: React.FC<{ ot: any, onJoin: (dest: string, path: stri
          <div className="mt-auto pt-4 border-t border-dashed border-art-text/10 flex flex-col gap-4">
            <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                 {ot.originalPrice > 0 && <span className="text-[9px] text-art-text/30 line-through">Rp {(ot.originalPrice * 1000).toLocaleString('id-ID')}</span>}
+                 {ot.originalPrice > 0 && <span className="text-[9px] text-art-text/30 line-through">Rp {formatPrice(ot.originalPrice * 1000)}</span>}
                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-black text-art-orange leading-none">Rp {(ot.price * 1000).toLocaleString('id-ID')}</span>
+                    <span className="text-xl font-black text-art-orange leading-none">Rp {formatPrice(ot.price * 1000)}</span>
                     <span className="text-[8px] font-bold text-art-text/40 uppercase">/Pax</span>
                  </div>
               </div>

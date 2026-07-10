@@ -12,6 +12,7 @@ import { Button } from './Button';
 import { RundownPreviewModal } from './RundownPreviewModal';
 import { WeatherWidget } from './WeatherWidget';
 import { useCompare } from '../CompareContext';
+import { formatPrice } from '../useAppConfig';
 
 const StarRating = ({ rating, size = 16, interactive = false, onRate }: { rating: number, size?: number, interactive?: boolean, onRate?: (r: number) => void }) => {
   return (
@@ -161,7 +162,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       id={`dest-card-${dest.id}`}
-      className={`group bg-white border-2 rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 relative ${highlighted ? 'border-art-orange shadow-[12px_12px_0px_0px_#ff6b00] ring-4 ring-art-orange/50 ring-offset-4' : 'border-art-text'}`}
+      className={`group bg-white border-2 rounded-2xl overflow-hidden hover:shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] transition-all duration-300 relative ${showActionsMenu ? 'z-[60]' : 'z-10'} ${highlighted ? 'border-art-orange shadow-[12px_12px_0px_0px_#ff6b00] ring-4 ring-art-orange/50 ring-offset-4' : 'border-art-text'}`}
     >
       <RundownPreviewModal isOpen={showWebRundown} onClose={() => setShowWebRundown(false)} rundownText={currentDur?.rundownHtml || currentDur?.rundownText || "Itinerary belum tersedia."} title={`${dest.name} - ${currentDur?.label}`} />
       
@@ -283,16 +284,16 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border-2 border-art-text overflow-hidden z-[100]"
+                    className="absolute right-0 mt-1 w-36 bg-white rounded-xl shadow-xl border-2 border-art-text overflow-hidden z-[100]"
                   >
-                    <div className="p-2 space-y-1">
+                    <div className="p-1.5 space-y-0.5">
                       {((currentDur?.rundownHtml || currentDur?.rundownPdf) && dest.rundownMode !== 'hidden') && (
                         <>
                           <button 
                             onClick={(e) => { e.stopPropagation(); setShowWebRundown(true); setShowActionsMenu(false); }}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                            className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                           >
-                            <Eye size={14} /> Lihat Rundown
+                            <Eye size={12} /> Lihat Rundown
                           </button>
                           <button 
                             onClick={(e) => { 
@@ -304,28 +305,28 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                               }
                               setShowActionsMenu(false); 
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                            className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                           >
-                            <Download size={14} /> Download PDF
+                            <Download size={12} /> Download PDF
                           </button>
                         </>
                       )}
                       <button 
                         onClick={(e) => { e.stopPropagation(); setShowCalculator(true); setShowActionsMenu(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                       >
-                        <Calculator size={14} /> Kalkulator Biaya
+                        <Calculator size={12} /> Kalkulator Biaya
                       </button>
-                      <div className="h-[1px] bg-art-text/10 my-1"></div>
+                      <div className="h-[1px] bg-art-text/10 my-0.5"></div>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           handleShare('whatsapp');
                           setShowActionsMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                       >
-                        <MessageCircle size={14} /> WhatsApp Share
+                        <MessageCircle size={12} /> WA Share
                       </button>
                       <button 
                         onClick={(e) => {
@@ -333,9 +334,9 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                           handleShare('twitter');
                           setShowActionsMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-art-text hover:bg-art-bg rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-wider text-art-text hover:bg-art-bg rounded-md transition-colors"
                       >
-                        <Share2 size={14} /> Twitter Share
+                        <Share2 size={12} /> Tweet Share
                       </button>
                     </div>
                   </motion.div>
@@ -356,7 +357,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
               {dest.enablePrivateTrip !== false ? (
                 <>
                   <p className="text-[9px] font-bold uppercase text-art-orange mb-1">Mulai Dari</p>
-                  <p className="text-lg md:text-xl font-black text-art-text">Rp {dest.paths?.[0]?.durations?.[0]?.price || '0'}k</p>
+                  <p className="text-lg md:text-xl font-black text-art-text">Rp {formatPrice(dest.paths?.[0]?.durations?.[0]?.price || 0)}k</p>
                 </>
               ) : (
                 <p className="text-[9px] font-black uppercase text-art-text/30 border border-art-text/10 px-2 py-1 rounded">Private Trip Closed</p>
@@ -448,7 +449,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                                        </div>
                                        <div className="pt-3 border-t border-dashed border-art-text/5 flex justify-between items-center">
                                           <span className="text-[9px] font-bold text-art-text/40 uppercase">Harga / Pax</span>
-                                          <span className="text-xs font-black text-art-text">Rp {currentDurPrice.toLocaleString('id-ID')}k</span>
+                                          <span className="text-xs font-black text-art-text">Rp {formatPrice(currentDurPrice)}k</span>
                                        </div>
                                     </div>
                                  </div>
@@ -479,7 +480,7 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                                     <p className="text-[7px] font-bold uppercase opacity-50">*Harga sewaktu-waktu bisa berubah</p>
                                  </div>
                                  <div className="text-right">
-                                    <span className="text-2xl font-black">Rp {totalEstimation}k</span>
+                                    <span className="text-2xl font-black">Rp {formatPrice(totalEstimation)}k</span>
                                     <p className="text-[8px] font-bold uppercase opacity-70">Sesuai Kapasitas</p>
                                  </div>
                               </div>
@@ -539,8 +540,8 @@ export const DestinationCard: React.FC<{ dest: any, visibilities: any, onBook: (
                              <div className="flex justify-between items-center mb-1">
                                 <span className="text-[10px] font-black uppercase text-art-orange">Biaya Per Orang</span>
                                 <div className="flex items-center gap-2">
-                                   {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {currentDur.originalPrice}k</span>}
-                                   <span className="text-xl font-black text-art-text">Rp {currentDur?.price}k</span>
+                                   {currentDur?.originalPrice > currentDur?.price && <span className="text-[10px] text-art-text/30 line-through">Rp {formatPrice(currentDur.originalPrice)}k</span>}
+                                   <span className="text-xl font-black text-art-text">Rp {formatPrice(currentDur?.price || 0)}k</span>
                                 </div>
                              </div>
                              <p className="text-[8px] font-bold text-art-text/40 uppercase">Harga Dasar (Min. 2 Pax)</p>

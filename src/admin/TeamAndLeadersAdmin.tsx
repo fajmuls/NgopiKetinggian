@@ -307,7 +307,7 @@ export const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: a
                           <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-art-text/30">Nama Gunung</label>
                             <input 
-                              className="w-full border-2 border-white p-2 rounded-lg text-[11px] font-bold outline-none focus:border-art-orange"
+                              className={`w-full border-2 p-2 rounded-lg text-[11px] font-bold outline-none focus:border-art-orange ${!exp.mountain ? 'border-red-300 bg-red-50/10' : 'border-white'}`}
                               value={exp.mountain}
                               onChange={e => {
                                 const nd = [...data];
@@ -316,6 +316,7 @@ export const LeadersAdmin = ({ config, updateConfig, showToast, defaultList }: a
                               }}
                               placeholder="Contoh: Mt. Rinjani"
                             />
+                            {!exp.mountain && <span className="text-[8px] text-red-500 font-black uppercase mt-1 block">⚠️ Nama Gunung Wajib Diisi</span>}
                           </div>
                           <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-art-text/30">Tahun / Waktu</label>

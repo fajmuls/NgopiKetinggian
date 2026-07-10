@@ -8,7 +8,7 @@ import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, setD
 import { jsPDF } from 'jspdf';
 import { generateRundownPdf } from '../lib/pdf-utils';
 import { customConfirm, customAlert } from '../GlobalDialog';
-import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION } from '../useAppConfig';
+import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION, formatPrice } from '../useAppConfig';
 
 export const InputWithPaste = ({ value, onChange, placeholder, className, ...props }: any) => {
   const handlePaste = async () => {
@@ -258,8 +258,8 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
     const baseTotal = (booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0);
     const pricePerPax = baseTotal / (Number(booking.peserta) || 1);
     doc.text(`PAKET TRIP ${booking.destinasi.toUpperCase()}`, 25, currentY);
-    doc.text(`${booking.peserta} Pax @ Rp ${pricePerPax.toLocaleString('id-ID')}`, 110, currentY);
-    doc.text(`Rp ${baseTotal.toLocaleString('id-ID')}`, 160, currentY);
+    doc.text(`${booking.peserta} Pax @ Rp ${formatPrice(pricePerPax)}`, 110, currentY);
+    doc.text(`Rp ${formatPrice(baseTotal)}`, 160, currentY);
     currentY += 8;
 
     if (booking.opsionalItems && booking.opsionalItems.length > 0) {
@@ -267,11 +267,11 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
         doc.setFontSize(7);
         doc.setTextColor(80, 80, 80);
         const itemDesc = `(+) ${item.name}`;
-        const itemQty = `${item.count || 1}x • ${item.days || 1}H @ Rp ${item.price.toLocaleString('id-ID')}`;
+        const itemQty = `${item.count || 1}x • ${item.days || 1}H @ Rp ${formatPrice(item.price)}`;
         
         doc.text(itemDesc, 25, currentY);
         doc.text(itemQty, 110, currentY);
-        doc.text(item.price === 0 ? '-' : `Rp ${item.subtotal.toLocaleString('id-ID')}`, 160, currentY);
+        doc.text(item.price === 0 ? '-' : `Rp ${formatPrice(item.subtotal)}`, 160, currentY);
         currentY += 6;
       });
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -280,7 +280,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
       doc.setFontSize(9);
       const splitText = doc.splitTextToSize(`(+) LAYANAN TAMBAHAN: ${booking.opsionalText}`, 130);
       doc.text(splitText, 25, currentY);
-      doc.text(`Rp ${(booking.opsionalPrice || 0).toLocaleString('id-ID')}`, 160, currentY);
+      doc.text(`Rp ${formatPrice(booking.opsionalPrice || 0)}`, 160, currentY);
       currentY += (splitText.length * 6) + 2;
     }
 
@@ -290,7 +290,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
       doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
       doc.setFont('helvetica', 'bold');
       doc.text(`KODE PROMO: ${booking.promoCode.toUpperCase()}`, 25, currentY);
-      doc.text(`- Rp ${booking.discountAmount?.toLocaleString('id-ID')}`, 160, currentY);
+      doc.text(`- Rp ${formatPrice(booking.discountAmount || 0)}`, 160, currentY);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       currentY += 8;
     }
@@ -304,7 +304,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
     doc.setFont('helvetica', 'bold');
     doc.text('TOTAL AKHIR:', 120, currentY);
     doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
-    doc.text(`Rp ${booking.totalPrice?.toLocaleString('id-ID')}`, 160, currentY);
+    doc.text(`Rp ${formatPrice(booking.totalPrice || 0)}`, 160, currentY);
 
     // Status Badge
     currentY += 20;
@@ -588,11 +588,11 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                        <div className="flex justify-between items-end">
                           <div>
                              <h5 className="text-sm font-black text-art-text uppercase leading-none mb-1">{booking.destinasi}</h5>
-                             <p className="text-[9px] font-bold text-art-text/40">{booking.peserta} Pax • Rp {((((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0))) / (Number(booking.peserta) || 1)).toLocaleString('id-ID')} / Pax</p>
+                             <p className="text-[9px] font-bold text-art-text/40">{booking.peserta} Pax • Rp {formatPrice((((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0))) / (Number(booking.peserta) || 1))} / Pax</p>
                           </div>
                           <div className="text-right">
                              <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
-                             <p className="font-black text-art-text text-sm">Rp {((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0)).toLocaleString('id-ID')}</p>
+                             <p className="font-black text-art-text text-sm">Rp {formatPrice((booking.totalPrice || 0) + (booking.discountAmount || 0) - (booking.opsionalPrice || 0))}</p>
                           </div>
                        </div>
                     </div>
@@ -627,12 +627,12 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                                        )}
                                      </span>
                                      <span className="text-[8px] font-bold text-art-text/40 italic ml-3">
-                                       {item.isRental ? `${item.days} Hari • Rp ${(item.price || 0).toLocaleString('id-ID')}` : item.priceInfo || item.name}
+                                       {item.isRental ? `${item.days} Hari • Rp ${formatPrice(item.price || 0)}` : item.priceInfo || item.name}
                                      </span>
                                    </div>
                                    <div className="text-right">
                                      <span className={`font-black text-[10px] ${item.status === 'pending_price' ? 'text-art-orange italic' : 'text-art-text'}`}>
-                                       {item.status === 'pending_price' ? "Input Admin" : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}
+                                       {item.status === 'pending_price' ? "Input Admin" : `Rp ${formatPrice(item.subtotal || 0)}`}
                                      </span>
                                    </div>
                                  </div>
@@ -641,7 +641,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                          </div>
                          <div className="mt-4 pt-3 border-t-2 border-art-text/5 flex justify-between items-center">
                             <span className="text-[10px] font-black uppercase text-art-text/30">Subtotal Layanan</span>
-                            <span className="text-sm font-black text-art-orange">Rp {(booking.opsionalPrice || 0).toLocaleString('id-ID')}</span>
+                            <span className="text-sm font-black text-art-orange">Rp {formatPrice(booking.opsionalPrice || 0)}</span>
                          </div>
                       </div>
                     )}
@@ -657,7 +657,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                                   <h5 className="text-sm font-black text-art-text uppercase tracking-tight">{booking.promoCode}</h5>
                                </div>
                             </div>
-                            <span className="text-sm font-black text-art-green">- Rp {booking.discountAmount?.toLocaleString('id-ID')}</span>
+                            <span className="text-sm font-black text-art-green">- Rp {formatPrice(booking.discountAmount || 0)}</span>
                          </div>
                       </div>
                     )}
@@ -761,7 +761,7 @@ export const BookingsAdmin = ({ bookings, showToast, config, updateConfig, onNav
                          <div className="flex justify-between items-end">
                             <div>
                                <p className="text-[10px] font-black uppercase text-art-orange/60 tracking-widest mb-1">Total Estimasi Akhir:</p>
-                               <p className="text-3xl font-black text-art-text tracking-tighter">Rp {booking.totalPrice?.toLocaleString('id-ID')}</p>
+                               <p className="text-3xl font-black text-art-text tracking-tighter">Rp {formatPrice(booking.totalPrice || 0)}</p>
                             </div>
                             <div className="text-right">
                                <p className="text-[9px] font-bold text-art-text/30 uppercase mb-0.5">Ref ID</p>

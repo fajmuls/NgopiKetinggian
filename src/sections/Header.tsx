@@ -17,19 +17,12 @@ export const Header = ({
   onExecuteSearch,
   showSearchDropdown,
   setShowSearchDropdown,
-  theme,
-  setTheme,
   userPoints = 0
 }: any) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'default' : 'dark';
-    setTheme(nextTheme);
-  };
-
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] bg-white/90 dark:bg-black/90 backdrop-blur-md border-b-2 border-art-text transition-colors">
+    <header className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b-2 border-art-text transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -102,15 +95,6 @@ export const Header = ({
           </div>
 
           <div className="flex items-center gap-4 sm:gap-6">
-            {/* Dark Mode Toggle */}
-            <button 
-              onClick={toggleTheme}
-              className="p-2 rounded-xl border-2 border-art-text hover:bg-art-bg transition-all"
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-art-text" />}
-            </button>
-
             <div className="hidden md:flex items-center gap-6">
               {user ? (
                 <div className="flex items-center gap-3">
@@ -148,14 +132,14 @@ export const Header = ({
             initial={{ height: 0, opacity: 0 }} 
             animate={{ height: 'auto', opacity: 1 }} 
             exit={{ height: 0, opacity: 0 }} 
-            className="md:hidden bg-white border-t-2 border-art-text overflow-visible shadow-2xl"
+            className="md:hidden bg-white border-t-2 border-art-text overflow-visible shadow-2xl z-[2000] relative"
           >
-             <div className="p-3 space-y-3 bg-art-bg/20 border-b border-art-text/10 overflow-visible">
+             <div className="p-2 space-y-2 bg-art-bg/20 border-b border-art-text/10 overflow-visible">
                 <div className="relative">
                   <input 
                     type="text" 
                     placeholder="Cari Gunung..."
-                    className="w-full bg-white border-2 border-art-text py-3 pl-4 pr-10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all shadow-sm"
+                    className="w-full bg-white border-2 border-art-text py-2 pl-3 pr-8 rounded-lg text-[8px] font-black uppercase tracking-widest outline-none focus:border-art-orange transition-all shadow-sm"
                     value={searchQuery}
                     onChange={(e) => {
                       onSearchChange(e);
@@ -163,7 +147,7 @@ export const Header = ({
                     }}
                     onFocus={() => searchQuery && setShowSearchDropdown(true)}
                   />
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-art-text/40" size={14} />
+                  <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 text-art-text/40" size={12} />
                   
                   <AnimatePresence>
                     {showSearchDropdown && searchResults.length > 0 && (
@@ -171,30 +155,29 @@ export const Header = ({
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="absolute left-0 right-0 mt-3 bg-white border-2 border-art-text rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden z-[1001]"
+                        className="absolute left-0 right-0 mt-2 bg-white border-2 border-art-text rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden z-[9999]"
                       >
-                        {searchResults.slice(0, 6).map((item: any, idx: number) => (
+                        {searchResults.slice(0, 5).map((item: any, idx: number) => (
                           <button 
                             key={idx}
                             onClick={() => { onExecuteSearch(item); setIsMenuOpen(false); }}
-                            className="w-full p-4 px-5 flex items-center justify-between border-b border-art-text/5 last:border-0 hover:bg-art-bg active:bg-art-orange/10 transition-colors"
+                            className="w-full p-2.5 px-3 flex items-center justify-between border-b border-art-text/5 last:border-0 hover:bg-art-bg active:bg-art-orange/10 transition-colors"
                           >
-                             <div className="flex items-center gap-4">
+                             <div className="flex items-center gap-3">
                                 {item.image ? (
-                                  <img src={item.image} className="w-10 h-10 rounded-lg object-cover border border-art-text/10" alt={item.name} />
+                                  <img src={item.image} className="w-8 h-8 rounded-md object-cover border border-art-text/10" alt={item.name} />
                                 ) : (
-                                  <div className="w-10 h-10 rounded-lg bg-art-bg flex items-center justify-center border border-art-text/10"><Mountain size={16} /></div>
+                                  <div className="w-8 h-8 rounded-md bg-art-bg flex items-center justify-center border border-art-text/10"><Mountain size={12} /></div>
                                 )}
                                 <div className="text-left">
-                                   <p className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2">
+                                   <p className="text-[7px] font-black uppercase text-art-text tracking-widest flex items-center gap-1.5">
                                       {item.name}
-                                      {item.subType === 'open' && <span className="px-1.5 py-0.5 rounded text-[7px] bg-art-green/10 text-art-green border border-art-green/20 leading-none">OPEN TRIP</span>}
-                                      {item.subType === 'private' && <span className="px-1.5 py-0.5 rounded text-[7px] bg-art-orange/10 text-art-orange border border-art-orange/20 leading-none">PRIVATE</span>}
+                                      {item.subType === 'open' && <span className="px-1 py-0.5 rounded-[3px] text-[6px] bg-art-green/10 text-art-green border border-art-green/20 leading-none">OPEN</span>}
                                    </p>
-                                   <p className="text-[8px] font-bold text-art-text/40 uppercase tracking-tighter">{item.type === 'section' ? 'Menu' : 'Gunung'}</p>
+                                   <p className="text-[6px] font-bold text-art-text/40 uppercase tracking-tighter">{item.type === 'section' ? 'Menu' : 'Gunung'}</p>
                                 </div>
                              </div>
-                             <ChevronRight size={12} className="text-art-orange" />
+                             <ChevronRight size={10} className="text-art-orange" />
                           </button>
                         ))}
                       </motion.div>
@@ -202,32 +185,32 @@ export const Header = ({
                   </AnimatePresence>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <button onClick={() => { onOpenTestimonials(); setIsMenuOpen(false); }} className="w-full py-3 text-[10px] font-black uppercase tracking-widest bg-art-orange/10 text-art-orange border-2 border-art-orange/20 rounded-xl flex items-center justify-center gap-2 mb-1">
-                    <Star size={14} fill="currentColor" /> Testimoni Pendaki
+                <div className="flex flex-col gap-1.5">
+                  <button onClick={() => { onOpenTestimonials(); setIsMenuOpen(false); }} className="w-full py-2 text-[8px] font-black uppercase tracking-widest bg-art-orange/10 text-art-orange border-2 border-art-orange/20 rounded-lg flex items-center justify-center gap-1.5">
+                    <Star size={12} fill="currentColor" /> Testimoni
                   </button>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-1.5">
                     {user ? (
                       <>
-                        <button onClick={() => { onOpenHistory(); setIsMenuOpen(false); }} className="py-2.5 text-[9px] font-black uppercase tracking-widest text-art-text flex items-center justify-center gap-2 border-2 border-art-text rounded-xl bg-white hover:bg-art-bg transition-colors">
-                          <History size={12} className="text-art-orange" /> History
+                        <button onClick={() => { onOpenHistory(); setIsMenuOpen(false); }} className="py-2 text-[7px] font-black uppercase tracking-widest text-art-text flex items-center justify-center gap-1.5 border-2 border-art-text rounded-lg bg-white active:bg-art-bg transition-colors">
+                          <History size={10} className="text-art-orange" /> History
                         </button>
-                        <button onClick={() => { onOpenSettings(); setIsMenuOpen(false); }} className="py-2.5 text-[9px] font-black uppercase tracking-widest bg-art-text text-white rounded-xl flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(255,107,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
-                          <User size={12} /> Profile
+                        <button onClick={() => { onOpenSettings(); setIsMenuOpen(false); }} className="py-2 text-[7px] font-black uppercase tracking-widest bg-art-text text-white rounded-lg flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(255,107,0,1)] active:translate-x-px active:translate-y-px active:shadow-none transition-all">
+                          <User size={10} /> Profile
                         </button>
                       </>
                     ) : (
-                      <button onClick={() => { onLogin(); setIsMenuOpen(false); }} className="col-span-2 py-3 text-[10px] font-black uppercase tracking-widest bg-art-text text-white rounded-xl flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(255,107,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
-                        <LogIn size={14} /> Login
+                      <button onClick={() => { onLogin(); setIsMenuOpen(false); }} className="col-span-2 py-2 text-[8px] font-black uppercase tracking-widest bg-art-text text-white rounded-lg flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(255,107,0,1)] active:translate-x-px active:translate-y-px active:shadow-none transition-all">
+                        <LogIn size={12} /> Login
                       </button>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex justify-center gap-4 py-2 opacity-30">
-                  <Coffee size={12} />
-                  <Mountain size={12} />
-                  <MapPin size={12} />
+                <div className="flex justify-center gap-3 py-1 opacity-20">
+                  <Coffee size={10} />
+                  <Mountain size={10} />
+                  <MapPin size={10} />
                 </div>
              </div>
           </motion.div>

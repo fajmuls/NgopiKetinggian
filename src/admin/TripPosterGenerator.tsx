@@ -356,8 +356,11 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     const val = parseInt(String(p)) || 0;
     if (val === 0) return 'Rp 0';
     // If val is entered as 500 in admin, it means 500,000 (500K)
-    if (val < 1000) return `Rp ${val}.000`; 
-    return `Rp ${val.toLocaleString('id-ID')}`;
+    if (val < 1000) {
+      const full = val * 1000;
+      return `Rp ${full.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ":")}`;
+    }
+    return `Rp ${val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ":")}`;
   };
 
   const currentPrice = initialType === 'open' 
@@ -431,6 +434,78 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const [customFonts, setCustomFonts] = useState<{name: string, url: string}[]>([]);
+  const [activeFont, setActiveFont] = useState('Inter');
+
+  const handleFontUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fontName = file.name.split('.')[0].replace(/\s+/g, '-');
+        const fontUrl = event.target?.result as string;
+        
+        const newFont = new FontFace(fontName, `url(${fontUrl})`);
+        newFont.load().then((loadedFont) => {
+          document.fonts.add(loadedFont);
+          setCustomFonts(prev => [...prev, { name: fontName, url: fontUrl }]);
+          setActiveFont(fontName);
+          customAlert(`Font ${fontName} berhasil dimuat!`);
+        }).catch(err => {
+          console.error("Font loading error:", err);
+          customAlert("Gagal memuat font.");
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const savePreset = () => {
+    const preset = {
+      theme: theme.id,
+      bgOpacity,
+      posterDesign,
+      infoDesign,
+      adDesign,
+      activeFont,
+      ratio,
+      layout,
+      flagLogoOpacity,
+      flagDesign,
+      boardDesign
+    };
+    localStorage.setItem('trip_poster_preset', JSON.stringify(preset));
+    customAlert("Preset berhasil disimpan!", "Success");
+  };
+
+  const loadPreset = () => {
+    const saved = localStorage.getItem('trip_poster_preset');
+    if (saved) {
+      try {
+        const p = JSON.parse(saved);
+        if (p.theme) {
+          const foundTheme = THEMES.find(t => t.id === p.theme);
+          if (foundTheme) setTheme(foundTheme);
+        }
+        if (p.bgOpacity !== undefined) setBgOpacity(p.bgOpacity);
+        if (p.posterDesign !== undefined) setPosterDesign(p.posterDesign);
+        if (p.infoDesign !== undefined) setInfoDesign(p.infoDesign);
+        if (p.adDesign !== undefined) setAdDesign(p.adDesign);
+        if (p.activeFont !== undefined) setActiveFont(p.activeFont);
+        if (p.ratio !== undefined) setRatio(p.ratio);
+        if (p.layout !== undefined) setLayout(p.layout);
+        if (p.flagLogoOpacity !== undefined) setFlagLogoOpacity(p.flagLogoOpacity);
+        if (p.flagDesign !== undefined) setFlagDesign(p.flagDesign);
+        if (p.boardDesign !== undefined) setBoardDesign(p.boardDesign);
+        customAlert("Preset berhasil dimuat!", "Success");
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      customAlert("Belum ada preset yang disimpan.");
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
@@ -472,6 +547,56 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
             <hr className="border-gray-100" />
 
             {/* Layout Switcher */}
+            <div className="flex gap-2">
+              <button 
+                onClick={savePreset}
+                className="flex-1 py-2 bg-art-green/10 text-art-green border border-art-green/20 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-art-green hover:text-white transition-all flex items-center justify-center gap-1"
+              >
+                <Plus size={12} /> Simpan Preset
+              </button>
+              <button 
+                onClick={loadPreset}
+                className="flex-1 py-2 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-1"
+              >
+                <RotateCcw size={12} /> Load Preset
+              </button>
+            </div>
+
+            {/* Custom Font Upload */}
+            <div className="space-y-3 bg-art-bg/30 p-4 rounded-2xl border-2 border-art-text/10">
+               <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-2">
+                 <FileText size={12} className="text-art-orange" /> Custom Font Upload
+               </label>
+               <input 
+                 type="file" 
+                 accept=".ttf,.otf,.woff,.woff2"
+                 onChange={handleFontUpload}
+                 className="hidden" 
+                 id="font-upload-input" 
+               />
+               <label 
+                 htmlFor="font-upload-input"
+                 className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-art-text/10 rounded-xl cursor-pointer hover:border-art-orange hover:bg-white transition-all"
+               >
+                 <Plus size={16} className="text-art-text/30" />
+                 <span className="text-[10px] font-black uppercase text-art-text/60">Upload Font (.ttf / .otf)</span>
+               </label>
+               {customFonts.length > 0 && (
+                 <div className="flex flex-wrap gap-1.5 pt-2">
+                    {customFonts.map(f => (
+                       <button 
+                         key={f.name}
+                         onClick={() => setActiveFont(f.name)}
+                         className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase border-2 transition-all ${activeFont === f.name ? 'bg-art-orange text-white border-art-orange' : 'bg-white text-art-text/40 border-gray-100 hover:border-gray-200'}`}
+                         style={{ fontFamily: f.name }}
+                       >
+                         {f.name}
+                       </button>
+                    ))}
+                 </div>
+               )}
+            </div>
+
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-1.5">
                 <Layout size={12} className="text-art-orange" /> Tipe Layout
@@ -988,7 +1113,8 @@ Amankan slot pendakian kamu sekarang juga sebelum kehabisan! Klik link di bio In
                                 transformOrigin: 'top left',
                                 position: 'absolute',
                                 top: 0,
-                                left: 0
+                                left: 0,
+                                fontFamily: activeFont
                               }}
                             >
                     

@@ -40,9 +40,12 @@ const defaultGalleryPhotos = [
 ];
 
 import { TestimonialsModal } from './components/TestimonialsModal';
+import { LeaderExperienceModal } from './components/LeaderExperienceModal';
 
 export default function App() {
   const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
+  const [selectedLeaderExp, setSelectedLeaderExp] = useState<{ name: string; experiences: any[] } | null>(null);
+  const [isLeaderExpModalOpen, setIsLeaderExpModalOpen] = useState(false);
   const [user] = useAuthState(auth);
   const [showSplash, setShowSplash] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -621,11 +624,28 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
                     <p className="text-[9px] font-black uppercase tracking-widest text-art-text/40 mb-2 text-left">Pengalaman Mendaki:</p>
                     <div className="flex flex-wrap gap-1 justify-center">
                       {leader.experiences.map((exp: any, idx: number) => (
-                        <span key={idx} className="text-[8px] font-bold bg-white border border-art-text/10 px-2 py-0.5 rounded-full text-art-text/60" title={exp.description}>
-                          {exp.mountain} {exp.years ? `(${exp.years})` : ''}
-                        </span>
+                        <button 
+                          key={idx} 
+                          onClick={() => {
+                            setSelectedLeaderExp({ name: leader.name, experiences: leader.experiences });
+                            setIsLeaderExpModalOpen(true);
+                          }}
+                          className="text-[8px] font-black uppercase bg-white hover:bg-art-orange hover:text-white border border-art-text/15 hover:border-art-orange px-2 py-0.5 rounded-full text-art-text/60 transition-all flex items-center gap-1 cursor-pointer" 
+                          title="Klik untuk detail & foto dokumentasi"
+                        >
+                          <Mountain size={8} /> {exp.mountain} {exp.years ? `(${exp.years})` : ''}
+                        </button>
                       ))}
                     </div>
+                    <button
+                      onClick={() => {
+                        setSelectedLeaderExp({ name: leader.name, experiences: leader.experiences });
+                        setIsLeaderExpModalOpen(true);
+                      }}
+                      className="w-full mt-3 py-2 border border-dashed border-art-orange text-art-orange hover:bg-art-orange hover:text-white text-[8px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1"
+                    >
+                      <ExternalLink size={10} /> Portofolio Daki ({leader.experiences.length})
+                    </button>
                   </div>
                 )}
                 {leader.voiceLine ? (
@@ -918,6 +938,13 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
           setIsComparing(false);
           handleOpenBooking(item.name, item.path || '', item.duration || '', item.type, item.jadwal || '');
         }}
+      />
+
+      <LeaderExperienceModal
+        isOpen={isLeaderExpModalOpen}
+        onClose={() => setIsLeaderExpModalOpen(false)}
+        leaderName={selectedLeaderExp?.name || ""}
+        experiences={selectedLeaderExp?.experiences || []}
       />
 
       <AnimatePresence>

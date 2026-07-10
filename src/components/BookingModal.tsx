@@ -10,6 +10,7 @@ import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
 import { CustomSelect } from './CustomSelect';
+import { formatPrice, formatPriceNotation } from '../useAppConfig';
 
 
 export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, facilities, config, updateConfig, setIsHistoryOpen, userBookings }: { isOpen: boolean, onClose: () => void, destinationOptions?: any[], prefill?: { destinasi: string, jalur: string, durasi: string, type: 'private' | 'open', jadwal?: string }, facilities?: any, config: any, updateConfig: (c: any) => void, setIsHistoryOpen: (v: boolean) => void, userBookings: any[] }) => {
@@ -406,7 +407,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
         customAlert("Gagal menyimpan ke database, mohon hubungi admin", "Sedang ada gangguan sinkronisasi.");
       }
   
-      const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Jalur: ${selectedJalur}\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${netPrice.toLocaleString('id-ID')} ${isPromoValid ? `(Diskon Rp ${discountAmount.toLocaleString('id-ID')})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${finalOpsionalText ? finalOpsionalText.split(' | ').map(o => `• ${o}`).join('\n') : '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
+      const waMsg = `Halo Admin Trip Ngopi di Ketinggian! 🏕️\n\nSaya tertarik untuk booking trip, berikut detail pesanan saya:\n\n*Data Pemesan*\n• Nama: ${nama}\n• No WhatsApp: ${wa}\n• Email: ${email}\n\n*Detail Trip*\n• Destinasi: *${selectedDestinasi}*\n• Jalur: ${selectedJalur}\n• Durasi: ${selectedDurasi}\n• Rencana Tanggal: ${finalJadwalLabel}\n• Jumlah Peserta: ${pesertaCount} Pax\n\n*Promo & Biaya*\n• Kode Promo: ${promoCode || '-'} ${isPromoValid ? `(Valid - Diskon ${activePromo.discount}%)` : ''}\n• Estimasi Harga Paket: Rp ${formatPrice(netPrice)} ${isPromoValid ? `(Diskon Rp ${formatPrice(discountAmount)})` : ''}\n\n*Opsi Tambahan (Opsional)*\n${finalOpsionalText ? finalOpsionalText.split(' | ').map(o => `• ${o}`).join('\n') : '• Tidak ada'}\n\n*Catatan Khusus / Kesehatan*\n_${deskripsi || '-'}_ \n\nMohon info untuk ketersediaan jadwal serta total biayanya ya min.\nTerima kasih! 🙌`;
       
       if (currentType !== 'open_request') {
         window.open(`https://wa.me/6282127533268?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -478,7 +479,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                    {(currentType !== 'private' && currentType !== 'open_request') && (
                    <div className="text-right">
                      <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
-                     <span className="text-[12px] font-black text-art-text">Rp {(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}</span>
+                     <span className="text-[12px] font-black text-art-text">Rp {formatPrice(basePricePerPax * currentPesertaCount)}</span>
                    </div>
                    )}
                  </div>
@@ -497,7 +498,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                     </div>
                     <div>
                        <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
-                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax {(currentType !== 'private' && currentType !== 'open_request') && `• Rp ${basePricePerPax.toLocaleString('id-ID')}`}</p>
+                       <p className="text-[10px] font-black text-art-text">{pesertaCount} Pax {(currentType !== 'private' && currentType !== 'open_request') && `• Rp ${formatPrice(basePricePerPax)}`}</p>
                     </div>
                  </div>
                </div>
@@ -510,7 +511,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                      {(currentType !== 'private' && currentType !== 'open_request') && (
                      <div className="text-right">
                        <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Layanan</p>
-                       <span className="text-[12px] font-black text-art-orange">Rp {totalOpsionalPrice.toLocaleString('id-ID')}</span>
+                       <span className="text-[12px] font-black text-art-orange">Rp {formatPrice(totalOpsionalPrice)}</span>
                      </div>
                      )}
                    </div>
@@ -518,7 +519,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                      {opsionalItemsList.map((item: any, idx: number) => (
                        <div key={idx} className="flex justify-between items-start">
                          <span className="uppercase">{item.name} {item.isRental ? `(${item.count} • ${item.days} Hari)` : (item.count > 1 ? `(${item.count} •)` : '')}</span>
-                         <span className="text-art-text font-black ml-2 text-right">{(currentType === 'private' || currentType === 'open_request' || item.status === 'pending_price') ? 'Biaya Menyusul' : `Rp ${item.subtotal.toLocaleString('id-ID')}`}</span>
+                         <span className="text-art-text font-black ml-2 text-right">{(currentType === 'private' || currentType === 'open_request' || item.status === 'pending_price') ? 'Biaya Menyusul' : `Rp ${formatPrice(item.subtotal)}`}</span>
                        </div>
                      ))}
                    </div>
@@ -532,7 +533,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                      <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area <span className="bg-art-green text-white px-2 py-0.5 rounded-full text-[8px] ml-1">-{activePromo.discount}%</span></h5>
                      <div className="text-right">
                        <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
-                       <span className="text-[12px] font-black text-art-green">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                       <span className="text-[12px] font-black text-art-green">- Rp {formatPrice(discountAmount)}</span>
                      </div>
                    </div>
                    <div className="mt-2 pt-2 border-t border-art-green/10">
@@ -547,7 +548,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                   <div className="flex justify-between items-end">
                      <div>
                         <p className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1">Total Estimasi Keseluruhan</p>
-                        <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</h4>
+                        <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {formatPrice(netPrice)}</h4>
                      </div>
                   </div>
                </div>
@@ -713,7 +714,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                            </div>
                            <div className="text-right">
                               <p className={`text-[10px] font-black uppercase ${sisa <= 3 ? 'text-red-500' : 'text-art-green'}`}>{sisa} Pax Tersisa</p>
-                              <p className="text-[10px] font-black text-art-orange uppercase">Rp {(ot.price*1000).toLocaleString('id-ID')}</p>
+                              <p className="text-[10px] font-black text-art-orange uppercase">Rp {formatPrice((ot.price*1000))}</p>
                            </div>
                         </button>
                        );
@@ -884,7 +885,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                          </span>
                                          {currentType === 'private' && (
                                             <span className="text-[8px] font-black font-mono text-art-orange bg-art-orange/5 px-1.5 py-0.5 rounded">
-                                               Rp {(dur.basePrice * 1000).toLocaleString('id-ID')}
+                                               Rp {formatPrice((dur.basePrice * 1000))}
                                             </span>
                                          )}
                                       </button>
@@ -957,7 +958,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                             <span className="text-[8px] font-bold text-art-text/40 uppercase mt-0.5">{ot.mepo || 'MEETING POINT'} • {ot.duration || ''}</span>
                                          </div>
                                          <div className="text-right">
-                                            <span className="text-[9px] font-black font-mono text-art-orange block">Rp {ot.price ? ot.price.toLocaleString('id-ID') : '0'}</span>
+                                            <span className="text-[9px] font-black font-mono text-art-orange block">Rp {formatPrice(ot.price || 0)}</span>
                                             <span className={`text-[7px] font-black uppercase ${sisa <= 3 ? 'text-red-500 animate-pulse' : 'text-art-text/40'}`}>{sisa <= 0 ? 'Penuh' : `Sisa ${sisa} Slot`}</span>
                                          </div>
                                       </button>
@@ -1034,7 +1035,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                            <span className="text-[11px] font-black text-art-text uppercase tracking-wider group-hover:text-art-orange transition-colors block w-full">{opt.name}</span>
                                            {opt.priceInfo && (
                                              <span className="text-[9px] font-bold text-art-orange uppercase mt-1 tracking-tighter block w-full">
-                                               {opt.priceInfo.toString().toLowerCase().includes('rp') ? opt.priceInfo : `Rp ${opt.priceInfo}`}
+                                               {formatPriceNotation(opt.priceInfo)}
                                              </span>
                                            )}
                                         </div>
@@ -1062,9 +1063,9 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                                                      <div className="flex flex-col">
                                                         <span className="text-[9px] font-black text-art-text/70 uppercase leading-none">{sub.name}</span>
                                                         {sub.price ? (
-                                                           <span className="text-[8px] font-black text-art-orange italic uppercase tracking-tighter mt-1 block font-mono">Rp {(sub.price * 1000).toLocaleString('id-ID')} / Hari</span>
+                                                           <span className="text-[8px] font-black text-art-orange italic uppercase tracking-tighter mt-1 block font-mono">Rp {formatPrice((sub.price * 1000))} / Hari</span>
                                                         ) : sub.priceInfo && (
-                                                           <span className="text-[8px] font-medium text-art-text/40 italic mt-1 block">{sub.priceInfo}</span>
+                                                           <span className="text-[8px] font-medium text-art-text/40 italic mt-1 block">{formatPriceNotation(sub.priceInfo)}</span>
                                                         )}
                                                      </div>
                                                      <div className="flex items-center gap-1.5 bg-white border border-art-text/10 rounded-lg px-1.5 py-1 shrink-0">
@@ -1112,14 +1113,14 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                    <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Map size={14} className="text-art-text/40"/> Trip Utama</h5>
                    <div className="text-right">
                      <p className="text-[8px] font-bold text-art-text/40 uppercase">{currentType === 'open_request' ? 'Status' : 'Subtotal Trip'}</p>
-                     <span className="text-[12px] font-black text-art-text">{currentType === 'open_request' ? 'ESTIMASI ADMIN' : `Rp ${(basePricePerPax * currentPesertaCount).toLocaleString('id-ID')}`}</span>
+                     <span className="text-[12px] font-black text-art-text">{currentType === 'open_request' ? 'ESTIMASI ADMIN' : `Rp ${formatPrice((basePricePerPax * currentPesertaCount))}`}</span>
                    </div>
                  </div>
                  <div className="space-y-2 text-[10px] font-bold text-art-text/60">
                    <div className="flex justify-between"><span>Destinasi:</span><span className="text-art-text font-black uppercase">{selectedDestinasi || '-'}</span></div>
                    {currentType !== 'open_request' && <div className="flex justify-between"><span>Jalur & Durasi:</span><span className="text-art-text font-black uppercase">{selectedJalur || '-'} • {selectedDurasi || '-'}</span></div>}
                    <div className="flex justify-between"><span>Jadwal:</span><span className="text-art-text font-black uppercase">{selectedJadwal ? (currentType === 'private' ? calculateEndDate(selectedJadwal, selectedDurasi) : selectedJadwal.replace(/\|/g, ' ')) : '-'}</span></div>
-                   <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax {currentType !== 'open_request' && `x RP ${basePricePerPax.toLocaleString('id-ID')}`}</span></div>
+                   <div className="flex justify-between pt-1 mt-1 border-t border-art-text/5"><span>Peserta:</span><span className="text-art-text font-black uppercase">{currentPesertaCount} Pax {currentType !== 'open_request' && `x Rp ${formatPrice(basePricePerPax)}`}</span></div>
                  </div>
                </div>
 
@@ -1129,14 +1130,14 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                      <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
                      <div className="text-right">
                        <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Layanan</p>
-                       <span className="text-[12px] font-black text-art-orange">Rp {totalOpsionalPrice.toLocaleString('id-ID')}</span>
+                       <span className="text-[12px] font-black text-art-orange">Rp {formatPrice(totalOpsionalPrice)}</span>
                      </div>
                    </div>
                    <div className="space-y-2 text-[10px] font-bold text-art-text/60">
                      {opsionalItemsList.map((item: any, idx: number) => (
                        <div key={idx} className="flex justify-between items-start">
                          <span className="uppercase">{item.name} {item.isRental ? `(${item.count}x • ${item.days} Hari)` : ''}</span>
-                         <span className="text-art-text font-black ml-2 text-right">{item.status === 'pending_price' ? 'Biaya Menyusul' : `Rp ${item.subtotal.toLocaleString('id-ID')}`}</span>
+                         <span className="text-art-text font-black ml-2 text-right">{item.status === 'pending_price' ? 'Biaya Menyusul' : `Rp ${formatPrice(item.subtotal)}`}</span>
                        </div>
                      ))}
                    </div>
@@ -1149,7 +1150,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                      <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area <span className="bg-art-green text-white px-2 py-0.5 rounded-full text-[8px] ml-1">-{activePromo.discount}%</span></h5>
                      <div className="text-right">
                        <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
-                       <span className="text-[12px] font-black text-art-green">- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                       <span className="text-[12px] font-black text-art-green">- Rp {formatPrice(discountAmount)}</span>
                      </div>
                    </div>
                    <div className="mt-2 pt-2 border-t border-art-green/10">
@@ -1163,7 +1164,7 @@ export const BookingModal = ({ isOpen, onClose, destinationOptions, prefill, fac
                   <div className="flex justify-between items-end">
                      <div>
                         <p className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1">Total Estimasi Keseluruhan</p>
-                        <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {netPrice.toLocaleString('id-ID')}</h4>
+                        <h4 className="text-3xl sm:text-4xl font-black text-white leading-none tracking-tighter">Rp {formatPrice(netPrice)}</h4>
                      </div>
                   </div>
                </div>

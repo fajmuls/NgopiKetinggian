@@ -1419,12 +1419,13 @@ export const FacilitiesAdmin = ({ config, updateConfig, showToast, defaultList }
                                 onChange={e => {
                                   const raw = e.target.value.replace(/[^0-9]/g, '');
                                   const num = parseInt(raw);
-                                  updateSubItem(i, sIdx, 'priceInfo', raw ? Number(raw).toLocaleString('id-ID') : '');
+                                  const formatted = raw ? Number(raw).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ":") : '';
+                                  updateSubItem(i, sIdx, 'priceInfo', formatted);
                                   const nd = { ...data };
                                   nd.opsi[i].subItems[sIdx].price = isNaN(num) ? 0 : num / 1000;
                                   setData(nd);
                                 }} 
-                                placeholder="50.000" 
+                                placeholder="50:000" 
                               />
                             </div>
                             <button onClick={() => removeSubItem(i, sIdx)} className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={14}/></button>

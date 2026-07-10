@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Check, ArrowRight, Mountain, Shield, Clock, MapPin, TrendingUp } from 'lucide-react';
 import { useCompare } from '../CompareContext';
 import { Button } from './Button';
+import { formatPrice } from '../useAppConfig';
 
 export const ComparisonModal = ({ isOpen, onClose, onBook }: { isOpen: boolean, onClose: () => void, onBook: (item: any) => void }) => {
   const { selectedItems, toggleItem, clearItems } = useCompare();
@@ -88,7 +89,7 @@ export const ComparisonModal = ({ isOpen, onClose, onBook }: { isOpen: boolean, 
                       <div className="space-y-6 flex-1">
                         <div className="md:h-10 flex flex-col md:justify-center">
                           <span className="md:hidden text-[9px] font-black uppercase text-art-text/40 tracking-widest mb-1">Harga</span>
-                          <p className="text-xl font-black text-art-orange">Rp {item.price.toLocaleString('id-ID')}K</p>
+                          <p className="text-xl font-black text-art-orange">Rp {formatPrice(item.price)}K</p>
                         </div>
 
                         <div className="md:h-10 flex flex-col md:justify-center">

@@ -11,7 +11,7 @@ import { customConfirm, customAlert } from '../GlobalDialog';
 import { InputWithPaste, ImageUploader } from '../components/admin/SharedAdmin';
 import { RundownEditor } from '../components/admin/RundownEditor';
 import { CustomSelect } from '../components/CustomSelect';
-import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION } from '../useAppConfig';
+import { AppConfig, FacilityOption, DIFFICULTY_LEVELS as difficultyLevels, DURATION_LEVELS as durationLevels, OpenTrip, WEBSITE_VERSION, formatPrice as globalFormatPrice } from '../useAppConfig';
 import { TripPosterGenerator } from './TripPosterGenerator';
 
 export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList }: any) => {
@@ -235,7 +235,7 @@ export const DestinationsAdmin = ({ config, updateConfig, showToast, defaultList
                     if (p === 0) return '0';
                     if (p < 1000) return `${p}K`;
                     if (p % 1000 === 0) return `${p / 1000}K`;
-                    return p.toLocaleString('id-ID');
+                    return globalFormatPrice(p);
                   };
                   const minPrice = Math.min(...(dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.price)) || [0]));
                   const text = `*PRIVATE TRIP ${dest.name?.toUpperCase() || '-'}*\n\n⛰️ *Jalur:* ${dest.paths?.map((p: any) => p.name).join(', ') || '-'}\n💰 *Mulai:* Rp ${formatPrice(minPrice)}\n👥 *Kuota:* ${dest.kuota || '-'}\n⏳ *Durasi:* ${dest.paths?.flatMap((p: any) => p.durations?.map((d: any) => d.label)).filter((v: any, i: any, a: any) => a.indexOf(v) === i).join(', ') || '-'}\n\nYuk booking private trip kamu: https://ngopidiketinggian.com/destinasi`;

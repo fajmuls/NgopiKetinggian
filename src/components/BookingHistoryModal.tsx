@@ -10,6 +10,7 @@ import { customConfirm, customAlert } from '../GlobalDialog';
 import { useSound } from '../hooks/useSound';
 import { Button } from './Button';
 import { ReviewModal } from './ReviewModal';
+import { formatPrice } from '../useAppConfig';
 
 
 export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { isOpen: boolean, onClose: () => void, showToast: (m: string, t?: any) => void, bookings: any[] }) => {
@@ -191,7 +192,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                                   <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Map size={14} className="text-art-text/40"/> Trip Utama</h5>
                                   <div className="text-right">
                                     <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Trip</p>
-                                    <span className="text-[12px] font-black text-art-text">Rp {((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0)).toLocaleString('id-ID')}</span>
+                                    <span className="text-[12px] font-black text-art-text">Rp {formatPrice((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0))}</span>
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -209,7 +210,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                                    </div>
                                    <div>
                                       <p className="text-[9px] font-black text-art-text/30 uppercase mb-1">Peserta</p>
-                                      <p className="text-[10px] font-black text-art-text">{b.peserta} Pax x Rp {((((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0))) / (Number(b.peserta) || 1)).toLocaleString('id-ID')}</p>
+                                      <p className="text-[10px] font-black text-art-text">{b.peserta} Pax x Rp {formatPrice((((b.totalPrice || 0) + (b.discountAmount || 0) - (b.opsionalPrice || 0))) / (Number(b.peserta) || 1))}</p>
                                    </div>
                                 </div>
                               </div>
@@ -221,7 +222,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                                     <h5 className="text-[10px] font-black uppercase text-art-text tracking-widest flex items-center gap-2"><Tent size={14} className="text-art-text/40"/> Layanan Tambahan</h5>
                                     <div className="text-right">
                                       <p className="text-[8px] font-bold text-art-text/40 uppercase">Subtotal Layanan</p>
-                                      <span className="text-[12px] font-black text-art-orange">Rp {(b.opsionalPrice || 0).toLocaleString('id-ID')}</span>
+                                      <span className="text-[12px] font-black text-art-orange">Rp {formatPrice(b.opsionalPrice || 0)}</span>
                                     </div>
                                   </div>
                                   <div className="space-y-2 text-[10px] font-bold text-art-text/60">
@@ -230,7 +231,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                                       return (
                                         <div key={idx} className="flex justify-between items-start">
                                           <span className="uppercase">{item.name} {item.isRental ? `(${item.count}x)` : ''}</span>
-                                          <span className="text-art-text font-black ml-2 text-right">{isPending ? 'Estimasi Admin' : `Rp ${(item.subtotal || 0).toLocaleString('id-ID')}`}</span>
+                                          <span className="text-art-text font-black ml-2 text-right">{isPending ? 'Estimasi Admin' : `Rp ${formatPrice(item.subtotal || 0)}`}</span>
                                         </div>
                                       );
                                     })}
@@ -245,7 +246,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                                     <h5 className="text-[10px] font-black uppercase text-art-green tracking-widest flex items-center gap-2">🎁 Promosi Area {b.discountPercentage && <span className="bg-art-green text-white px-2 py-0.5 rounded-full text-[8px] ml-1">-{b.discountPercentage}%</span>}</h5>
                                     <div className="text-right">
                                       <p className="text-[8px] font-bold text-art-green/60 uppercase text-right">Potongan Harga</p>
-                                      <span className="text-[12px] font-black text-art-green">- Rp {b.discountAmount?.toLocaleString('id-ID')}</span>
+                                      <span className="text-[12px] font-black text-art-green">- Rp {formatPrice(b.discountAmount || 0)}</span>
                                     </div>
                                   </div>
                                   <div className="mt-2 pt-2 border-t border-art-green/10">
@@ -258,7 +259,7 @@ export const BookingHistoryModal = ({ isOpen, onClose, showToast, bookings }: { 
                            <div className="md:w-56 shrink-0 flex flex-col md:border-l border-art-text/10 md:pl-6 justify-between gap-6">
                               <div>
                                 <span className="text-[10px] font-black text-art-text/30 uppercase block mb-1">Total Biaya</span>
-                                <p className="text-2xl font-black text-art-orange tracking-tighter">Rp {b.totalPrice?.toLocaleString('id-ID')}</p>
+                                <p className="text-2xl font-black text-art-orange tracking-tighter">Rp {formatPrice(b.totalPrice || 0)}</p>
                               </div>
 
                               <div className="flex flex-col gap-2">
