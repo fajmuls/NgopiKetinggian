@@ -22,7 +22,7 @@ export const formatPriceNotation = (val: any) => {
   return str;
 };
 
-export const WEBSITE_VERSION = "3.4.2";
+export const WEBSITE_VERSION = "3.5.1";
 
 export interface FacilityOption {
   name: string;
@@ -243,13 +243,29 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "3.4.2",
+  version: "3.5.1",
   patchNotes: [
+    {
+      version: "3.5.1",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan Visibilitas Header: Mengatur agar bilah navigasi utama (top bar / Header) hanya muncul di halaman beranda (homepage) dan otomatis tersembunyi ketika layar splash aktif atau panel admin sedang dibuka."
+      ]
+    },
+    {
+      version: "3.5.0",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan Bug Permission Denied: Menghilangkan pop-up peringatan kesalahan Firestore secara global bagi pengguna non-admin/tamu saat melakukan pemesanan (booking) Open Trip, menjaga pengalaman navigasi tetap mulus.",
+        "Sistem Dropdown Nama Gunung: Mengubah input nama gunung pada riwayat pendakian pemandu (Leader) di panel admin menjadi menu dropdown dinamis yang berisi daftar gunung aktif di website.",
+        "Peningkatan Visibilitas Tombol Hapus: Mengubah tombol hapus (delete) pada riwayat pendakian pemandu dan elemen galeri foto agar selalu terlihat secara permanen (menghapus opacity hover) untuk aksesibilitas yang lebih baik."
+      ]
+    },
     {
       version: "3.4.2",
       date: "2026-07-09",
       notes: [
-        "Inisialisasi & Koneksi Database Firestore: Mengganti dan menyelaraskan konfigurasi database Firestore ke proyek Google Cloud 'ngopi-ketinggian' milik pengguna langsung dalam kode utama untuk memastikan sinkronisasi data yang aman, real-time, dan stabil di seluruh platform."
+        "Perbaikan Overflow Menu Open Trip: Menyelaraskan struktur rendering kartu Open Trip agar overlay menu burger titik tiga tidak terpotong oleh batas gambar, menyempurnakan kegunaan menu di seluruh platform."
       ]
     },
     {
@@ -587,7 +603,6 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
     ...getDefaultWebsiteData()
   });
   const [loading, setLoading] = useState(true);
-  const [isDbSeeded, setIsDbSeeded] = useState<boolean>(false);
 
   useEffect(() => {
     let unsubs: (() => void)[] = [];
@@ -614,7 +629,6 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       const docRef = doc(db, name, 'data');
       const unsub = onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
-          setIsDbSeeded(true);
           const data = snap.data();
           if (name === 'website') {
             const loadedVersion = data.version || "1.0.0";
@@ -712,10 +726,17 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       // await updateDoc(doc(db, 'appConfig', 'default'), config as any);
       // Let's modify AdminPanel.tsx separately.
       
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Could not save to Firestore, trying local state update only", err);
       setConfig((prev) => ({ ...prev, ...newConfig }));
-      customAlert("Gagal menyimpan ke Database Cloud. Perubahan akan disimpan sementara di memori browser.");
+      
+      const isPermissionError = err?.code === 'permission-denied' || 
+                                err?.message?.includes('permission') || 
+                                err?.message?.includes('PERMISSION_DENIED');
+                                
+      if (!isPermissionError) {
+        customAlert("Gagal menyimpan ke Database Cloud. Perubahan akan disimpan sementara di memori browser.");
+      }
     }
   };
 
@@ -747,13 +768,18 @@ export function useAppConfig(defaultDestinations: any[], defaultLeaders: any[], 
       batch.set(doc(db, 'website', 'data'), website);
       
       await batch.commit();
-      setIsDbSeeded(true);
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Could not revert to default in Firestore", err);
-      customAlert("Gagal mereset ke default di Cloud. Reset hanya berlaku untuk sesi ini.");
+      const isPermissionError = err?.code === 'permission-denied' || 
+                                err?.message?.includes('permission') || 
+                                err?.message?.includes('PERMISSION_DENIED');
+                                
+      if (!isPermissionError) {
+        customAlert("Gagal mereset ke default di Cloud. Reset hanya berlaku untuk sesi ini.");
+      }
     }
   };
 
-  return { config, loading, updateConfig, revertToDefault, isDbSeeded };
+  return { config, loading, updateConfig, revertToDefault };
 }
 

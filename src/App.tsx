@@ -43,7 +43,7 @@ import { TestimonialsModal } from './components/TestimonialsModal';
 import { LeaderExperienceModal } from './components/LeaderExperienceModal';
 
 export default function App() {
-  const { config, updateConfig, revertToDefault, loading, isDbSeeded } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
+  const { config, updateConfig, revertToDefault, loading } = useAppConfig(destinationsData, defaultTripLeaders, defaultGalleryPhotos);
   const [selectedLeaderExp, setSelectedLeaderExp] = useState<{ name: string; experiences: any[] } | null>(null);
   const [isLeaderExpModalOpen, setIsLeaderExpModalOpen] = useState(false);
   const [user] = useAuthState(auth);
@@ -449,29 +449,31 @@ const heroSlidesConfig = config.homepage?.heroSlides && config.homepage.heroSlid
         onClose={() => setIsTestimonialsOpen(false)} 
       />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} theme={theme} setTheme={setTheme} setIsHistoryOpen={setIsHistoryOpen} />
-      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} isDbSeeded={isDbSeeded} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
+      <AdminPanelModal isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} config={config} updateConfig={updateConfig} revertToDefault={revertToDefault} showToast={showToastMsg} defaultLists={{ destinations: destinationsData, leaders: defaultTripLeaders, gallery: defaultGalleryPhotos, cerita: "https://videos.pexels.com/video-files/856172/856172-hd_1920_1080_30fps.mp4" }} />
       <div className="min-h-screen selection:bg-art-orange selection:text-white overflow-x-hidden">
       
       {/* Navigation */}
-      <Header 
-        config={config}
-        user={user}
-        onLogin={loginWithGoogle}
-        onLogout={logout}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenTestimonials={() => setIsTestimonialsOpen(true)}
-        onOpenBooking={() => handleOpenBooking()}
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        searchResults={getSearchResults()}
-        onExecuteSearch={executeSearch}
-        showSearchDropdown={showSearchDropdown}
-        setShowSearchDropdown={setShowSearchDropdown}
-        theme={theme}
-        setTheme={setTheme}
-        userPoints={userBookings.filter(b => b.status === 'selesai' || b.status === 'lunas').length * 100}
-      />
+      {!showSplash && !isAdminPanelOpen && (
+        <Header 
+          config={config}
+          user={user}
+          onLogin={loginWithGoogle}
+          onLogout={logout}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          onOpenTestimonials={() => setIsTestimonialsOpen(true)}
+          onOpenBooking={() => handleOpenBooking()}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          searchResults={getSearchResults()}
+          onExecuteSearch={executeSearch}
+          showSearchDropdown={showSearchDropdown}
+          setShowSearchDropdown={setShowSearchDropdown}
+          theme={theme}
+          setTheme={setTheme}
+          userPoints={userBookings.filter(b => b.status === 'selesai' || b.status === 'lunas').length * 100}
+        />
+      )}
 
       {/* Hero Section */}
       <Hero 

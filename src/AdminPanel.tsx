@@ -27,8 +27,7 @@ export const AdminPanelModal = ({
   updateConfig,
   revertToDefault,
   defaultLists,
-  showToast,
-  isDbSeeded
+  showToast
 }: { 
   isOpen: boolean, 
   onClose: () => void, 
@@ -36,8 +35,7 @@ export const AdminPanelModal = ({
   updateConfig: (c: Partial<AppConfig>) => void,
   revertToDefault: () => void,
   defaultLists: any,
-  showToast: (msg: string, type?: 'success' | 'info' | 'error') => void,
-  isDbSeeded: boolean
+  showToast: (msg: string, type?: 'success' | 'info' | 'error') => void
 }) => {
   const { playClick, playBack } = useSound();
   const [activeCategory, setActiveCategory] = useState<'booking' | 'trip' | 'website'>('booking');
@@ -163,7 +161,7 @@ export const AdminPanelModal = ({
       >
         <div className="flex flex-col border-b border-art-text bg-white">
           <div className="flex justify-between items-center p-3 sm:p-6 pb-0 sm:pb-6">
-            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+            <div className="flex items-center gap-4">
               <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-art-text">Admin Dashboard</h2>
               <button 
                 onClick={() => setShowPatchNotes(true)}
@@ -171,31 +169,6 @@ export const AdminPanelModal = ({
               >
                 v{config.version || WEBSITE_VERSION}
               </button>
-              {isDbSeeded ? (
-                <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full select-none">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                  Cloud Live
-                </span>
-              ) : (
-                <button
-                  onClick={async () => {
-                    playClick();
-                    customConfirm("Database Firestore di Google Cloud Anda masih kosong atau belum terisi data bawaan. Ingin menginisialisasi/seeding database draf sekarang?", async () => {
-                      try {
-                        await revertToDefault();
-                        showToast("Inisialisasi database berhasil!", "success");
-                      } catch (err) {
-                        showToast("Gagal menginisialisasi database", "error");
-                      }
-                    });
-                  }}
-                  className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full hover:bg-amber-100 transition-all cursor-pointer animate-bounce animate-duration-1000"
-                  title="Klik untuk mempopulasikan data default ke Firestore"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  Inisialisasi Cloud DB ⚡
-                </button>
-              )}
             </div>
             <div className="flex items-center gap-3">
               <button 
