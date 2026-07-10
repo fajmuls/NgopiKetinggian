@@ -358,9 +358,9 @@ export const TripPosterGenerator = ({ trip, onClose, type: initialType, config }
     // If val is entered as 500 in admin, it means 500,000 (500K)
     if (val < 1000) {
       const full = val * 1000;
-      return `Rp ${full.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ":")}`;
+      return `Rp ${full.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
     }
-    return `Rp ${val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ":")}`;
+    return `Rp ${val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
   };
 
   const currentPrice = initialType === 'open' 

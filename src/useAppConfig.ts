@@ -4,20 +4,25 @@ import { doc, getDoc, setDoc, onSnapshot, writeBatch } from 'firebase/firestore'
 
 export const formatPrice = (val: number | string) => {
   if (val === undefined || val === null) return '0';
-  const num = typeof val === 'string' ? parseInt(val) : val;
+  let num: number;
+  if (typeof val === 'string') {
+    const cleaned = val.replace(/[:.]/g, '');
+    num = parseInt(cleaned);
+  } else {
+    num = val;
+  }
   if (isNaN(num)) return val.toString();
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ":");
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 export const formatPriceNotation = (val: any) => {
   if (val === undefined || val === null) return '';
   let str = val.toString();
-  str = str.replace(/(\d+)[.,](\d+)/g, "$1:$2");
   str = str.replace(/\b\d{4,}\b/g, (match: string) => formatPrice(match));
   return str;
 };
 
-export const WEBSITE_VERSION = "3.3.0";
+export const WEBSITE_VERSION = "3.4.0";
 
 export interface FacilityOption {
   name: string;
@@ -238,8 +243,17 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "3.3.0",
+  version: "3.4.0",
   patchNotes: [
+    {
+      version: "3.4.0",
+      date: "2026-07-09",
+      notes: [
+        "Integrasi Tema Handphone (Sistem Auto): Menambahkan opsi tema 'Sistem (Auto)' yang menyelaraskan warna tema aplikasi secara real-time dengan preferensi mode gelap/terang perangkat pengguna.",
+        "Perbaikan Overflow Menu Destinasi: Memindahkan z-index dan struktur kontainer overlay tiga titik di kartu destinasi agar tidak tertimpa atau terpotong oleh batas gambar.",
+        "Restorasi Format Pemisah Ribuan Titik: Mengembalikan standarisasi penulisan harga menggunakan pemisah ribuan titik (.) tradisional di seluruh platform (Booking, Admin, Poster) sementara tetap mempertahankan kompatibilitas navigasi jam/waktu yang menggunakan titik dua (:)."
+      ]
+    },
     {
       version: "3.3.0",
       date: "2026-07-09",

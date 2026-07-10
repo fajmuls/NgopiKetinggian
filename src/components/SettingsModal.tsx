@@ -39,10 +39,12 @@ export const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOp
   };
 
   const themes = [
+    { id: 'system', name: 'Sistem (Auto)', isGradient: true, gradient: 'linear-gradient(135deg, #421404 50%, #121212 50%)' },
     { id: 'default', name: 'Rush (Default)', color: '#421404' },
     { id: 'matcha', name: 'Matcha (Hijau)', color: '#afa231' },
     { id: 'wine', name: 'Wine (Merah)', color: '#4c0004' },
     { id: 'wasabi', name: 'Wasabi (Kuning)', color: '#dcd189' },
+    { id: 'dark', name: 'Malam (Gelap)', color: '#121212' },
   ];
 
   useEffect(() => {
@@ -106,7 +108,7 @@ export const SettingsModal = ({ isOpen, onClose, theme, setTheme, setIsHistoryOp
                 onMouseEnter={playHover}
                 className={`flex flex-col gap-1 items-start p-2 rounded border-2 transition-all ${theme === t.id ? 'border-art-orange bg-white/50 shadow-sm' : 'border-art-text/10 hover:border-art-text/30'}`}
               >
-                <div className="w-full h-6 rounded flex" style={{ backgroundColor: t.color }}></div>
+                <div className="w-full h-6 rounded flex" style={{ background: t.isGradient ? t.gradient : t.color }}></div>
                 <span className="text-[10px] font-bold uppercase w-full text-center leading-tight mt-1">{t.name}</span>
               </button>
             ))}

@@ -75,14 +75,30 @@ export default function App() {
   };
 
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('appTheme') || 'default';
+    return localStorage.getItem('appTheme') || 'system';
   });
 
   const bgmRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('appTheme', theme);
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+        const activeTheme = e.matches ? 'dark' : 'default';
+        document.documentElement.setAttribute('data-theme', activeTheme);
+      };
+      handleChange(mediaQuery);
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        mediaQuery.addListener(handleChange);
+        return () => mediaQuery.removeListener(handleChange);
+      }
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
   }, [theme]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
