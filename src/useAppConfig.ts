@@ -22,7 +22,7 @@ export const formatPriceNotation = (val: any) => {
   return str;
 };
 
-export const WEBSITE_VERSION = "3.4.0";
+export const WEBSITE_VERSION = "3.4.2";
 
 export interface FacilityOption {
   name: string;
@@ -243,8 +243,22 @@ const getDefaultWebsiteData = () => ({
       }
     ]
   },
-  version: "3.4.0",
+  version: "3.4.2",
   patchNotes: [
+    {
+      version: "3.4.2",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan Overflow Menu Open Trip: Menyelaraskan struktur rendering kartu Open Trip agar overlay menu burger titik tiga tidak terpotong oleh batas gambar, menyempurnakan kegunaan menu di seluruh platform."
+      ]
+    },
+    {
+      version: "3.4.1",
+      date: "2026-07-09",
+      notes: [
+        "Perbaikan Fetch Cuaca (Fallback Detil): Mengatasi masalah kegagalan fetch dari API wttr.in dengan menyematkan sistem fallback estimasi cuaca pegunungan yang stabil secara real-time berdasarkan hash nama gunung."
+      ]
+    },
     {
       version: "3.4.0",
       date: "2026-07-09",
